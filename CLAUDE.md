@@ -3,7 +3,7 @@
 ## 🎯 Project Overview
 
 **Instructions** 
-- **This is an important app for which you are the best developer, whenever you code before that you will plan first check for code security and code, you will always update the documentation or make one, the code should be well commented and easy to debug, the main goal is for the best performance, The is a big application you will always make everything work in sync, you will always work with the knowledge, using cache tokes and memory to store things compute thinj logic, oyu haveto always be logical and implement the best backend and code ever. 
+- **This is an important app for which you are the best developer, whenever you code before that you will plan first check for code security and code, you will always update the documentation or make one, the code should be well commented and easy to debug, the main goal is for the best performance, The is a big application you will always make everything work in sync, you will always work with the knowledge, using cache tokes and memory to store things compute think logic, you have to always be logical and implement the best backend and code ever. 
 
 **JobSwipe** is an enterprise-grade job application automation platform that combines:
 - **Web/Mobile Interface**: Users swipe right on jobs (Tinder-like UX)
