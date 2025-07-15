@@ -1,76 +1,201 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// JobSwipe Enterprise Database Schema
+// Comprehensive schema for job application automation platform
+// Built for scalability, security, and GDPR compliance
 
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated"
+  previewFeatures = ["postgresqlExtensions", "views", "relationJoins"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [uuid_ossp, pgcrypto]
 }
 
-// User Authentication and Profile
+// =============================================================================
+// USER MANAGEMENT & AUTHENTICATION
+// =============================================================================
+
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   email         String    @unique
   passwordHash  String?
   name          String?
   avatar        String?
   emailVerified DateTime?
+  
+  // Enterprise Security
+  role          UserRole  @default(USER)
+  status        UserStatus @default(ACTIVE)
+  lastLoginAt   DateTime?
+  loginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+  
+  // GDPR Compliance
+  dataConsent   Boolean   @default(false)
+  consentDate   DateTime?
+  dataRetentionUntil DateTime?
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime?
+  
+  // Metadata
+  ipAddress     String?
+  userAgent     String?
+  timezone      String?
+  locale        String?   @default("en")
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Profile information
-  profile UserProfile?
-
-  // Authentication
-  accounts     Account[]
-  sessions     Session[]
+  // Relations
+  profile       UserProfile?
+  preferences   UserPreferences?
+  accounts      Account[]
+  sessions      Session[]
+  resumes       Resume[]
+  applications  JobApplication[]
+  subscription  Subscription?
+  usageRecords  UsageRecord[]
+  savedJobs     SavedJob[]
+  jobSwipes     UserJobSwipe[]
+  auditLogs     AuditLog[]
   
-  // User's resumes
-  resumes      Resume[]
+  // Analytics
+  analyticsEvents AnalyticsEvent[]
   
-  // Job applications
-  applications JobApplication[]
+  // Notifications
+  notifications UserNotification[]
   
-  // Subscription
-  subscription Subscription?
+  // Company Reviews
+  companyReviews CompanyReview[]
   
-  // Usage tracking
-  usageRecords UsageRecord[]
-  
-  // Saved jobs
-  savedJobs    SavedJob[]
+  // Application Queue
+  applicationQueue ApplicationQueue[]
 
   @@map("users")
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([lastLoginAt])
 }
 
 model UserProfile {
-  id           String  @id @default(cuid())
+  id           String  @id @default(uuid())
   userId       String  @unique
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
+  // Personal Information
   firstName    String?
   lastName     String?
+  displayName  String?
   phone        String?
-  location     String?
+  dateOfBirth  DateTime?
+  gender       String?
+  
+  // Location Details
+  address      String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  location     String? // Current location string
+  
+  // Professional Links
   website      String?
   linkedin     String?
   github       String?
-  bio          String?
+  portfolio    String?
+  blog         String?
   
-  // Professional details
-  title        String?
-  experience   String?
+  // Professional Summary
+  bio          String?
+  headline     String?
+  summary      String?
+  
+  // Career Information
+  currentTitle String?
+  currentCompany String?
+  experienceLevel String?
+  yearsOfExperience Int?
+  
+  // Skills & Expertise
   skills       String[] // Array of skills
-  education    Json?    // JSON for education history
+  certifications Json?  // Professional certifications
+  languages    Json?    // Languages and proficiency levels
+  
+  // Education Background
+  education    Json?    // Structured education history
+  
+  // Work Preferences
+  desiredJobTypes     String[] // Remote, onsite, hybrid
+  desiredSalaryMin    Int?
+  desiredSalaryMax    Int?
+  preferredCurrency   String?
+  willingToRelocate   Boolean? @default(false)
+  
+  // Privacy Settings
+  profileVisibility   ProfileVisibility @default(PRIVATE)
+  showEmail          Boolean @default(false)
+  showPhone          Boolean @default(false)
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@map("user_profiles")
+  @@index([userId])
+  @@index([city, state, country])
+}
+
+model UserPreferences {
+  id                    String  @id @default(uuid())
+  userId                String  @unique
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Job Search Preferences
+  jobSearchRadius       Int?    @default(50) // miles/km
+  jobTypes              String[] // Full-time, part-time, contract, etc.
+  experienceLevels      String[] // Entry, mid, senior, etc.
+  industries            String[] // Tech, finance, healthcare, etc.
+  companyTypes          String[] // Startup, enterprise, non-profit, etc.
+  remotePref            RemotePreference @default(NO_PREFERENCE)
+  
+  // Notification Preferences
+  emailNotifications    Boolean @default(true)
+  pushNotifications     Boolean @default(true)
+  smsNotifications      Boolean @default(false)
+  
+  // Specific Notification Types
+  newJobMatches         Boolean @default(true)
+  applicationUpdates    Boolean @default(true)
+  interviewReminders    Boolean @default(true)
+  weeklyDigest          Boolean @default(true)
+  promotionalEmails     Boolean @default(false)
+  
+  // Application Automation Preferences
+  autoApplyEnabled      Boolean @default(false)
+  autoApplyJobTypes     String[]
+  autoApplyMaxPerDay    Int?    @default(5)
+  autoApplyRequireMatch Boolean @default(true)
+  
+  // Privacy Preferences
+  dataProcessingConsent Boolean @default(false)
+  marketingConsent      Boolean @default(false)
+  analyticsConsent      Boolean @default(false)
+  thirdPartySharing     Boolean @default(false)
+  
+  // Theme & Display
+  theme                 String? @default("light")
+  language              String? @default("en")
+  timezone              String?
+  dateFormat            String? @default("MM/DD/YYYY")
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("user_preferences")
+  @@index([userId])
 }
 
 // NextAuth.js required models
@@ -113,265 +238,1066 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// Company information
-model Company {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  website     String?
-  logo        String?
-  industry    String?
-  size        String?
-  location    String?
-  
-  // Company metadata
-  linkedinUrl String?
-  glassdoorUrl String?
-  crunchbaseUrl String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// =============================================================================
+// JOB SWIPING SYSTEM (Core Tinder-like Functionality)
+// =============================================================================
 
-  // Relations
-  jobPostings JobPosting[]
-
-  @@map("companies")
-}
-
-// Job postings
-model JobPosting {
-  id            String   @id @default(cuid())
-  title         String
-  description   String
-  requirements  String?
-  benefits      String?
-  
-  // Job details
-  type          JobType  @default(FULL_TIME)
-  level         JobLevel @default(MID)
-  department    String?
-  remote        Boolean  @default(false)
-  location      String?
-  
-  // Compensation
-  salaryMin     Int?
-  salaryMax     Int?
-  currency      String?  @default("USD")
-  equity        String?
-  
-  // External data
-  externalId    String?  // ID from job board
-  source        String?  // Source job board (LinkedIn, Indeed, etc.)
-  sourceUrl     String?  // Original job posting URL
-  
-  // Company relation
-  companyId     String
-  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  // Status
-  isActive      Boolean  @default(true)
-  postedAt      DateTime?
-  expiresAt     DateTime?
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  applications  JobApplication[]
-  savedBy       SavedJob[]
-
-  @@map("job_postings")
-}
-
-// Resume templates and user resumes
-model ResumeTemplate {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  category    String?
-  
-  // Template content
-  content     Json     // JSON structure for the template
-  preview     String?  // Preview image URL
-  
-  // Metadata
-  isActive    Boolean  @default(true)
-  isPremium   Boolean  @default(false)
-  tags        String[] // Template tags
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  resumes     Resume[]
-
-  @@map("resume_templates")
-}
-
-model Resume {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  templateId  String?
-  template    ResumeTemplate? @relation(fields: [templateId], references: [id])
-  
-  // Resume data
-  name        String
-  content     Json     // JSON structure for resume content
-  
-  // File storage
-  pdfUrl      String?  // Generated PDF URL
-  docxUrl     String?  // Generated DOCX URL
-  
-  // Metadata
-  isDefault   Boolean  @default(false)
-  version     Int      @default(1)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  applications JobApplication[]
-
-  @@map("resumes")
-}
-
-// Job applications tracking
-model JobApplication {
-  id            String   @id @default(cuid())
+model UserJobSwipe {
+  id            String    @id @default(uuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   jobPostingId  String
   jobPosting    JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
   
-  resumeId      String?
-  resume        Resume?  @relation(fields: [resumeId], references: [id])
+  // Swipe Action
+  direction     SwipeDirection // LEFT (reject) or RIGHT (like)
+  confidence    Float?    // AI confidence score (0-1)
   
-  // Application details
-  status        ApplicationStatus @default(DRAFT)
-  priority      ApplicationPriority @default(MEDIUM)
+  // Context Data
+  deviceType    String?   // web, mobile, desktop
+  sessionId     String?   // User session tracking
+  position      Int?      // Position in swipe deck
+  timeSpent     Int?      // Time spent viewing (seconds)
   
-  // Custom fields for the application
-  coverLetter   String?
-  customResume  Json?    // Custom modifications for this application
-  notes         String?
+  // Matching Algorithm Data
+  matchScore    Float?    // Algorithm match score (0-100)
+  matchFactors  Json?     // What factors contributed to match
   
-  // Timeline tracking
-  appliedAt     DateTime?
-  responseAt    DateTime?
-  interviewAt   DateTime?
-  followUpAt    DateTime?
+  // Feedback Loop
+  userFeedback  String?   // User can provide feedback on why they swiped
+  isCorrectMatch Boolean? // Later feedback on whether it was a good match
   
-  // External tracking
-  externalId    String?  // ID from ATS system
-  atsUrl        String?  // Link to ATS application
+  // Metadata
+  ipAddress     String?
+  userAgent     String?
+  location      String?   // Geographic location when swiped
   
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  // Relations
-  interactions  ApplicationInteraction[]
-
-  @@map("job_applications")
+  @@map("user_job_swipes")
+  @@unique([userId, jobPostingId])
+  @@index([userId, direction])
+  @@index([jobPostingId, direction])
+  @@index([createdAt])
+  @@index([matchScore])
 }
 
-// Application interactions and timeline
+// =============================================================================
+// BROWSER AUTOMATION SYSTEM
+// =============================================================================
+
+model ApplicationQueue {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobPostingId    String
+  jobPosting      JobPosting  @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  applicationId   String?
+  application     JobApplication? @relation(fields: [applicationId], references: [id])
+  
+  // Queue Management
+  status          QueueStatus @default(PENDING)
+  priority        QueuePriority @default(NORMAL)
+  attempts        Int         @default(0)
+  maxAttempts     Int         @default(3)
+  
+  // Scheduling
+  scheduledAt     DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  failedAt        DateTime?
+  nextRetryAt     DateTime?
+  
+  // Automation Configuration
+  useCustomResume Boolean     @default(false)
+  resumeId        String?
+  coverLetter     String?
+  customFields    Json?       // Custom form fields for this application
+  
+  // Browser Automation Data
+  automationConfig Json?      // Browser automation specific config
+  requiresCaptcha Boolean     @default(false)
+  captchaSolved   Boolean     @default(false)
+  
+  // Results
+  success         Boolean?
+  errorMessage    String?
+  errorType       String?
+  responseData    Json?       // Response from job site
+  
+  // Desktop App Integration
+  desktopSessionId String?    // Session ID from desktop app
+  automationLogs   AutomationLog[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("application_queue")
+  @@index([userId, status])
+  @@index([status, scheduledAt])
+  @@index([priority, scheduledAt])
+  @@index([createdAt])
+}
+
+model AutomationLog {
+  id              String      @id @default(uuid())
+  queueId         String
+  queue           ApplicationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  
+  // Log Details
+  level           LogLevel    @default(INFO)
+  message         String
+  details         Json?       // Detailed log data
+  
+  // Browser Automation Context
+  step            String?     // Which automation step
+  elementSelector String?     // CSS selector being targeted
+  action          String?     // click, type, wait, etc.
+  
+  // Error Information
+  errorType       String?
+  stackTrace      String?
+  screenshot      String?     // URL to screenshot if error occurred
+  
+  // Performance Data
+  executionTime   Int?        // Time taken for this step (ms)
+  memoryUsage     Int?        // Memory usage (bytes)
+  
+  // Context
+  browserInfo     Json?       // Browser and system info
+  pageUrl         String?     // Current page URL
+  
+  createdAt       DateTime    @default(now())
+
+  @@map("automation_logs")
+  @@index([queueId, level])
+  @@index([createdAt])
+  @@index([level, createdAt])
+}
+
+// =============================================================================
+// ENTERPRISE SECURITY & AUDIT SYSTEM
+// =============================================================================
+
+model AuditLog {
+  id              String      @id @default(uuid())
+  
+  // Actor Information
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  actorType       ActorType   @default(USER)
+  actorId         String?     // Could be system, API key, etc.
+  
+  // Action Details
+  action          String      // What action was performed
+  resource        String      // What resource was affected
+  resourceId      String?     // ID of the affected resource
+  
+  // Request Context
+  method          String?     // HTTP method
+  endpoint        String?     // API endpoint
+  statusCode      Int?        // Response status code
+  
+  // Security Context
+  ipAddress       String?
+  userAgent       String?
+  sessionId       String?
+  
+  // Data Changes
+  oldValues       Json?       // Previous values (for updates)
+  newValues       Json?       // New values (for updates/creates)
+  
+  // Risk Assessment
+  riskLevel       RiskLevel   @default(LOW)
+  riskFactors     String[]    // Factors contributing to risk
+  
+  // Compliance
+  dataCategory    String?     // Type of data accessed (PII, etc.)
+  legalBasis      String?     // GDPR legal basis
+  
+  // Metadata
+  metadata        Json?       // Additional context data
+  tags            String[]    // Searchable tags
+  
+  createdAt       DateTime    @default(now())
+
+  @@map("audit_logs")
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([resource, resourceId])
+  @@index([riskLevel, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// ANALYTICS & BUSINESS INTELLIGENCE
+// =============================================================================
+
+model AnalyticsEvent {
+  id              String      @id @default(uuid())
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  
+  // Event Details
+  eventType       String      // job_view, application_start, etc.
+  eventCategory   String      // user_action, system_event, etc.
+  eventName       String      // Specific event name
+  
+  // Event Properties
+  properties      Json?       // Event-specific properties
+  traits          Json?       // User traits at time of event
+  
+  // Context
+  sessionId       String?
+  deviceType      String?     // web, mobile, desktop
+  platform        String?     // browser, iOS, Android, Windows, etc.
+  
+  // Location & Network
+  ipAddress       String?
+  country         String?
+  region          String?
+  city            String?
+  
+  // Technical Context
+  userAgent       String?
+  referrer        String?
+  pageUrl         String?
+  
+  // Business Metrics
+  revenue         Decimal?    // Revenue associated with event
+  currency        String?
+  
+  // Timing
+  timestamp       DateTime    @default(now())
+  processingTime  Int?        // Time to process event (ms)
+  
+  createdAt       DateTime    @default(now())
+
+  @@map("analytics_events")
+  @@index([userId, eventType])
+  @@index([eventType, timestamp])
+  @@index([sessionId, timestamp])
+  @@index([timestamp])
+}
+
+// =============================================================================
+// NOTIFICATION SYSTEM
+// =============================================================================
+
+model UserNotification {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notification Details
+  type            NotificationType
+  title           String
+  message         String
+  actionUrl       String?     // URL to navigate when clicked
+  
+  // Targeting
+  channel         NotificationChannel @default(IN_APP)
+  priority        NotificationPriority @default(NORMAL)
+  
+  // Status
+  status          NotificationStatus @default(UNREAD)
+  readAt          DateTime?
+  clickedAt       DateTime?
+  
+  // Delivery
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  failedAt        DateTime?
+  errorMessage    String?
+  
+  // Metadata
+  metadata        Json?       // Additional notification data
+  templateId      String?     // Reference to template used
+  
+  // Scheduling
+  scheduledFor    DateTime?   // For scheduled notifications
+  expiresAt       DateTime?   // When notification expires
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("user_notifications")
+  @@index([userId, status])
+  @@index([type, createdAt])
+  @@index([scheduledFor])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// SYSTEM CONFIGURATION & TEMPLATES
+// =============================================================================
+
+model SystemSetting {
+  id              String      @id @default(uuid())
+  key             String      @unique
+  value           String
+  type            SettingType @default(STRING)
+  category        String      @default("general")
+  
+  // Metadata
+  description     String?
+  isPublic        Boolean     @default(false)
+  isEncrypted     Boolean     @default(false)
+  
+  // Validation
+  validationRule  String?     // Regex or validation rule
+  defaultValue    String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  updatedBy       String?     // User ID who updated
+
+  @@map("system_settings")
+  @@index([category])
+  @@index([isPublic])
+}
+
+model NotificationTemplate {
+  id              String      @id @default(uuid())
+  name            String      @unique
+  type            NotificationType
+  
+  // Template Content
+  subject         String?     // For email notifications
+  title           String
+  body            String      // Supports templating variables
+  htmlBody        String?     // HTML version for emails
+  
+  // Configuration
+  channel         NotificationChannel @default(IN_APP)
+  isActive        Boolean     @default(true)
+  
+  // Personalization
+  variables       Json?       // Available template variables
+  conditions      Json?       // Conditions for when to use template
+  
+  // Metadata
+  category        String?
+  tags            String[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("notification_templates")
+  @@index([type, isActive])
+  @@index([channel, isActive])
+}
+
+// =============================================================================
+// COMPANY & JOB MANAGEMENT (Enhanced)
+// =============================================================================
+
+model Company {
+  id              String      @id @default(uuid())
+  name            String
+  slug            String      @unique
+  description     String?
+  website         String?
+  logo            String?
+  industry        String?
+  size            CompanySize?
+  
+  // Location Information
+  headquarters    String?
+  locations       Json?       // Multiple office locations
+  country         String?
+  
+  // Company Details
+  foundedYear     Int?
+  employeeCount   Int?
+  revenue         String?
+  fundingStage    String?
+  
+  // Social & External Links
+  linkedinUrl     String?
+  glassdoorUrl    String?
+  crunchbaseUrl   String?
+  twitterUrl      String?
+  facebookUrl     String?
+  
+  // Company Culture & Benefits
+  benefits        Json?       // Structured benefits data
+  cultureValues   String[]
+  workEnvironment Json?       // Remote policy, office culture, etc.
+  
+  // Verification & Quality
+  isVerified      Boolean     @default(false)
+  verifiedAt      DateTime?
+  verificationSource String?
+  qualityScore    Float?      // Algorithm-calculated quality score
+  
+  // SEO & Discovery
+  keywords        String[]    // For search optimization
+  tags            String[]    // Internal tags
+  
+  // Status
+  status          CompanyStatus @default(ACTIVE)
+  isBlacklisted   Boolean     @default(false)
+  blacklistReason String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  jobPostings     JobPosting[]
+  companyReviews  CompanyReview[]
+
+  @@map("companies")
+  @@index([slug])
+  @@index([industry])
+  @@index([size])
+  @@index([status])
+  @@index([isVerified])
+  @@index([qualityScore])
+}
+
+model CompanyReview {
+  id              String      @id @default(uuid())
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  
+  // Review Content
+  title           String?
+  content         String
+  rating          Float       // 1-5 stars
+  
+  // Review Categories
+  workLifeBalance Float?
+  compensation    Float?
+  culture         Float?
+  management      Float?
+  careerGrowth    Float?
+  
+  // Reviewer Context
+  jobTitle        String?
+  department      String?
+  employmentType  EmploymentType?
+  workDuration    String?     // "6 months", "2 years", etc.
+  
+  // Status
+  isApproved      Boolean     @default(false)
+  isAnonymous     Boolean     @default(true)
+  isVerified      Boolean     @default(false)
+  
+  // Metadata
+  helpfulVotes    Int         @default(0)
+  reportCount     Int         @default(0)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("company_reviews")
+  @@index([companyId, isApproved])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+model JobPosting {
+  id              String      @id @default(uuid())
+  title           String
+  description     String
+  requirements    String?
+  benefits        String?
+  
+  // Job Classification
+  type            JobType     @default(FULL_TIME)
+  level           JobLevel    @default(MID)
+  department      String?
+  category        JobCategory @default(OTHER)
+  
+  // Work Arrangement
+  remote          Boolean     @default(false)
+  remoteType      RemoteType  @default(ONSITE)
+  location        String?
+  timeZone        String?
+  
+  // Location Details
+  city            String?
+  state           String?
+  country         String?
+  coordinates     Json?       // Lat/lng for mapping
+  
+  // Compensation
+  salaryMin       Int?
+  salaryMax       Int?
+  currency        String?     @default("USD")
+  salaryType      SalaryType? // hourly, annual, contract
+  equity          String?
+  bonus           String?
+  
+  // Job Requirements
+  experienceYears Int?
+  skills          String[]    // Required skills
+  education       String?     // Required education level
+  languages       String[]    // Required languages
+  
+  // Company Context
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // External Integration
+  externalId      String?     // ID from job board
+  source          JobSource   @default(MANUAL)
+  sourceUrl       String?     // Original job posting URL
+  applyUrl        String?     // Direct application URL
+  
+  // SEO & Search
+  keywords        String[]    // For search optimization
+  tags            String[]    // Internal tags
+  
+  // Quality & Verification
+  qualityScore    Float?      // Algorithm quality score
+  isVerified      Boolean     @default(false)
+  verifiedAt      DateTime?
+  
+  // Status & Lifecycle
+  status          JobStatus   @default(ACTIVE)
+  isActive        Boolean     @default(true)
+  isFeatured      Boolean     @default(false)
+  isUrgent        Boolean     @default(false)
+  
+  // Dates
+  postedAt        DateTime?
+  expiresAt       DateTime?
+  lastScrapedAt   DateTime?   // When job was last updated from source
+  
+  // Analytics
+  viewCount       Int         @default(0)
+  applicationCount Int        @default(0)
+  rightSwipeCount Int         @default(0)
+  leftSwipeCount  Int         @default(0)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  applications    JobApplication[]
+  savedBy         SavedJob[]
+  swipes          UserJobSwipe[]
+  queueItems      ApplicationQueue[]
+  enhancements    ResumeEnhancement[]
+
+  @@map("job_postings")
+  @@index([companyId])
+  @@index([type, level])
+  @@index([remote, remoteType])
+  @@index([status, isActive])
+  @@index([source])
+  @@index([city, state, country])
+  @@index([salaryMin, salaryMax])
+  @@index([createdAt])
+  @@index([postedAt])
+  @@index([qualityScore])
+  @@fulltext([title, description])
+}
+
+// =============================================================================
+// RESUME TEMPLATE & ENHANCEMENT SYSTEM
+// =============================================================================
+
+model ResumeTemplate {
+  id              String      @id @default(uuid())
+  name            String
+  description     String?
+  category        TemplateCategory @default(GENERAL)
+  
+  // Template Structure
+  content         Json        // JSON structure for the template
+  sections        Json        // Available sections configuration
+  styling         Json        // Styling and layout configuration
+  
+  // Preview & Assets
+  preview         String?     // Preview image URL
+  thumbnails      Json?       // Multiple preview sizes
+  
+  // Template Metadata
+  industry        String?     // Target industry
+  experience      String?     // Target experience level
+  jobTypes        String[]    // Suitable job types
+  
+  // Quality & Ratings
+  qualityScore    Float?      // Template quality score
+  downloads       Int         @default(0)
+  ratings         Float?      // Average user rating
+  ratingCount     Int         @default(0)
+  
+  // Access Control
+  isActive        Boolean     @default(true)
+  isPremium       Boolean     @default(false)
+  isPublic        Boolean     @default(true)
+  
+  // SEO & Discovery
+  tags            String[]    // Template tags
+  keywords        String[]    // Search keywords
+  
+  // Analytics
+  usageCount      Int         @default(0)
+  successRate     Float?      // Application success rate with this template
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  createdBy       String?     // User or admin who created
+
+  // Relations
+  resumes         Resume[]
+  enhancements    ResumeEnhancement[]
+
+  @@map("resume_templates")
+  @@index([category, isActive])
+  @@index([isPremium, isActive])
+  @@index([qualityScore])
+  @@index([downloads])
+  @@fulltext([name, description])
+}
+
+model Resume {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  templateId      String?
+  template        ResumeTemplate? @relation(fields: [templateId], references: [id])
+  
+  // Resume Identity
+  name            String
+  title           String?     // Professional title
+  
+  // Content Structure
+  content         Json        // Complete resume content
+  sections        Json        // Section-by-section content
+  metadata        Json?       // Additional metadata
+  
+  // File Storage
+  pdfUrl          String?     // Generated PDF URL
+  docxUrl         String?     // Generated DOCX URL
+  htmlUrl         String?     // Generated HTML URL
+  
+  // File Metadata
+  fileSize        Int?        // File size in bytes
+  pageCount       Int?        // Number of pages
+  lastGenerated   DateTime?   // When files were last generated
+  
+  // Version Control
+  version         Int         @default(1)
+  parentResumeId  String?     // For resume versions
+  isDefault       Boolean     @default(false)
+  
+  // Privacy & Sharing
+  visibility      ResumeVisibility @default(PRIVATE)
+  shareToken      String?     // For sharing resume publicly
+  
+  // Analytics
+  viewCount       Int         @default(0)
+  downloadCount   Int         @default(0)
+  applicationCount Int        @default(0)
+  
+  // AI Enhancement
+  aiEnhanced      Boolean     @default(false)
+  enhancementData Json?       // AI enhancement metadata
+  
+  // Quality Metrics
+  completeness    Float?      // Completeness score (0-100)
+  readabilityScore Float?     // ATS readability score
+  keywordMatch    Float?      // Keyword optimization score
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  applications    JobApplication[]
+  enhancements    ResumeEnhancement[]
+
+  @@map("resumes")
+  @@index([userId, isDefault])
+  @@index([templateId])
+  @@index([visibility])
+  @@index([aiEnhanced])
+  @@index([createdAt])
+}
+
+model ResumeEnhancement {
+  id              String      @id @default(uuid())
+  resumeId        String
+  resume          Resume      @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  
+  templateId      String?
+  template        ResumeTemplate? @relation(fields: [templateId], references: [id])
+  
+  jobPostingId    String?
+  jobPosting      JobPosting? @relation(fields: [jobPostingId], references: [id])
+  
+  // Enhancement Details
+  type            EnhancementType
+  description     String
+  
+  // Before & After
+  originalContent Json        // Original content
+  enhancedContent Json        // Enhanced content
+  changes         Json        // Specific changes made
+  
+  // AI Context
+  aiModel         String?     // Which AI model was used
+  prompt          String?     // Prompt used for enhancement
+  confidence      Float?      // AI confidence score
+  
+  // Results
+  isApplied       Boolean     @default(false)
+  appliedAt       DateTime?
+  
+  // Performance Tracking
+  improvedMatch   Float?      // Improvement in job match score
+  successRate     Float?      // Success rate after enhancement
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("resume_enhancements")
+  @@index([resumeId, type])
+  @@index([jobPostingId])
+  @@index([isApplied])
+  @@index([createdAt])
+}
+
+// =============================================================================
+// JOB APPLICATION TRACKING SYSTEM
+// =============================================================================
+
+model JobApplication {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobPostingId    String
+  jobPosting      JobPosting  @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  resumeId        String?
+  resume          Resume?     @relation(fields: [resumeId], references: [id])
+  
+  // Application Management
+  status          ApplicationStatus @default(DRAFT)
+  priority        ApplicationPriority @default(MEDIUM)
+  source          ApplicationSource @default(MANUAL)
+  
+  // Application Content
+  coverLetter     String?
+  customFields    Json?       // Custom form fields for specific applications
+  notes           String?     // User notes
+  
+  // Resume Customization
+  customResume    Json?       // Job-specific resume modifications
+  resumeVersion   String?     // Version identifier
+  
+  // Timeline & Status Tracking
+  appliedAt       DateTime?
+  viewedAt        DateTime?   // When employer viewed application
+  responseAt      DateTime?   // When employer responded
+  interviewAt     DateTime?   // Interview date
+  followUpAt      DateTime?   // Next follow-up date
+  rejectedAt      DateTime?
+  acceptedAt      DateTime?
+  
+  // External System Integration
+  externalId      String?     // ID from ATS system
+  atsUrl          String?     // Link to ATS application
+  confirmationNumber String?  // Application confirmation number
+  
+  // Automation Data
+  automationStatus AutomationStatus?
+  automationAttempts Int      @default(0)
+  automationData  Json?       // Data from automation process
+  lastAutomationAt DateTime?
+  
+  // Communication Tracking
+  lastContactAt   DateTime?
+  contactMethod   String?     // Email, phone, LinkedIn, etc.
+  recruiterName   String?
+  recruiterEmail  String?
+  recruiterPhone  String?
+  
+  // Success Metrics
+  responseTime    Int?        // Time to response in hours
+  interviewCount  Int         @default(0)
+  
+  // Quality & Matching
+  matchScore      Float?      // How well job matches user profile
+  appliedVia      String?     // Platform used to apply
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  interactions    ApplicationInteraction[]
+  queueItems      ApplicationQueue[]
+
+  @@map("job_applications")
+  @@unique([userId, jobPostingId])
+  @@index([userId, status])
+  @@index([status, priority])
+  @@index([appliedAt])
+  @@index([source])
+  @@index([automationStatus])
+  @@index([createdAt])
+}
+
 model ApplicationInteraction {
-  id              String   @id @default(cuid())
+  id              String      @id @default(uuid())
   applicationId   String
   application     JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   
+  // Interaction Details
   type            InteractionType
   title           String
   description     String?
+  outcome         InteractionOutcome?
   
-  // Interaction details
+  // Contact Information
   contactPerson   String?
   contactEmail    String?
+  contactPhone    String?
+  contactRole     String?     // Recruiter, Hiring Manager, etc.
   
+  // Communication Details
+  medium          String?     // Email, phone, video call, in-person
+  location        String?     // For in-person meetings
+  duration        Int?        // Duration in minutes
+  
+  // Scheduling
   scheduledAt     DateTime?
+  startedAt       DateTime?
   completedAt     DateTime?
+  rescheduledFrom DateTime?
+  
+  // Content & Results
+  agenda          String?     // Meeting agenda or purpose
+  notes           String?     // Interaction notes
+  feedback        String?     // Feedback received
+  nextSteps       String?     // Next steps discussed
+  
+  // File Attachments
+  attachments     Json?       // File URLs and metadata
+  
+  // Follow-up
+  requiresFollowUp Boolean    @default(false)
+  followUpDate    DateTime?
+  followUpCompleted Boolean   @default(false)
   
   // Metadata
-  metadata        Json?    // Additional data (interview feedback, etc.)
+  metadata        Json?       // Additional structured data
   
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@map("application_interactions")
+  @@index([applicationId, type])
+  @@index([scheduledAt])
+  @@index([completedAt])
+  @@index([requiresFollowUp])
 }
 
-// Saved jobs for later application
 model SavedJob {
-  id           String   @id @default(cuid())
+  id           String      @id @default(uuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  jobPosting   JobPosting  @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
   
-  notes        String?
-  tags         String[] // User-defined tags
+  // Organization
+  folder       String?     // User-defined folder/category
+  notes        String?     // User notes
+  tags         String[]    // User-defined tags
+  priority     SavedJobPriority @default(MEDIUM)
   
-  createdAt    DateTime @default(now())
+  // Alerts
+  alertOnUpdate Boolean    @default(false)
+  alertOnDeadline Boolean  @default(false)
+  reminderDate DateTime?
+  
+  // Metadata
+  savedReason  String?     // Why user saved this job
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@unique([userId, jobPostingId])
   @@map("saved_jobs")
+  @@index([userId, folder])
+  @@index([priority])
+  @@index([reminderDate])
 }
 
-// Subscription management
+// =============================================================================
+// SUBSCRIPTION & BILLING SYSTEM
+// =============================================================================
+
 model Subscription {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String              @id @default(uuid())
+  userId              String              @unique
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Subscription details
-  plan              SubscriptionPlan @default(FREE)
-  status            SubscriptionStatus @default(ACTIVE)
+  // Plan Details
+  plan                SubscriptionPlan    @default(FREE)
+  status              SubscriptionStatus  @default(ACTIVE)
   
-  // Billing
-  stripeCustomerId      String?
-  stripeSubscriptionId  String?
-  stripePriceId        String?
+  // Billing Integration
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  stripePriceId       String?
+  stripeProductId     String?
   
-  // Billing cycle
-  currentPeriodStart   DateTime?
-  currentPeriodEnd     DateTime?
-  cancelAtPeriodEnd    Boolean @default(false)
+  // Billing Cycle
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean             @default(false)
+  canceledAt          DateTime?
+  cancelReason        String?
   
-  // Trial
-  trialStart           DateTime?
-  trialEnd             DateTime?
+  // Trial Management
+  trialStart          DateTime?
+  trialEnd            DateTime?
+  trialUsed           Boolean             @default(false)
   
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  // Plan Limits
+  monthlyApplications Int?                // Monthly application limit
+  resumeTemplates     Int?                // Resume template access
+  prioritySupport     Boolean             @default(false)
+  
+  // Billing History
+  lastPaymentAt       DateTime?
+  lastPaymentAmount   Decimal?
+  nextBillingDate     DateTime?
+  
+  // Promo & Discounts
+  promoCode           String?
+  discountPercent     Float?
+  discountEndsAt      DateTime?
+  
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Relations
+  usageRecords        UsageRecord[]
+  billingHistory      BillingHistory[]
 
   @@map("subscriptions")
+  @@index([plan, status])
+  @@index([stripeCustomerId])
+  @@index([nextBillingDate])
 }
 
-// Usage tracking for rate limiting and analytics
+model BillingHistory {
+  id              String          @id @default(uuid())
+  subscriptionId  String
+  subscription    Subscription    @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  // Transaction Details
+  amount          Decimal
+  currency        String          @default("USD")
+  status          PaymentStatus
+  
+  // Stripe Integration
+  stripeInvoiceId String?
+  stripePaymentIntentId String?
+  
+  // Invoice Details
+  description     String?
+  invoiceUrl      String?
+  
+  // Billing Period
+  periodStart     DateTime
+  periodEnd       DateTime
+  
+  // Metadata
+  metadata        Json?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("billing_history")
+  @@index([subscriptionId, status])
+  @@index([status, createdAt])
+}
+
 model UsageRecord {
-  id         String     @id @default(cuid())
-  userId     String
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Usage details
-  feature    UsageFeature
-  count      Int        @default(1)
-  metadata   Json?      // Additional usage data
+  subscriptionId  String?
+  subscription    Subscription?   @relation(fields: [subscriptionId], references: [id])
   
-  // Time period
-  date       DateTime   @default(now()) @db.Date
-  createdAt  DateTime   @default(now())
+  // Usage Details
+  feature         UsageFeature
+  count           Int             @default(1)
+  metadata        Json?           // Feature-specific usage data
+  
+  // Context
+  sessionId       String?         // User session
+  deviceType      String?         // web, mobile, desktop
+  ipAddress       String?
+  
+  // Time Tracking
+  date            DateTime        @default(now()) @db.Date
+  hour            Int?            // Hour of day (0-23)
+  createdAt       DateTime        @default(now())
 
   @@unique([userId, feature, date])
   @@map("usage_records")
+  @@index([userId, feature])
+  @@index([feature, date])
+  @@index([subscriptionId])
 }
 
-// Enums
+// =============================================================================
+// COMPREHENSIVE ENUM DEFINITIONS
+// =============================================================================
+
+// User Management Enums
+enum UserRole {
+  USER
+  PREMIUM_USER
+  ADMIN
+  SUPER_ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+  DELETED
+}
+
+enum ProfileVisibility {
+  PRIVATE
+  PUBLIC
+  CONNECTIONS_ONLY
+  RECRUITERS_ONLY
+}
+
+enum RemotePreference {
+  REMOTE_ONLY
+  HYBRID
+  ONSITE_ONLY
+  NO_PREFERENCE
+}
+
+// Job & Company Enums
 enum JobType {
   FULL_TIME
   PART_TIME
@@ -379,6 +1305,8 @@ enum JobType {
   FREELANCE
   INTERNSHIP
   TEMPORARY
+  VOLUNTEER
+  APPRENTICESHIP
 }
 
 enum JobLevel {
@@ -387,23 +1315,142 @@ enum JobLevel {
   MID
   SENIOR
   LEAD
+  PRINCIPAL
+  STAFF
   MANAGER
+  SENIOR_MANAGER
   DIRECTOR
+  SENIOR_DIRECTOR
   VP
+  SVP
   C_LEVEL
+  FOUNDER
 }
 
+enum JobCategory {
+  TECHNOLOGY
+  ENGINEERING
+  DESIGN
+  PRODUCT
+  MARKETING
+  SALES
+  FINANCE
+  OPERATIONS
+  HUMAN_RESOURCES
+  LEGAL
+  CUSTOMER_SUCCESS
+  DATA_SCIENCE
+  HEALTHCARE
+  EDUCATION
+  CONSULTING
+  MANUFACTURING
+  RETAIL
+  HOSPITALITY
+  MEDIA
+  NON_PROFIT
+  GOVERNMENT
+  OTHER
+}
+
+enum RemoteType {
+  ONSITE
+  REMOTE
+  HYBRID
+  FLEXIBLE
+}
+
+enum SalaryType {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  ANNUAL
+  CONTRACT
+  COMMISSION
+}
+
+enum JobSource {
+  MANUAL
+  LINKEDIN
+  INDEED
+  GLASSDOOR
+  ANGELLIST
+  STACKOVERFLOW
+  DICE
+  MONSTER
+  ZIPRECRUITER
+  BUILTIN
+  FLEXJOBS
+  REMOTE_CO
+  WEWORKREMOTELY
+  COMPANY_WEBSITE
+  RECRUITER_OUTREACH
+  REFERRAL
+  OTHER
+}
+
+enum JobStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  FILLED
+  ON_HOLD
+  CANCELLED
+  DRAFT
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+  UNKNOWN
+}
+
+enum CompanyStatus {
+  ACTIVE
+  INACTIVE
+  ACQUIRED
+  CLOSED
+  SUSPENDED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+  TEMPORARY
+}
+
+// Application & Automation Enums
 enum ApplicationStatus {
   DRAFT
+  QUEUED
+  APPLYING
   APPLIED
+  APPLICATION_ERROR
+  VIEWED
   SCREENING
-  INTERVIEW
-  TECHNICAL
-  FINAL_ROUND
-  OFFER
-  ACCEPTED
+  PHONE_SCREEN
+  INTERVIEW_SCHEDULED
+  FIRST_INTERVIEW
+  SECOND_INTERVIEW
+  FINAL_INTERVIEW
+  TECHNICAL_ASSESSMENT
+  TAKE_HOME_PROJECT
+  REFERENCE_CHECK
+  BACKGROUND_CHECK
+  OFFER_PENDING
+  OFFER_RECEIVED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
   REJECTED
   WITHDRAWN
+  GHOSTED
+  ARCHIVED
 }
 
 enum ApplicationPriority {
@@ -411,43 +1458,289 @@ enum ApplicationPriority {
   MEDIUM
   HIGH
   URGENT
+  CRITICAL
 }
 
+enum ApplicationSource {
+  MANUAL
+  AUTOMATION
+  BULK_APPLY
+  REFERRAL
+  RECRUITER
+  COMPANY_OUTREACH
+}
+
+enum AutomationStatus {
+  NOT_AUTOMATED
+  QUEUED
+  IN_PROGRESS
+  WAITING_CAPTCHA
+  COMPLETED
+  FAILED
+  REQUIRES_MANUAL
+  CANCELLED
+}
+
+enum QueueStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  RETRYING
+  PAUSED
+  REQUIRES_CAPTCHA
+}
+
+enum QueuePriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  IMMEDIATE
+}
+
+// Interaction & Communication Enums
 enum InteractionType {
-  EMAIL
-  PHONE_CALL
+  APPLICATION_SUBMITTED
+  EMAIL_RECEIVED
+  EMAIL_SENT
+  PHONE_CALL_INCOMING
+  PHONE_CALL_OUTGOING
   VIDEO_CALL
-  IN_PERSON
-  ONLINE_ASSESSMENT
-  TECHNICAL_INTERVIEW
-  BEHAVIORAL_INTERVIEW
-  FOLLOW_UP
-  OFFER_DISCUSSION
-  REJECTION
+  IN_PERSON_MEETING
+  LINKEDIN_MESSAGE
+  TEXT_MESSAGE
+  RECRUITER_CONTACT
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  ASSESSMENT_SENT
+  ASSESSMENT_COMPLETED
+  REFERENCE_REQUEST
+  BACKGROUND_CHECK
+  OFFER_RECEIVED
+  OFFER_NEGOTIATION
+  REJECTION_RECEIVED
+  FOLLOW_UP_SENT
+  THANK_YOU_SENT
+  WITHDRAWAL_SENT
+  STATUS_UPDATE
   OTHER
 }
 
+enum InteractionOutcome {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  NO_RESPONSE
+  NEEDS_FOLLOW_UP
+  SCHEDULED_NEXT_STEP
+  OFFER_DISCUSSION
+  REJECTION
+  INTERVIEW_SCHEDULED
+  ASSESSMENT_REQUIRED
+  REFERENCES_REQUESTED
+  WITHDRAWN
+}
+
+// Resume & Template Enums
+enum TemplateCategory {
+  GENERAL
+  TECHNOLOGY
+  BUSINESS
+  CREATIVE
+  ACADEMIC
+  HEALTHCARE
+  ENGINEERING
+  SALES
+  MARKETING
+  FINANCE
+  LEGAL
+  EDUCATION
+  NON_PROFIT
+  EXECUTIVE
+  ENTRY_LEVEL
+  CAREER_CHANGE
+}
+
+enum ResumeVisibility {
+  PRIVATE
+  PUBLIC
+  RECRUITERS_ONLY
+  SHARED_LINK
+}
+
+enum EnhancementType {
+  KEYWORD_OPTIMIZATION
+  ATS_OPTIMIZATION
+  JOB_SPECIFIC_TAILORING
+  SKILL_HIGHLIGHTING
+  EXPERIENCE_ENHANCEMENT
+  SUMMARY_IMPROVEMENT
+  GRAMMAR_CHECK
+  FORMAT_OPTIMIZATION
+  LENGTH_OPTIMIZATION
+  IMPACT_ENHANCEMENT
+}
+
+// Swiping & Matching Enums
+enum SwipeDirection {
+  LEFT
+  RIGHT
+  SUPER_LIKE
+}
+
+// Subscription & Billing Enums
 enum SubscriptionPlan {
   FREE
   BASIC
   PRO
+  PREMIUM
   ENTERPRISE
+  CUSTOM
 }
 
 enum SubscriptionStatus {
   ACTIVE
   INACTIVE
   PAST_DUE
-  CANCELED
+  CANCELLED
   UNPAID
+  TRIALING
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  PAUSED
 }
 
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+  DISPUTED
+  REQUIRES_ACTION
+}
+
+enum SavedJobPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Usage & Analytics Enums
 enum UsageFeature {
-  APPLICATION_AUTOMATION
-  RESUME_GENERATION
-  COVER_LETTER_GENERATION
   JOB_SEARCH
-  API_CALLS
-  PDF_EXPORTS
-  DOCUMENT_UPLOADS
+  JOB_VIEW
+  JOB_SWIPE
+  JOB_SAVE
+  APPLICATION_MANUAL
+  APPLICATION_AUTOMATION
+  RESUME_CREATION
+  RESUME_EDIT
+  RESUME_DOWNLOAD
+  RESUME_ENHANCEMENT
+  COVER_LETTER_GENERATION
+  TEMPLATE_USAGE
+  PROFILE_UPDATE
+  SEARCH_FILTER
+  NOTIFICATION_SENT
+  EMAIL_SENT
+  FILE_UPLOAD
+  FILE_DOWNLOAD
+  API_CALL
+  DESKTOP_APP_USAGE
+  MOBILE_APP_USAGE
+  WEB_APP_USAGE
+  ANALYTICS_EVENT
+  AUDIT_LOG_ENTRY
+}
+
+// Notification Enums
+enum NotificationType {
+  JOB_MATCH
+  APPLICATION_UPDATE
+  INTERVIEW_REMINDER
+  DEADLINE_REMINDER
+  NEW_MESSAGE
+  SYSTEM_NOTIFICATION
+  BILLING_NOTIFICATION
+  SECURITY_ALERT
+  FEATURE_ANNOUNCEMENT
+  WEEKLY_DIGEST
+  REFERRAL_BONUS
+  ACHIEVEMENT_UNLOCKED
+  SUBSCRIPTION_EXPIRING
+  PAYMENT_FAILED
+  ACCOUNT_SUSPENDED
+  DATA_EXPORT_READY
+  PROFILE_INCOMPLETE
+  RESUME_FEEDBACK
+  JOB_RECOMMENDATION
+  COMPANY_UPDATE
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+  SLACK
+  WEBHOOK
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  CLICKED
+  DISMISSED
+  EXPIRED
+  FAILED
+}
+
+// System & Security Enums
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+  ARRAY
+  URL
+  EMAIL
+  PASSWORD
+  ENCRYPTED
+}
+
+enum ActorType {
+  USER
+  ADMIN
+  SYSTEM
+  API_KEY
+  SERVICE_ACCOUNT
+  AUTOMATION
+  WEBHOOK
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
 }
