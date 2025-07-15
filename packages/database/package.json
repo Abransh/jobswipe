@@ -1,0 +1,39 @@
+{
+  "name": "@jobswipe/database",
+  "version": "1.0.0",
+  "description": "Database layer with Prisma ORM for JobSwipe",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist node_modules",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx seed/index.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "bcryptjs": "^2.4.3",
+    "nanoid": "^5.0.4",
+    "@jobswipe/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.0",
+    "@types/bcryptjs": "^2.4.6",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "prisma",
+    "database",
+    "postgresql",
+    "orm"
+  ]
+}

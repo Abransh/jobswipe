@@ -1,0 +1,453 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Authentication and Profile
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String?
+  name          String?
+  avatar        String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Profile information
+  profile UserProfile?
+
+  // Authentication
+  accounts     Account[]
+  sessions     Session[]
+  
+  // User's resumes
+  resumes      Resume[]
+  
+  // Job applications
+  applications JobApplication[]
+  
+  // Subscription
+  subscription Subscription?
+  
+  // Usage tracking
+  usageRecords UsageRecord[]
+  
+  // Saved jobs
+  savedJobs    SavedJob[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  firstName    String?
+  lastName     String?
+  phone        String?
+  location     String?
+  website      String?
+  linkedin     String?
+  github       String?
+  bio          String?
+  
+  // Professional details
+  title        String?
+  experience   String?
+  skills       String[] // Array of skills
+  education    Json?    // JSON for education history
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+// NextAuth.js required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Company information
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  website     String?
+  logo        String?
+  industry    String?
+  size        String?
+  location    String?
+  
+  // Company metadata
+  linkedinUrl String?
+  glassdoorUrl String?
+  crunchbaseUrl String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  jobPostings JobPosting[]
+
+  @@map("companies")
+}
+
+// Job postings
+model JobPosting {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  requirements  String?
+  benefits      String?
+  
+  // Job details
+  type          JobType  @default(FULL_TIME)
+  level         JobLevel @default(MID)
+  department    String?
+  remote        Boolean  @default(false)
+  location      String?
+  
+  // Compensation
+  salaryMin     Int?
+  salaryMax     Int?
+  currency      String?  @default("USD")
+  equity        String?
+  
+  // External data
+  externalId    String?  // ID from job board
+  source        String?  // Source job board (LinkedIn, Indeed, etc.)
+  sourceUrl     String?  // Original job posting URL
+  
+  // Company relation
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Status
+  isActive      Boolean  @default(true)
+  postedAt      DateTime?
+  expiresAt     DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  applications  JobApplication[]
+  savedBy       SavedJob[]
+
+  @@map("job_postings")
+}
+
+// Resume templates and user resumes
+model ResumeTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  
+  // Template content
+  content     Json     // JSON structure for the template
+  preview     String?  // Preview image URL
+  
+  // Metadata
+  isActive    Boolean  @default(true)
+  isPremium   Boolean  @default(false)
+  tags        String[] // Template tags
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  resumes     Resume[]
+
+  @@map("resume_templates")
+}
+
+model Resume {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  templateId  String?
+  template    ResumeTemplate? @relation(fields: [templateId], references: [id])
+  
+  // Resume data
+  name        String
+  content     Json     // JSON structure for resume content
+  
+  // File storage
+  pdfUrl      String?  // Generated PDF URL
+  docxUrl     String?  // Generated DOCX URL
+  
+  // Metadata
+  isDefault   Boolean  @default(false)
+  version     Int      @default(1)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  applications JobApplication[]
+
+  @@map("resumes")
+}
+
+// Job applications tracking
+model JobApplication {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobPostingId  String
+  jobPosting    JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  resumeId      String?
+  resume        Resume?  @relation(fields: [resumeId], references: [id])
+  
+  // Application details
+  status        ApplicationStatus @default(DRAFT)
+  priority      ApplicationPriority @default(MEDIUM)
+  
+  // Custom fields for the application
+  coverLetter   String?
+  customResume  Json?    // Custom modifications for this application
+  notes         String?
+  
+  // Timeline tracking
+  appliedAt     DateTime?
+  responseAt    DateTime?
+  interviewAt   DateTime?
+  followUpAt    DateTime?
+  
+  // External tracking
+  externalId    String?  // ID from ATS system
+  atsUrl        String?  // Link to ATS application
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  interactions  ApplicationInteraction[]
+
+  @@map("job_applications")
+}
+
+// Application interactions and timeline
+model ApplicationInteraction {
+  id              String   @id @default(cuid())
+  applicationId   String
+  application     JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  type            InteractionType
+  title           String
+  description     String?
+  
+  // Interaction details
+  contactPerson   String?
+  contactEmail    String?
+  
+  scheduledAt     DateTime?
+  completedAt     DateTime?
+  
+  // Metadata
+  metadata        Json?    // Additional data (interview feedback, etc.)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("application_interactions")
+}
+
+// Saved jobs for later application
+model SavedJob {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  jobPostingId String
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  
+  notes        String?
+  tags         String[] // User-defined tags
+  
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, jobPostingId])
+  @@map("saved_jobs")
+}
+
+// Subscription management
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Subscription details
+  plan              SubscriptionPlan @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  
+  // Billing
+  stripeCustomerId      String?
+  stripeSubscriptionId  String?
+  stripePriceId        String?
+  
+  // Billing cycle
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean @default(false)
+  
+  // Trial
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+// Usage tracking for rate limiting and analytics
+model UsageRecord {
+  id         String     @id @default(cuid())
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Usage details
+  feature    UsageFeature
+  count      Int        @default(1)
+  metadata   Json?      // Additional usage data
+  
+  // Time period
+  date       DateTime   @default(now()) @db.Date
+  createdAt  DateTime   @default(now())
+
+  @@unique([userId, feature, date])
+  @@map("usage_records")
+}
+
+// Enums
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+  TEMPORARY
+}
+
+enum JobLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  MANAGER
+  DIRECTOR
+  VP
+  C_LEVEL
+}
+
+enum ApplicationStatus {
+  DRAFT
+  APPLIED
+  SCREENING
+  INTERVIEW
+  TECHNICAL
+  FINAL_ROUND
+  OFFER
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ApplicationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum InteractionType {
+  EMAIL
+  PHONE_CALL
+  VIDEO_CALL
+  IN_PERSON
+  ONLINE_ASSESSMENT
+  TECHNICAL_INTERVIEW
+  BEHAVIORAL_INTERVIEW
+  FOLLOW_UP
+  OFFER_DISCUSSION
+  REJECTION
+  OTHER
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum UsageFeature {
+  APPLICATION_AUTOMATION
+  RESUME_GENERATION
+  COVER_LETTER_GENERATION
+  JOB_SEARCH
+  API_CALLS
+  PDF_EXPORTS
+  DOCUMENT_UPLOADS
+}

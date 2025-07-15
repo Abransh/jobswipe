@@ -1,0 +1,101 @@
+{
+  "name": "jobswipe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise job application automation platform with AI-powered browser automation",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:desktop": "npm run dev --workspace=apps/desktop", 
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "turbo run build",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:desktop": "npm run build --workspace=apps/desktop",
+    "build:api": "npm run build --workspace=apps/api",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:e2e": "turbo run test:e2e",
+    "test:integration": "turbo run test:integration",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "db:generate": "npm run db:generate --workspace=packages/database",
+    "db:push": "npm run db:push --workspace=packages/database",
+    "db:migrate": "npm run db:migrate --workspace=packages/database",
+    "db:studio": "npm run db:studio --workspace=packages/database",
+    "db:seed": "npm run db:seed --workspace=packages/database",
+    "db:reset": "npm run db:reset --workspace=packages/database",
+    "setup": "npm install && npm run db:migrate",
+    "docker:dev": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "security:audit": "npm audit --audit-level moderate",
+    "security:scan": "turbo run security:scan",
+    "precommit": "lint-staged",
+    "prepare": "husky install",
+    "release": "turbo run build && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-security": "^2.1.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.2.4",
+    "turbo": "^1.12.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/jobswipe.git"
+  },
+  "keywords": [
+    "job-application",
+    "automation",
+    "ai",
+    "browser-automation",
+    "enterprise",
+    "nextjs",
+    "electron",
+    "typescript",
+    "postgresql",
+    "prisma"
+  ],
+  "author": "JobSwipe Team",
+  "license": "UNLICENSED",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "volta": {
+    "node": "20.11.0",
+    "npm": "10.3.0"
+  }
+}
