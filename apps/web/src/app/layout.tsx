@@ -2,6 +2,8 @@ import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Metadata } from 'next';
 
 import '@/styles/globals.css';
+import { AuthProvider } from '@/components/providers/AuthProvider';
+
 
 const inter = Inter({
   subsets: ['latin'],
@@ -97,9 +99,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
-        <div className="relative flex min-h-screen flex-col">
-          <div className="flex-1">{children}</div>
-        </div>
+        <AuthProvider>
+          <div className="relative flex min-h-screen flex-col">
+            <div className="flex-1">{children}</div>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

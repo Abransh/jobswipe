@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Enterprise job application automation platform with AI-powered browser automation",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "turbo run dev",
     "dev:web": "npm run dev --workspace=apps/web",
-    "dev:desktop": "npm run dev --workspace=apps/desktop", 
+    "dev:desktop": "npm run dev --workspace=apps/desktop",
     "dev:api": "npm run dev --workspace=apps/api",
     "build": "turbo run build",
     "build:web": "npm run build --workspace=apps/web",
@@ -61,6 +57,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "fastify": "^5.4.0",
     "zod": "^3.22.4"
   },
   "engines": {
@@ -83,7 +80,7 @@
     "postgresql",
     "prisma"
   ],
-  "author": "JobSwipe Team",
+  "author": "Abransh Baliyan",
   "license": "UNLICENSED",
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

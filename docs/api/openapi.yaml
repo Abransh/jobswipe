@@ -1,0 +1,1185 @@
+openapi: 3.0.3
+info:
+  title: JobSwipe Authentication API
+  description: |
+    Enterprise-grade authentication and authorization API for JobSwipe platform.
+    
+    This API provides comprehensive authentication services including:
+    - User registration and login
+    - Token-based authentication with JWT
+    - Multi-factor authentication (MFA)
+    - Session management
+    - Desktop app authentication
+    - Security event logging
+    
+    ## Authentication
+    
+    The API uses Bearer token authentication with JWT tokens. Include the token in the Authorization header:
+    
+    ```
+    Authorization: Bearer {token}
+    ```
+    
+    ## Rate Limiting
+    
+    All endpoints are rate-limited to prevent abuse:
+    - Login: 5 attempts per 15 minutes per IP
+    - Registration: 3 attempts per hour per IP
+    - Password reset: 3 attempts per hour per email
+    
+    Rate limit headers are included in responses.
+    
+    ## Security
+    
+    All data is transmitted over HTTPS. Passwords are hashed using bcrypt.
+    JWT tokens are signed with RS256 algorithm.
+    
+  version: 1.0.0
+  contact:
+    name: JobSwipe API Support
+    email: api-support@jobswipe.io
+    url: https://docs.jobswipe.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://jobswipe.io/terms
+
+servers:
+  - url: https://api.jobswipe.io
+    description: Production server
+  - url: https://staging-api.jobswipe.io
+    description: Staging server
+  - url: http://localhost:3000
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Creates a new user account with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              basic:
+                summary: Basic registration
+                value:
+                  email: user@example.com
+                  password: SecurePassword123!
+                  firstName: John
+                  lastName: Doe
+                  source: web
+                  termsAccepted: true
+                  privacyAccepted: true
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticates existing user with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              basic:
+                summary: Basic login
+                value:
+                  email: user@example.com
+                  password: SecurePassword123!
+                  source: web
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Revokes current session and tokens
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/token/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Refreshes expired access token using refresh token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/profile:
+    get:
+      tags:
+        - User Profile
+      summary: Get user profile
+      description: Retrieves authenticated user's profile information
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password/reset:
+    post:
+      tags:
+        - Password Management
+      summary: Request password reset
+      description: Initiates password reset flow by sending reset email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Password reset email sent (if email exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password/change:
+    post:
+      tags:
+        - Password Management
+      summary: Change password
+      description: Changes user password (requires current password)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid current password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/token-exchange/initiate:
+    post:
+      tags:
+        - Desktop Authentication
+      summary: Initiate token exchange
+      description: Starts desktop app authentication flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenExchangeInitiateRequest'
+      responses:
+        '200':
+          description: Token exchange initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenExchangeInitiateResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/token-exchange/complete:
+    post:
+      tags:
+        - Desktop Authentication
+      summary: Complete token exchange
+      description: Completes desktop app authentication flow
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenExchangeCompleteRequest'
+      responses:
+        '200':
+          description: Token exchange completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenExchangeCompleteResponse'
+        '400':
+          description: Invalid exchange token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/setup/totp:
+    post:
+      tags:
+        - Multi-Factor Authentication
+      summary: Setup TOTP
+      description: Initiates TOTP (Time-based One-Time Password) setup
+      responses:
+        '200':
+          description: TOTP setup initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TOTPSetupResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/verify:
+    post:
+      tags:
+        - Multi-Factor Authentication
+      summary: Verify MFA setup
+      description: Verifies MFA setup with generated code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MFAVerifyRequest'
+      responses:
+        '200':
+          description: MFA verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFAVerifyResponse'
+        '400':
+          description: Invalid verification code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sessions:
+    get:
+      tags:
+        - Session Management
+      summary: Get active sessions
+      description: Retrieves all active sessions for authenticated user
+      responses:
+        '200':
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sessions/terminate:
+    post:
+      tags:
+        - Session Management
+      summary: Terminate session
+      description: Terminates a specific session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TerminateSessionRequest'
+      responses:
+        '200':
+          description: Session terminated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/sessions/terminate-all:
+    post:
+      tags:
+        - Session Management
+      summary: Terminate all other sessions
+      description: Terminates all sessions except the current one
+      responses:
+        '200':
+          description: All other sessions terminated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/security-events:
+    get:
+      tags:
+        - Security
+      summary: Get security events
+      description: Retrieves security events for authenticated user
+      parameters:
+        - name: limit
+          in: query
+          description: Number of events to return (max 100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of events to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Security events retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityEventsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - source
+        - termsAccepted
+        - privacyAccepted
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          description: User's password (min 8 chars, must contain uppercase, lowercase, number, special char)
+          example: SecurePassword123!
+        firstName:
+          type: string
+          minLength: 2
+          description: User's first name
+          example: John
+        lastName:
+          type: string
+          minLength: 2
+          description: User's last name
+          example: Doe
+        source:
+          type: string
+          enum: [web, desktop, mobile, api]
+          description: Registration source
+          example: web
+        termsAccepted:
+          type: boolean
+          description: Terms of service acceptance
+          example: true
+        privacyAccepted:
+          type: boolean
+          description: Privacy policy acceptance
+          example: true
+        marketingConsent:
+          type: boolean
+          description: Marketing communications consent
+          example: false
+        timezone:
+          type: string
+          description: User's timezone
+          example: America/New_York
+        companySize:
+          type: string
+          description: Company size
+          example: Startup (1-50 employees)
+        industry:
+          type: string
+          description: Industry
+          example: Technology
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+        - source
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        password:
+          type: string
+          description: User's password
+          example: SecurePassword123!
+        source:
+          type: string
+          enum: [web, desktop, mobile, api]
+          description: Login source
+          example: web
+        rememberMe:
+          type: boolean
+          description: Remember me option
+          example: true
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Valid refresh token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    PasswordResetRequest:
+      type: object
+      required:
+        - email
+        - source
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        source:
+          type: string
+          enum: [web, desktop, mobile, api]
+          description: Request source
+          example: web
+
+    PasswordChangeRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          description: Current password
+          example: OldPassword123!
+        newPassword:
+          type: string
+          minLength: 8
+          description: New password
+          example: NewPassword123!
+
+    TokenExchangeInitiateRequest:
+      type: object
+      required:
+        - deviceId
+        - deviceName
+        - platform
+        - deviceType
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+          description: Unique device identifier
+          example: 550e8400-e29b-41d4-a716-446655440002
+        deviceName:
+          type: string
+          description: Human-readable device name
+          example: John's MacBook Pro
+        platform:
+          type: string
+          description: Device platform
+          example: darwin
+        deviceType:
+          type: string
+          enum: [desktop, mobile, tablet]
+          description: Device type
+          example: desktop
+        appVersion:
+          type: string
+          description: App version
+          example: 1.0.0
+        osVersion:
+          type: string
+          description: OS version
+          example: macOS 14.0
+
+    TokenExchangeCompleteRequest:
+      type: object
+      required:
+        - exchangeToken
+        - deviceId
+        - deviceName
+        - platform
+        - deviceType
+      properties:
+        exchangeToken:
+          type: string
+          description: Exchange token from initiate request
+          example: xchg_1234567890abcdef
+        deviceId:
+          type: string
+          format: uuid
+          description: Unique device identifier
+          example: 550e8400-e29b-41d4-a716-446655440002
+        deviceName:
+          type: string
+          description: Human-readable device name
+          example: John's MacBook Pro
+        platform:
+          type: string
+          description: Device platform
+          example: darwin
+        deviceType:
+          type: string
+          enum: [desktop, mobile, tablet]
+          description: Device type
+          example: desktop
+        appVersion:
+          type: string
+          description: App version
+          example: 1.0.0
+        osVersion:
+          type: string
+          description: OS version
+          example: macOS 14.0
+
+    MFAVerifyRequest:
+      type: object
+      required:
+        - code
+        - method
+      properties:
+        code:
+          type: string
+          pattern: '^[0-9]{6}$'
+          description: 6-digit verification code
+          example: 123456
+        method:
+          type: string
+          enum: [totp, sms]
+          description: MFA method
+          example: totp
+
+    TerminateSessionRequest:
+      type: object
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: Session ID to terminate
+          example: 550e8400-e29b-41d4-a716-446655440001
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        name:
+          type: string
+          description: User's full name
+          example: John Doe
+        role:
+          type: string
+          enum: [user, admin, moderator]
+          description: User role
+          example: user
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+          description: User status
+          example: active
+        profile:
+          type: object
+          description: User profile data
+          properties:
+            firstName:
+              type: string
+              example: John
+            lastName:
+              type: string
+              example: Doe
+            timezone:
+              type: string
+              example: America/New_York
+        emailVerified:
+          type: string
+          format: date-time
+          nullable: true
+          description: Email verification timestamp
+          example: 2023-12-01T09:00:00.000Z
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp
+          example: 2023-12-01T10:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: 2023-12-01T09:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Account update timestamp
+          example: 2023-12-01T10:00:00.000Z
+
+    Tokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: JWT refresh token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        tokenType:
+          type: string
+          enum: [Bearer]
+          description: Token type
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: Access token expiration in seconds
+          example: 900
+        refreshExpiresIn:
+          type: integer
+          description: Refresh token expiration in seconds
+          example: 2592000
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Session ID
+          example: 550e8400-e29b-41d4-a716-446655440001
+        userId:
+          type: string
+          format: uuid
+          description: User ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        deviceType:
+          type: string
+          enum: [desktop, mobile, tablet, unknown]
+          description: Device type
+          example: desktop
+        deviceName:
+          type: string
+          description: Device name
+          example: John's MacBook Pro
+        platform:
+          type: string
+          description: Platform
+          example: darwin
+        browser:
+          type: string
+          description: Browser information
+          example: Chrome 120.0
+        ipAddress:
+          type: string
+          description: IP address
+          example: 192.168.1.100
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+              example: San Francisco
+            country:
+              type: string
+              example: United States
+            countryCode:
+              type: string
+              example: US
+        isCurrentSession:
+          type: boolean
+          description: Whether this is the current session
+          example: true
+        trusted:
+          type: boolean
+          description: Whether the device is trusted
+          example: true
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last activity timestamp
+          example: 2023-12-01T10:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          description: Session creation timestamp
+          example: 2023-12-01T09:00:00.000Z
+        userAgent:
+          type: string
+          description: User agent string
+          example: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...
+
+    SecurityEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Event ID
+          example: 550e8400-e29b-41d4-a716-446655440004
+        type:
+          type: string
+          enum: [login, logout, suspicious, blocked, password_change, mfa_change]
+          description: Event type
+          example: login
+        description:
+          type: string
+          description: Event description
+          example: Successful login from new device
+        timestamp:
+          type: string
+          format: date-time
+          description: Event timestamp
+          example: 2023-12-01T10:00:00.000Z
+        ipAddress:
+          type: string
+          description: IP address
+          example: 192.168.1.100
+        location:
+          type: string
+          description: Location
+          example: San Francisco, US
+        severity:
+          type: string
+          enum: [low, medium, high]
+          description: Event severity
+          example: low
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/Tokens'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        tokens:
+          $ref: '#/components/schemas/Tokens'
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        user:
+          $ref: '#/components/schemas/User'
+
+    TokenExchangeInitiateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        exchangeToken:
+          type: string
+          description: Exchange token for completing authentication
+          example: xchg_1234567890abcdef
+        expiresAt:
+          type: string
+          format: date-time
+          description: Exchange token expiration
+          example: 2023-12-01T10:05:00.000Z
+        qrCodeUrl:
+          type: string
+          format: uri
+          description: QR code URL for mobile scanning
+          example: https://api.jobswipe.io/auth/exchange/xchg_1234567890abcdef
+        deepLinkUrl:
+          type: string
+          format: uri
+          description: Deep link URL for desktop apps
+          example: jobswipe://auth/exchange?token=xchg_1234567890abcdef
+
+    TokenExchangeCompleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/Tokens'
+        sessionId:
+          type: string
+          format: uuid
+          description: Session ID
+          example: 550e8400-e29b-41d4-a716-446655440003
+
+    TOTPSetupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        setup:
+          type: object
+          properties:
+            secret:
+              type: string
+              description: TOTP secret
+              example: JBSWY3DPEHPK3PXP
+            qrCodeUrl:
+              type: string
+              format: uri
+              description: QR code URL for authenticator apps
+              example: otpauth://totp/JobSwipe:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=JobSwipe
+            manualEntryKey:
+              type: string
+              description: Manual entry key for authenticator apps
+              example: JBSWY3DPEHPK3PXP
+            backupCodes:
+              type: array
+              items:
+                type: string
+              description: Backup codes
+              example: ["12345678", "87654321", "11111111", "22222222", "33333333"]
+
+    MFAVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        backupCodes:
+          type: array
+          items:
+            type: string
+          description: Backup codes
+          example: ["12345678", "87654321", "11111111", "22222222", "33333333"]
+
+    SessionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+
+    SecurityEventsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityEvent'
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total number of events
+              example: 100
+            limit:
+              type: integer
+              description: Number of events per page
+              example: 20
+            offset:
+              type: integer
+              description: Number of events skipped
+              example: 0
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          description: Success message
+          example: Operation completed successfully
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: Invalid email or password
+        errorCode:
+          type: string
+          description: Machine-readable error code
+          example: INVALID_CREDENTIALS
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Authentication required
+            errorCode: TOKEN_INVALID
+
+    ForbiddenError:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Insufficient permissions
+            errorCode: FORBIDDEN
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Resource not found
+            errorCode: NOT_FOUND
+
+    RateLimitError:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Rate limit exceeded
+            errorCode: RATE_LIMIT_EXCEEDED
+
+    ValidationError:
+      description: Input validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Validation failed
+            errorCode: VALIDATION_ERROR
+            details:
+              email: Invalid email format
+              password: Password too weak
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error: Internal server error
+            errorCode: INTERNAL_ERROR
+
+tags:
+  - name: Authentication
+    description: Core authentication endpoints
+  - name: User Profile
+    description: User profile management
+  - name: Password Management
+    description: Password reset and change operations
+  - name: Desktop Authentication
+    description: Desktop app authentication flow
+  - name: Multi-Factor Authentication
+    description: MFA setup and verification
+  - name: Session Management
+    description: Session monitoring and control
+  - name: Security
+    description: Security events and monitoring
