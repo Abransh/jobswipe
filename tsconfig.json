@@ -24,6 +24,7 @@
       "@/packages/*": ["./packages/*"],
       "@/shared/*": ["./packages/shared/src/*"],
       "@/database/*": ["./packages/database/src/*"],
+      "@jobswipe/database": ["./packages/database/src"],
       "@/ui/*": ["./packages/ui/src/*"]
     }
   },
@@ -46,7 +47,6 @@
     { "path": "./apps/web" },
     { "path": "./apps/desktop" },
     { "path": "./packages/shared" },
-    { "path": "./packages/database" },
-    { "path": "./packages/ui" }
+    { "path": "./packages/database" }
   ]
 }
