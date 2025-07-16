@@ -338,7 +338,7 @@ export async function getSubscriptionAnalytics() {
     Promise.all([
       db.subscription.count({
         where: {
-          status: SubscriptionStatus.CANCELED,
+          status: SubscriptionStatus.CANCELLED,
           updatedAt: {
             gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
           },
@@ -380,7 +380,7 @@ export async function handleSubscriptionPeriodEnd(userId: string): Promise<void>
     await db.subscription.update({
       where: { userId },
       data: {
-        status: SubscriptionStatus.CANCELED,
+        status: SubscriptionStatus.CANCELLED,
       },
     });
   }

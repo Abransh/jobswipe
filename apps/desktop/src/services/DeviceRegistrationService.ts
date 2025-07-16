@@ -356,7 +356,7 @@ export class DeviceRegistrationService {
       const { screen } = require('electron');
       const displays = screen.getAllDisplays();
       
-      const displayInfo = displays.map(display => 
+      const displayInfo = displays.map((display:any) => 
         `${display.size.width}x${display.size.height}-${display.scaleFactor}`
       ).join('-');
       
