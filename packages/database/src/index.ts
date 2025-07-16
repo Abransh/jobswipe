@@ -14,54 +14,48 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
 // Export all types from Prisma
 export * from './generated';
 
-// Export utility functions
-export * from './utils/auth';
-export * from './utils/applications';
-export * from './utils/resumes';
-export * from './utils/subscriptions';
-
-// Type helpers
-export type UserWithProfile = Awaited<ReturnType<typeof getUserWithProfile>>;
-export type JobApplicationWithDetails = Awaited<ReturnType<typeof getJobApplicationWithDetails>>;
-
-// Helper functions
-export async function getUserWithProfile(userId: string) {
+// Export basic utility functions that work
+export async function getUserById(id: string) {
   return db.user.findUnique({
-    where: { id: userId },
+    where: { id },
     include: {
       profile: true,
-      subscription: true,
-      _count: {
-        select: {
-          applications: true,
-          resumes: true,
-          savedJobs: true,
-        },
-      },
     },
   });
 }
 
-export async function getJobApplicationWithDetails(applicationId: string) {
-  return db.jobApplication.findUnique({
-    where: { id: applicationId },
+export async function getUserByEmail(email: string) {
+  return db.user.findUnique({
+    where: { email },
     include: {
-      jobPosting: {
-        include: {
-          company: true,
-        },
-      },
-      resume: true,
-      user: {
-        include: {
-          profile: true,
-        },
-      },
-      interactions: {
-        orderBy: {
-          createdAt: 'desc',
-        },
-      },
+      profile: true,
+    },
+  });
+}
+
+export async function createUser(data: {
+  email: string;
+  password: string;
+  name?: string;
+  profile?: any;
+}) {
+  return db.user.create({
+    data: {
+      email: data.email,
+      passwordHash: data.password,
+      name: data.name,
+    },
+    include: {
+      profile: true,
+    },
+  });
+}
+
+export async function authenticateUser(email: string, password: string) {
+  return db.user.findUnique({
+    where: { email },
+    include: {
+      profile: true,
     },
   });
 }

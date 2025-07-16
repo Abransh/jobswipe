@@ -5,7 +5,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated"
-  previewFeatures = ["postgresqlExtensions", "views", "relationJoins"]
+  previewFeatures = ["postgresqlExtensions", "views", "relationJoins", "fullTextSearch"]
 }
 
 datasource db {
@@ -801,7 +801,8 @@ model JobPosting {
   @@index([createdAt])
   @@index([postedAt])
   @@index([qualityScore])
-  @@fulltext([title, description])
+  @@index([title])
+  @@index([description])
 }
 
 // =============================================================================
@@ -860,7 +861,8 @@ model ResumeTemplate {
   @@index([isPremium, isActive])
   @@index([qualityScore])
   @@index([downloads])
-  @@fulltext([name, description])
+  @@index([name])
+  @@index([description])
 }
 
 model Resume {

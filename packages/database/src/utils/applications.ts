@@ -307,7 +307,7 @@ export async function getApplicationsNeedingFollowUp(userId: string) {
         lte: new Date(),
       },
       status: {
-        in: [ApplicationStatus.APPLIED, ApplicationStatus.INTERVIEW],
+        in: [ApplicationStatus.APPLIED, ApplicationStatus.FIRST_INTERVIEW, ApplicationStatus.SECOND_INTERVIEW, ApplicationStatus.FINAL_INTERVIEW],
       },
     },
     include: {

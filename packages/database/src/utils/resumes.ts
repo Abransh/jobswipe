@@ -1,17 +1,17 @@
 import { db } from '../index';
-import { Resume, ResumeTemplate } from '../generated';
+import { Resume, ResumeTemplate, Prisma } from '../generated';
 
 export interface CreateResumeInput {
   userId: string;
   templateId?: string;
   name: string;
-  content: any; // JSON content
+  content: Prisma.JsonValue;
   isDefault?: boolean;
 }
 
 export interface UpdateResumeInput {
   name?: string;
-  content?: any;
+  content?: Prisma.JsonValue;
   pdfUrl?: string;
   docxUrl?: string;
   isDefault?: boolean;
@@ -21,7 +21,7 @@ export interface CreateTemplateInput {
   name: string;
   description?: string;
   category?: string;
-  content: any; // JSON structure
+  content: Prisma.JsonValue;
   preview?: string;
   isPremium?: boolean;
   tags?: string[];

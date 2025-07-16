@@ -18,11 +18,7 @@
     "sourceMap": true,
     "removeComments": false,
     "noEmitOnError": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/shared/*": ["../shared/src/*"]
-    }
+    "baseUrl": "."
   },
   "include": [
     "src/**/*.ts"
@@ -30,7 +26,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "prisma/migrations",
-    "src/utils"
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

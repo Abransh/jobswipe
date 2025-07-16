@@ -104,7 +104,7 @@ export async function getUserSubscription(userId: string) {
 export async function cancelSubscription(userId: string, immediately = false): Promise<Subscription> {
   const updateData = immediately
     ? {
-        status: SubscriptionStatus.CANCELED,
+        status: SubscriptionStatus.CANCELLED,
         cancelAtPeriodEnd: false,
       }
     : {
@@ -243,39 +243,39 @@ export async function checkUsageLimit(
   const limits: Record<SubscriptionPlan, Record<UsageFeature, number>> = {
     [SubscriptionPlan.FREE]: {
       [UsageFeature.APPLICATION_AUTOMATION]: 5,
-      [UsageFeature.RESUME_GENERATION]: 3,
+      [UsageFeature.RESUME_CREATION]: 3,
       [UsageFeature.COVER_LETTER_GENERATION]: 5,
       [UsageFeature.JOB_SEARCH]: 10,
-      [UsageFeature.API_CALLS]: 100,
-      [UsageFeature.PDF_EXPORTS]: 5,
-      [UsageFeature.DOCUMENT_UPLOADS]: 3,
+      [UsageFeature.API_CALL]: 100,
+      [UsageFeature.FILE_DOWNLOAD]: 5,
+      [UsageFeature.FILE_UPLOAD]: 3,
     },
     [SubscriptionPlan.BASIC]: {
       [UsageFeature.APPLICATION_AUTOMATION]: 50,
-      [UsageFeature.RESUME_GENERATION]: 10,
+      [UsageFeature.RESUME_CREATION]: 10,
       [UsageFeature.COVER_LETTER_GENERATION]: 50,
       [UsageFeature.JOB_SEARCH]: 100,
-      [UsageFeature.API_CALLS]: 1000,
-      [UsageFeature.PDF_EXPORTS]: 50,
-      [UsageFeature.DOCUMENT_UPLOADS]: 20,
+      [UsageFeature.API_CALL]: 1000,
+      [UsageFeature.FILE_DOWNLOAD]: 50,
+      [UsageFeature.FILE_UPLOAD]: 20,
     },
     [SubscriptionPlan.PRO]: {
       [UsageFeature.APPLICATION_AUTOMATION]: 200,
-      [UsageFeature.RESUME_GENERATION]: 50,
+      [UsageFeature.RESUME_CREATION]: 50,
       [UsageFeature.COVER_LETTER_GENERATION]: 200,
       [UsageFeature.JOB_SEARCH]: 500,
-      [UsageFeature.API_CALLS]: 5000,
-      [UsageFeature.PDF_EXPORTS]: 200,
-      [UsageFeature.DOCUMENT_UPLOADS]: 100,
+      [UsageFeature.API_CALL]: 5000,
+      [UsageFeature.FILE_DOWNLOAD]: 200,
+      [UsageFeature.FILE_UPLOAD]: 100,
     },
     [SubscriptionPlan.ENTERPRISE]: {
       [UsageFeature.APPLICATION_AUTOMATION]: Infinity,
-      [UsageFeature.RESUME_GENERATION]: Infinity,
+      [UsageFeature.RESUME_CREATION]: Infinity,
       [UsageFeature.COVER_LETTER_GENERATION]: Infinity,
       [UsageFeature.JOB_SEARCH]: Infinity,
-      [UsageFeature.API_CALLS]: Infinity,
-      [UsageFeature.PDF_EXPORTS]: Infinity,
-      [UsageFeature.DOCUMENT_UPLOADS]: Infinity,
+      [UsageFeature.API_CALL]: Infinity,
+      [UsageFeature.FILE_DOWNLOAD]: Infinity,
+      [UsageFeature.FILE_UPLOAD]: Infinity,
     },
   };
 

@@ -1,18 +1,18 @@
 import { db } from '../index';
 import { hash, compare } from 'bcryptjs';
-import { User, UserProfile } from '../generated';
+import { User, Prisma } from '../generated';
 
 export interface CreateUserInput {
   email: string;
   password: string;
   name?: string;
-  profile?: Partial<UserProfile>;
+  profile?: Partial<Prisma.UserProfileCreateWithoutUserInput>;
 }
 
 export interface UpdateUserInput {
   name?: string;
   avatar?: string;
-  profile?: Partial<UserProfile>;
+  profile?: Partial<Prisma.UserProfileCreateWithoutUserInput>;
 }
 
 /**

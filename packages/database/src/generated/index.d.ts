@@ -36168,6 +36168,21 @@ export namespace Prisma {
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
+  export const UserOrderByRelevanceFieldEnum: {
+    id: 'id',
+    email: 'email',
+    passwordHash: 'passwordHash',
+    name: 'name',
+    avatar: 'avatar',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    timezone: 'timezone',
+    locale: 'locale'
+  };
+
+  export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
   export const JsonNullValueFilter: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull,
@@ -36175,6 +36190,428 @@ export namespace Prisma {
   };
 
   export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  export const UserProfileOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    displayName: 'displayName',
+    phone: 'phone',
+    gender: 'gender',
+    address: 'address',
+    city: 'city',
+    state: 'state',
+    country: 'country',
+    postalCode: 'postalCode',
+    location: 'location',
+    website: 'website',
+    linkedin: 'linkedin',
+    github: 'github',
+    portfolio: 'portfolio',
+    blog: 'blog',
+    bio: 'bio',
+    headline: 'headline',
+    summary: 'summary',
+    currentTitle: 'currentTitle',
+    currentCompany: 'currentCompany',
+    experienceLevel: 'experienceLevel',
+    skills: 'skills',
+    desiredJobTypes: 'desiredJobTypes',
+    preferredCurrency: 'preferredCurrency'
+  };
+
+  export type UserProfileOrderByRelevanceFieldEnum = (typeof UserProfileOrderByRelevanceFieldEnum)[keyof typeof UserProfileOrderByRelevanceFieldEnum]
+
+
+  export const UserPreferencesOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobTypes: 'jobTypes',
+    experienceLevels: 'experienceLevels',
+    industries: 'industries',
+    companyTypes: 'companyTypes',
+    autoApplyJobTypes: 'autoApplyJobTypes',
+    theme: 'theme',
+    language: 'language',
+    timezone: 'timezone',
+    dateFormat: 'dateFormat'
+  };
+
+  export type UserPreferencesOrderByRelevanceFieldEnum = (typeof UserPreferencesOrderByRelevanceFieldEnum)[keyof typeof UserPreferencesOrderByRelevanceFieldEnum]
+
+
+  export const AccountOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    provider: 'provider',
+    providerAccountId: 'providerAccountId',
+    refresh_token: 'refresh_token',
+    access_token: 'access_token',
+    token_type: 'token_type',
+    scope: 'scope',
+    id_token: 'id_token',
+    session_state: 'session_state'
+  };
+
+  export type AccountOrderByRelevanceFieldEnum = (typeof AccountOrderByRelevanceFieldEnum)[keyof typeof AccountOrderByRelevanceFieldEnum]
+
+
+  export const SessionOrderByRelevanceFieldEnum: {
+    id: 'id',
+    sessionToken: 'sessionToken',
+    userId: 'userId'
+  };
+
+  export type SessionOrderByRelevanceFieldEnum = (typeof SessionOrderByRelevanceFieldEnum)[keyof typeof SessionOrderByRelevanceFieldEnum]
+
+
+  export const VerificationTokenOrderByRelevanceFieldEnum: {
+    identifier: 'identifier',
+    token: 'token'
+  };
+
+  export type VerificationTokenOrderByRelevanceFieldEnum = (typeof VerificationTokenOrderByRelevanceFieldEnum)[keyof typeof VerificationTokenOrderByRelevanceFieldEnum]
+
+
+  export const UserJobSwipeOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobPostingId: 'jobPostingId',
+    deviceType: 'deviceType',
+    sessionId: 'sessionId',
+    userFeedback: 'userFeedback',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    location: 'location'
+  };
+
+  export type UserJobSwipeOrderByRelevanceFieldEnum = (typeof UserJobSwipeOrderByRelevanceFieldEnum)[keyof typeof UserJobSwipeOrderByRelevanceFieldEnum]
+
+
+  export const ApplicationQueueOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobPostingId: 'jobPostingId',
+    applicationId: 'applicationId',
+    resumeId: 'resumeId',
+    coverLetter: 'coverLetter',
+    errorMessage: 'errorMessage',
+    errorType: 'errorType',
+    desktopSessionId: 'desktopSessionId'
+  };
+
+  export type ApplicationQueueOrderByRelevanceFieldEnum = (typeof ApplicationQueueOrderByRelevanceFieldEnum)[keyof typeof ApplicationQueueOrderByRelevanceFieldEnum]
+
+
+  export const AutomationLogOrderByRelevanceFieldEnum: {
+    id: 'id',
+    queueId: 'queueId',
+    message: 'message',
+    step: 'step',
+    elementSelector: 'elementSelector',
+    action: 'action',
+    errorType: 'errorType',
+    stackTrace: 'stackTrace',
+    screenshot: 'screenshot',
+    pageUrl: 'pageUrl'
+  };
+
+  export type AutomationLogOrderByRelevanceFieldEnum = (typeof AutomationLogOrderByRelevanceFieldEnum)[keyof typeof AutomationLogOrderByRelevanceFieldEnum]
+
+
+  export const AuditLogOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    actorId: 'actorId',
+    action: 'action',
+    resource: 'resource',
+    resourceId: 'resourceId',
+    method: 'method',
+    endpoint: 'endpoint',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    sessionId: 'sessionId',
+    riskFactors: 'riskFactors',
+    dataCategory: 'dataCategory',
+    legalBasis: 'legalBasis',
+    tags: 'tags'
+  };
+
+  export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
+
+
+  export const AnalyticsEventOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    eventType: 'eventType',
+    eventCategory: 'eventCategory',
+    eventName: 'eventName',
+    sessionId: 'sessionId',
+    deviceType: 'deviceType',
+    platform: 'platform',
+    ipAddress: 'ipAddress',
+    country: 'country',
+    region: 'region',
+    city: 'city',
+    userAgent: 'userAgent',
+    referrer: 'referrer',
+    pageUrl: 'pageUrl',
+    currency: 'currency'
+  };
+
+  export type AnalyticsEventOrderByRelevanceFieldEnum = (typeof AnalyticsEventOrderByRelevanceFieldEnum)[keyof typeof AnalyticsEventOrderByRelevanceFieldEnum]
+
+
+  export const UserNotificationOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    title: 'title',
+    message: 'message',
+    actionUrl: 'actionUrl',
+    errorMessage: 'errorMessage',
+    templateId: 'templateId'
+  };
+
+  export type UserNotificationOrderByRelevanceFieldEnum = (typeof UserNotificationOrderByRelevanceFieldEnum)[keyof typeof UserNotificationOrderByRelevanceFieldEnum]
+
+
+  export const SystemSettingOrderByRelevanceFieldEnum: {
+    id: 'id',
+    key: 'key',
+    value: 'value',
+    category: 'category',
+    description: 'description',
+    validationRule: 'validationRule',
+    defaultValue: 'defaultValue',
+    updatedBy: 'updatedBy'
+  };
+
+  export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
+
+
+  export const NotificationTemplateOrderByRelevanceFieldEnum: {
+    id: 'id',
+    name: 'name',
+    subject: 'subject',
+    title: 'title',
+    body: 'body',
+    htmlBody: 'htmlBody',
+    category: 'category',
+    tags: 'tags'
+  };
+
+  export type NotificationTemplateOrderByRelevanceFieldEnum = (typeof NotificationTemplateOrderByRelevanceFieldEnum)[keyof typeof NotificationTemplateOrderByRelevanceFieldEnum]
+
+
+  export const CompanyOrderByRelevanceFieldEnum: {
+    id: 'id',
+    name: 'name',
+    slug: 'slug',
+    description: 'description',
+    website: 'website',
+    logo: 'logo',
+    industry: 'industry',
+    headquarters: 'headquarters',
+    country: 'country',
+    revenue: 'revenue',
+    fundingStage: 'fundingStage',
+    linkedinUrl: 'linkedinUrl',
+    glassdoorUrl: 'glassdoorUrl',
+    crunchbaseUrl: 'crunchbaseUrl',
+    twitterUrl: 'twitterUrl',
+    facebookUrl: 'facebookUrl',
+    cultureValues: 'cultureValues',
+    verificationSource: 'verificationSource',
+    keywords: 'keywords',
+    tags: 'tags',
+    blacklistReason: 'blacklistReason'
+  };
+
+  export type CompanyOrderByRelevanceFieldEnum = (typeof CompanyOrderByRelevanceFieldEnum)[keyof typeof CompanyOrderByRelevanceFieldEnum]
+
+
+  export const CompanyReviewOrderByRelevanceFieldEnum: {
+    id: 'id',
+    companyId: 'companyId',
+    userId: 'userId',
+    title: 'title',
+    content: 'content',
+    jobTitle: 'jobTitle',
+    department: 'department',
+    workDuration: 'workDuration'
+  };
+
+  export type CompanyReviewOrderByRelevanceFieldEnum = (typeof CompanyReviewOrderByRelevanceFieldEnum)[keyof typeof CompanyReviewOrderByRelevanceFieldEnum]
+
+
+  export const JobPostingOrderByRelevanceFieldEnum: {
+    id: 'id',
+    title: 'title',
+    description: 'description',
+    requirements: 'requirements',
+    benefits: 'benefits',
+    department: 'department',
+    location: 'location',
+    timeZone: 'timeZone',
+    city: 'city',
+    state: 'state',
+    country: 'country',
+    currency: 'currency',
+    equity: 'equity',
+    bonus: 'bonus',
+    skills: 'skills',
+    education: 'education',
+    languages: 'languages',
+    companyId: 'companyId',
+    externalId: 'externalId',
+    sourceUrl: 'sourceUrl',
+    applyUrl: 'applyUrl',
+    keywords: 'keywords',
+    tags: 'tags'
+  };
+
+  export type JobPostingOrderByRelevanceFieldEnum = (typeof JobPostingOrderByRelevanceFieldEnum)[keyof typeof JobPostingOrderByRelevanceFieldEnum]
+
+
+  export const ResumeTemplateOrderByRelevanceFieldEnum: {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    preview: 'preview',
+    industry: 'industry',
+    experience: 'experience',
+    jobTypes: 'jobTypes',
+    tags: 'tags',
+    keywords: 'keywords',
+    createdBy: 'createdBy'
+  };
+
+  export type ResumeTemplateOrderByRelevanceFieldEnum = (typeof ResumeTemplateOrderByRelevanceFieldEnum)[keyof typeof ResumeTemplateOrderByRelevanceFieldEnum]
+
+
+  export const ResumeOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    templateId: 'templateId',
+    name: 'name',
+    title: 'title',
+    pdfUrl: 'pdfUrl',
+    docxUrl: 'docxUrl',
+    htmlUrl: 'htmlUrl',
+    parentResumeId: 'parentResumeId',
+    shareToken: 'shareToken'
+  };
+
+  export type ResumeOrderByRelevanceFieldEnum = (typeof ResumeOrderByRelevanceFieldEnum)[keyof typeof ResumeOrderByRelevanceFieldEnum]
+
+
+  export const ResumeEnhancementOrderByRelevanceFieldEnum: {
+    id: 'id',
+    resumeId: 'resumeId',
+    templateId: 'templateId',
+    jobPostingId: 'jobPostingId',
+    description: 'description',
+    aiModel: 'aiModel',
+    prompt: 'prompt'
+  };
+
+  export type ResumeEnhancementOrderByRelevanceFieldEnum = (typeof ResumeEnhancementOrderByRelevanceFieldEnum)[keyof typeof ResumeEnhancementOrderByRelevanceFieldEnum]
+
+
+  export const JobApplicationOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobPostingId: 'jobPostingId',
+    resumeId: 'resumeId',
+    coverLetter: 'coverLetter',
+    notes: 'notes',
+    resumeVersion: 'resumeVersion',
+    externalId: 'externalId',
+    atsUrl: 'atsUrl',
+    confirmationNumber: 'confirmationNumber',
+    contactMethod: 'contactMethod',
+    recruiterName: 'recruiterName',
+    recruiterEmail: 'recruiterEmail',
+    recruiterPhone: 'recruiterPhone',
+    appliedVia: 'appliedVia'
+  };
+
+  export type JobApplicationOrderByRelevanceFieldEnum = (typeof JobApplicationOrderByRelevanceFieldEnum)[keyof typeof JobApplicationOrderByRelevanceFieldEnum]
+
+
+  export const ApplicationInteractionOrderByRelevanceFieldEnum: {
+    id: 'id',
+    applicationId: 'applicationId',
+    title: 'title',
+    description: 'description',
+    contactPerson: 'contactPerson',
+    contactEmail: 'contactEmail',
+    contactPhone: 'contactPhone',
+    contactRole: 'contactRole',
+    medium: 'medium',
+    location: 'location',
+    agenda: 'agenda',
+    notes: 'notes',
+    feedback: 'feedback',
+    nextSteps: 'nextSteps'
+  };
+
+  export type ApplicationInteractionOrderByRelevanceFieldEnum = (typeof ApplicationInteractionOrderByRelevanceFieldEnum)[keyof typeof ApplicationInteractionOrderByRelevanceFieldEnum]
+
+
+  export const SavedJobOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    jobPostingId: 'jobPostingId',
+    folder: 'folder',
+    notes: 'notes',
+    tags: 'tags',
+    savedReason: 'savedReason'
+  };
+
+  export type SavedJobOrderByRelevanceFieldEnum = (typeof SavedJobOrderByRelevanceFieldEnum)[keyof typeof SavedJobOrderByRelevanceFieldEnum]
+
+
+  export const SubscriptionOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    stripeCustomerId: 'stripeCustomerId',
+    stripeSubscriptionId: 'stripeSubscriptionId',
+    stripePriceId: 'stripePriceId',
+    stripeProductId: 'stripeProductId',
+    cancelReason: 'cancelReason',
+    promoCode: 'promoCode'
+  };
+
+  export type SubscriptionOrderByRelevanceFieldEnum = (typeof SubscriptionOrderByRelevanceFieldEnum)[keyof typeof SubscriptionOrderByRelevanceFieldEnum]
+
+
+  export const BillingHistoryOrderByRelevanceFieldEnum: {
+    id: 'id',
+    subscriptionId: 'subscriptionId',
+    currency: 'currency',
+    stripeInvoiceId: 'stripeInvoiceId',
+    stripePaymentIntentId: 'stripePaymentIntentId',
+    description: 'description',
+    invoiceUrl: 'invoiceUrl'
+  };
+
+  export type BillingHistoryOrderByRelevanceFieldEnum = (typeof BillingHistoryOrderByRelevanceFieldEnum)[keyof typeof BillingHistoryOrderByRelevanceFieldEnum]
+
+
+  export const UsageRecordOrderByRelevanceFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    subscriptionId: 'subscriptionId',
+    sessionId: 'sessionId',
+    deviceType: 'deviceType',
+    ipAddress: 'ipAddress'
+  };
+
+  export type UsageRecordOrderByRelevanceFieldEnum = (typeof UsageRecordOrderByRelevanceFieldEnum)[keyof typeof UsageRecordOrderByRelevanceFieldEnum]
 
 
   /**
@@ -36896,6 +37333,7 @@ export namespace Prisma {
     notifications?: UserNotificationOrderByRelationAggregateInput
     companyReviews?: CompanyReviewOrderByRelationAggregateInput
     applicationQueue?: ApplicationQueueOrderByRelationAggregateInput
+    _relevance?: UserOrderByRelevanceInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -37088,6 +37526,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: UserProfileOrderByRelevanceInput
   }
 
   export type UserProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -37300,6 +37739,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: UserPreferencesOrderByRelevanceInput
   }
 
   export type UserPreferencesWhereUniqueInput = Prisma.AtLeast<{
@@ -37446,6 +37886,7 @@ export namespace Prisma {
     id_token?: SortOrderInput | SortOrder
     session_state?: SortOrderInput | SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: AccountOrderByRelevanceInput
   }
 
   export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -37523,6 +37964,7 @@ export namespace Prisma {
     userId?: SortOrder
     expires?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: SessionOrderByRelevanceInput
   }
 
   export type SessionWhereUniqueInput = Prisma.AtLeast<{
@@ -37569,6 +38011,7 @@ export namespace Prisma {
     identifier?: SortOrder
     token?: SortOrder
     expires?: SortOrder
+    _relevance?: VerificationTokenOrderByRelevanceInput
   }
 
   export type VerificationTokenWhereUniqueInput = Prisma.AtLeast<{
@@ -37646,6 +38089,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     jobPosting?: JobPostingOrderByWithRelationInput
+    _relevance?: UserJobSwipeOrderByRelevanceInput
   }
 
   export type UserJobSwipeWhereUniqueInput = Prisma.AtLeast<{
@@ -37794,6 +38238,7 @@ export namespace Prisma {
     jobPosting?: JobPostingOrderByWithRelationInput
     application?: JobApplicationOrderByWithRelationInput
     automationLogs?: AutomationLogOrderByRelationAggregateInput
+    _relevance?: ApplicationQueueOrderByRelevanceInput
   }
 
   export type ApplicationQueueWhereUniqueInput = Prisma.AtLeast<{
@@ -37942,6 +38387,7 @@ export namespace Prisma {
     pageUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     queue?: ApplicationQueueOrderByWithRelationInput
+    _relevance?: AutomationLogOrderByRelevanceInput
   }
 
   export type AutomationLogWhereUniqueInput = Prisma.AtLeast<{
@@ -38066,6 +38512,7 @@ export namespace Prisma {
     tags?: SortOrder
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: AuditLogOrderByRelevanceInput
   }
 
   export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
@@ -38208,6 +38655,7 @@ export namespace Prisma {
     processingTime?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: AnalyticsEventOrderByRelevanceInput
   }
 
   export type AnalyticsEventWhereUniqueInput = Prisma.AtLeast<{
@@ -38348,6 +38796,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
+    _relevance?: UserNotificationOrderByRelevanceInput
   }
 
   export type UserNotificationWhereUniqueInput = Prisma.AtLeast<{
@@ -38465,6 +38914,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     updatedBy?: SortOrderInput | SortOrder
+    _relevance?: SystemSettingOrderByRelevanceInput
   }
 
   export type SystemSettingWhereUniqueInput = Prisma.AtLeast<{
@@ -38561,6 +39011,7 @@ export namespace Prisma {
     tags?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    _relevance?: NotificationTemplateOrderByRelevanceInput
   }
 
   export type NotificationTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -38705,6 +39156,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     jobPostings?: JobPostingOrderByRelationAggregateInput
     companyReviews?: CompanyReviewOrderByRelationAggregateInput
+    _relevance?: CompanyOrderByRelevanceInput
   }
 
   export type CompanyWhereUniqueInput = Prisma.AtLeast<{
@@ -38886,6 +39338,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     company?: CompanyOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
+    _relevance?: CompanyReviewOrderByRelevanceInput
   }
 
   export type CompanyReviewWhereUniqueInput = Prisma.AtLeast<{
@@ -39095,6 +39548,7 @@ export namespace Prisma {
     swipes?: UserJobSwipeOrderByRelationAggregateInput
     queueItems?: ApplicationQueueOrderByRelationAggregateInput
     enhancements?: ResumeEnhancementOrderByRelationAggregateInput
+    _relevance?: JobPostingOrderByRelevanceInput
   }
 
   export type JobPostingWhereUniqueInput = Prisma.AtLeast<{
@@ -39336,6 +39790,7 @@ export namespace Prisma {
     createdBy?: SortOrderInput | SortOrder
     resumes?: ResumeOrderByRelationAggregateInput
     enhancements?: ResumeEnhancementOrderByRelationAggregateInput
+    _relevance?: ResumeTemplateOrderByRelevanceInput
   }
 
   export type ResumeTemplateWhereUniqueInput = Prisma.AtLeast<{
@@ -39511,6 +39966,7 @@ export namespace Prisma {
     template?: ResumeTemplateOrderByWithRelationInput
     applications?: JobApplicationOrderByRelationAggregateInput
     enhancements?: ResumeEnhancementOrderByRelationAggregateInput
+    _relevance?: ResumeOrderByRelevanceInput
   }
 
   export type ResumeWhereUniqueInput = Prisma.AtLeast<{
@@ -39673,6 +40129,7 @@ export namespace Prisma {
     resume?: ResumeOrderByWithRelationInput
     template?: ResumeTemplateOrderByWithRelationInput
     jobPosting?: JobPostingOrderByWithRelationInput
+    _relevance?: ResumeEnhancementOrderByRelevanceInput
   }
 
   export type ResumeEnhancementWhereUniqueInput = Prisma.AtLeast<{
@@ -39843,6 +40300,7 @@ export namespace Prisma {
     resume?: ResumeOrderByWithRelationInput
     interactions?: ApplicationInteractionOrderByRelationAggregateInput
     queueItems?: ApplicationQueueOrderByRelationAggregateInput
+    _relevance?: JobApplicationOrderByRelevanceInput
   }
 
   export type JobApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -40047,6 +40505,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     application?: JobApplicationOrderByWithRelationInput
+    _relevance?: ApplicationInteractionOrderByRelevanceInput
   }
 
   export type ApplicationInteractionWhereUniqueInput = Prisma.AtLeast<{
@@ -40191,6 +40650,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
     jobPosting?: JobPostingOrderByWithRelationInput
+    _relevance?: SavedJobOrderByRelevanceInput
   }
 
   export type SavedJobWhereUniqueInput = Prisma.AtLeast<{
@@ -40320,6 +40780,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     usageRecords?: UsageRecordOrderByRelationAggregateInput
     billingHistory?: BillingHistoryOrderByRelationAggregateInput
+    _relevance?: SubscriptionOrderByRelevanceInput
   }
 
   export type SubscriptionWhereUniqueInput = Prisma.AtLeast<{
@@ -40463,6 +40924,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     subscription?: SubscriptionOrderByWithRelationInput
+    _relevance?: BillingHistoryOrderByRelevanceInput
   }
 
   export type BillingHistoryWhereUniqueInput = Prisma.AtLeast<{
@@ -40563,6 +41025,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     user?: UserOrderByWithRelationInput
     subscription?: SubscriptionOrderByWithRelationInput
+    _relevance?: UsageRecordOrderByRelevanceInput
   }
 
   export type UsageRecordWhereUniqueInput = Prisma.AtLeast<{
@@ -45299,6 +45762,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     mode?: QueryMode
     not?: NestedStringFilter<$PrismaModel> | string
   }
@@ -45314,6 +45778,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
@@ -45510,6 +45975,12 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type UserOrderByRelevanceInput = {
+    fields: UserOrderByRelevanceFieldEnum | UserOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
@@ -45604,6 +46075,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     mode?: QueryMode
     not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
     _count?: NestedIntFilter<$PrismaModel>
@@ -45622,6 +46094,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     mode?: QueryMode
     not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
@@ -45757,6 +46230,12 @@ export namespace Prisma {
   export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
+  }
+
+  export type UserProfileOrderByRelevanceInput = {
+    fields: UserProfileOrderByRelevanceFieldEnum | UserProfileOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type UserProfileCountOrderByAggregateInput = {
@@ -45956,6 +46435,12 @@ export namespace Prisma {
     not?: NestedEnumRemotePreferenceFilter<$PrismaModel> | $Enums.RemotePreference
   }
 
+  export type UserPreferencesOrderByRelevanceInput = {
+    fields: UserPreferencesOrderByRelevanceFieldEnum | UserPreferencesOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type UserPreferencesCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -46065,6 +46550,12 @@ export namespace Prisma {
     _max?: NestedEnumRemotePreferenceFilter<$PrismaModel>
   }
 
+  export type AccountOrderByRelevanceInput = {
+    fields: AccountOrderByRelevanceFieldEnum | AccountOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type AccountProviderProviderAccountIdCompoundUniqueInput = {
     provider: string
     providerAccountId: string
@@ -46123,6 +46614,12 @@ export namespace Prisma {
     expires_at?: SortOrder
   }
 
+  export type SessionOrderByRelevanceInput = {
+    fields: SessionOrderByRelevanceFieldEnum | SessionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type SessionCountOrderByAggregateInput = {
     id?: SortOrder
     sessionToken?: SortOrder
@@ -46142,6 +46639,12 @@ export namespace Prisma {
     sessionToken?: SortOrder
     userId?: SortOrder
     expires?: SortOrder
+  }
+
+  export type VerificationTokenOrderByRelevanceInput = {
+    fields: VerificationTokenOrderByRelevanceFieldEnum | VerificationTokenOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type VerificationTokenIdentifierTokenCompoundUniqueInput = {
@@ -46188,6 +46691,12 @@ export namespace Prisma {
   export type JobPostingRelationFilter = {
     is?: JobPostingWhereInput
     isNot?: JobPostingWhereInput
+  }
+
+  export type UserJobSwipeOrderByRelevanceInput = {
+    fields: UserJobSwipeOrderByRelevanceFieldEnum | UserJobSwipeOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type UserJobSwipeUserIdJobPostingIdCompoundUniqueInput = {
@@ -46325,6 +46834,12 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type ApplicationQueueOrderByRelevanceInput = {
+    fields: ApplicationQueueOrderByRelevanceFieldEnum | ApplicationQueueOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type ApplicationQueueCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -46451,6 +46966,12 @@ export namespace Prisma {
     isNot?: ApplicationQueueWhereInput
   }
 
+  export type AutomationLogOrderByRelevanceInput = {
+    fields: AutomationLogOrderByRelevanceFieldEnum | AutomationLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type AutomationLogCountOrderByAggregateInput = {
     id?: SortOrder
     queueId?: SortOrder
@@ -46541,6 +47062,12 @@ export namespace Prisma {
   export type UserNullableRelationFilter = {
     is?: UserWhereInput | null
     isNot?: UserWhereInput | null
+  }
+
+  export type AuditLogOrderByRelevanceInput = {
+    fields: AuditLogOrderByRelevanceFieldEnum | AuditLogOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type AuditLogCountOrderByAggregateInput = {
@@ -46645,6 +47172,12 @@ export namespace Prisma {
     gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type AnalyticsEventOrderByRelevanceInput = {
+    fields: AnalyticsEventOrderByRelevanceFieldEnum | AnalyticsEventOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type AnalyticsEventCountOrderByAggregateInput = {
@@ -46772,6 +47305,12 @@ export namespace Prisma {
     not?: NestedEnumNotificationStatusFilter<$PrismaModel> | $Enums.NotificationStatus
   }
 
+  export type UserNotificationOrderByRelevanceInput = {
+    fields: UserNotificationOrderByRelevanceFieldEnum | UserNotificationOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type UserNotificationCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -46889,6 +47428,12 @@ export namespace Prisma {
     not?: NestedEnumSettingTypeFilter<$PrismaModel> | $Enums.SettingType
   }
 
+  export type SystemSettingOrderByRelevanceInput = {
+    fields: SystemSettingOrderByRelevanceFieldEnum | SystemSettingOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type SystemSettingCountOrderByAggregateInput = {
     id?: SortOrder
     key?: SortOrder
@@ -46945,6 +47490,12 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSettingTypeFilter<$PrismaModel>
     _max?: NestedEnumSettingTypeFilter<$PrismaModel>
+  }
+
+  export type NotificationTemplateOrderByRelevanceInput = {
+    fields: NotificationTemplateOrderByRelevanceFieldEnum | NotificationTemplateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type NotificationTemplateCountOrderByAggregateInput = {
@@ -47017,6 +47568,12 @@ export namespace Prisma {
 
   export type JobPostingOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type CompanyOrderByRelevanceInput = {
+    fields: CompanyOrderByRelevanceFieldEnum | CompanyOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type CompanyCountOrderByAggregateInput = {
@@ -47171,6 +47728,12 @@ export namespace Prisma {
   export type CompanyRelationFilter = {
     is?: CompanyWhereInput
     isNot?: CompanyWhereInput
+  }
+
+  export type CompanyReviewOrderByRelevanceInput = {
+    fields: CompanyReviewOrderByRelevanceFieldEnum | CompanyReviewOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type CompanyReviewCountOrderByAggregateInput = {
@@ -47353,6 +47916,12 @@ export namespace Prisma {
 
   export type ResumeEnhancementOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type JobPostingOrderByRelevanceInput = {
+    fields: JobPostingOrderByRelevanceFieldEnum | JobPostingOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type JobPostingCountOrderByAggregateInput = {
@@ -47625,6 +48194,12 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
+  export type ResumeTemplateOrderByRelevanceInput = {
+    fields: ResumeTemplateOrderByRelevanceFieldEnum | ResumeTemplateOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type ResumeTemplateCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -47761,6 +48336,12 @@ export namespace Prisma {
   export type ResumeTemplateNullableRelationFilter = {
     is?: ResumeTemplateWhereInput | null
     isNot?: ResumeTemplateWhereInput | null
+  }
+
+  export type ResumeOrderByRelevanceInput = {
+    fields: ResumeOrderByRelevanceFieldEnum | ResumeOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type ResumeCountOrderByAggregateInput = {
@@ -47902,6 +48483,12 @@ export namespace Prisma {
     isNot?: JobPostingWhereInput | null
   }
 
+  export type ResumeEnhancementOrderByRelevanceInput = {
+    fields: ResumeEnhancementOrderByRelevanceFieldEnum | ResumeEnhancementOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type ResumeEnhancementCountOrderByAggregateInput = {
     id?: SortOrder
     resumeId?: SortOrder
@@ -48022,6 +48609,12 @@ export namespace Prisma {
 
   export type ApplicationInteractionOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type JobApplicationOrderByRelevanceInput = {
+    fields: JobApplicationOrderByRelevanceFieldEnum | JobApplicationOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type JobApplicationUserIdJobPostingIdCompoundUniqueInput = {
@@ -48216,6 +48809,12 @@ export namespace Prisma {
     isNot?: JobApplicationWhereInput
   }
 
+  export type ApplicationInteractionOrderByRelevanceInput = {
+    fields: ApplicationInteractionOrderByRelevanceFieldEnum | ApplicationInteractionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type ApplicationInteractionCountOrderByAggregateInput = {
     id?: SortOrder
     applicationId?: SortOrder
@@ -48340,6 +48939,12 @@ export namespace Prisma {
     not?: NestedEnumSavedJobPriorityFilter<$PrismaModel> | $Enums.SavedJobPriority
   }
 
+  export type SavedJobOrderByRelevanceInput = {
+    fields: SavedJobOrderByRelevanceFieldEnum | SavedJobOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type SavedJobUserIdJobPostingIdCompoundUniqueInput = {
     userId: string
     jobPostingId: string
@@ -48423,6 +49028,12 @@ export namespace Prisma {
 
   export type BillingHistoryOrderByRelationAggregateInput = {
     _count?: SortOrder
+  }
+
+  export type SubscriptionOrderByRelevanceInput = {
+    fields: SubscriptionOrderByRelevanceFieldEnum | SubscriptionOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type SubscriptionCountOrderByAggregateInput = {
@@ -48572,6 +49183,12 @@ export namespace Prisma {
     isNot?: SubscriptionWhereInput
   }
 
+  export type BillingHistoryOrderByRelevanceInput = {
+    fields: BillingHistoryOrderByRelevanceFieldEnum | BillingHistoryOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
   export type BillingHistoryCountOrderByAggregateInput = {
     id?: SortOrder
     subscriptionId?: SortOrder
@@ -48660,6 +49277,12 @@ export namespace Prisma {
     in?: $Enums.UsageFeature[] | ListEnumUsageFeatureFieldRefInput<$PrismaModel>
     notIn?: $Enums.UsageFeature[] | ListEnumUsageFeatureFieldRefInput<$PrismaModel>
     not?: NestedEnumUsageFeatureFilter<$PrismaModel> | $Enums.UsageFeature
+  }
+
+  export type UsageRecordOrderByRelevanceInput = {
+    fields: UsageRecordOrderByRelevanceFieldEnum | UsageRecordOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
   }
 
   export type UsageRecordUserIdFeatureDateCompoundUniqueInput = {
@@ -50883,6 +51506,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
@@ -50897,6 +51521,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
@@ -50963,6 +51588,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
@@ -50980,6 +51606,7 @@ export namespace Prisma {
     contains?: string | StringFieldRefInput<$PrismaModel>
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
+    search?: string
     not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>

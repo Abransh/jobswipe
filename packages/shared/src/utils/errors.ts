@@ -22,7 +22,7 @@ export abstract class BaseError extends Error {
   constructor(
     message: string,
     public readonly details?: Record<string, any>,
-    public readonly cause?: Error
+    public override readonly cause?: Error
   ) {
     super(message);
     

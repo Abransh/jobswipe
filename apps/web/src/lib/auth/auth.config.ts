@@ -10,7 +10,7 @@ import Google from 'next-auth/providers/google';
 import GitHub from 'next-auth/providers/github';
 import LinkedIn from 'next-auth/providers/linkedin';
 import Credentials from 'next-auth/providers/credentials';
-import { PrismaAdapter } from '@auth/prisma-adapter';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { db } from '@jobswipe/database';
 import { 
   LoginRequestSchema, 

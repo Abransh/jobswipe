@@ -804,10 +804,369 @@ exports.Prisma.NullsOrder = {
   last: 'last'
 };
 
+exports.Prisma.UserOrderByRelevanceFieldEnum = {
+  id: 'id',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  name: 'name',
+  avatar: 'avatar',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  timezone: 'timezone',
+  locale: 'locale'
+};
+
 exports.Prisma.JsonNullValueFilter = {
   DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
+};
+
+exports.Prisma.UserProfileOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  displayName: 'displayName',
+  phone: 'phone',
+  gender: 'gender',
+  address: 'address',
+  city: 'city',
+  state: 'state',
+  country: 'country',
+  postalCode: 'postalCode',
+  location: 'location',
+  website: 'website',
+  linkedin: 'linkedin',
+  github: 'github',
+  portfolio: 'portfolio',
+  blog: 'blog',
+  bio: 'bio',
+  headline: 'headline',
+  summary: 'summary',
+  currentTitle: 'currentTitle',
+  currentCompany: 'currentCompany',
+  experienceLevel: 'experienceLevel',
+  skills: 'skills',
+  desiredJobTypes: 'desiredJobTypes',
+  preferredCurrency: 'preferredCurrency'
+};
+
+exports.Prisma.UserPreferencesOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobTypes: 'jobTypes',
+  experienceLevels: 'experienceLevels',
+  industries: 'industries',
+  companyTypes: 'companyTypes',
+  autoApplyJobTypes: 'autoApplyJobTypes',
+  theme: 'theme',
+  language: 'language',
+  timezone: 'timezone',
+  dateFormat: 'dateFormat'
+};
+
+exports.Prisma.AccountOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  refresh_token: 'refresh_token',
+  access_token: 'access_token',
+  token_type: 'token_type',
+  scope: 'scope',
+  id_token: 'id_token',
+  session_state: 'session_state'
+};
+
+exports.Prisma.SessionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  sessionToken: 'sessionToken',
+  userId: 'userId'
+};
+
+exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
+  identifier: 'identifier',
+  token: 'token'
+};
+
+exports.Prisma.UserJobSwipeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobPostingId: 'jobPostingId',
+  deviceType: 'deviceType',
+  sessionId: 'sessionId',
+  userFeedback: 'userFeedback',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  location: 'location'
+};
+
+exports.Prisma.ApplicationQueueOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobPostingId: 'jobPostingId',
+  applicationId: 'applicationId',
+  resumeId: 'resumeId',
+  coverLetter: 'coverLetter',
+  errorMessage: 'errorMessage',
+  errorType: 'errorType',
+  desktopSessionId: 'desktopSessionId'
+};
+
+exports.Prisma.AutomationLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  queueId: 'queueId',
+  message: 'message',
+  step: 'step',
+  elementSelector: 'elementSelector',
+  action: 'action',
+  errorType: 'errorType',
+  stackTrace: 'stackTrace',
+  screenshot: 'screenshot',
+  pageUrl: 'pageUrl'
+};
+
+exports.Prisma.AuditLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  actorId: 'actorId',
+  action: 'action',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  method: 'method',
+  endpoint: 'endpoint',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  sessionId: 'sessionId',
+  riskFactors: 'riskFactors',
+  dataCategory: 'dataCategory',
+  legalBasis: 'legalBasis',
+  tags: 'tags'
+};
+
+exports.Prisma.AnalyticsEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  eventType: 'eventType',
+  eventCategory: 'eventCategory',
+  eventName: 'eventName',
+  sessionId: 'sessionId',
+  deviceType: 'deviceType',
+  platform: 'platform',
+  ipAddress: 'ipAddress',
+  country: 'country',
+  region: 'region',
+  city: 'city',
+  userAgent: 'userAgent',
+  referrer: 'referrer',
+  pageUrl: 'pageUrl',
+  currency: 'currency'
+};
+
+exports.Prisma.UserNotificationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  message: 'message',
+  actionUrl: 'actionUrl',
+  errorMessage: 'errorMessage',
+  templateId: 'templateId'
+};
+
+exports.Prisma.SystemSettingOrderByRelevanceFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  category: 'category',
+  description: 'description',
+  validationRule: 'validationRule',
+  defaultValue: 'defaultValue',
+  updatedBy: 'updatedBy'
+};
+
+exports.Prisma.NotificationTemplateOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  subject: 'subject',
+  title: 'title',
+  body: 'body',
+  htmlBody: 'htmlBody',
+  category: 'category',
+  tags: 'tags'
+};
+
+exports.Prisma.CompanyOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  website: 'website',
+  logo: 'logo',
+  industry: 'industry',
+  headquarters: 'headquarters',
+  country: 'country',
+  revenue: 'revenue',
+  fundingStage: 'fundingStage',
+  linkedinUrl: 'linkedinUrl',
+  glassdoorUrl: 'glassdoorUrl',
+  crunchbaseUrl: 'crunchbaseUrl',
+  twitterUrl: 'twitterUrl',
+  facebookUrl: 'facebookUrl',
+  cultureValues: 'cultureValues',
+  verificationSource: 'verificationSource',
+  keywords: 'keywords',
+  tags: 'tags',
+  blacklistReason: 'blacklistReason'
+};
+
+exports.Prisma.CompanyReviewOrderByRelevanceFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  userId: 'userId',
+  title: 'title',
+  content: 'content',
+  jobTitle: 'jobTitle',
+  department: 'department',
+  workDuration: 'workDuration'
+};
+
+exports.Prisma.JobPostingOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  requirements: 'requirements',
+  benefits: 'benefits',
+  department: 'department',
+  location: 'location',
+  timeZone: 'timeZone',
+  city: 'city',
+  state: 'state',
+  country: 'country',
+  currency: 'currency',
+  equity: 'equity',
+  bonus: 'bonus',
+  skills: 'skills',
+  education: 'education',
+  languages: 'languages',
+  companyId: 'companyId',
+  externalId: 'externalId',
+  sourceUrl: 'sourceUrl',
+  applyUrl: 'applyUrl',
+  keywords: 'keywords',
+  tags: 'tags'
+};
+
+exports.Prisma.ResumeTemplateOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  preview: 'preview',
+  industry: 'industry',
+  experience: 'experience',
+  jobTypes: 'jobTypes',
+  tags: 'tags',
+  keywords: 'keywords',
+  createdBy: 'createdBy'
+};
+
+exports.Prisma.ResumeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  templateId: 'templateId',
+  name: 'name',
+  title: 'title',
+  pdfUrl: 'pdfUrl',
+  docxUrl: 'docxUrl',
+  htmlUrl: 'htmlUrl',
+  parentResumeId: 'parentResumeId',
+  shareToken: 'shareToken'
+};
+
+exports.Prisma.ResumeEnhancementOrderByRelevanceFieldEnum = {
+  id: 'id',
+  resumeId: 'resumeId',
+  templateId: 'templateId',
+  jobPostingId: 'jobPostingId',
+  description: 'description',
+  aiModel: 'aiModel',
+  prompt: 'prompt'
+};
+
+exports.Prisma.JobApplicationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobPostingId: 'jobPostingId',
+  resumeId: 'resumeId',
+  coverLetter: 'coverLetter',
+  notes: 'notes',
+  resumeVersion: 'resumeVersion',
+  externalId: 'externalId',
+  atsUrl: 'atsUrl',
+  confirmationNumber: 'confirmationNumber',
+  contactMethod: 'contactMethod',
+  recruiterName: 'recruiterName',
+  recruiterEmail: 'recruiterEmail',
+  recruiterPhone: 'recruiterPhone',
+  appliedVia: 'appliedVia'
+};
+
+exports.Prisma.ApplicationInteractionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  applicationId: 'applicationId',
+  title: 'title',
+  description: 'description',
+  contactPerson: 'contactPerson',
+  contactEmail: 'contactEmail',
+  contactPhone: 'contactPhone',
+  contactRole: 'contactRole',
+  medium: 'medium',
+  location: 'location',
+  agenda: 'agenda',
+  notes: 'notes',
+  feedback: 'feedback',
+  nextSteps: 'nextSteps'
+};
+
+exports.Prisma.SavedJobOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  jobPostingId: 'jobPostingId',
+  folder: 'folder',
+  notes: 'notes',
+  tags: 'tags',
+  savedReason: 'savedReason'
+};
+
+exports.Prisma.SubscriptionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  stripePriceId: 'stripePriceId',
+  stripeProductId: 'stripeProductId',
+  cancelReason: 'cancelReason',
+  promoCode: 'promoCode'
+};
+
+exports.Prisma.BillingHistoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  currency: 'currency',
+  stripeInvoiceId: 'stripeInvoiceId',
+  stripePaymentIntentId: 'stripePaymentIntentId',
+  description: 'description',
+  invoiceUrl: 'invoiceUrl'
+};
+
+exports.Prisma.UsageRecordOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  subscriptionId: 'subscriptionId',
+  sessionId: 'sessionId',
+  deviceType: 'deviceType',
+  ipAddress: 'ipAddress'
 };
 exports.UserRole = exports.$Enums.UserRole = {
   USER: 'USER',
