@@ -51,6 +51,14 @@ export { RedisSessionService } from './services/redis-session-stub.service';
 export { TokenExchangeService } from './services/token-exchange.service';
 export * from './services/factory';
 
+// Export specific service types and functions for API usage
+export type { SecurityMiddlewareService } from './services/factory';
+export { 
+  createRedisSessionService, 
+  createSecurityMiddlewareService,
+  createJwtTokenService
+} from './services/factory';
+
 // Security utilities
 export * from './utils/security';
 

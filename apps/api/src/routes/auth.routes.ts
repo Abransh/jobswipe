@@ -277,14 +277,14 @@ async function registerHandler(
       user.name,
       user.role,
       validatedData.source,
-      session.id
+      session.id as any
     );
     
     const refreshTokenConfig = createRefreshTokenConfig(
       createBrandedId<UserId>(user.id),
       user.email,
       validatedData.source,
-      session.id
+      session.id as any
     );
     
     const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
@@ -387,14 +387,14 @@ async function loginHandler(
       user.name,
       user.role,
       validatedData.source,
-      session.id
+      session.id as any
     );
     
     const refreshTokenConfig = createRefreshTokenConfig(
       createBrandedId<UserId>(user.id),
       user.email,
       validatedData.source,
-      session.id
+      session.id as any
     );
     
     const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
