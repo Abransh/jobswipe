@@ -79,7 +79,7 @@
 
   IMPLEMENT THIS SYSTEM WITH ENTERPRISE-GRADE SECURITY AND PERFORMANCE FROM DAY ONE. THIS AUTHENTICATION FOUNDATION WILL SUPPORT ALL 
   FUTURE FEATURES AND MONETIZATION STRATEGIES., you will follow @rules.md and @CLAUDE.md and ULTRATHINK AND PLAN AND EXECUTE, take you
-   time, understand and reply like a CTO who knows all the tech and is an experienced coder for 20+ years. UNDERSTAND CODEBASE AND 
+   time, understand and reply like a CTO who knows all the tech and is an experienced coder for 30+ years. UNDERSTAND CODEBASE AND 
   build the best system. after you are done make a documentation of what do you did, so that even if someone who doesnt know the code 
   can understand what is going on. MAKE ENTERPRISE LEVEL CODE WITH all the  considerations
   ⎿  Read rules.md (300 lines)
