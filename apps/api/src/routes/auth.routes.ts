@@ -33,11 +33,6 @@ import {
 } from '@jobswipe/shared';
 
 import { 
-  JwtTokenService,
-  RedisSessionService,
-  TokenExchangeService,
-  defaultJwtTokenService,
-  defaultRedisSessionService,
   createAccessTokenConfig,
   createRefreshTokenConfig,
   createDesktopTokenConfig,
@@ -273,7 +268,7 @@ async function registerHandler(
       },
     };
     
-    const session = await defaultRedisSessionService.createSession(sessionOptions);
+    const session = await request.server.sessionService.createSession(sessionOptions);
     
     // Generate tokens
     const accessTokenConfig = createAccessTokenConfig(
@@ -292,8 +287,8 @@ async function registerHandler(
       session.id
     );
     
-    const accessToken = await defaultJwtTokenService.createToken(accessTokenConfig);
-    const refreshToken = await defaultJwtTokenService.createToken(refreshTokenConfig);
+    const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
+    const refreshToken = await request.server.jwtService.createToken(refreshTokenConfig);
     
     // Format user response
     const userResponse: AuthenticatedUser = {
@@ -383,7 +378,7 @@ async function loginHandler(
       },
     };
     
-    const session = await defaultRedisSessionService.createSession(sessionOptions);
+    const session = await request.server.sessionService.createSession(sessionOptions);
     
     // Generate tokens
     const accessTokenConfig = createAccessTokenConfig(
@@ -402,8 +397,8 @@ async function loginHandler(
       session.id
     );
     
-    const accessToken = await defaultJwtTokenService.createToken(accessTokenConfig);
-    const refreshToken = await defaultJwtTokenService.createToken(refreshTokenConfig);
+    const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
+    const refreshToken = await request.server.jwtService.createToken(refreshTokenConfig);
     
     // Update user last login timestamp
     await updateLastLogin(user.id);
@@ -456,7 +451,7 @@ async function refreshTokenHandler(
     const { refreshToken } = request.body;
     
     // Verify refresh token
-    const tokenResult = await defaultJwtTokenService.verifyToken(refreshToken);
+    const tokenResult = await request.server.jwtService.verifyToken(refreshToken);
     if (!tokenResult.valid || !tokenResult.payload) {
       return reply.status(401).send({
         success: false,
@@ -485,7 +480,7 @@ async function refreshTokenHandler(
       tokenResult.payload.sessionId
     );
     
-    const newAccessToken = await defaultJwtTokenService.createToken(accessTokenConfig);
+    const newAccessToken = await request.server.jwtService.createToken(accessTokenConfig);
     
     return reply.status(200).send({
       success: true,
@@ -615,7 +610,7 @@ async function logoutHandler(
 ): Promise<{ success: boolean; message: string }> {
   try {
     if (request.sessionId) {
-      await defaultRedisSessionService.revokeSession(createBrandedId(request.sessionId));
+      await request.server.sessionService.revokeSession(createBrandedId(request.sessionId));
     }
     
     return reply.status(200).send({
@@ -755,7 +750,7 @@ async function authMiddleware(
     }
     
     const token = authHeader.split(' ')[1];
-    const tokenResult = await defaultJwtTokenService.verifyToken(token);
+    const tokenResult = await request.server.jwtService.verifyToken(token);
     
     if (!tokenResult.valid || !tokenResult.payload) {
       return reply.status(401).send({

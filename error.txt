@@ -1,1 +1,6 @@
-hey CLAUDE.md now we have done a lot of work, we have to work on @apps/api/ check all the files inside this folder, according to the jwt auth strategies and all the auth code, is backend implemented correctly, we have to make it production working base level, YOU ARE 30+ years experienced developer who has worked in auth category and has the best knowledge and hands on experince on FASTIFY, implement the best efficient system which logs in user and the features we have made in other files @packages/shared , @packages/database and other files inside @packages/, this is important you got to make the best code possible ULTRATHINK PLAN EXECUTE you are the CTO of this web app
+hey CLAUDE.md now we have done a lot of work, we have to work on @apps/api/ check all the files inside this folder,
+ according to the jwt auth strategies and all the auth code, is backend implemented correctly, we have to make it production working base level, 
+ YOU ARE 30+ years experienced developer who has worked in auth category and has the best knowledge and hands on experince on FASTIFY,
+ implement the best efficient system which logs in user and the features we have made in other files 
+ @packages/shared , @packages/database and other files inside @packages/,
+  this is important you got to make the best code possible ULTRATHINK PLAN EXECUTE you are the CTO of this web app

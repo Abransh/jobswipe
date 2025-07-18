@@ -13,8 +13,13 @@ import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerAuthRoutes } from './routes/auth.routes';
+import tokenExchangeRoutes from './routes/token-exchange.routes';
 import { db } from '@jobswipe/database';
 import securityPlugin from './plugins/security.plugin';
+import servicesPlugin from './plugins/services.plugin';
+import advancedSecurityPlugin from './plugins/advanced-security.plugin';
+import loggingPlugin from './plugins/logging.plugin';
+import monitoringPlugin from './plugins/monitoring.plugin';
 
 // =============================================================================
 // CONFIGURATION
@@ -67,7 +72,19 @@ async function createServer(): Promise<FastifyInstance> {
   // MIDDLEWARE REGISTRATION
   // =============================================================================
 
-  // Register enterprise security plugin first
+  // Register services first (JWT, Redis, Security)
+  await server.register(servicesPlugin);
+
+  // Register enterprise logging plugin
+  await server.register(loggingPlugin);
+
+  // Register monitoring and observability plugin
+  await server.register(monitoringPlugin);
+
+  // Register advanced security plugin
+  await server.register(advancedSecurityPlugin);
+
+  // Register basic security plugin (for backwards compatibility)
   await server.register(securityPlugin);
 
   // Security headers (additional to security plugin)
@@ -289,11 +306,17 @@ async function createServer(): Promise<FastifyInstance> {
   // Security health check
   server.get('/health/security', async (request, reply) => {
     try {
-      const securityStats = server.security.getStats();
+      // Check both security services if available
+      const basicSecurityStats = server.security?.getStats?.() || {};
+      const advancedSecurityStats = server.advancedSecurity?.getHealthStatus?.() || {};
+      
       return reply.code(200).send({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        security: securityStats,
+        security: {
+          basic: basicSecurityStats,
+          advanced: advancedSecurityStats,
+        },
       });
     } catch (error) {
       return reply.code(503).send({
@@ -316,25 +339,39 @@ async function createServer(): Promise<FastifyInstance> {
     await registerAuthRoutes(fastify);
   }, { prefix: `${apiPrefix}/auth` });
 
+  // Token exchange routes
+  await server.register(tokenExchangeRoutes, { prefix: `${apiPrefix}` });
+
   // =============================================================================
   // ERROR HANDLING
   // =============================================================================
 
-  // Global error handler
+  // Global error handler (will be overridden by logging plugin if registered)
   server.setErrorHandler(async (error, request, reply) => {
     const isDev = process.env.NODE_ENV === 'development';
     
-    server.log.error({
-      error: error.message,
-      stack: error.stack,
-      request: {
-        method: request.method,
+    // Use logging service if available
+    if (server.logging && (request as any).logContext) {
+      server.logging.logError(error, (request as any).logContext, {
         url: request.url,
-        headers: request.headers,
+        method: request.method,
+        body: request.body,
         query: request.query,
         params: request.params,
-      },
-    }, 'Unhandled error');
+      });
+    } else {
+      server.log.error({
+        error: error.message,
+        stack: error.stack,
+        request: {
+          method: request.method,
+          url: request.url,
+          headers: request.headers,
+          query: request.query,
+          params: request.params,
+        },
+      }, 'Unhandled error');
+    }
 
     // Validation errors
     if (error.validation) {
@@ -466,6 +503,8 @@ async function start(): Promise<void> {
     server.log.info(`📡 Server listening on http://${config.host}:${config.port}`);
     server.log.info(`🔍 Health check: http://${config.host}:${config.port}/health`);
     server.log.info(`🛡️  Security middleware: http://${config.host}:${config.port}/health/security`);
+    server.log.info(`📊 Monitoring metrics: http://${config.host}:${config.port}/metrics`);
+    server.log.info(`📈 Monitoring health: http://${config.host}:${config.port}/health/monitoring`);
     if (isDevelopment) {
       server.log.info(`📚 API Documentation: http://${config.host}:${config.port}/docs`);
     }
