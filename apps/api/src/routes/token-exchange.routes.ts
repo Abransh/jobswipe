@@ -404,11 +404,18 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
    */
   fastify.post('/token-exchange/initiate', {
     schema: {
-      summary: 'Initiate web-to-desktop token exchange',
-      description: 'Create a secure token exchange session for desktop authentication',
-      tags: ['Token Exchange'],
-      security: [{ BearerAuth: [] }],
-      body: TokenExchangeInitiateSchema,
+      body: {
+        type: 'object',
+        required: ['deviceId', 'deviceName', 'deviceType', 'platform'],
+        properties: {
+          deviceId: { type: 'string', format: 'uuid' },
+          deviceName: { type: 'string', minLength: 1, maxLength: 100 },
+          deviceType: { type: 'string', enum: ['desktop', 'mobile'] },
+          platform: { type: 'string', minLength: 1, maxLength: 50 },
+          osVersion: { type: 'string' },
+          appVersion: { type: 'string' }
+        }
+      },
       response: {
         200: {
           type: 'object',
@@ -490,10 +497,24 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
    */
   fastify.post('/token-exchange/complete', {
     schema: {
-      summary: 'Complete token exchange and issue desktop token',
-      description: 'Exchange the temporary token for a long-lived desktop token',
-      tags: ['Token Exchange'],
-      body: TokenExchangeCompleteSchema,
+      body: {
+        type: 'object',
+        required: ['exchangeToken', 'deviceId', 'deviceName', 'platform'],
+        properties: {
+          exchangeToken: { type: 'string', minLength: 32, maxLength: 256 },
+          deviceId: { type: 'string', format: 'uuid' },
+          deviceName: { type: 'string', minLength: 1, maxLength: 100 },
+          platform: { type: 'string', minLength: 1, maxLength: 50 },
+          systemInfo: {
+            type: 'object',
+            properties: {
+              platform: { type: 'string' },
+              version: { type: 'string' },
+              arch: { type: 'string' }
+            }
+          }
+        }
+      },
       response: {
         200: {
           type: 'object',
