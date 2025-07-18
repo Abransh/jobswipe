@@ -24,6 +24,9 @@ export * from './services/redis-session-stub.service';
 // Password utilities
 export * from './utils/password';
 
+// Security utilities
+export * from './utils/security';
+
 // Re-export specific functions to avoid conflicts
 export { 
   isEmpty as isEmptyString,

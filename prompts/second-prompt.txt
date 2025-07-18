@@ -1,0 +1,111 @@
+
+  Our primary goal is to establish a rock-solid foundation by building the core user authentication flow from end to end.
+  This will serve as the backbone for all future features. We will start with the backend API and database, then build the
+  frontend UI to interact with it, ensuring a clean separation of concerns as per our architecture.
+
+  ---
+
+
+  Project Kickstart: User Authentication End-to-End
+
+  Goal: Implement a complete, secure, and production-ready user registration and login flow. This involves creating the
+  necessary API endpoints, database interactions, and frontend components to allow a user to sign up, sign in, and access a
+  protected page.
+
+  ---
+
+
+  Phase 1: Backend Foundation (API & Database)
+
+  Objective: Create the secure API endpoints for user registration and login.
+
+
+   1. Task: Finalize Database and Shared Utilities.
+       * How:
+           1. Correct the tsconfig.json in @jobswipe/database and @jobswipe/shared to properly include and export the utility
+              functions from the src/utils/ directories.
+           2. Ensure the JwtTokenService and password hashing utilities are fully functional and accessible.
+           3. Implement the RedisSessionService to replace the existing stub, connecting it to the Redis instance managed by our
+              docker-compose.yml.
+       * Why: This ensures our core logic for data access, token generation, and session management is robust and available to
+         the API server before we start building the endpoints.
+
+
+   2. Task: Implement Authentication API Endpoints.
+       * How:
+           1. In the apps/api application, create a new route file for authentication (e.g., src/routes/auth.ts).
+           2. Create a POST /auth/register endpoint. This endpoint will:
+               * Validate the incoming request body (email, password, name) using the Zod schemas from @jobswipe/shared.
+               * Use the createUser utility from @jobswipe/database to hash the password and create a new user in the database.
+               * Return a 201 Created response with the new user object.
+           3. Create a POST /auth/login endpoint. This endpoint will:
+               * Validate the request body (email, password).
+               * Use the authenticateUser utility to verify the credentials against the database.
+               * If successful, use the JwtTokenService to generate a new access token and refresh token.
+               * Use the RedisSessionService to create a new user session.
+               * Return a 200 OK response containing the user object and the generated tokens.
+       * Why: This establishes the core, stateless authentication logic on our server, providing a secure foundation for all
+         client applications.
+
+  ---
+
+  Phase 2: Frontend Implementation (Web Application)
+
+  Objective: Build the user interface for registration and login and connect it to the new API endpoints.
+
+
+   2. Task: Implement Authentication API Endpoints.
+       * How:
+   1. Task: Create a Dedicated API Client Service.
+       * How:
+           1. In the apps/web application, create a new file (e.g., src/lib/api-client.ts).
+           2. This file will contain functions for making fetch requests to our API (e.g., registerUser, loginUser). It will
+              handle setting headers, processing request bodies, and parsing JSON responses.
+           3. It will also manage storing and retrieving JWT tokens from secure, HttpOnly cookies.
+       * Why: This abstracts all data-fetching logic out of our UI components, keeping them clean and focused on presentation.
+         It also centralizes token management.
+
+
+   2. Task: Refactor Auth Forms.
+       * How:
+           1. Modify the SignUpForm and SignInForm components in apps/web/src/components/auth.
+           2. Remove any direct fetch calls and replace them with calls to our new API client service.
+           3. On successful login, use a React Context provider (AuthContext) to store the user's authentication state globally
+              within the application.
+       * Why: This connects our frontend to our backend, creating a complete, working authentication flow.
+
+  ---
+
+  Phase 3: Securing Routes & Verifying the Flow
+
+  Objective: Ensure the authentication system correctly protects resources on both the frontend and backend.
+
+
+   1. Task: Create a Protected API Route.
+       * How:
+           1. In the apps/api application, create a new GET /users/me endpoint.
+           2. Add middleware to this route that validates the Authorization header for a valid JWT access token.
+           3. If the token is valid, the endpoint will decode it, retrieve the user from the database, and return their profile
+              information. If not, it will return a 401 Unauthorized error.
+       * Why: This tests our token validation and ensures our API can protect user-specific data.
+
+
+   2. Task: Create a Protected Frontend Page.
+       * How:
+           1. Create a new page at apps/web/src/app/dashboard/page.tsx.
+           2. This page will be a client component that uses the AuthContext to check if a user is logged in.
+           3. If the user is not authenticated, it will redirect them to the /login page.
+           4. If the user is authenticated, it will use our API client service to make a request to the new GET /users/me
+              endpoint and display the returned user information.
+       * Why: This completes the end-to-end flow, demonstrating that a logged-in user can access protected client-side routes
+         and fetch protected data from the server.
+
+  ---
+
+  Final Outcome:
+
+
+  Upon completion of these three phases, we will have a fully functional and secure user authentication system. A new user
+  can visit the website, create an account, log in, and view a protected dashboard page that displays their own data, all
+  while being seamlessly managed by our robust backend. This provides the perfect launchpad for building out the rest of the
+  JobSwipe platform's features.

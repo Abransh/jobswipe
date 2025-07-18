@@ -7,7 +7,7 @@ we are building an software jor job applying, now details listen to me you are m
 │   as better as we can do, with best practices as we can do                                                                              │
 │                                                                                                                                         │
 │                                                                                                                                         │
-│                                                                                                                                         │
+│                                                                                                                                       │
 │   now you have to build a robust, highly expandable platform for that and work on logic and code,                                       │
 │   you will ask me everytime there is an important decision to take. \                                                                   │
 │   \                                                                                                                                     │

@@ -42,9 +42,7 @@
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/services/redis-session.service.ts",
-    "src/services/security-middleware.service.ts",
-    "src/services/token-exchange.service.ts",
+
     "src/utils/security.ts"
   ]
 }

@@ -122,12 +122,13 @@ export function encryptData(data: string, key: string): {
 export function decryptData(
   encrypted: string,
   key: string,
-  iv: string,
+ 
   tag: string
 ): string {
   const decipher = crypto.createDecipher('aes-256-gcm', key);
   decipher.setAAD(Buffer.from('JobSwipe'));
   decipher.setAuthTag(Buffer.from(tag, 'hex'));
+  
   
   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
@@ -180,6 +181,39 @@ export function sanitizeUrl(url: string): string {
   } catch {
     return '';
   }
+}
+
+// =============================================================================
+// NETWORK UTILITIES
+// =============================================================================
+
+/**
+ * Extract IP address from request headers
+ */
+export function extractIpFromHeaders(headers: Record<string, string | string[] | undefined>): string {
+  // Check common proxy headers
+  const forwardedFor = headers['x-forwarded-for'];
+  if (forwardedFor) {
+    const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+    return ips.split(',')[0].trim();
+  }
+  
+  const realIp = headers['x-real-ip'];
+  if (realIp && !Array.isArray(realIp)) {
+    return realIp;
+  }
+  
+  const cfConnectingIp = headers['cf-connecting-ip'];
+  if (cfConnectingIp && !Array.isArray(cfConnectingIp)) {
+    return cfConnectingIp;
+  }
+  
+  const xClientIp = headers['x-client-ip'];
+  if (xClientIp && !Array.isArray(xClientIp)) {
+    return xClientIp;
+  }
+  
+  return '127.0.0.1'; // Fallback to localhost
 }
 
 // =============================================================================

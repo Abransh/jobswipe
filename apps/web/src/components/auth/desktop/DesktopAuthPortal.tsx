@@ -11,7 +11,7 @@ import {
   CheckCircle, 
   AlertTriangle, 
   Clock,
-  Refresh,
+  RefreshCw,
   Copy,
   ExternalLink,
   Download,
@@ -478,7 +478,7 @@ export function DesktopAuthPortal() {
           {/* Refresh Button */}
           <div className="text-center">
             <Button variant="outline" onClick={refreshExchange}>
-              <Refresh className="h-4 w-4 mr-2" />
+              <RefreshCw className="h-4 w-4 mr-2" />
               Start Over
             </Button>
           </div>
