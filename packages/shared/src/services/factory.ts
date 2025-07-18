@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Service Factory for creating service instances
  * @description Centralized factory for creating properly configured services
@@ -53,15 +54,7 @@ export function createJwtTokenService(config?: JwtServiceConfig): JwtTokenServic
   );
 }
 
-/**
- * Create Redis Session Service with configuration
- */
-export function createRedisSessionService(
-  redisConfig: RedisConfig,
-  sessionConfig?: SessionConfig
-): RedisSessionService {
-  return new RedisSessionService();
-}
+// This function is now defined below after the SecurityMiddlewareService interface
 
 /**
  * Default JWT Token Service instance
@@ -98,19 +91,28 @@ export interface SecurityMiddlewareService {
   };
 }
 
+// Export session service factory
+export function createRedisSessionService(
+  redisConfig: RedisConfig,
+  sessionConfig?: SessionConfig
+): RedisSessionService {
+  console.log('Creating Redis session service with config:', redisConfig.host);
+  return new RedisSessionService();
+}
+
 /**
  * Create Security Middleware Service
  */
 export function createSecurityMiddlewareService(): SecurityMiddlewareService {
   return {
-    async checkRateLimit(key: string, maxRequests: number, windowMs: number): Promise<boolean> {
+    async checkRateLimit(_key: string, _maxRequests: number, _windowMs: number): Promise<boolean> {
       // Simple in-memory rate limiting for now
       return true;
     },
     async blockIp(ip: string, reason: string): Promise<void> {
       console.log(`IP blocked: ${ip} - ${reason}`);
     },
-    async isIpBlocked(ip: string): Promise<boolean> {
+    async isIpBlocked(_ip: string): Promise<boolean> {
       return false;
     },
     getStats() {

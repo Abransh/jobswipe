@@ -65,3 +65,6 @@ export class RedisSessionService {
 }
 
 export const defaultRedisSessionService = new RedisSessionService();
+
+// Re-export the main RedisSessionService from the full implementation
+export { RedisSessionService as FullRedisSessionService } from './redis-session.service';

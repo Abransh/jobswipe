@@ -58,7 +58,7 @@ async function createServer(): Promise<FastifyInstance> {
   });
 
   // Security headers
-  await server.register(helmet, {
+  await server.register(helmet as any, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -76,7 +76,7 @@ async function createServer(): Promise<FastifyInstance> {
   });
 
   // CORS configuration
-  await server.register(cors, {
+  await server.register(cors as any, {
     origin: config.cors.origin,
     credentials: config.cors.credentials,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -92,7 +92,7 @@ async function createServer(): Promise<FastifyInstance> {
   });
 
   // Rate limiting
-  await server.register(rateLimit, {
+  await server.register(rateLimit as any, {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.timeWindow,
     allowList: ['127.0.0.1'],

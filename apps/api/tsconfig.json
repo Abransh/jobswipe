@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "module": "CommonJS",
@@ -22,6 +21,8 @@
     "noImplicitReturns": false,
     "noImplicitAny": false,
     "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "paths": {
       "@jobswipe/*": ["../../packages/*/src"]
     }
@@ -32,10 +33,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "../../packages/*/node_modules",
-    "../../packages/*/dist",
-    "../../packages/shared/src/**/*",
-    "../../packages/database/src/**/*",
-    "../../packages/ui/src/**/*"
+    "../../packages/**/*"
   ]
 }

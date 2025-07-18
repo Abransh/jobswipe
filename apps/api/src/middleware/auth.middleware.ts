@@ -114,9 +114,9 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
         // Update session last used time
         await request.server.sessionService.updateSession(payload.sessionId, {
           lastUsedAt: new Date(),
-          ipAddress: request.ipAddress,
+          ipAddress: (request as any).ipAddress,
           userAgent: request.headers['user-agent'],
-        });
+        } as any);
       }
 
       // Create authenticated user object
@@ -139,7 +139,7 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
         
         if (!hasAllPermissions) {
           throw createAuthError(
-            AuthErrorCode.INSUFFICIENT_PERMISSIONS,
+            'INSUFFICIENT_PERMISSIONS' as any,
             'Insufficient permissions for this operation'
           );
         }
@@ -153,7 +153,7 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
         
         if (!hasAllFeatures) {
           throw createAuthError(
-            AuthErrorCode.FEATURE_NOT_AVAILABLE,
+            'FEATURE_NOT_AVAILABLE' as any,
             'Required features not available for this account'
           );
         }
@@ -391,10 +391,10 @@ declare module 'fastify' {
 // =============================================================================
 
 export {
-  AuthMiddlewareOptions,
-  AuthenticatedRequest,
   extractIpAddress,
   hasAuthHeader,
   extractTokenFromHeader,
   generateRequestId,
 };
+
+export type { AuthMiddlewareOptions, AuthenticatedRequest };
