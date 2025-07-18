@@ -1,128 +1,134 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth/auth';
 import type { NextRequest } from 'next/server';
+import { 
+  verifyAuthFromRequest, 
+  isProtectedRoute, 
+  isAuthRoute, 
+  isPublicRoute,
+  hasRefreshToken,
+  getClientIP,
+  getUserAgent,
+  type MiddlewareAuthResult 
+} from '@/lib/auth/middleware-auth';
 
 /**
- * Enhanced middleware with robust error handling for OIDC token validation errors
- * Specifically handles Next.js 15 + NextAuth v4 compatibility issues
+ * Edge Runtime compatible middleware using custom JWT authentication
+ * Replaces NextAuth with lightweight JWT verification for better performance
  */
 export default function middleware(req: NextRequest) {
   try {
-    // Use NextAuth middleware with enhanced error handling
-    return auth((authReq: NextRequest & { auth?: any }) => {
-      try {
-        const { nextUrl } = authReq;
-        const isLoggedIn = !!authReq.auth;
+    const { nextUrl } = req;
+    const pathname = nextUrl.pathname;
 
-        // Define route types
-        const protectedRoutes = ['/dashboard', '/profile', '/settings', '/applications', '/resumes'];
-        const authRoutes = ['/auth/signin', '/auth/signup', '/auth/reset-password', '/login'];
-        const publicRoutes = ['/', '/about', '/contact', '/privacy', '/terms'];
+    // Skip middleware for API routes, static files, and images
+    if (
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/favicon.ico') ||
+      pathname.match(/\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/)
+    ) {
+      return NextResponse.next();
+    }
 
-        const isProtectedRoute = protectedRoutes.some(route => 
-          nextUrl.pathname.startsWith(route)
-        );
-        
-        const isAuthRoute = authRoutes.some(route => 
-          nextUrl.pathname.startsWith(route) || nextUrl.pathname === route
-        );
+    // Handle /login route specifically (redirect to proper auth page)
+    if (pathname === '/login') {
+      console.log('Redirecting /login to /auth/signin');
+      return NextResponse.redirect(new URL('/auth/signin', nextUrl));
+    }
 
-        // Handle /login route specifically (redirect to proper auth page)
-        if (nextUrl.pathname === '/login') {
-          return NextResponse.redirect(new URL('/auth/signin', nextUrl));
-        }
+    // Allow public routes without authentication check
+    if (isPublicRoute(pathname)) {
+      return NextResponse.next();
+    }
 
+    // Verify authentication for other routes
+    const authResult: MiddlewareAuthResult = verifyAuthFromRequest(req);
+    const isAuthenticated = authResult.isAuthenticated;
+
+    // Log authentication attempt for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[Middleware] ${pathname} - Auth: ${isAuthenticated ? 'SUCCESS' : 'FAILED'}`, {
+        user: authResult.user?.email,
+        error: authResult.error,
+        ip: getClientIP(req),
+        userAgent: getUserAgent(req)?.substring(0, 100),
+      });
+    }
+
+    // Handle authentication routes
+    if (isAuthRoute(pathname)) {
+      if (isAuthenticated) {
         // Redirect authenticated users away from auth pages
-        if (isLoggedIn && isAuthRoute) {
-          return NextResponse.redirect(new URL('/dashboard', nextUrl));
-        }
-
-        // Redirect unauthenticated users away from protected routes
-        if (!isLoggedIn && isProtectedRoute) {
-          const callbackUrl = nextUrl.pathname + nextUrl.search;
-          return NextResponse.redirect(
-            new URL(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`, nextUrl)
-          );
-        }
-
-        // Allow all other requests
-        return NextResponse.next();
-        
-      } catch (innerError) {
-        // Handle specific auth processing errors
-        console.error('Inner middleware auth error:', innerError);
-        
-        const { nextUrl } = authReq;
-        const protectedRoutes = ['/dashboard', '/profile', '/settings', '/applications', '/resumes'];
-        const isProtectedRoute = protectedRoutes.some(route => 
-          nextUrl.pathname.startsWith(route)
-        );
-        
-        if (isProtectedRoute) {
-          const callbackUrl = nextUrl.pathname + nextUrl.search;
-          return NextResponse.redirect(
-            new URL(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`, nextUrl)
-          );
-        }
-        
-        // Handle /login route error specifically
-        if (nextUrl.pathname === '/login') {
-          return NextResponse.redirect(new URL('/auth/signin', nextUrl));
-        }
-        
-        // For non-protected routes, allow access
-        return NextResponse.next();
+        console.log(`Redirecting authenticated user from ${pathname} to /dashboard`);
+        return NextResponse.redirect(new URL('/dashboard', nextUrl));
       }
-    })(req);
+      // Allow unauthenticated users to access auth pages
+      return NextResponse.next();
+    }
+
+    // Handle protected routes
+    if (isProtectedRoute(pathname)) {
+      if (!isAuthenticated) {
+        // Check if there's a refresh token for automatic redirect vs manual login
+        const hasRefresh = hasRefreshToken(req);
+        
+        if (hasRefresh && authResult.needsRefresh) {
+          // User has a refresh token but access token expired
+          // Redirect to a refresh endpoint or login with auto-refresh
+          console.log(`Access token expired for ${pathname}, redirecting for refresh`);
+          const callbackUrl = encodeURIComponent(pathname + nextUrl.search);
+          return NextResponse.redirect(new URL(`/auth/signin?callbackUrl=${callbackUrl}&refresh=true`, nextUrl));
+        } else {
+          // No valid authentication, redirect to signin
+          console.log(`Redirecting unauthenticated user from ${pathname} to signin`);
+          const callbackUrl = encodeURIComponent(pathname + nextUrl.search);
+          return NextResponse.redirect(new URL(`/auth/signin?callbackUrl=${callbackUrl}`, nextUrl));
+        }
+      }
+      
+      // User is authenticated, allow access to protected route
+      return NextResponse.next();
+    }
+
+    // For all other routes, allow access
+    return NextResponse.next();
     
   } catch (error) {
-    // Handle outer-level errors (OIDC token validation, crypto issues, etc.)
-    console.error('Middleware initialization error:', error);
+    // Handle any unexpected errors gracefully
+    console.error('Middleware error:', error);
     
     const { nextUrl } = req;
+    const pathname = nextUrl.pathname;
     
-    // Check if this is an OIDC-related error
-    const isOIDCError = error instanceof Error && (
-      error.message.includes('oidc-token-hash') ||
-      error.message.includes('substring') ||
-      error.message.includes('crypto') ||
-      error.stack?.includes('oidc-token-hash')
-    );
+    // Log error for monitoring
+    console.error(`[Middleware Error] ${pathname}:`, {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      ip: getClientIP(req),
+      userAgent: getUserAgent(req)?.substring(0, 100),
+    });
     
-    if (isOIDCError) {
-      console.warn('OIDC token validation error detected, falling back to no-auth state');
+    // For protected routes, redirect to signin on error (fail-safe)
+    if (isProtectedRoute(pathname)) {
+      console.log(`Error in middleware for protected route ${pathname}, redirecting to signin`);
+      const callbackUrl = encodeURIComponent(pathname + nextUrl.search);
+      return NextResponse.redirect(new URL(`/auth/signin?callbackUrl=${callbackUrl}&error=auth_error`, nextUrl));
     }
     
-    // Define route types for fallback handling
-    const protectedRoutes = ['/dashboard', '/profile', '/settings', '/applications', '/resumes'];
-    const authRoutes = ['/auth/signin', '/auth/signup', '/auth/reset-password', '/login'];
-    
-    const isProtectedRoute = protectedRoutes.some(route => 
-      nextUrl.pathname.startsWith(route)
-    );
-    
-    // Handle /login route specifically
-    if (nextUrl.pathname === '/login') {
-      console.log('Redirecting /login to /auth/signin due to auth error');
+    // Handle /login route error specifically
+    if (pathname === '/login') {
+      console.log('Error handling /login route, redirecting to /auth/signin');
       return NextResponse.redirect(new URL('/auth/signin', nextUrl));
     }
     
-    // For protected routes, redirect to signin when auth fails
-    if (isProtectedRoute) {
-      console.log(`Redirecting protected route ${nextUrl.pathname} to signin due to auth error`);
-      const callbackUrl = nextUrl.pathname + nextUrl.search;
-      return NextResponse.redirect(
-        new URL(`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`, nextUrl)
-      );
-    }
-    
-    // For all other routes, allow access (graceful degradation)
-    console.log(`Allowing access to ${nextUrl.pathname} despite auth error`);
+    // For other routes, allow access (graceful degradation)
+    console.log(`Allowing access to ${pathname} despite middleware error`);
     return NextResponse.next();
   }
 }
 
 export const config = {
+  runtime: 'edge',
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
@@ -132,6 +138,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder files
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

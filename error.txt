@@ -1,0 +1,36 @@
+Cannot read properties of undefined (reading 'substring')
+Call Stack
+11
+Show 3 ignore-listed frame(s)
+<unknown>
+file:///Users/abranshbaliyan/jobswipe/node_modules/.pnpm/oidc-token-hash%20(5.1.0/node_modules/oidc-token-hash/lib/shake256.js (3)
+(middleware)/../../node_modules/.pnpm/oidc-token-hash@5.1.0/node_modules/oidc-token-hash/lib/shake256.js
+.next/server/middleware.js (2769:1)
+__webpack_require__
+.next/server/edge-runtime-webpack.js (37:33)
+fn
+.next/server/edge-runtime-webpack.js (273:21)
+(middleware)/../../node_modules/.pnpm/oidc-token-hash@5.1.0/node_modules/oidc-token-hash/lib/index.js
+.next/server/middleware.js (2759:1)
+__webpack_require__
+.next/server/edge-runtime-webpack.js (37:33)
+fn
+.next/server/edge-runtime-webpack.js (273:21)
+(middleware)/../../node_modules/.pnpm/openid-client@5.7.1/node_modules/openid-client/lib/client.js
+.next/server/middleware.js (2780:1)
+1
+2
+
+and in console error is 
+ ⨯ Error [TypeError]: Cannot read properties of undefined (reading 'substring')
+    at (middleware)/../../node_modules/.pnpm/oidc-token-hash@5.1.0/node_modules/oidc-token-hash/lib/shake256.js (.next/server/middleware.js:2769:1)
+    at __webpack_require__ (.next/server/edge-runtime-webpack.js:37:33)
+    at fn (.next/server/edge-runtime-webpack.js:273:21)
+    at (middleware)/../../node_modules/.pnpm/oidc-token-hash@5.1.0/node_modules/oidc-token-hash/lib/index.js (.next/server/middleware.js:2759:1)
+    at __webpack_require__ (.next/server/edge-runtime-webpack.js:37:33)
+    at fn (.next/server/edge-runtime-webpack.js:273:21)
+    at (middleware)/../../node_modules/.pnpm/openid-client@5.7.1/node_modules/openid-client/lib/client.js (.next/server/middleware.js:2780:1)
+ GET / 404 in 2ms
+
+
+ 

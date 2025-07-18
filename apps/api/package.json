@@ -27,6 +27,7 @@
     "fastify-zod": "^1.4.0",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
+    "uuid": "^11.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

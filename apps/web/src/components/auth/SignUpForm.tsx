@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { useAuth } from '@jobswipe/shared/context/auth.context';
+import { AuthSource } from '@jobswipe/shared/types/auth';
 import { OAuthProviders } from './OAuthProviders';
 import { FormInput } from './FormInput';
 import { Button } from '@/components/ui/button';
@@ -40,12 +41,13 @@ const passwordRequirements = [
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
+  // Use the new auth context
+  const { register: registerUser, isLoading, error, clearError } = useAuth();
 
   const {
     register,
@@ -59,46 +61,32 @@ export function SignUpForm() {
   const password = watch('password') || '';
 
   const onSubmit = async (data: SignUpFormData) => {
-    setIsLoading(true);
-    setError(null);
+    // Clear any existing errors
+    clearError();
 
     try {
-      // Register using credentials provider with registration flag
-      const result = await signIn('credentials', {
+      const response = await registerUser({
         email: data.email,
         password: data.password,
+        name: `${data.firstName} ${data.lastName}`,
         firstName: data.firstName,
         lastName: data.lastName,
-        isRegistering: 'true',
-        termsAccepted: data.termsAccepted.toString(),
-        privacyAccepted: data.privacyAccepted.toString(),
-        marketingConsent: data.marketingConsent?.toString() || 'false',
-        redirect: false,
-        callbackUrl,
+        source: AuthSource.WEB,
+        termsAccepted: data.termsAccepted,
+        privacyAccepted: data.privacyAccepted,
+        marketingConsent: data.marketingConsent || false,
       });
 
-      if (result?.error) {
-        switch (result.error) {
-          case 'CredentialsSignin':
-            setError('Registration failed. Please check your information.');
-            break;
-          case 'AccessDenied':
-            setError('Registration is currently disabled.');
-            break;
-          default:
-            if (result.error.includes('already exists')) {
-              setError('An account with this email already exists.');
-            } else {
-              setError('An error occurred during registration. Please try again.');
-            }
-        }
-      } else if (result?.url) {
-        router.push(result.url);
+      if (response.success && response.user) {
+        // Redirect to callback URL on successful registration
+        router.push(callbackUrl);
+      } else {
+        // Handle specific error cases
+        console.error('Registration failed:', response.error);
       }
-    } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      // Error is automatically handled by the auth context
     }
   };
 

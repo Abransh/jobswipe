@@ -1,18 +1,22 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth as useAuthContext } from '../../../../packages/shared/src/context/auth.context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export function useAuth() {
-  const { data: session, status } = useSession();
+  const authContext = useAuthContext();
   
   return {
-    user: session?.user,
-    isAuthenticated: !!session?.user,
-    isLoading: status === 'loading',
-    status,
-    session,
+    user: authContext.user,
+    isAuthenticated: authContext.isAuthenticated,
+    isLoading: authContext.isLoading,
+    error: authContext.error,
+    login: authContext.login,
+    register: authContext.register,
+    logout: authContext.logout,
+    updateProfile: authContext.updateProfile,
+    clearError: authContext.clearError,
   };
 }
 

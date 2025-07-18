@@ -1,7 +1,7 @@
 'use client';
 
-import { SessionProvider } from 'next-auth/react';
 import { ReactNode } from 'react';
+import { AuthProvider as AuthContextProvider } from '../../../../../packages/shared/src/context/auth.context';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -9,8 +9,14 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   return (
-    <SessionProvider>
+    <AuthContextProvider
+      config={{
+        apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+        enableAutoRefresh: true,
+        refreshThresholdMinutes: 5,
+      }}
+    >
       {children}
-    </SessionProvider>
+    </AuthContextProvider>
   );
 }

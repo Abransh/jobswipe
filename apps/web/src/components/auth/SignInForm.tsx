@@ -24,12 +24,13 @@ type SignInFormData = z.infer<typeof signInSchema>;
 
 export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
+  // Use the new auth context
+  const { login, isLoading, error, clearError } = useAuth();
 
   const {
     register,
@@ -40,35 +41,22 @@ export function SignInForm() {
   });
 
   const onSubmit = async (data: SignInFormData) => {
-    setIsLoading(true);
-    setError(null);
+    // Clear any existing errors
+    clearError();
 
     try {
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
+      const response = await login(data.email, data.password);
 
-      if (result?.error) {
-        switch (result.error) {
-          case 'CredentialsSignin':
-            setError('Invalid email or password');
-            break;
-          case 'AccessDenied':
-            setError('Access denied. Please check your account status.');
-            break;
-          default:
-            setError('An error occurred. Please try again.');
-        }
-      } else if (result?.url) {
-        router.push(result.url);
+      if (response.success && response.user) {
+        // Redirect to callback URL on successful login
+        router.push(callbackUrl);
+      } else {
+        // Handle specific error cases
+        console.error('Login failed:', response.error);
       }
-    } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      // Error is automatically handled by the auth context
     }
   };
 

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useOAuth } from '@jobswipe/shared';
 
 // OAuth Provider Icons
 const GoogleIcon = () => (
@@ -60,16 +60,19 @@ interface OAuthProvidersProps {
 
 export function OAuthProviders({ callbackUrl }: OAuthProvidersProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+  const { loginWithOAuth } = useOAuth();
 
   const handleOAuthSignIn = async (provider: string) => {
     setLoadingProvider(provider);
     try {
-      await signIn(provider, { callbackUrl });
+      // Use the custom OAuth implementation
+      const redirectUri = callbackUrl || window.location.origin + '/dashboard';
+      loginWithOAuth(provider as any, redirectUri);
     } catch (error) {
       console.error(`${provider} sign in error:`, error);
-    } finally {
       setLoadingProvider(null);
     }
+    // Note: We don't reset loading state here because the user will be redirected
   };
 
   const providers = [

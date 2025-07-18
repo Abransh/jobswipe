@@ -4,6 +4,7 @@ import windowStateKeeper from 'electron-window-state';
 import Store from 'electron-store';
 import isDev from 'electron-is-dev';
 import path from 'path';
+import { AuthService } from './services/AuthService';
 
 // Initialize electron store for persistent data
 const store = new Store({
@@ -20,8 +21,10 @@ const store = new Store({
 class JobSwipeApp {
   private mainWindow: BrowserWindow | null = null;
   private isQuitting = false;
+  private authService: AuthService;
 
   constructor() {
+    this.authService = AuthService.getInstance();
     this.initializeApp();
   }
 
@@ -32,7 +35,8 @@ class JobSwipeApp {
     }
 
     // Handle app events
-    app.whenReady().then(() => {
+    app.whenReady().then(async () => {
+      await this.authService.initialize();
       this.createMainWindow();
       this.setupApplicationMenu();
       this.setupAutoUpdater();
@@ -51,8 +55,9 @@ class JobSwipeApp {
       }
     });
 
-    app.on('before-quit', () => {
+    app.on('before-quit', async () => {
       this.isQuitting = true;
+      await this.authService.cleanup();
     });
 
     // Security: Prevent new window creation

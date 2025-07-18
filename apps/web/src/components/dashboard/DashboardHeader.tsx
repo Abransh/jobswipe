@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { 
   BellIcon, 
   UserCircleIcon,
@@ -13,10 +13,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 export function DashboardHeader() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: '/' });
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   if (!isAuthenticated) {
