@@ -46,9 +46,10 @@ export * from './utils/errors';
 export * from './utils/datetime';
 
 // Services
-export * from './services/jwt-token.service';
-export * from './services/redis-session-stub.service';
-export * from './services/token-exchange.service';
+export { JwtTokenService } from './services/jwt-token.service';
+export { RedisSessionService } from './services/redis-session-stub.service';
+export { TokenExchangeService } from './services/token-exchange.service';
+export * from './services/factory';
 
 // Security utilities
 export * from './utils/security';
@@ -73,6 +74,4 @@ export {
   needsRehash
 } from './utils/password';
 
-// Create explicit exports for commonly imported services
-export { RedisSessionService, defaultRedisSessionService } from './services/redis-session-stub.service';
-export { TokenExchangeService } from './services/token-exchange.service';
+// Note: Services already exported above

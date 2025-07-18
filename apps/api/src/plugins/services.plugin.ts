@@ -14,6 +14,7 @@ import {
   SecurityMiddlewareService,
   createJwtTokenService,
   createRedisSessionService,
+  createSecurityMiddlewareService,
   defaultJwtTokenService,
   defaultRedisSessionService
 } from '@jobswipe/shared';
@@ -287,25 +288,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   
   let securityService: SecurityMiddlewareService;
   try {
-    // Import the SecurityMiddlewareService from shared package
-    // For now, we'll use a placeholder since we need to implement Redis-backed security
-    securityService = {
-      checkRateLimit: async (key: string, maxRequests: number, windowMs: number) => {
-        // Placeholder implementation - will be replaced with Redis-backed version
-        return true;
-      },
-      blockIp: async (ip: string, reason: string) => {
-        fastify.log.warn(`IP blocked: ${ip} - ${reason}`);
-      },
-      isIpBlocked: async (ip: string) => {
-        return false;
-      },
-      getStats: () => ({
-        rateLimitEntries: 0,
-        blockedIps: 0,
-        suspiciousActivity: 0,
-      }),
-    } as any;
+    securityService = createSecurityMiddlewareService();
 
     serviceRegistry.register(
       'security',
@@ -436,4 +419,4 @@ export default fastifyPlugin(servicesPlugin, {
   fastify: '4.x',
 });
 
-export { ServicesConfig, ServiceHealth, ServiceRegistry };
+export type { ServicesConfig, ServiceHealth, ServiceRegistry };

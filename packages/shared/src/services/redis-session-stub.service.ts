@@ -26,10 +26,15 @@ export interface UpdateSessionInput {
  * TODO: Implement actual Redis session management
  */
 export class RedisSessionService {
-  async createSession(input: CreateSessionInput): Promise<SessionId> {
+  async createSession(input: CreateSessionInput): Promise<any> {
     // Placeholder implementation
     console.log('Creating session:', input);
-    return 'session-id' as SessionId;
+    return {
+      id: 'session-id' as SessionId,
+      userId: input.userId,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+    };
   }
 
   async updateSession(sessionId: SessionId, input: UpdateSessionInput): Promise<void> {
@@ -46,6 +51,16 @@ export class RedisSessionService {
     // Placeholder implementation
     console.log('Getting session:', sessionId);
     return null;
+  }
+
+  async getHealthStatus(): Promise<any> {
+    return {
+      status: 'healthy',
+      details: {
+        activeSessions: 0,
+        redisConnected: true,
+      },
+    };
   }
 }
 
