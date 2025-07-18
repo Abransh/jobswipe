@@ -890,6 +890,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
   fastify.post('/password/reset', {
     schema: {
       body: {
+        
         type: 'object',
         required: ['email', 'source'],
         properties: {
