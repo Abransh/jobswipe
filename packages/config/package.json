@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "dependencies": {
-    "@jobswipe/shared": "*",
+    "@jobswipe/shared": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {

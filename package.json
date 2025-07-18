@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "Enterprise job application automation platform with AI-powered browser automation",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "dev": "turbo run dev",
     "dev:web": "npm run dev --workspace=apps/web",

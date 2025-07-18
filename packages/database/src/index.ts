@@ -197,37 +197,33 @@ export async function deleteUser(id: string) {
  */
 export async function createJob(data: {
   title: string;
-  company: string;
-  jobUrl: string;
+  companyId: string;
+  sourceUrl?: string;
   description?: string;
   location?: string;
-  salary?: number;
-  jobType?: string;
-  experienceLevel?: string;
-  remoteType?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  type?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'FREELANCE' | 'INTERNSHIP' | 'TEMPORARY' | 'VOLUNTEER' | 'APPRENTICESHIP';
+  level?: 'ENTRY' | 'JUNIOR' | 'MID' | 'SENIOR' | 'LEAD' | 'PRINCIPAL' | 'STAFF' | 'MANAGER' | 'SENIOR_MANAGER' | 'DIRECTOR' | 'SENIOR_DIRECTOR' | 'VP' | 'SVP' | 'C_LEVEL' | 'FOUNDER';
+  remoteType?: 'ONSITE' | 'REMOTE' | 'HYBRID' | 'FLEXIBLE';
   skills?: string[];
-  benefits?: string[];
-  requirements?: string[];
-  scraped?: boolean;
-  scrapedData?: any;
+  requirements?: string;
 }) {
   try {
     return await db.jobPosting.create({
       data: {
         title: data.title,
-        company: data.company,
-        jobUrl: data.jobUrl,
-        description: data.description,
+        companyId: data.companyId,
+        sourceUrl: data.sourceUrl,
+        description: data.description || '',
         location: data.location,
-        salary: data.salary,
-        jobType: data.jobType,
-        experienceLevel: data.experienceLevel,
-        remoteType: data.remoteType,
-        skills: data.skills,
-        benefits: data.benefits,
+        salaryMin: data.salaryMin,
+        salaryMax: data.salaryMax,
+        type: data.type || 'FULL_TIME',
+        level: data.level || 'MID',
+        remoteType: data.remoteType || 'ONSITE',
+        skills: data.skills || [],
         requirements: data.requirements,
-        scraped: data.scraped || false,
-        scrapedData: data.scrapedData,
       },
     });
   } catch (error) {
@@ -359,8 +355,8 @@ export async function createApplication(data: {
   jobId: string;
   resumeId?: string;
   coverLetter?: string;
-  customAnswers?: any;
-  source?: string;
+  customFields?: any;
+  source?: 'MANUAL' | 'AUTOMATION' | 'BULK_APPLY' | 'REFERRAL' | 'RECRUITER' | 'COMPANY_OUTREACH';
 }) {
   try {
     return await db.jobApplication.create({
@@ -369,7 +365,7 @@ export async function createApplication(data: {
         jobPostingId: data.jobId,
         resumeId: data.resumeId,
         coverLetter: data.coverLetter,
-        customAnswers: data.customAnswers,
+        customFields: data.customFields,
         source: data.source || 'MANUAL',
         status: 'DRAFT',
       },
@@ -409,17 +405,17 @@ export async function getUserApplications(userId: string, options: {
     }
 
     const [applications, total] = await Promise.all([
-      db.application.findMany({
+      db.jobApplication.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: offset,
         take: limit,
         include: {
-          job: true,
+          jobPosting: true,
           resume: true,
         },
       }),
-      db.application.count({ where }),
+      db.jobApplication.count({ where }),
     ]);
 
     return {
@@ -440,9 +436,9 @@ export async function getUserApplications(userId: string, options: {
 /**
  * Update application status
  */
-export async function updateApplicationStatus(id: string, status: string, notes?: string) {
+export async function updateApplicationStatus(id: string, status: 'DRAFT' | 'QUEUED' | 'APPLYING' | 'APPLIED' | 'APPLICATION_ERROR' | 'VIEWED' | 'SCREENING' | 'PHONE_SCREEN' | 'INTERVIEW_SCHEDULED' | 'FIRST_INTERVIEW' | 'SECOND_INTERVIEW' | 'FINAL_INTERVIEW' | 'TECHNICAL_ASSESSMENT' | 'TAKE_HOME_PROJECT' | 'REFERENCE_CHECK' | 'BACKGROUND_CHECK' | 'OFFER_PENDING' | 'OFFER_RECEIVED' | 'OFFER_ACCEPTED' | 'OFFER_DECLINED' | 'REJECTED' | 'WITHDRAWN' | 'GHOSTED' | 'ARCHIVED', notes?: string) {
   try {
-    return await db.application.update({
+    return await db.jobApplication.update({
       where: { id },
       data: {
         status,
@@ -450,7 +446,7 @@ export async function updateApplicationStatus(id: string, status: string, notes?
         updatedAt: new Date(),
       },
       include: {
-        job: true,
+        jobPosting: true,
         user: {
           select: {
             id: true,
@@ -482,11 +478,11 @@ export async function createUserJobSwipe(data: {
     return await db.userJobSwipe.create({
       data: {
         userId: data.userId,
-        jobId: data.jobId,
-        swipedRight: data.swipedRight,
+        jobPostingId: data.jobId,
+        direction: data.swipedRight ? 'RIGHT' : 'LEFT',
       },
       include: {
-        job: true,
+        jobPosting: true,
       },
     });
   } catch (error) {
@@ -502,14 +498,14 @@ export async function getUserSwipedJobs(userId: string, swipedRight?: boolean) {
   try {
     const where: any = { userId };
     if (swipedRight !== undefined) {
-      where.swipedRight = swipedRight;
+      where.direction = swipedRight ? 'RIGHT' : 'LEFT';
     }
 
     return await db.userJobSwipe.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        job: true,
+        jobPosting: true,
       },
     });
   } catch (error) {
@@ -544,9 +540,9 @@ export async function checkDatabaseHealth() {
 export async function getDatabaseStats() {
   try {
     const [userCount, jobCount, applicationCount] = await Promise.all([
-      db.user.count({ where: { status: 'active' } }),
-      db.job.count({ where: { status: 'active' } }),
-      db.application.count(),
+      db.user.count({ where: { status: 'ACTIVE' } }),
+      db.jobPosting.count({ where: { status: 'ACTIVE' } }),
+      db.jobApplication.count(),
     ]);
 
     return {
