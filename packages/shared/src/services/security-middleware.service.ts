@@ -6,22 +6,17 @@
  */
 
 import { 
-  createAuthError, 
-  AuthErrorCode, 
-  RATE_LIMITS, 
-  SECURITY_CONFIG 
+  AuthErrorCode
 } from '../types/auth';
 import { 
   generateSecureToken, 
   generateCsrfToken, 
-  generateSecurityHeaders, 
-  generateRateLimitKey, 
-  isRateLimitExceeded, 
   calculateRateLimitReset, 
   isSuspiciousRequest,
   sanitizeHtml,
   isValidIpAddress
 } from '../utils/security';
+import { RATE_LIMITS } from '../constants';
 
 // =============================================================================
 // INTERFACES
@@ -288,13 +283,13 @@ export class SecurityMiddlewareService {
       const count = this.suspiciousActivity.get(key) || 0;
       this.suspiciousActivity.set(key, count + 1);
 
-      // Block IP after threshold
-      if (count >= SECURITY_CONFIG.SUSPICIOUS_ACTIVITY_THRESHOLD) {
+      // Block IP after threshold (hardcoded threshold of 5)
+      if (count >= 5) {
         this.blockIp(request.ip, 'Suspicious activity detected', 60 * 60 * 1000); // 1 hour
         return {
           allowed: false,
           error: 'Suspicious activity detected',
-          errorCode: AuthErrorCode.SUSPICIOUS_ACTIVITY,
+          errorCode: AuthErrorCode.RATE_LIMIT_EXCEEDED, // Use existing error code
           securityHeaders: this.generateSecurityHeaders(request),
         };
       }
@@ -437,7 +432,32 @@ export class SecurityMiddlewareService {
    */
   private generateSecurityHeaders(request: SecurityRequest): Record<string, string> {
     const nonce = generateSecureToken(16);
-    const headers = generateSecurityHeaders(nonce);
+    const headers: Record<string, string> = {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+      'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+    };
+
+    // Add CSP header with nonce
+    headers['Content-Security-Policy'] = `
+      default-src 'self';
+      script-src 'self' 'nonce-${nonce}';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https:;
+      font-src 'self';
+      connect-src 'self';
+      media-src 'self';
+      object-src 'none';
+      child-src 'none';
+      frame-src 'none';
+      worker-src 'none';
+      frame-ancestors 'none';
+      form-action 'self';
+      upgrade-insecure-requests;
+    `.replace(/\s+/g, ' ').trim();
 
     // Add custom headers
     if (this.securityHeadersConfig.customHeaders) {
@@ -447,10 +467,14 @@ export class SecurityMiddlewareService {
     // Add rate limit headers
     headers['X-RateLimit-Limit'] = this.rateLimitConfig.maxRequests.toString();
     headers['X-RateLimit-Window'] = this.rateLimitConfig.windowMs.toString();
+    
+    // Log request for debugging (remove in production)
+    if (request.method === 'POST') {
+      console.log(`Security headers generated for ${request.method} ${request.url}`);
+    }
 
     // Add security-related headers
     headers['X-Request-ID'] = generateSecureToken(16);
-    headers['X-Content-Type-Options'] = 'nosniff';
     headers['X-Download-Options'] = 'noopen';
     headers['X-Permitted-Cross-Domain-Policies'] = 'none';
 
@@ -658,6 +682,11 @@ export class SecurityMiddlewareService {
     // In a real implementation, you'd set up a proper interval
     // For now, we'll just log that cleanup would be scheduled
     console.log('Security middleware cleanup job would be scheduled to run every 5 minutes');
+    
+    // Schedule cleanup to run periodically
+    setInterval(() => {
+      this.cleanupExpiredData();
+    }, 5 * 60 * 1000); // Every 5 minutes
   }
 }
 
@@ -752,8 +781,8 @@ export function createLoginRateLimitConfig(): RateLimitConfig {
  */
 export function createRegistrationRateLimitConfig(): RateLimitConfig {
   return {
-    windowMs: RATE_LIMITS.REGISTER.WINDOW_MS,
-    maxRequests: RATE_LIMITS.REGISTER.MAX_ATTEMPTS,
+    windowMs: RATE_LIMITS.REGISTRATION.WINDOW_MS,
+    maxRequests: RATE_LIMITS.REGISTRATION.MAX_ATTEMPTS,
     skipSuccessfulRequests: false,
     skipFailedRequests: false,
     keyGenerator: (req) => `register:${req.ip}`,

@@ -164,7 +164,7 @@ class MockRedisClient implements RedisClient {
     return item.value;
   }
 
-  async set(key: string, value: string, mode?: string, duration?: number): Promise<'OK' | null> {
+  async set(key: string, value: string, _mode?: string, duration?: number): Promise<'OK' | null> {
     const expiresAt = duration ? Date.now() + (duration * 1000) : undefined;
     this.store.set(key, { value, expiresAt });
     return 'OK';
@@ -331,6 +331,8 @@ export class RedisSessionService {
     } = {}
   ) {
     // In a real implementation, you'd create a real Redis client here
+    // Store config for future use when implementing real Redis client
+    console.log(`Redis config: ${config.host}:${config.port}`);
     this.client = new MockRedisClient();
     this.keyPrefix = options.keyPrefix || 'session:';
     this.defaultExpiration = options.defaultExpiration || SESSION_CONFIG.TIMEOUT / 1000;

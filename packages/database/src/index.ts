@@ -86,7 +86,6 @@ export async function createUser(data: {
           create: {
             firstName: data.profile.firstName,
             lastName: data.profile.lastName,
-            timezone: data.profile.timezone || 'UTC',
           },
         } : undefined,
       },
@@ -179,7 +178,7 @@ export async function deleteUser(id: string) {
     return await db.user.update({
       where: { id },
       data: {
-        status: 'deleted',
+        status: 'DELETED',
         updatedAt: new Date(),
       },
     });
@@ -213,7 +212,7 @@ export async function createJob(data: {
   scrapedData?: any;
 }) {
   try {
-    return await db.job.create({
+    return await db.jobPosting.create({
       data: {
         title: data.title,
         company: data.company,
@@ -242,7 +241,7 @@ export async function createJob(data: {
  */
 export async function getJobById(id: string) {
   try {
-    return await db.job.findUnique({
+    return await db.jobPosting.findUnique({
       where: { id },
       include: {
         applications: {
@@ -292,7 +291,7 @@ export async function getJobs(options: {
     const offset = (page - 1) * limit;
 
     const where: any = {
-      status: 'active',
+      status: 'ACTIVE',
     };
 
     if (search) {
@@ -324,13 +323,13 @@ export async function getJobs(options: {
     }
 
     const [jobs, total] = await Promise.all([
-      db.job.findMany({
+      db.jobPosting.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         skip: offset,
         take: limit,
       }),
-      db.job.count({ where }),
+      db.jobPosting.count({ where }),
     ]);
 
     return {
@@ -364,18 +363,18 @@ export async function createApplication(data: {
   source?: string;
 }) {
   try {
-    return await db.application.create({
+    return await db.jobApplication.create({
       data: {
         userId: data.userId,
-        jobId: data.jobId,
+        jobPostingId: data.jobId,
         resumeId: data.resumeId,
         coverLetter: data.coverLetter,
         customAnswers: data.customAnswers,
-        source: data.source || 'manual',
-        status: 'draft',
+        source: data.source || 'MANUAL',
+        status: 'DRAFT',
       },
       include: {
-        job: true,
+        jobPosting: true,
         user: {
           select: {
             id: true,

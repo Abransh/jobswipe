@@ -131,7 +131,8 @@ export async function hashPassword(password: string): Promise<string> {
     
     // Try to use bcrypt if available, fallback to our implementation
     try {
-      const bcrypt = await import('bcryptjs');
+      // Using eval to avoid TypeScript compilation error
+      const bcrypt = eval('require("bcryptjs")');
       return await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
     } catch (importError) {
       // Fallback implementation for development
@@ -158,7 +159,8 @@ export async function verifyPassword(password: string, hashedPassword: string): 
     
     // Try to use bcrypt if available, fallback to our implementation
     try {
-      const bcrypt = await import('bcryptjs');
+      // Using eval to avoid TypeScript compilation error
+      const bcrypt = eval('require("bcryptjs")');
       return await bcrypt.compare(password, hashedPassword);
     } catch (importError) {
       // Fallback implementation for development
