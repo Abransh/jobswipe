@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
+import { useAuth } from '@jobswipe/shared/context/auth.context';
+import { AuthErrorCode } from '@jobswipe/shared/types/auth';
 import { OAuthProviders } from './OAuthProviders';
 import { FormInput } from './FormInput';
 import { Button } from '@/components/ui/button';

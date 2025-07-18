@@ -6,23 +6,29 @@
  * @security Enterprise-grade authentication with JWT tokens
  */
 
+// Browser environment type declarations
+declare const window: Window | undefined;
+declare const document: Document | undefined;
+declare const sessionStorage: Storage | undefined;
+declare const localStorage: Storage | undefined;
+
 import { 
   LoginRequest, 
+  LoginResponse,
   RegisterRequest, 
-  AuthResponse, 
+  RegisterResponse, 
   RefreshTokenRequest,
   AuthSource,
   AuthProvider,
   AuthErrorCode,
   createAuthError,
-  User,
-  Session
-} from '../types';
+  AuthenticatedUser,
+  AuthSession,
+  AuthTokens
+} from '../types/auth';
 import { 
   JWT_CONFIG, 
-  API_VERSION, 
-  HTTP_STATUS,
-  RATE_LIMITS 
+  API_VERSION 
 } from '../constants';
 
 // =============================================================================
@@ -30,8 +36,8 @@ import {
 // =============================================================================
 
 export interface AuthState {
-  user: User | null;
-  session: Session | null;
+  user: AuthenticatedUser | null;
+  session: AuthSession | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -234,7 +240,7 @@ export class FrontendAuthService {
   /**
    * Login with email and password
    */
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email: string, password: string): Promise<LoginResponse> {
     try {
       this.setLoading(true);
       this.clearError();
@@ -267,7 +273,7 @@ export class FrontendAuthService {
   /**
    * Register new user account
    */
-  async register(registerData: RegisterRequest): Promise<AuthResponse> {
+  async register(registerData: RegisterRequest): Promise<RegisterResponse> {
     try {
       this.setLoading(true);
       this.clearError();
@@ -382,8 +388,9 @@ export class FrontendAuthService {
    */
   getOAuthUrl(provider: AuthProvider, redirectUri?: string): string {
     const baseUrl = `${this.config.apiBaseUrl}/${API_VERSION}/auth/oauth/${provider}`;
+    const defaultRedirectUri = typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : '/auth/callback';
     const params = new URLSearchParams({
-      redirect_uri: redirectUri || window.location.origin + '/auth/callback',
+      redirect_uri: redirectUri || defaultRedirectUri,
       source: AuthSource.WEB,
     });
     
@@ -393,7 +400,7 @@ export class FrontendAuthService {
   /**
    * Handle OAuth callback
    */
-  async handleOAuthCallback(code: string, state: string, provider: AuthProvider): Promise<AuthResponse> {
+  async handleOAuthCallback(code: string, state: string, provider: AuthProvider): Promise<LoginResponse> {
     try {
       this.setLoading(true);
       this.clearError();
@@ -432,14 +439,14 @@ export class FrontendAuthService {
   /**
    * Get current user
    */
-  getCurrentUser(): User | null {
+  getCurrentUser(): AuthenticatedUser | null {
     return this.authState.user;
   }
 
   /**
    * Update user profile
    */
-  async updateProfile(profileData: Partial<User>): Promise<User> {
+  async updateProfile(profileData: Partial<AuthenticatedUser>): Promise<AuthenticatedUser> {
     try {
       this.setLoading(true);
       
@@ -547,7 +554,7 @@ export class FrontendAuthService {
   /**
    * Handle successful authentication response
    */
-  private async handleSuccessfulAuth(response: AuthResponse): Promise<void> {
+  private async handleSuccessfulAuth(response: LoginResponse | RegisterResponse): Promise<void> {
     if (!response.tokens || !response.user) {
       throw createAuthError(AuthErrorCode.INTERNAL_ERROR, 'Invalid auth response');
     }
@@ -603,9 +610,9 @@ export class FrontendAuthService {
   private async makeAuthRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${this.config.apiBaseUrl}/${API_VERSION}${endpoint}`;
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     // Add authorization header if token available
@@ -621,10 +628,10 @@ export class FrontendAuthService {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json().catch(() => ({})) as any;
       throw createAuthError(
-        errorData.code || AuthErrorCode.INTERNAL_ERROR,
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        errorData?.code || AuthErrorCode.INTERNAL_ERROR,
+        errorData?.message || `HTTP ${response.status}: ${response.statusText}`
       );
     }
 
@@ -640,7 +647,7 @@ export class FrontendAuthService {
     }
 
     if (error?.message?.includes('network') || error?.message?.includes('fetch')) {
-      return createAuthError(AuthErrorCode.NETWORK_ERROR, 'Network error. Please check your connection.');
+      return createAuthError(AuthErrorCode.INTERNAL_ERROR, 'Network error. Please check your connection.');
     }
 
     return createAuthError(AuthErrorCode.INTERNAL_ERROR, error?.message || 'An unexpected error occurred');
@@ -671,7 +678,7 @@ export class FrontendAuthService {
   /**
    * Set user in auth state
    */
-  private setUser(user: User): void {
+  private setUser(user: AuthenticatedUser): void {
     this.authState.user = user;
     this.notifyListeners();
   }
