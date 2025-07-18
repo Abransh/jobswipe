@@ -435,9 +435,30 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
             },
           },
         },
-        400: { $ref: 'ErrorResponse#' },
-        401: { $ref: 'ErrorResponse#' },
-        429: { $ref: 'ErrorResponse#' },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
+        401: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
+        429: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
@@ -448,7 +469,7 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
         throw createAuthError(AuthErrorCode.INVALID_CREDENTIALS, 'Authentication required');
       }
 
-      const deviceInfo = TokenExchangeInitiateSchema.parse(request.body);
+      const deviceInfo = request.body as any; // Fastify will validate this automatically
 
       // Rate limiting check for token exchange
       const rateLimitKey = `token-exchange:${authContext.user.id}`;
@@ -531,14 +552,35 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
             features: { type: 'array', items: { type: 'string' } },
           },
         },
-        400: { $ref: 'ErrorResponse#' },
-        401: { $ref: 'ErrorResponse#' },
-        429: { $ref: 'ErrorResponse#' },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
+        401: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
+        429: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            error: { type: 'string' },
+            code: { type: 'string' }
+          }
+        },
       },
     },
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const exchangeData = TokenExchangeCompleteSchema.parse(request.body);
+      const exchangeData = request.body as any; // Fastify will validate this automatically
 
       // Security: Rate limiting for exchange completion
       const rateLimitKey = `token-exchange-complete:${exchangeData.deviceId}`;
@@ -586,9 +628,6 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/token-exchange/verify/:token', {
     schema: {
-      summary: 'Verify token exchange status',
-      description: 'Check if an exchange token is valid and get device info',
-      tags: ['Token Exchange'],
       params: {
         type: 'object',
         properties: {
@@ -636,10 +675,6 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
    */
   fastify.delete('/token-exchange/:token', {
     schema: {
-      summary: 'Cancel active token exchange',
-      description: 'Cancel an active token exchange session',
-      tags: ['Token Exchange'],
-      security: [{ BearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
