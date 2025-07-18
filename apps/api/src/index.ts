@@ -14,6 +14,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { registerAuthRoutes } from './routes/auth.routes';
 import { db } from '@jobswipe/database';
+import securityPlugin from './plugins/security.plugin';
 
 // =============================================================================
 // CONFIGURATION
@@ -66,7 +67,10 @@ async function createServer(): Promise<FastifyInstance> {
   // MIDDLEWARE REGISTRATION
   // =============================================================================
 
-  // Security headers
+  // Register enterprise security plugin first
+  await server.register(securityPlugin);
+
+  // Security headers (additional to security plugin)
   await server.register(helmet, {
     contentSecurityPolicy: {
       directives: {
@@ -282,6 +286,24 @@ async function createServer(): Promise<FastifyInstance> {
     });
   });
 
+  // Security health check
+  server.get('/health/security', async (request, reply) => {
+    try {
+      const securityStats = server.security.getStats();
+      return reply.code(200).send({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        security: securityStats,
+      });
+    } catch (error) {
+      return reply.code(503).send({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : 'Security check failed',
+      });
+    }
+  });
+
   // =============================================================================
   // API ROUTES
   // =============================================================================
@@ -443,6 +465,7 @@ async function start(): Promise<void> {
     server.log.info(`🚀 JobSwipe API Server started successfully!`);
     server.log.info(`📡 Server listening on http://${config.host}:${config.port}`);
     server.log.info(`🔍 Health check: http://${config.host}:${config.port}/health`);
+    server.log.info(`🛡️  Security middleware: http://${config.host}:${config.port}/health/security`);
     if (isDevelopment) {
       server.log.info(`📚 API Documentation: http://${config.host}:${config.port}/docs`);
     }

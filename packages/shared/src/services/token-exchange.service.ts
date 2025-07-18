@@ -19,7 +19,7 @@ import {
 } from '../types/auth';
 import { createAuthError, AuthErrorCode } from '../types/auth';
 import { JwtTokenService, createDesktopTokenConfig } from './jwt-token.service';
-import { RedisSessionService } from './redis-session.service';
+import { RedisSessionService } from './redis-session-stub.service';
 import { generateSecureToken, createSecureHash } from '../utils/security';
 import { addDays } from '../utils/datetime';
 

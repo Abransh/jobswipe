@@ -42,7 +42,5 @@
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-
-    "src/utils/security.ts"
   ]
 }
