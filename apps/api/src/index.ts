@@ -362,7 +362,7 @@ async function createServer(): Promise<FastifyInstance> {
 
   // API Documentation (Swagger)
   if (isDevelopment) {
-    await server.register(swagger, {
+    await server.register(swagger as any, {
       swagger: {
         info: {
           title: 'JobSwipe API',
@@ -399,7 +399,7 @@ async function createServer(): Promise<FastifyInstance> {
       },
     });
 
-    await server.register(swaggerUi, {
+    await server.register(swaggerUi as any, {
       routePrefix: '/docs',
       uiConfig: {
         docExpansion: 'list',

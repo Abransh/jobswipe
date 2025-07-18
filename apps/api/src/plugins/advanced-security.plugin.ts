@@ -778,7 +778,7 @@ declare module 'fastify' {
 // EXPORTS
 // =============================================================================
 
-export default fastifyPlugin(advancedSecurityPlugin, {
+export default fastifyPlugin(advancedSecurityPlugin as any, {
   name: 'advanced-security',
   fastify: '4.x',
 });

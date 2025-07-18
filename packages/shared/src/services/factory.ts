@@ -46,7 +46,11 @@ export interface SessionConfig {
  * Create JWT Token Service with configuration
  */
 export function createJwtTokenService(config?: JwtServiceConfig): JwtTokenService {
-  return new JwtTokenService(config);
+  return new JwtTokenService(
+    config?.keyRotationInterval,
+    config?.maxKeyAge,
+    config?.revokedTokensCleanupInterval
+  );
 }
 
 /**
@@ -71,6 +75,14 @@ export const defaultRedisSessionService = createRedisSessionService({
   host: 'localhost',
   port: 6379,
 });
+
+// Re-export JWT token configuration functions
+export {
+  createAccessTokenConfig,
+  createRefreshTokenConfig,
+  createDesktopTokenConfig,
+  createVerificationTokenConfig
+} from './jwt-token.service';
 
 /**
  * Security Middleware Service interface

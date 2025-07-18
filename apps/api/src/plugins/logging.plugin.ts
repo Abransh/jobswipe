@@ -721,7 +721,7 @@ declare module 'fastify' {
 // EXPORTS
 // =============================================================================
 
-export default fastifyPlugin(loggingPlugin, {
+export default fastifyPlugin(loggingPlugin as any, {
   name: 'logging',
   fastify: '4.x',
 });

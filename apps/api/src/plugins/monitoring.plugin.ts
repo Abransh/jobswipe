@@ -816,7 +816,7 @@ declare module 'fastify' {
 // EXPORTS
 // =============================================================================
 
-export default fastifyPlugin(monitoringPlugin, {
+export default fastifyPlugin(monitoringPlugin as any, {
   name: 'monitoring',
   fastify: '4.x',
 });

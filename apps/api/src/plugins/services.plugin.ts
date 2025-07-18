@@ -414,7 +414,7 @@ declare module 'fastify' {
 // EXPORTS
 // =============================================================================
 
-export default fastifyPlugin(servicesPlugin, {
+export default fastifyPlugin(servicesPlugin as any, {
   name: 'services',
   fastify: '4.x',
 });

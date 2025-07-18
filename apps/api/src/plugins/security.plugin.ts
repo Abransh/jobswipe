@@ -367,7 +367,7 @@ async function securityPlugin(fastify: FastifyInstance) {
 }
 
 // Export as Fastify plugin
-export default fastifyPlugin(securityPlugin, {
+export default fastifyPlugin(securityPlugin as any, {
   name: 'security',
   fastify: '4.x',
 });
