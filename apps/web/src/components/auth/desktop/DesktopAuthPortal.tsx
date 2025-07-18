@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@jobswipe/shared';
 import { 
   QrCode, 
   Smartphone, 
@@ -115,7 +115,7 @@ export function DesktopAuthPortal() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  const { data: session } = useSession();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -200,7 +200,7 @@ export function DesktopAuthPortal() {
   };
 
   const initiateTokenExchange = async () => {
-    if (!session || !deviceInfo) return;
+    if (!isAuthenticated || !user || !deviceInfo) return;
 
     setIsLoading(true);
     setError(null);
@@ -257,7 +257,7 @@ export function DesktopAuthPortal() {
     setCurrentStep(1);
   };
 
-  if (!session) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
         <div className="text-center">

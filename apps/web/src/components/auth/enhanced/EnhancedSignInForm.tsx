@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useAuth } from '@jobswipe/shared';
 import Link from 'next/link';
 import { 
   Eye, 
@@ -47,8 +47,6 @@ interface RateLimitInfo {
 
 export function EnhancedSignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
   const [biometricSupported, setBiometricSupported] = useState(false);
@@ -58,6 +56,9 @@ export function EnhancedSignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
+  // Use the custom auth context
+  const { login, isLoading, error, clearError } = useAuth();
 
   const {
     register,
@@ -153,49 +154,17 @@ export function EnhancedSignInForm() {
   };
 
   const onSubmit = async (data: SignInFormData) => {
-    setIsLoading(true);
-    setError(null);
+    // Clear any existing errors
+    clearError();
     setAttemptCount(prev => prev + 1);
     setLastAttemptTime(new Date());
 
     try {
       addSecurityEvent('info', 'Sign-in attempt initiated');
 
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
+      const response = await login(data.email, data.password);
 
-      if (result?.error) {
-        let errorMessage = '';
-        
-        switch (result.error) {
-          case 'CredentialsSignin':
-            errorMessage = 'Invalid email or password';
-            addSecurityEvent('error', 'Invalid credentials provided');
-            break;
-          case 'AccessDenied':
-            errorMessage = 'Access denied. Please check your account status.';
-            addSecurityEvent('error', 'Account access denied');
-            break;
-          case 'RateLimitExceeded':
-            errorMessage = 'Too many attempts. Please try again later.';
-            addSecurityEvent('error', 'Rate limit exceeded');
-            setRateLimitInfo({
-              remaining: 0,
-              reset: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
-              blocked: true,
-            });
-            break;
-          default:
-            errorMessage = 'An error occurred. Please try again.';
-            addSecurityEvent('error', 'Unknown authentication error');
-        }
-        
-        setError(errorMessage);
-      } else if (result?.url) {
+      if (response.success && response.user) {
         addSecurityEvent('success', 'Authentication successful');
         
         // Store device trust if selected
@@ -204,13 +173,31 @@ export function EnhancedSignInForm() {
           localStorage.setItem('deviceTrustDate', new Date().toISOString());
         }
         
-        router.push(result.url);
+        // Redirect to callback URL on successful login
+        router.push(callbackUrl);
+      } else {
+        // Handle specific error cases
+        let errorMessage = error || 'Authentication failed';
+        
+        if (error?.includes('Invalid email or password')) {
+          addSecurityEvent('error', 'Invalid credentials provided');
+        } else if (error?.includes('Account')) {
+          addSecurityEvent('error', 'Account access denied');
+        } else if (error?.includes('Rate limit') || error?.includes('Too many')) {
+          addSecurityEvent('error', 'Rate limit exceeded');
+          setRateLimitInfo({
+            remaining: 0,
+            reset: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+            blocked: true,
+          });
+        } else {
+          addSecurityEvent('error', 'Unknown authentication error');
+        }
       }
-    } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch (error: any) {
+      console.error('Login error:', error);
       addSecurityEvent('error', 'Unexpected authentication error');
-    } finally {
-      setIsLoading(false);
+      // Error is automatically handled by the auth context
     }
   };
 

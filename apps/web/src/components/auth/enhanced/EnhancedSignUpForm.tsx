@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useAuth, AuthSource } from '@jobswipe/shared';
 import { 
   Eye, 
   EyeOff, 
@@ -96,8 +96,6 @@ const industries = [
 export function EnhancedSignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({
     score: 0,
@@ -111,6 +109,9 @@ export function EnhancedSignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  
+  // Use the custom auth context
+  const { register: registerUser, isLoading, error, clearError } = useAuth();
 
   const {
     register,
@@ -242,67 +243,55 @@ export function EnhancedSignUpForm() {
   };
 
   const onSubmit = async (data: SignUpFormData) => {
-    setIsLoading(true);
-    setError(null);
+    // Clear any existing errors
+    clearError();
 
     try {
       addSecurityEvent('info', 'Registration attempt initiated');
 
       // Check email availability one more time
       if (emailAvailable === false) {
-        setError('Email is already registered');
         addSecurityEvent('error', 'Email already exists');
         return;
       }
 
-      const result = await signIn('credentials', {
+      const response = await registerUser({
         email: data.email,
         password: data.password,
+        name: `${data.firstName} ${data.lastName}`,
         firstName: data.firstName,
         lastName: data.lastName,
-        isRegistering: 'true',
-        termsAccepted: data.termsAccepted.toString(),
-        privacyAccepted: data.privacyAccepted.toString(),
-        marketingConsent: data.marketingConsent?.toString() || 'false',
+        source: AuthSource.WEB,
+        termsAccepted: data.termsAccepted,
+        privacyAccepted: data.privacyAccepted,
+        marketingConsent: data.marketingConsent || false,
         timezone: data.timezone || userTimezone,
         companySize: data.companySize || '',
         industry: data.industry || '',
-        redirect: false,
-        callbackUrl,
       });
 
-      if (result?.error) {
-        let errorMessage = '';
-        
-        switch (result.error) {
-          case 'CredentialsSignin':
-            errorMessage = 'Registration failed. Please check your information.';
-            addSecurityEvent('error', 'Registration validation failed');
-            break;
-          case 'AccessDenied':
-            errorMessage = 'Registration is currently disabled.';
-            addSecurityEvent('error', 'Registration access denied');
-            break;
-          default:
-            if (result.error.includes('already exists')) {
-              errorMessage = 'An account with this email already exists.';
-              addSecurityEvent('error', 'Duplicate account detected');
-            } else {
-              errorMessage = 'An error occurred during registration. Please try again.';
-              addSecurityEvent('error', 'Unknown registration error');
-            }
-        }
-        
-        setError(errorMessage);
-      } else if (result?.url) {
+      if (response.success && response.user) {
         addSecurityEvent('success', 'Registration successful');
-        router.push(result.url);
+        // Redirect to callback URL on successful registration
+        router.push(callbackUrl);
+      } else {
+        // Handle specific error cases
+        let errorMessage = error || 'Registration failed';
+        
+        if (error?.includes('already exists')) {
+          addSecurityEvent('error', 'Duplicate account detected');
+        } else if (error?.includes('disabled')) {
+          addSecurityEvent('error', 'Registration access denied');
+        } else if (error?.includes('validation')) {
+          addSecurityEvent('error', 'Registration validation failed');
+        } else {
+          addSecurityEvent('error', 'Unknown registration error');
+        }
       }
-    } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch (error: any) {
+      console.error('Registration error:', error);
       addSecurityEvent('error', 'Unexpected registration error');
-    } finally {
-      setIsLoading(false);
+      // Error is automatically handled by the auth context
     }
   };
 

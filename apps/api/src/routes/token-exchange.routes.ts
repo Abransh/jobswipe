@@ -9,6 +9,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { 
   JwtTokenService, 
   RedisSessionService, 
@@ -72,18 +73,65 @@ interface TokenExchangeSession {
 }
 
 // =============================================================================
+// REDIS CLIENT INTERFACE
+// =============================================================================
+
+interface RedisClient {
+  get(key: string): Promise<string | null>;
+  setex(key: string, seconds: number, value: string): Promise<'OK'>;
+  del(key: string): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+}
+
+// Simple Redis client implementation (replace with ioredis in production)
+class SimpleRedisClient implements RedisClient {
+  private store: Map<string, { value: string; expiresAt: number }> = new Map();
+
+  async get(key: string): Promise<string | null> {
+    const item = this.store.get(key);
+    if (!item) return null;
+    
+    if (Date.now() > item.expiresAt) {
+      this.store.delete(key);
+      return null;
+    }
+    
+    return item.value;
+  }
+
+  async setex(key: string, seconds: number, value: string): Promise<'OK'> {
+    const expiresAt = Date.now() + (seconds * 1000);
+    this.store.set(key, { value, expiresAt });
+    return 'OK';
+  }
+
+  async del(key: string): Promise<number> {
+    return this.store.delete(key) ? 1 : 0;
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+    return Array.from(this.store.keys()).filter(key => regex.test(key));
+  }
+}
+
+// =============================================================================
 // TOKEN EXCHANGE SERVICE
 // =============================================================================
 
 class TokenExchangeService {
   private static instance: TokenExchangeService;
-  private exchanges = new Map<string, TokenExchangeSession>();
+  private redis: RedisClient;
+  private keyPrefix: string = 'token_exchange:';
   private cleanupInterval: NodeJS.Timeout;
 
   private constructor(
     private jwtService: JwtTokenService,
     private sessionService: RedisSessionService
   ) {
+    // Initialize Redis client (replace with real Redis in production)
+    this.redis = new SimpleRedisClient();
+    
     // Cleanup expired exchanges every 5 minutes
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredExchanges();
@@ -123,7 +171,9 @@ class TokenExchangeService {
       webSessionId,
     };
 
-    this.exchanges.set(exchangeToken, exchangeSession);
+    // Store in Redis with TTL
+    const redisKey = `${this.keyPrefix}${exchangeToken}`;
+    await this.redis.setex(redisKey, 10 * 60, JSON.stringify(exchangeSession));
 
     return {
       success: true,
@@ -146,14 +196,21 @@ class TokenExchangeService {
     exchangeToken: string,
     deviceInfo: any
   ): Promise<TokenExchangeResponse> {
-    const exchangeSession = this.exchanges.get(exchangeToken);
+    const redisKey = `${this.keyPrefix}${exchangeToken}`;
+    const sessionData = await this.redis.get(redisKey);
 
-    if (!exchangeSession) {
+    if (!sessionData) {
       throw createAuthError(
         AuthErrorCode.TOKEN_INVALID,
         'Invalid or expired exchange token'
       );
     }
+
+    const exchangeSession: TokenExchangeSession = JSON.parse(sessionData);
+    
+    // Convert string dates back to Date objects
+    exchangeSession.createdAt = new Date(exchangeSession.createdAt);
+    exchangeSession.expiresAt = new Date(exchangeSession.expiresAt);
 
     if (exchangeSession.isUsed) {
       throw createAuthError(
@@ -163,7 +220,7 @@ class TokenExchangeService {
     }
 
     if (new Date() > exchangeSession.expiresAt) {
-      this.exchanges.delete(exchangeToken);
+      await this.redis.del(redisKey);
       throw createAuthError(
         AuthErrorCode.TOKEN_EXPIRED,
         'Exchange token has expired'
@@ -178,8 +235,9 @@ class TokenExchangeService {
       );
     }
 
-    // Mark as used
+    // Mark as used and update in Redis
     exchangeSession.isUsed = true;
+    await this.redis.setex(redisKey, 60, JSON.stringify(exchangeSession)); // Keep for 1 minute for audit
 
     // Generate long-lived desktop token
     const desktopToken = await this.jwtService.generateToken({
@@ -206,8 +264,8 @@ class TokenExchangeService {
       },
     });
 
-    // Clean up exchange session
-    this.exchanges.delete(exchangeToken);
+    // Clean up exchange session - delete after successful use
+    await this.redis.del(redisKey);
 
     return {
       success: true,
@@ -231,9 +289,17 @@ class TokenExchangeService {
     deviceInfo?: any;
     expiresAt?: Date;
   }> {
-    const exchangeSession = this.exchanges.get(exchangeToken);
+    const redisKey = `${this.keyPrefix}${exchangeToken}`;
+    const sessionData = await this.redis.get(redisKey);
 
-    if (!exchangeSession || exchangeSession.isUsed || new Date() > exchangeSession.expiresAt) {
+    if (!sessionData) {
+      return { valid: false };
+    }
+
+    const exchangeSession: TokenExchangeSession = JSON.parse(sessionData);
+    exchangeSession.expiresAt = new Date(exchangeSession.expiresAt);
+
+    if (exchangeSession.isUsed || new Date() > exchangeSession.expiresAt) {
       return { valid: false };
     }
 
@@ -249,38 +315,69 @@ class TokenExchangeService {
   }
 
   /**
-   * Generate secure exchange token
+   * Generate cryptographically secure exchange token
    */
   private generateSecureExchangeToken(): string {
-    // Generate cryptographically secure random token
-    const randomBytes = Buffer.from(Array.from({ length: 32 }, () => 
-      Math.floor(Math.random() * 256)
-    ));
+    // Generate cryptographically secure random bytes
+    const randomBytes = crypto.randomBytes(32);
     
+    // Add timestamp for ordering and uniqueness
     const timestamp = Date.now().toString(36);
+    
+    // Add UUID for additional entropy
     const uuid = uuidv4().replace(/-/g, '');
     
-    return `${timestamp}_${uuid}_${randomBytes.toString('hex')}`;
+    // Combine all components and hash for final security
+    const tokenData = `${timestamp}_${uuid}_${randomBytes.toString('hex')}`;
+    const hash = crypto.createHash('sha256').update(tokenData).digest('hex');
+    
+    return `exch_${timestamp}_${hash.substring(0, 48)}`;
   }
 
   /**
    * Cleanup expired exchange sessions
    */
-  private cleanupExpiredExchanges(): void {
-    const now = new Date();
-    for (const [token, session] of this.exchanges.entries()) {
-      if (now > session.expiresAt) {
-        this.exchanges.delete(token);
+  private async cleanupExpiredExchanges(): Promise<void> {
+    try {
+      const pattern = `${this.keyPrefix}*`;
+      const keys = await this.redis.keys(pattern);
+      let cleanedCount = 0;
+
+      for (const key of keys) {
+        const sessionData = await this.redis.get(key);
+        if (sessionData) {
+          try {
+            const session: TokenExchangeSession = JSON.parse(sessionData);
+            session.expiresAt = new Date(session.expiresAt);
+            
+            if (new Date() > session.expiresAt) {
+              await this.redis.del(key);
+              cleanedCount++;
+            }
+          } catch (parseError) {
+            // Invalid JSON, delete the key
+            await this.redis.del(key);
+            cleanedCount++;
+          }
+        }
       }
+
+      if (cleanedCount > 0) {
+        console.log(`Cleaned up ${cleanedCount} expired token exchange sessions`);
+      }
+    } catch (error) {
+      console.error('Error during token exchange cleanup:', error);
     }
   }
 
   /**
    * Cleanup service
    */
-  cleanup(): void {
+  async cleanup(): Promise<void> {
     clearInterval(this.cleanupInterval);
-    this.exchanges.clear();
+    
+    // Final cleanup of any remaining sessions
+    await this.cleanupExpiredExchanges();
   }
 }
 
