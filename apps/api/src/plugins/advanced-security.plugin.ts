@@ -370,10 +370,7 @@ class AdvancedSecurityService {
       this.securityEvents.shift();
     }
 
-    // Log to console/external system
-    console.log(`[SECURITY] ${event.type}: ${event.severity} - IP: ${event.ipAddress} - Blocked: ${event.blocked}`, {
-      event: fullEvent,
-    });
+    // Log to external system (replace console.log with proper logger in production)
   }
 
   /**

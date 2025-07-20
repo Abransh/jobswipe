@@ -1,0 +1,17 @@
+Hey CTO of Jobswipe, we have a very big issue to be understood and resolved so as per you know we are building one of the greatest      │
+│   technical project, for that we also implementing the best system, and since its multi platofrm project and mono repo we have made a     │
+│   packages folder with all the shared data now come to @packages/shared/src/ read all the files inside, like all the files all the        │
+│   folders inside, now also read @packages/types/src/ and @packages/utils/src/ , all of them. Now lets come to backend @apps/api/src/ all  │
+│   the files here, so we are just on a path to devlop authentication, and user login, so we were earlier using nextauth but now we are     │
+│   fully Jwt based, after reading understanding both packages and api, we come to @apps/web/src/ , read all the files now here too, we     │
+│   had to implment the frotnend now, after packages, database, backend, now time to make frontend utilise the things we have made, now i   │
+│   dont understand why frontend has many issues also espcially why do we have                                                              │
+│   @apps/web/src/components/auth/enhanced/EnhancedSignUpForm.tsx and @apps/web/src/components/auth/SignUpForm.tsx and same                 │
+│   EnhancedSigninFOrm.tsx and SignInFOrm.tsx, like we should use only one. and other files isnide @apps/web/src/components/ read all the   │
+│   folders and files inside it, and why do we have a dektop folder inside a web component, we have a desktop app in electron though which  │
+│   is apps/desktop, is it okay to have this dektop component folder inside there i think the project is getting a mess as it is becoming   │
+│   bigger, help me analyse the things we are messing up. Since you are the CTO of this app and 30+ years experienced developer you job     │
+│   is to fix the shit we have done, Rather writing more code i want you to fix the existing one and functionalities should start working,
+│   after all we have worked on so many things read @rules.md to follow rules, The is a big application you will always make everything     │
+│   work in sync, you will always work with the knowledge, using cache tokes and memory to store things compute think logic, you have to    │
+│   always be logical and implement the best backend and code ever. ULTRATHINK PLAN AND MAKE THE BEST PLAN FOR US TO CARRY FORWARD 

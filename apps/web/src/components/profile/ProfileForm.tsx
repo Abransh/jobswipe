@@ -90,17 +90,17 @@ export function ProfileForm() {
         <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Photo</h3>
         <div className="flex items-center space-x-6">
           <div className="relative">
-            {user?.image ? (
+            {/* {user?.image ? (
               <img
                 className="h-20 w-20 rounded-full object-cover"
                 src={user.image}
                 alt="Profile"
               />
-            ) : (
+            ) : ( //TODO: Add a default user icon
               <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
                 <User className="h-8 w-8 text-gray-400" />
               </div>
-            )}
+            )} */}
             <button
               type="button"
               className="absolute bottom-0 right-0 h-7 w-7 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700"

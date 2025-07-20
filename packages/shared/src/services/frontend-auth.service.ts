@@ -9,8 +9,6 @@
 // Browser environment type declarations
 declare const window: Window | undefined;
 declare const document: Document | undefined;
-declare const sessionStorage: Storage | undefined;
-declare const localStorage: Storage | undefined;
 
 import { 
   LoginRequest, 
@@ -83,6 +81,11 @@ class SecureTokenStorage implements TokenStorage {
    */
   getAccessToken(): string | null {
     try {
+      // Only access storage in browser environment
+      if (typeof window === 'undefined') {
+        return null;
+      }
+      
       // In browser environment, use httpOnly cookies when possible
       if (typeof document !== 'undefined') {
         const token = this.getCookie(this.ACCESS_TOKEN_KEY);
@@ -90,7 +93,11 @@ class SecureTokenStorage implements TokenStorage {
       }
       
       // Fallback to sessionStorage for development
-      return sessionStorage.getItem(this.ACCESS_TOKEN_KEY);
+      if (window.sessionStorage) {
+        return window.sessionStorage.getItem(this.ACCESS_TOKEN_KEY);
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error retrieving access token:', error);
       return null;
@@ -102,9 +109,14 @@ class SecureTokenStorage implements TokenStorage {
    */
   setAccessToken(token: string): void {
     try {
+      // Only access storage in browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
       // In production, this should be set via httpOnly cookie from backend
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem(this.ACCESS_TOKEN_KEY, token);
+      if (window.sessionStorage) {
+        window.sessionStorage.setItem(this.ACCESS_TOKEN_KEY, token);
       }
     } catch (error) {
       console.error('Error storing access token:', error);
@@ -116,6 +128,11 @@ class SecureTokenStorage implements TokenStorage {
    */
   getRefreshToken(): string | null {
     try {
+      // Only access storage in browser environment
+      if (typeof window === 'undefined') {
+        return null;
+      }
+      
       // In browser environment, use httpOnly cookies when possible
       if (typeof document !== 'undefined') {
         const token = this.getCookie(this.REFRESH_TOKEN_KEY);
@@ -123,7 +140,11 @@ class SecureTokenStorage implements TokenStorage {
       }
       
       // Fallback to localStorage for development
-      return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+      if (window.localStorage) {
+        return window.localStorage.getItem(this.REFRESH_TOKEN_KEY);
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error retrieving refresh token:', error);
       return null;
@@ -135,9 +156,14 @@ class SecureTokenStorage implements TokenStorage {
    */
   setRefreshToken(token: string): void {
     try {
+      // Only access storage in browser environment
+      if (typeof window === 'undefined') {
+        return;
+      }
+      
       // In production, this should be set via httpOnly cookie from backend
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
+      if (window.localStorage) {
+        window.localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
       }
     } catch (error) {
       console.error('Error storing refresh token:', error);
@@ -149,11 +175,17 @@ class SecureTokenStorage implements TokenStorage {
    */
   clearTokens(): void {
     try {
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.removeItem(this.ACCESS_TOKEN_KEY);
+      // Only access storage in browser environment
+      if (typeof window === 'undefined') {
+        return;
       }
-      if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+      
+      if (window.sessionStorage) {
+        window.sessionStorage.removeItem(this.ACCESS_TOKEN_KEY);
+      }
+      
+      if (window.localStorage) {
+        window.localStorage.removeItem(this.REFRESH_TOKEN_KEY);
       }
       
       // Clear cookies if available
@@ -229,13 +261,24 @@ export class FrontendAuthService {
     this.config = config;
     this.tokenStorage = new SecureTokenStorage();
     
-    // Initialize auth state on service creation
-    this.initializeAuthState();
+    // Don't initialize auth state during SSR - will be initialized client-side
+    // this.initializeAuthState();
   }
 
   // ===========================================================================
   // PUBLIC API METHODS
   // ===========================================================================
+
+  /**
+   * Initialize auth state - should be called on client-side only
+   */
+  async initialize(): Promise<void> {
+    if (typeof window === 'undefined') {
+      return; // Don't initialize on server-side
+    }
+    
+    await this.initializeAuthState();
+  }
 
   /**
    * Login with email and password
@@ -477,7 +520,7 @@ export class FrontendAuthService {
     try {
       this.setLoading(true);
       
-      await this.makeAuthRequest('/auth/password/reset-request', {
+      await this.makeAuthRequest('/auth/password/reset', {
         method: 'POST',
         body: JSON.stringify({ email, source: AuthSource.WEB }),
       });
@@ -497,7 +540,7 @@ export class FrontendAuthService {
     try {
       this.setLoading(true);
       
-      await this.makeAuthRequest('/auth/password/reset', {
+      await this.makeAuthRequest('/auth/password/reset-complete', {
         method: 'POST',
         body: JSON.stringify({ 
           token, 

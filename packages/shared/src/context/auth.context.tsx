@@ -16,15 +16,14 @@ import {
   FrontendAuthService, 
   AuthState, 
   AuthConfig, 
-  getAuthService,
-  defaultAuthConfig 
+  getAuthService
 } from '../services/frontend-auth.service';
 import { 
   AuthenticatedUser, 
   LoginResponse,
   RegisterRequest, 
   RegisterResponse,
-  AuthProvider 
+  AuthProvider as AuthProviderEnum 
 } from '../types/auth';
 
 // =============================================================================
@@ -46,8 +45,8 @@ export interface AuthContextValue {
   clearError: () => void;
   
   // OAuth actions
-  loginWithOAuth: (provider: AuthProvider, redirectUri?: string) => void;
-  handleOAuthCallback: (code: string, state: string, provider: AuthProvider) => Promise<LoginResponse>;
+  loginWithOAuth: (provider: AuthProviderEnum, redirectUri?: string) => void;
+  handleOAuthCallback: (code: string, state: string, provider: AuthProviderEnum) => Promise<LoginResponse>;
   
   // Profile actions
   updateProfile: (data: Partial<AuthenticatedUser>) => Promise<AuthenticatedUser>;
@@ -83,6 +82,7 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     isLoading: true,
     error: null,
   });
+  const [isClient, setIsClient] = React.useState(false);
 
   // Get auth service instance
   const authService = React.useMemo(
@@ -90,20 +90,8 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     [config]
   );
 
-  // Subscribe to auth state changes
-  useEffect(() => {
-    const unsubscribe = authService.subscribe((newState: AuthState) => {
-      setAuthState(newState);
-    });
-
-    // Initialize with current state
-    setAuthState(authService.getAuthState());
-
-    return unsubscribe;
-  }, [authService]);
-
   // ==========================================================================
-  // AUTH ACTION IMPLEMENTATIONS
+  // AUTH ACTION IMPLEMENTATIONS (MUST BE BEFORE CONDITIONAL RENDERING)
   // ==========================================================================
 
   const login = React.useCallback(
@@ -138,7 +126,7 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
   // ==========================================================================
 
   const loginWithOAuth = React.useCallback(
-    (provider: AuthProvider, redirectUri?: string): void => {
+    (provider: AuthProviderEnum, redirectUri?: string): void => {
       const authUrl = authService.getOAuthUrl(provider, redirectUri);
       if (typeof window !== 'undefined') {
         window.location.href = authUrl;
@@ -148,7 +136,7 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
   );
 
   const handleOAuthCallback = React.useCallback(
-    async (code: string, state: string, provider: AuthProvider): Promise<LoginResponse> => {
+    async (code: string, state: string, provider: AuthProviderEnum): Promise<LoginResponse> => {
       return authService.handleOAuthCallback(code, state, provider);
     },
     [authService]
@@ -191,8 +179,36 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     return authService;
   }, [authService]);
 
+  // Initialize client-side flag
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Subscribe to auth state changes and initialize when client-side
+  useEffect(() => {
+    if (!isClient) return;
+
+    const unsubscribe = authService.subscribe((newState: AuthState) => {
+      setAuthState(newState);
+    });
+
+    // Initialize auth service on client-side
+    authService.initialize().then(() => {
+      // Set initial state after initialization
+      setAuthState(authService.getAuthState());
+    }).catch(() => {
+      setAuthState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to initialize authentication'
+      }));
+    });
+
+    return unsubscribe;
+  }, [authService, isClient]);
+
   // ==========================================================================
-  // CONTEXT VALUE
+  // CONTEXT VALUE (MUST BE BEFORE CONDITIONAL RENDERING)
   // ==========================================================================
 
   const contextValue: AuthContextValue = React.useMemo(
@@ -240,6 +256,20 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     ]
   );
 
+  // Show loading state during SSR and initial client-side hydration
+  if (!isClient) {
+    return (
+      <AuthContext.Provider value={contextValue}>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-sm text-gray-600">Initializing authentication...</p>
+          </div>
+        </div>
+      </AuthContext.Provider>
+    );
+  }
+
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
@@ -257,7 +287,41 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   
+  // Provide SSR-safe defaults when context is not available
   if (!context) {
+    // During SSR or when outside provider, provide safe defaults
+    if (typeof window === 'undefined') {
+      return {
+        // Auth state
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        error: null,
+        
+        // Auth actions - no-op functions for SSR
+        login: async () => ({ success: false, error: 'Not available during SSR' }),
+        register: async () => ({ success: false, error: 'Not available during SSR' }),
+        logout: async () => {},
+        refreshToken: async () => false,
+        clearError: () => {},
+        
+        // OAuth actions - no-op functions for SSR
+        loginWithOAuth: () => {},
+        handleOAuthCallback: async () => ({ success: false, error: 'Not available during SSR' }),
+        
+        // Profile actions - no-op functions for SSR
+        updateProfile: async () => { throw new Error('Not available during SSR'); },
+        
+        // Password actions - no-op functions for SSR
+        requestPasswordReset: async () => {},
+        resetPassword: async () => {},
+        
+        // Utility methods
+        getAuthService: () => { throw new Error('Auth service not available during SSR'); },
+      };
+    }
+    
+    // On client-side, require proper provider
     throw new Error('useAuth must be used within an AuthProvider');
   }
   
@@ -493,4 +557,3 @@ export function GuestOnly({
 // =============================================================================
 
 export default AuthContext;
-export type { AuthContextValue, AuthProviderProps };

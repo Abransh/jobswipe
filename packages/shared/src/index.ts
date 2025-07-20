@@ -36,6 +36,30 @@ export {
 // Authentication types and utilities
 export * from './types/auth';
 
+// Export context for React apps (explicit exports to avoid conflicts)
+export { 
+  useAuth, 
+  useAuthState, 
+  useUser, 
+  useIsAuthenticated, 
+  useAuthLoading, 
+  useAuthError, 
+  useLogin, 
+  useRegister, 
+  useLogout, 
+  useOAuth, 
+  useProfile, 
+  usePassword,
+  withAuth,
+  withGuest,
+  AuthRequired,
+  GuestOnly,
+  AuthProvider as AuthContextProvider
+} from './context/auth.context';
+
+// Export frontend auth service
+export * from './services/frontend-auth.service';
+
 // Common types and utilities  
 export * from './types/common';
 

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { SignUpForm } from '@/components/auth/SignUpForm';
+import { EnhancedSignUpForm } from '@/components/auth/enhanced/EnhancedSignUpForm';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ export default function SignUpPage() {
       authToggleLinkText="Sign in"
     >
       <Suspense fallback={<div>Loading...</div>}>
-        <SignUpForm />
+        <EnhancedSignUpForm />
       </Suspense>
     </AuthLayout>
   );

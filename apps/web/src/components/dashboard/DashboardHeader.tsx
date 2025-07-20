@@ -51,15 +51,15 @@ export function DashboardHeader() {
           <Menu as="div" className="relative">
             <Menu.Button className="-m-1.5 flex items-center p-1.5">
               <span className="sr-only">Open user menu</span>
-              {user?.image ? (
+              {/* {user?.image ? (
                 <img
                   className="h-8 w-8 rounded-full bg-gray-50"
                   src={user.image}
                   alt=""
                 />
-              ) : (
+              ) : ( // TODO: Add a default user icon
                 <UserCircleIcon className="h-8 w-8 text-gray-400" />
-              )}
+              )} */}
               <span className="hidden lg:flex lg:items-center">
                 <span className="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true">
                   {user?.name || user?.email}

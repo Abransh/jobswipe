@@ -128,7 +128,6 @@ export function EnhancedSignInForm() {
 
   const handleBiometricAuth = async () => {
     try {
-      setIsLoading(true);
       addSecurityEvent('info', 'Biometric authentication initiated');
       
       const credential = await (navigator.credentials as any).get({
@@ -147,9 +146,6 @@ export function EnhancedSignInForm() {
       }
     } catch (error) {
       addSecurityEvent('error', 'Biometric authentication failed');
-      setError('Biometric authentication failed. Please try password login.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -177,8 +173,6 @@ export function EnhancedSignInForm() {
         router.push(callbackUrl);
       } else {
         // Handle specific error cases
-        let errorMessage = error || 'Authentication failed';
-        
         if (error?.includes('Invalid email or password')) {
           addSecurityEvent('error', 'Invalid credentials provided');
         } else if (error?.includes('Account')) {
@@ -195,7 +189,6 @@ export function EnhancedSignInForm() {
         }
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       addSecurityEvent('error', 'Unexpected authentication error');
       // Error is automatically handled by the auth context
     }

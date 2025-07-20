@@ -193,8 +193,9 @@ export function EnhancedSignUpForm() {
     setIsCheckingEmail(true);
     
     try {
-      // In a real implementation, this would call an API endpoint
-      const response = await fetch('/api/auth/check-email', {
+      // Call the backend API directly
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const response = await fetch(`${apiBaseUrl}/v1/auth/check-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -266,8 +267,6 @@ export function EnhancedSignUpForm() {
         privacyAccepted: data.privacyAccepted,
         marketingConsent: data.marketingConsent || false,
         timezone: data.timezone || userTimezone,
-        companySize: data.companySize || '',
-        industry: data.industry || '',
       });
 
       if (response.success && response.user) {
@@ -289,7 +288,6 @@ export function EnhancedSignUpForm() {
         }
       }
     } catch (error: any) {
-      console.error('Registration error:', error);
       addSecurityEvent('error', 'Unexpected registration error');
       // Error is automatically handled by the auth context
     }
