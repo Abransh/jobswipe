@@ -9,12 +9,20 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { 
-  JwtTokenService, 
+  ServerJwtTokenService, 
   RedisSessionService, 
   createJwtTokenService,
-  defaultJwtTokenService,
   defaultRedisSessionService
 } from '@jobswipe/shared';
+
+// Database import (conditional)
+let db: any = null;
+try {
+  const { db: database } = require('@jobswipe/database');
+  db = database;
+} catch (error) {
+  console.warn('Database package not available, services will continue without database connectivity');
+}
 
 // Define missing types locally to avoid import issues
 interface SecurityMiddlewareService {
@@ -263,13 +271,16 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   fastify.log.info('Initializing JWT Token Service...');
   
-  let jwtService: JwtTokenService;
+  let jwtService: ServerJwtTokenService;
   try {
     jwtService = createJwtTokenService({
       keyRotationInterval: config.jwt.keyRotationInterval,
       maxKeyAge: config.jwt.maxKeyAge,
       revokedTokensCleanupInterval: config.jwt.revokedTokensCleanupInterval,
     });
+
+    // Wait for service to initialize
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     serviceRegistry.register(
       'jwt',
@@ -334,11 +345,87 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   // REGISTER SERVICES WITH FASTIFY
   // =============================================================================
 
+  // =============================================================================
+  // DATABASE SERVICE (Optional)
+  // =============================================================================
+
+  if (db) {
+    fastify.log.info('Initializing Database Service...');
+    
+    try {
+      // Test database connection
+      await db.$queryRaw`SELECT 1`;
+      
+      serviceRegistry.register(
+        'database',
+        db,
+        async () => {
+          try {
+            const start = Date.now();
+            await db.$queryRaw`SELECT 1`;
+            const latency = Date.now() - start;
+            
+            return {
+              status: 'healthy',
+              details: {
+                latency,
+                connected: true,
+              },
+            };
+          } catch (error) {
+            return {
+              status: 'unhealthy',
+              details: {
+                connected: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              },
+            };
+          }
+        }
+      );
+      
+      fastify.log.info('✅ Database Service initialized successfully');
+    } catch (error) {
+      fastify.log.warn('⚠️  Database connection test failed:', error);
+      
+      // Register database service as unhealthy but still available
+      serviceRegistry.register(
+        'database',
+        db,
+        () => Promise.resolve({
+          status: 'unhealthy',
+          details: {
+            connected: false,
+            error: error instanceof Error ? error.message : 'Connection failed',
+          },
+        })
+      );
+    }
+    
+    // Add database cleanup on close
+    fastify.addHook('onClose', async () => {
+      try {
+        await db.$disconnect();
+        fastify.log.info('Database connection closed');
+      } catch (error) {
+        fastify.log.error('Error closing database connection:', error);
+      }
+    });
+  }
+
+  // =============================================================================
+  // REGISTER SERVICES WITH FASTIFY
+  // =============================================================================
+
   // Decorate Fastify instance with services
   fastify.decorate('jwtService', jwtService);
   fastify.decorate('sessionService', sessionService);
   fastify.decorate('securityService', securityService);
   fastify.decorate('serviceRegistry', serviceRegistry);
+  
+  if (db) {
+    fastify.decorate('db', db);
+  }
 
   // Add service health check endpoint
   fastify.get('/health/services', {
@@ -431,10 +518,11 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
 declare module 'fastify' {
   interface FastifyInstance {
-    jwtService: JwtTokenService;
+    jwtService: ServerJwtTokenService;
     sessionService: RedisSessionService;
     securityService: SecurityMiddlewareService;
     serviceRegistry: ServiceRegistry;
+    db?: any; // Prisma client (optional)
   }
 }
 

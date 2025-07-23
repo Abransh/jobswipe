@@ -69,8 +69,14 @@ export * from './utils/errors';
 // Date and time utilities
 export * from './utils/datetime';
 
-// Services
-export { JwtTokenService } from './services/jwt-token.service';
+// Services (Environment-Aware)
+// Server-only services (Node.js crypto dependencies)
+export { ServerJwtTokenService } from './services/server-jwt-token.service';
+
+// Browser-safe services (no crypto dependencies)
+export * from './services/browser-jwt-utils.service';
+
+// Universal services
 export { RedisSessionService } from './services/redis-session-stub.service';
 export { TokenExchangeService } from './services/token-exchange.service';
 export * from './services/factory';

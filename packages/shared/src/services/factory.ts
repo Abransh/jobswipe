@@ -6,7 +6,7 @@
  * @author JobSwipe Team
  */
 
-import { JwtTokenService } from './jwt-token.service';
+import { ServerJwtTokenService } from './server-jwt-token.service';
 import { RedisSessionService } from './redis-session-stub.service';
 
 /**
@@ -44,10 +44,10 @@ export interface SessionConfig {
 }
 
 /**
- * Create JWT Token Service with configuration
+ * Create JWT Token Service with configuration (Server-Only)
  */
-export function createJwtTokenService(config?: JwtServiceConfig): JwtTokenService {
-  return new JwtTokenService(
+export function createJwtTokenService(config?: JwtServiceConfig): ServerJwtTokenService {
+  return new ServerJwtTokenService(
     config?.keyRotationInterval,
     config?.maxKeyAge,
     config?.revokedTokensCleanupInterval
@@ -75,7 +75,7 @@ export {
   createRefreshTokenConfig,
   createDesktopTokenConfig,
   createVerificationTokenConfig
-} from './jwt-token.service';
+} from './server-jwt-token.service';
 
 /**
  * Security Middleware Service interface

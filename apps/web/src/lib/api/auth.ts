@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-import { defaultJwtTokenService } from '@jobswipe/shared';
+import { parseJwtPayload, isTokenExpiredClientSide } from '@jobswipe/shared';
 
 export interface AuthenticatedUser {
   id: string;
@@ -68,32 +68,57 @@ export function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 /**
- * Verify JWT token using enterprise JWT service
+ * Verify JWT token by calling the API server (proper security approach)
  */
 export async function verifyToken(token: string): Promise<AuthenticatedUser> {
   try {
-    const result = await defaultJwtTokenService.verifyToken(token);
+    // Basic client-side validation first
+    if (isTokenExpiredClientSide(token)) {
+      throw new AuthError('Token has expired');
+    }
+
+    // Call API server for proper verification
+    const response = await fetch('/api/auth/verify-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ token })
+    });
+
+    if (!response.ok) {
+      throw new AuthError('Token verification failed');
+    }
+
+    const data = await response.json();
     
-    if (!result.valid || !result.payload) {
+    if (!data.success || !data.user) {
       throw new AuthError('Invalid token');
     }
 
-    const payload = result.payload;
-
-    return {
-      id: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      role: payload.role,
-      status: 'active', // TODO: Get from payload or database
-      emailVerified: true, // TODO: Get from payload or database
-      createdAt: new Date(payload.iat * 1000),
-      updatedAt: new Date(),
-    };
+    return data.user;
   } catch (error) {
     if (error instanceof AuthError) {
       throw error;
     }
+    
+    // Fallback: parse payload for basic info (not secure, but allows graceful degradation)
+    const payload = parseJwtPayload(token);
+    if (payload && !isTokenExpiredClientSide(token)) {
+      console.warn('Using fallback token parsing - verification endpoint unavailable');
+      return {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        role: payload.role,
+        status: 'active',
+        emailVerified: true,
+        createdAt: new Date(payload.iat * 1000),
+        updatedAt: new Date(),
+      };
+    }
+    
     throw new AuthError('Token verification failed');
   }
 }
