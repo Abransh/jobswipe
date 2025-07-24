@@ -587,7 +587,7 @@ async function createServer(): Promise<FastifyInstance> {
   // =============================================================================
 
   // API version prefix
-  const apiPrefix = process.env.API_PREFIX || '/api/v1';
+  const apiPrefix = process.env.API_PREFIX || '/v1';
 
   // Load routes conditionally
   const routes = await loadRoutes();
