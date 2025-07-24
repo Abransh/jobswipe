@@ -567,13 +567,4 @@ export class BrowserAuthUtils {
  */
 export const defaultBrowserAuthUtils = new BrowserAuthUtils();
 
-// =============================================================================
-// EXPORTS
-// =============================================================================
-
-export {
-  parseJwtPayload,
-  parseJwtHeader,
-  isValidTokenFormat,
-  extractUserInfoFromToken,
-};
+// Functions are already exported inline above - no need for additional export block

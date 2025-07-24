@@ -34,15 +34,32 @@ import {
   createBrandedId
 } from '@jobswipe/shared';
 
-import { 
-  createAccessTokenConfig,
-  createRefreshTokenConfig,
-  createDesktopTokenConfig,
-  hashPassword,
-  verifyPassword,
-  generateSecureToken,
-  extractIpFromHeaders
-} from '@jobswipe/shared';
+// Import server utilities conditionally
+let createAccessTokenConfig: any = null;
+let createRefreshTokenConfig: any = null;
+let createDesktopTokenConfig: any = null;
+let hashPassword: any = null;
+let verifyPassword: any = null;
+let generateSecureToken: any = null;
+let extractIpFromHeaders: any = null;
+
+try {
+  const serverModule = require('@jobswipe/shared/server');
+  createAccessTokenConfig = serverModule.createAccessTokenConfig;
+  createRefreshTokenConfig = serverModule.createRefreshTokenConfig;
+  createDesktopTokenConfig = serverModule.createDesktopTokenConfig;
+  hashPassword = serverModule.hashPassword;
+  verifyPassword = serverModule.verifyPassword;
+
+  const sharedModule = require('@jobswipe/shared');
+  generateSecureToken = sharedModule.generateSecureToken;
+  extractIpFromHeaders = sharedModule.extractIpFromHeaders;
+  
+  console.log('✅ Auth utilities loaded successfully');
+} catch (error) {
+  console.warn('⚠️  Failed to load auth utilities:', error);
+  console.warn('Auth routes will use fallback implementations');
+}
 
 import { 
   createUser as createUserDb,

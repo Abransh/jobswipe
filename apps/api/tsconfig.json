@@ -24,7 +24,9 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@jobswipe/*": ["../../packages/*/src"]
+      "@jobswipe/*": ["../../packages/*/src"],
+      "@jobswipe/shared/server": ["../../packages/shared/dist/server"],
+      "@jobswipe/shared/browser": ["../../packages/shared/dist/browser"]
     }
   },
   "include": [

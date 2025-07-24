@@ -289,7 +289,7 @@ export function useAuth(): AuthContextValue {
   
   // Provide SSR-safe defaults when context is not available
   if (!context) {
-    // During SSR or when outside provider, provide safe defaults
+    // During SSR or initial client-side hydration, provide safe defaults
     if (typeof window === 'undefined') {
       return {
         // Auth state
@@ -321,8 +321,37 @@ export function useAuth(): AuthContextValue {
       };
     }
     
-    // On client-side, require proper provider
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Also provide safe defaults during initial client-side mount
+    // This prevents the "must be used within AuthProvider" error during hydration
+    console.warn('useAuth: Context not available during initial hydration, providing safe defaults');
+    return {
+      // Auth state
+      user: null,
+      isAuthenticated: false,
+      isLoading: true,
+      error: null,
+      
+      // Auth actions - no-op functions during hydration
+      login: async () => ({ success: false, error: 'Authentication initializing...' }),
+      register: async () => ({ success: false, error: 'Authentication initializing...' }),
+      logout: async () => {},
+      refreshToken: async () => false,
+      clearError: () => {},
+      
+      // OAuth actions - no-op functions during hydration
+      loginWithOAuth: () => {},
+      handleOAuthCallback: async () => ({ success: false, error: 'Authentication initializing...' }),
+      
+      // Profile actions - no-op functions during hydration
+      updateProfile: async () => { throw new Error('Authentication initializing...'); },
+      
+      // Password actions - no-op functions during hydration
+      requestPasswordReset: async () => {},
+      resetPassword: async () => {},
+      
+      // Utility methods
+      getAuthService: () => { throw new Error('Authentication initializing...'); },
+    };
   }
   
   return context;

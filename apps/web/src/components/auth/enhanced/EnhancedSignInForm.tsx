@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@jobswipe/shared';
+import { useAuth } from '@jobswipe/shared/browser';
 import Link from 'next/link';
 import { 
   Eye, 

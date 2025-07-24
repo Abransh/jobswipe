@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
-import { parseJwtPayload, isTokenExpiredClientSide } from '@jobswipe/shared';
+import { parseJwtPayload, isTokenExpiredClientSide } from '@jobswipe/shared/browser';
 
 export interface AuthenticatedUser {
   id: string;

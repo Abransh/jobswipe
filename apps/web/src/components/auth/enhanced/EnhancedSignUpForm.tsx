@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth, AuthSource } from '@jobswipe/shared';
+import { useAuth } from '@jobswipe/shared/browser';
+import { AuthSource } from '@jobswipe/shared';
 import { 
   Eye, 
   EyeOff, 
@@ -194,7 +195,7 @@ export function EnhancedSignUpForm() {
     
     try {
       // Call the backend API directly
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const response = await fetch(`${apiBaseUrl}/v1/auth/check-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

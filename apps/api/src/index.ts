@@ -15,11 +15,21 @@ import swaggerUi from '@fastify/swagger-ui';
 // Import route handlers (ensure they exist first)
 async function loadRoutes() {
   try {
+    console.log('Loading enterprise authentication routes...');
     const { registerAuthRoutes } = await import('./routes/auth.routes');
+    console.log('Auth routes loaded successfully');
+    
     const tokenExchangeRoutes = await import('./routes/token-exchange.routes');
+    console.log('Token exchange routes loaded successfully');
+    
     return { registerAuthRoutes, tokenExchangeRoutes: tokenExchangeRoutes.default };
   } catch (error) {
-    console.warn('Advanced routes not available, using basic routes');
+    console.error('❌ Failed to load enterprise routes:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    console.warn('Falling back to basic routes');
     return null;
   }
 }
@@ -38,11 +48,24 @@ async function loadDatabase() {
 // Import plugins conditionally
 async function loadPlugins() {
   try {
+    console.log('Loading enterprise plugins...');
+    
     const securityPlugin = await import('./plugins/security.plugin');
+    console.log('Security plugin loaded');
+    
     const servicesPlugin = await import('./plugins/services.plugin');
+    console.log('Services plugin loaded');
+    
     const advancedSecurityPlugin = await import('./plugins/advanced-security.plugin');
+    console.log('Advanced security plugin loaded');
+    
     const loggingPlugin = await import('./plugins/logging.plugin');
+    console.log('Logging plugin loaded');
+    
     const monitoringPlugin = await import('./plugins/monitoring.plugin');
+    console.log('Monitoring plugin loaded');
+    
+    console.log('✅ All enterprise plugins loaded successfully');
     
     return {
       securityPlugin: securityPlugin.default,
@@ -52,7 +75,12 @@ async function loadPlugins() {
       monitoringPlugin: monitoringPlugin.default,
     };
   } catch (error) {
-    console.warn('Enterprise plugins not available, using basic security');
+    console.error('❌ Failed to load enterprise plugins:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    console.warn('Falling back to basic security');
     return null;
   }
 }

@@ -57,17 +57,33 @@ export function createJwtTokenService(config?: JwtServiceConfig): ServerJwtToken
 // This function is now defined below after the SecurityMiddlewareService interface
 
 /**
- * Default JWT Token Service instance
+ * Get default JWT Token Service instance (SERVER-ONLY)
+ * This function creates the instance only when called, preventing browser initialization
  */
-export const defaultJwtTokenService = createJwtTokenService();
+export function getDefaultJwtTokenService(): ServerJwtTokenService | null {
+  if (typeof window !== 'undefined') {
+    console.warn('Default JWT Token Service not available in browser environment');
+    return null;
+  }
+  
+  try {
+    return createJwtTokenService();
+  } catch (error) {
+    console.error('Failed to create default JWT Token Service:', error);
+    return null;
+  }
+}
 
 /**
- * Default Redis Session Service instance
+ * Get default Redis Session Service instance
+ * This function creates the instance only when called, preventing browser initialization
  */
-export const defaultRedisSessionService = createRedisSessionService({
-  host: 'localhost',
-  port: 6379,
-});
+export function getDefaultRedisSessionService(): RedisSessionService {
+  return createRedisSessionService({
+    host: 'localhost',
+    port: 6379,
+  });
+}
 
 // Re-export JWT token configuration functions
 export {

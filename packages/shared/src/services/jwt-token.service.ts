@@ -87,7 +87,22 @@ export class JwtTokenService {
     private readonly maxKeyAge: number = 7 * 24 * 60 * 60 * 1000, // 7 days
     private readonly revokedTokensCleanupInterval: number = 60 * 60 * 1000 // 1 hour
   ) {
-    this.initialize();
+    // Only initialize in Node.js environment
+    if (this.isNodeEnvironment()) {
+      this.initialize();
+    } else {
+      console.warn('JwtTokenService: Skipping initialization in browser environment');
+    }
+  }
+
+  /**
+   * Check if running in Node.js environment
+   */
+  private isNodeEnvironment(): boolean {
+    return typeof window === 'undefined' && 
+           typeof process !== 'undefined' && 
+           typeof process.versions === 'object' &&
+           typeof process.versions.node === 'string';
   }
 
   /**
@@ -119,9 +134,13 @@ export class JwtTokenService {
   }
 
   /**
-   * Generate a new RSA key pair
+   * Generate a new RSA key pair (SERVER-ONLY)
    */
   private async generateKeyPair(): Promise<JwtKeyPair> {
+    if (!this.isNodeEnvironment()) {
+      throw new Error('generateKeyPair can only be called in Node.js environment');
+    }
+
     try {
       const keyId = crypto.randomUUID();
       const keyPair = crypto.generateKeyPairSync('rsa', {
@@ -215,9 +234,13 @@ export class JwtTokenService {
   }
 
   /**
-   * Create a JWT token
+   * Create a JWT token (SERVER-ONLY)
    */
   async createToken(config: JwtTokenConfig): Promise<string> {
+    if (!this.isNodeEnvironment()) {
+      throw new Error('createToken can only be called in Node.js environment');
+    }
+
     try {
       const currentKey = this.getCurrentKey();
       const now = Math.floor(Date.now() / 1000);
@@ -278,9 +301,13 @@ export class JwtTokenService {
   }
 
   /**
-   * Verify a JWT token
+   * Verify a JWT token (SERVER-ONLY)
    */
   async verifyToken(token: string): Promise<JwtVerificationResult> {
+    if (!this.isNodeEnvironment()) {
+      return { valid: false, error: 'Token verification can only be performed in Node.js environment' };
+    }
+
     try {
       const parts = token.split('.');
       if (parts.length !== 3) {
@@ -512,13 +539,18 @@ export class JwtTokenService {
 // =============================================================================
 
 /**
- * Create a JWT token service instance
+ * Create a JWT token service instance (SERVER-ONLY)
  */
 export function createJwtTokenService(config?: {
   keyRotationInterval?: number;
   maxKeyAge?: number;
   revokedTokensCleanupInterval?: number;
 }): JwtTokenService {
+  // Check if running in Node.js environment
+  if (typeof window !== 'undefined') {
+    throw new Error('createJwtTokenService can only be called in Node.js environment. Use browser-safe JWT utilities for client-side operations.');
+  }
+
   return new JwtTokenService(
     config?.keyRotationInterval,
     config?.maxKeyAge,
@@ -635,13 +667,36 @@ export function createVerificationTokenConfig(
 }
 
 // =============================================================================
-// DEFAULT INSTANCE
+// DEFAULT INSTANCE (SERVER-ONLY)
 // =============================================================================
 
 /**
- * Default JWT token service instance
+ * Check if running in Node.js environment
  */
-export const defaultJwtTokenService = createJwtTokenService();
+const isNodeEnvironment = (): boolean => {
+  return typeof window === 'undefined' && 
+         typeof process !== 'undefined' && 
+         typeof process.versions === 'object' &&
+         typeof process.versions.node === 'string';
+};
+
+/**
+ * Default JWT token service instance (SERVER-ONLY)
+ * This will only be created in Node.js environment to prevent browser errors
+ */
+export const defaultJwtTokenService = (() => {
+  if (!isNodeEnvironment()) {
+    console.warn('JWT Token Service attempted to initialize in browser environment. This service is server-only.');
+    return null;
+  }
+  
+  try {
+    return createJwtTokenService();
+  } catch (error) {
+    console.error('Failed to initialize JWT Token Service:', error);
+    return null;
+  }
+})();
 
 // =============================================================================
 // UTILITY FUNCTIONS

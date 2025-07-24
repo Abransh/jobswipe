@@ -59,7 +59,7 @@ export interface OAuthProvider {
   authUrl: string;
 }
 
-export interface TokenStorage {
+export interface FrontendTokenStorage {
   getAccessToken(): string | null;
   setAccessToken(token: string): void;
   getRefreshToken(): string | null;
@@ -72,7 +72,7 @@ export interface TokenStorage {
 // TOKEN STORAGE IMPLEMENTATION
 // =============================================================================
 
-class SecureTokenStorage implements TokenStorage {
+class SecureTokenStorage implements FrontendTokenStorage {
   private readonly ACCESS_TOKEN_KEY = 'jobswipe_access_token';
   private readonly REFRESH_TOKEN_KEY = 'jobswipe_refresh_token';
 
@@ -246,7 +246,7 @@ class SecureTokenStorage implements TokenStorage {
 
 export class FrontendAuthService {
   private config: AuthConfig;
-  private tokenStorage: TokenStorage;
+  private tokenStorage: FrontendTokenStorage;
   private refreshTimer: NodeJS.Timeout | null = null;
   private authState: AuthState = {
     user: null,
@@ -777,7 +777,7 @@ export class FrontendAuthService {
 // =============================================================================
 
 export const defaultAuthConfig: AuthConfig = {
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
   tokenStorageKey: 'jobswipe_auth',
   refreshTokenStorageKey: 'jobswipe_refresh',
   sessionStorageKey: 'jobswipe_session',

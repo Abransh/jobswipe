@@ -4,3 +4,15 @@ hey CLAUDE.md now we have done a lot of work, we have to work on @apps/api/ chec
  implement the best efficient system which logs in user and the features we have made in other files 
  @packages/shared , @packages/database and other files inside @packages/,
   this is important you got to make the best code possible ULTRATHINK PLAN EXECUTE you are the CTO of this web app
+
+
+   everything works perfect, page is loading and all everything is working good. \                                                         │
+│   now lets work on actual sign up and sign in, now i see page, i fill details to login, i see 403 error, now make login work smoothly,    │
+│   with previous  ,now we have big code base its easy to find things, and i know tou can do it, , so the booking should be smooth,     │
+│   make a bug free code        │                                                                                                           │
+│   │   considering every aspect, you are 30+ years experienced dev, and CTO so you make the best app, ULTRATHINK , make sure you write     │
+│   the     │                                                                                                                               │
+│   │   best quality code since you have all the knowledge about the coding and this system.   abide @rules.md and you are the expert       │
+│   person to build auth, I think we have for no reason over complicated things, can you fix this, you are the CTO you have to make this    │
+│   work.e already started debugging this so help us complete it, Now you   │
+│   have to showcase your best codebase you can every make               

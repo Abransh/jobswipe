@@ -74,8 +74,8 @@ export class ServerJwtTokenService {
   private keyPairs: Map<string, JwtKeyPair> = new Map();
   private currentKeyId: string | null = null;
   private revokedTokens: Set<string> = new Set();
-  private keyRotationInterval: NodeJS.Timer | null = null;
-  private cleanupInterval: NodeJS.Timer | null = null;
+  private keyRotationInterval: NodeJS.Timeout | null = null;
+  private cleanupInterval: NodeJS.Timeout | null = null;
   private metrics: TokenMetrics = {
     tokensIssued: 0,
     tokensVerified: 0,

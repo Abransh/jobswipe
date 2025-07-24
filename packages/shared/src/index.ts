@@ -3,6 +3,11 @@
  * @description Exports all shared types, utilities, and constants
  * @version 1.0.0
  * @author JobSwipe Team
+ * 
+ * IMPORTANT: For better tree-shaking and to avoid server/client conflicts:
+ * - Use '@jobswipe/shared/browser' for React components and client-side code
+ * - Use '@jobswipe/shared/server' for API routes and server-side code
+ * - Use '@jobswipe/shared' (this file) only when you need both environments
  */
 
 // Constants (export explicitly to avoid conflicts)
@@ -69,25 +74,41 @@ export * from './utils/errors';
 // Date and time utilities
 export * from './utils/datetime';
 
-// Services (Environment-Aware)
-// Server-only services (Node.js crypto dependencies)
-export { ServerJwtTokenService } from './services/server-jwt-token.service';
+// =============================================================================
+// BROWSER-SAFE SERVICE EXPORTS
+// =============================================================================
 
-// Browser-safe services (no crypto dependencies)
+// Browser-safe services (always available)
 export * from './services/browser-jwt-utils.service';
 
-// Universal services
+// Universal services (work in both environments)
 export { RedisSessionService } from './services/redis-session-stub.service';
 export { TokenExchangeService } from './services/token-exchange.service';
-export * from './services/factory';
 
-// Export specific service types and functions for API usage
-export type { SecurityMiddlewareService } from './services/factory';
+// =============================================================================
+// SERVER-ONLY SERVICE EXPORTS (DO NOT IMPORT IN CLIENT CODE)
+// =============================================================================
+
+// WARNING: These exports should ONLY be used in server-side code (API routes, middleware, etc.)
+// Do NOT import these in React components or client-side code
+
+// Server-only services (Node.js crypto dependencies)
+// Only import these in your API routes or server-side code
+export { ServerJwtTokenService } from './services/server-jwt-token.service';
+
+// Factory functions for server-only services
 export { 
   createRedisSessionService, 
   createSecurityMiddlewareService,
-  createJwtTokenService
+  getDefaultJwtTokenService,
+  getDefaultRedisSessionService
 } from './services/factory';
+
+// Safe factory function (with environment guards)
+export { createJwtTokenService } from './services/jwt-token.service';
+
+// Export types (always safe to export)
+export type { SecurityMiddlewareService } from './services/factory';
 
 // Security utilities
 export * from './utils/security';
