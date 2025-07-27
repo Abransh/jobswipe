@@ -194,9 +194,8 @@ export function EnhancedSignUpForm() {
     setIsCheckingEmail(true);
     
     try {
-      // Call the backend API directly
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiBaseUrl}/v1/auth/check-email`, {
+      // Call the Next.js API route which will proxy to backend
+      const response = await fetch('/api/auth/check-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

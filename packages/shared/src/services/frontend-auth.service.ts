@@ -25,8 +25,7 @@ import {
   AuthTokens
 } from '../types/auth';
 import { 
-  JWT_CONFIG, 
-  API_VERSION 
+  JWT_CONFIG
 } from '../constants';
 
 // =============================================================================
@@ -245,8 +244,13 @@ class SecureTokenStorage implements FrontendTokenStorage {
 // =============================================================================
 
 export class FrontendAuthService {
-  private config: AuthConfig;
+  private _config: AuthConfig;
   private tokenStorage: FrontendTokenStorage;
+  
+  // Getter for debugging access
+  get config(): AuthConfig {
+    return this._config;
+  }
   private refreshTimer: NodeJS.Timeout | null = null;
   private authState: AuthState = {
     user: null,
@@ -258,8 +262,17 @@ export class FrontendAuthService {
   private listeners: Array<(state: AuthState) => void> = [];
 
   constructor(config: AuthConfig) {
-    this.config = config;
+    this._config = config;
     this.tokenStorage = new SecureTokenStorage();
+    
+    // Debug constructor config
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('🔧 [Auth Service] Constructor called with config:', {
+        apiBaseUrl: config.apiBaseUrl,
+        enableAutoRefresh: config.enableAutoRefresh,
+        configSource: 'constructor parameter'
+      });
+    }
     
     // Don't initialize auth state during SSR - will be initialized client-side
     // this.initializeAuthState();
@@ -299,7 +312,7 @@ export class FrontendAuthService {
         console.log('🚀 Login attempt starting:', { email });
       }
 
-      const response = await this.makeAuthRequest('/auth/login', {
+      const response = await this.makeAuthRequest('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(loginRequest),
       });
@@ -346,7 +359,7 @@ export class FrontendAuthService {
         console.log('🚀 Register attempt starting:', { email: registerData.email });
       }
 
-      const response = await this.makeAuthRequest('/auth/register', {
+      const response = await this.makeAuthRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({
           ...registerData,
@@ -391,7 +404,7 @@ export class FrontendAuthService {
       this.setLoading(true);
       
       // Call logout endpoint to invalidate session
-      await this.makeAuthRequest('/auth/logout', {
+      await this.makeAuthRequest('/api/auth/logout', {
         method: 'POST',
       });
     } catch (error) {
@@ -419,7 +432,7 @@ export class FrontendAuthService {
         source: AuthSource.WEB,
       };
 
-      const response = await this.makeAuthRequest('/auth/refresh', {
+      const response = await this.makeAuthRequest('/api/auth/refresh', {
         method: 'POST',
         body: JSON.stringify(refreshRequest),
       });
@@ -470,7 +483,7 @@ export class FrontendAuthService {
    * Get OAuth authorization URL
    */
   getOAuthUrl(provider: AuthProvider, redirectUri?: string): string {
-    const baseUrl = `${this.config.apiBaseUrl}/${API_VERSION}/auth/oauth/${provider}`;
+    const baseUrl = `${this._config.apiBaseUrl}/api/auth/oauth/${provider}`;
     const defaultRedirectUri = typeof window !== 'undefined' ? window.location.origin + '/auth/callback' : '/auth/callback';
     const params = new URLSearchParams({
       redirect_uri: redirectUri || defaultRedirectUri,
@@ -488,7 +501,7 @@ export class FrontendAuthService {
       this.setLoading(true);
       this.clearError();
 
-      const response = await this.makeAuthRequest(`/auth/oauth/${provider}/callback`, {
+      const response = await this.makeAuthRequest(`/api/auth/oauth/${provider}/callback`, {
         method: 'POST',
         body: JSON.stringify({
           code,
@@ -533,7 +546,7 @@ export class FrontendAuthService {
     try {
       this.setLoading(true);
       
-      const response = await this.makeAuthRequest('/auth/profile', {
+      const response = await this.makeAuthRequest('/api/auth/profile', {
         method: 'PATCH',
         body: JSON.stringify(profileData),
       });
@@ -560,7 +573,7 @@ export class FrontendAuthService {
     try {
       this.setLoading(true);
       
-      await this.makeAuthRequest('/auth/password/reset', {
+      await this.makeAuthRequest('/api/auth/password/reset', {
         method: 'POST',
         body: JSON.stringify({ email, source: AuthSource.WEB }),
       });
@@ -580,7 +593,7 @@ export class FrontendAuthService {
     try {
       this.setLoading(true);
       
-      await this.makeAuthRequest('/auth/password/reset-complete', {
+      await this.makeAuthRequest('/api/auth/password/reset-complete', {
         method: 'POST',
         body: JSON.stringify({ 
           token, 
@@ -610,7 +623,7 @@ export class FrontendAuthService {
       
       if (accessToken && !this.tokenStorage.isTokenExpired(accessToken)) {
         // Try to get current user with existing token
-        const response = await this.makeAuthRequest('/auth/me', {
+        const response = await this.makeAuthRequest('/api/auth/me', {
           method: 'GET',
         });
 
@@ -698,7 +711,17 @@ export class FrontendAuthService {
    * Make authenticated API request
    */
   private async makeAuthRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
-    const url = `${this.config.apiBaseUrl}/${API_VERSION}${endpoint}`;
+    const url = `${this._config.apiBaseUrl}${endpoint}`;
+    
+    // Debug URL construction
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 [Auth Service] Making request:', {
+        endpoint,
+        configApiBaseUrl: this._config.apiBaseUrl,
+        finalUrl: url,
+        method: options.method || 'GET'
+      });
+    }
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -823,14 +846,31 @@ export class FrontendAuthService {
 // DEFAULT CONFIGURATION
 // =============================================================================
 
+// Debug environment variables
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔧 [Auth Config] Environment variables:', {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NODE_ENV: process.env.NODE_ENV,
+  });
+}
+
 export const defaultAuthConfig: AuthConfig = {
-  apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  apiBaseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   tokenStorageKey: 'jobswipe_auth',
   refreshTokenStorageKey: 'jobswipe_refresh',
   sessionStorageKey: 'jobswipe_session',
   enableAutoRefresh: true,
   refreshThresholdMinutes: 5, // Refresh 5 minutes before expiration
 };
+
+// Debug default config
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔧 [Auth Config] Default config created:', {
+    apiBaseUrl: defaultAuthConfig.apiBaseUrl,
+    tokenStorageKey: defaultAuthConfig.tokenStorageKey,
+  });
+}
 
 // =============================================================================
 // SINGLETON INSTANCE
@@ -844,7 +884,26 @@ let authServiceInstance: FrontendAuthService | null = null;
 export function getAuthService(config?: Partial<AuthConfig>): FrontendAuthService {
   if (!authServiceInstance) {
     const finalConfig = { ...defaultAuthConfig, ...config };
+    
+    // Debug singleton creation
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('🔧 [Auth Service] Creating singleton instance:', {
+        defaultConfig: defaultAuthConfig,
+        overrideConfig: config,
+        finalConfig,
+        instanceExists: !!authServiceInstance
+      });
+    }
+    
     authServiceInstance = new FrontendAuthService(finalConfig);
+  } else {
+    // Debug existing instance
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('🔧 [Auth Service] Using existing singleton instance:', {
+        currentApiBaseUrl: authServiceInstance.config.apiBaseUrl,
+        overrideConfigProvided: !!config
+      });
+    }
   }
   return authServiceInstance;
 }

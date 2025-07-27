@@ -11,7 +11,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContextProvider
       config={{
-        apiBaseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+        apiBaseUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         enableAutoRefresh: true,
         refreshThresholdMinutes: 5,
       }}
