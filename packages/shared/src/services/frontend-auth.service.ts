@@ -73,8 +73,8 @@ export interface FrontendTokenStorage {
 // =============================================================================
 
 class SecureTokenStorage implements FrontendTokenStorage {
-  private readonly ACCESS_TOKEN_KEY = 'jobswipe_access_token';
-  private readonly REFRESH_TOKEN_KEY = 'jobswipe_refresh_token';
+  private readonly ACCESS_TOKEN_KEY = 'accessToken';
+  private readonly REFRESH_TOKEN_KEY = 'refreshToken';
 
   /**
    * Get access token from secure storage
@@ -294,17 +294,37 @@ export class FrontendAuthService {
         source: AuthSource.WEB,
       };
 
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Login attempt starting:', { email });
+      }
+
       const response = await this.makeAuthRequest('/auth/login', {
         method: 'POST',
         body: JSON.stringify(loginRequest),
       });
 
-      if (response.success && response.tokens && response.user) {
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📡 Login API response:', { 
+          success: response.success, 
+          hasUser: !!response.user,
+          hasTokens: !!response.tokens 
+        });
+      }
+
+      // Updated condition: tokens might not be in response due to HTTP-only cookies
+      if (response.success && response.user) {
         await this.handleSuccessfulAuth(response);
       }
 
       return response;
     } catch (error) {
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Login error:', error);
+      }
+      
       const authError = this.handleAuthError(error);
       this.setError(authError.message);
       throw authError;
@@ -321,6 +341,11 @@ export class FrontendAuthService {
       this.setLoading(true);
       this.clearError();
 
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Register attempt starting:', { email: registerData.email });
+      }
+
       const response = await this.makeAuthRequest('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -329,12 +354,27 @@ export class FrontendAuthService {
         }),
       });
 
-      if (response.success && response.tokens && response.user) {
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📡 Register API response:', { 
+          success: response.success, 
+          hasUser: !!response.user,
+          hasTokens: !!response.tokens 
+        });
+      }
+
+      // Updated condition: tokens might not be in response due to HTTP-only cookies
+      if (response.success && response.user) {
         await this.handleSuccessfulAuth(response);
       }
 
       return response;
     } catch (error) {
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Register error:', error);
+      }
+      
       const authError = this.handleAuthError(error);
       this.setError(authError.message);
       throw authError;
@@ -598,14 +638,21 @@ export class FrontendAuthService {
    * Handle successful authentication response
    */
   private async handleSuccessfulAuth(response: LoginResponse | RegisterResponse): Promise<void> {
-    if (!response.tokens || !response.user) {
-      throw createAuthError(AuthErrorCode.INTERNAL_ERROR, 'Invalid auth response');
+    if (!response.user) {
+      throw createAuthError(AuthErrorCode.INTERNAL_ERROR, 'Invalid auth response - no user data');
     }
 
-    // Store tokens securely
-    this.tokenStorage.setAccessToken(response.tokens.accessToken);
-    if (response.tokens.refreshToken) {
-      this.tokenStorage.setRefreshToken(response.tokens.refreshToken);
+    // Note: Tokens are set as HTTP-only cookies by the API route, not returned in response
+    // We don't need to manually store them as they're handled by the browser automatically
+    
+    // For development/debugging: Log if we can read the cookies
+    if (process.env.NODE_ENV === 'development') {
+      const accessToken = this.tokenStorage.getAccessToken();
+      const refreshToken = this.tokenStorage.getRefreshToken();
+      console.log('🔐 Auth success - tokens available:', { 
+        hasAccessToken: !!accessToken, 
+        hasRefreshToken: !!refreshToken 
+      });
     }
 
     // Update auth state

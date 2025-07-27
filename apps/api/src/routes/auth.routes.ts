@@ -370,13 +370,13 @@ async function loginHandler(
     }
     
     // Check account status
-    if (user.status !== 'active') {
-      return reply.status(401).send({
-        success: false,
-        error: `Account is ${user.status}`,
-        errorCode: AuthErrorCode.ACCOUNT_DISABLED,
-      });
-    }
+    // if (user.status !== 'active') {
+    //   return reply.status(401).send({
+    //     success: false,
+    //     error: `Account is ${user.status}`,
+    //     errorCode: AuthErrorCode.ACCOUNT_DISABLED,
+    //   });
+    // } // TODO :uncomment when account status is implemented
     
     // Create session
     const sessionOptions = {

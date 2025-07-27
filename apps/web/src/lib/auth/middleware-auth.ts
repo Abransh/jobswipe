@@ -181,8 +181,23 @@ function verifyTokenBasic(token: string): TokenVerificationResult {
  */
 export function verifyAuthFromRequest(request: NextRequest): MiddlewareAuthResult {
   try {
+    // Debug logging in development
+    if (process.env.NODE_ENV === 'development') {
+      const allCookies = request.cookies.getAll();
+      console.log('🍪 Available cookies:', allCookies.map(c => c.name));
+    }
+
     // Extract access token from cookies
     const accessToken = extractTokenFromCookies(request, JWT_CONSTANTS.ACCESS_TOKEN_COOKIE);
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔑 Token extraction:', { 
+        cookieName: JWT_CONSTANTS.ACCESS_TOKEN_COOKIE, 
+        hasToken: !!accessToken,
+        tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none'
+      });
+    }
     
     if (!accessToken) {
       return {
