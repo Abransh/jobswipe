@@ -40,6 +40,13 @@ model User {
   isDeleted     Boolean   @default(false)
   deletedAt     DateTime?
   
+  // Onboarding Tracking
+  onboardingCompleted Boolean   @default(false)
+  onboardingProgress  Int       @default(0) // Percentage 0-100
+  onboardingStep      Int       @default(1) // Current step 1-5
+  onboardingStartedAt DateTime?
+  onboardingCompletedAt DateTime?
+  
   // Metadata
   ipAddress     String?
   userAgent     String?
