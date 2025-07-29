@@ -151,3 +151,29 @@ export function createPaginationData(
     hasMore: page * limit < total,
   };
 }
+
+/**
+ * Create a generic API response (backwards compatibility)
+ */
+export function createApiResponse<T>(
+  data: T | null,
+  options: {
+    success: boolean;
+    error?: string;
+    message?: string;
+    details?: any;
+  },
+  statusCode?: number
+): NextResponse<ApiResponse<T>> {
+  const response: ApiResponse<T> = {
+    success: options.success,
+    ...(data !== null && { data }),
+    ...(options.error && { error: options.error }),
+    ...(options.message && { message: options.message }),
+    ...(options.details && { details: options.details }),
+  };
+
+  return NextResponse.json(response, { 
+    status: statusCode || (options.success ? 200 : 400) 
+  });
+}

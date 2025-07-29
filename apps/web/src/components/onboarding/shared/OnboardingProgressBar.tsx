@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, Circle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface OnboardingProgressBarProps {
   currentStep: number;
@@ -19,60 +19,92 @@ export function OnboardingProgressBar({
   return (
     <div className="bg-white border-b">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-            <span>Progress</span>
-            <span>{progress}% Complete</span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-sm font-medium text-gray-700">
+            Step {currentStep} of {totalSteps}
           </div>
-          
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <motion.div
-              className="bg-blue-600 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5, ease: 'easeInOut' }}
-            />
+          <div className="text-sm text-gray-500">
+            {progress}% Complete
           </div>
         </div>
 
-        {/* Step Dots */}
-        <div className="flex items-center justify-between">
-          {Array.from({ length: totalSteps }, (_, index) => {
-            const stepNumber = index + 1;
-            const isCompleted = completedSteps.includes(stepNumber);
-            const isCurrent = stepNumber === currentStep;
-            
-            return (
-              <div key={stepNumber} className="flex items-center">
-                <div className={`
-                  flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium
-                  ${isCurrent 
-                    ? 'bg-blue-600 text-white ring-4 ring-blue-100' 
-                    : isCompleted 
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }
-                `}>
-                  {isCompleted ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    stepNumber
-                  )}
+        {/* Progress Bar Track */}
+        <div className="relative">
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            {/* Progress Fill */}
+            <motion.div
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+            />
+          </div>
+
+          {/* Step Markers */}
+          <div className="absolute top-0 left-0 w-full h-2 flex justify-between">
+            {Array.from({ length: totalSteps }, (_, index) => {
+              const stepNumber = index + 1;
+              const isCompleted = completedSteps.includes(stepNumber);
+              const isCurrent = stepNumber === currentStep;
+              const stepProgress = ((stepNumber - 1) / (totalSteps - 1)) * 100;
+
+              return (
+                <div
+                  key={stepNumber}
+                  className="relative flex items-center justify-center"
+                  style={{ 
+                    left: `${stepProgress}%`,
+                    transform: 'translateX(-50%)'
+                  }}
+                >
+                  {/* Step Marker */}
+                  <motion.div
+                    className={cn(
+                      "w-4 h-4 rounded-full border-2 bg-white z-10 transition-colors duration-300",
+                      isCompleted && "border-blue-600 bg-blue-600",
+                      isCurrent && !isCompleted && "border-blue-600 bg-white",
+                      !isCompleted && !isCurrent && "border-gray-300 bg-white"
+                    )}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: isCurrent ? 1.2 : 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isCompleted && (
+                      <motion.div
+                        className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2, duration: 0.3 }}
+                      />
+                    )}
+                  </motion.div>
+
+                  {/* Step Label */}
+                  <div
+                    className={cn(
+                      "absolute top-6 text-xs font-medium whitespace-nowrap",
+                      isCurrent ? "text-blue-600" : "text-gray-500"
+                    )}
+                  >
+                    {stepNumber}
+                  </div>
                 </div>
-                
-                {stepNumber < totalSteps && (
-                  <div className={`
-                    w-full h-1 mx-2
-                    ${completedSteps.includes(stepNumber) 
-                      ? 'bg-green-600' 
-                      : 'bg-gray-200'
-                    }
-                  `} />
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Progress Text */}
+        <div className="mt-3 text-xs text-gray-500 text-center">
+          {completedSteps.length === totalSteps ? (
+            <span className="text-green-600 font-medium">
+              🎉 Onboarding Complete!
+            </span>
+          ) : (
+            <span>
+              {completedSteps.length} of {totalSteps} steps completed
+            </span>
+          )}
         </div>
       </div>
     </div>

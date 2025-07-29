@@ -68,6 +68,9 @@ export * from './services/frontend-auth.service';
 // Common types and utilities  
 export * from './types/common';
 
+// Validation schemas
+export * from './schemas';
+
 // Error handling utilities
 export * from './utils/errors';
 

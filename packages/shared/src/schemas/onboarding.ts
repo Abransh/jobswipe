@@ -436,12 +436,4 @@ export const getPreviousStep = (currentStep: number): number => {
 // EXPORT ALL SCHEMAS
 // =============================================================================
 
-export {
-  professionalBackgroundSchema,
-  jobPreferencesSchema,
-  workPreferencesSchema,
-  notificationPreferencesSchema,
-  profileCompletionSchema,
-  onboardingSchema,
-  onboardingProgressSchema
-};
+// All schemas are already exported above, no need to re-export

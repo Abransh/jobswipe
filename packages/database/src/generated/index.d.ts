@@ -4182,10 +4182,14 @@ export namespace Prisma {
 
   export type UserAvgAggregateOutputType = {
     loginAttempts: number | null
+    onboardingProgress: number | null
+    onboardingStep: number | null
   }
 
   export type UserSumAggregateOutputType = {
     loginAttempts: number | null
+    onboardingProgress: number | null
+    onboardingStep: number | null
   }
 
   export type UserMinAggregateOutputType = {
@@ -4205,6 +4209,11 @@ export namespace Prisma {
     dataRetentionUntil: Date | null
     isDeleted: boolean | null
     deletedAt: Date | null
+    onboardingCompleted: boolean | null
+    onboardingProgress: number | null
+    onboardingStep: number | null
+    onboardingStartedAt: Date | null
+    onboardingCompletedAt: Date | null
     ipAddress: string | null
     userAgent: string | null
     timezone: string | null
@@ -4230,6 +4239,11 @@ export namespace Prisma {
     dataRetentionUntil: Date | null
     isDeleted: boolean | null
     deletedAt: Date | null
+    onboardingCompleted: boolean | null
+    onboardingProgress: number | null
+    onboardingStep: number | null
+    onboardingStartedAt: Date | null
+    onboardingCompletedAt: Date | null
     ipAddress: string | null
     userAgent: string | null
     timezone: string | null
@@ -4255,6 +4269,11 @@ export namespace Prisma {
     dataRetentionUntil: number
     isDeleted: number
     deletedAt: number
+    onboardingCompleted: number
+    onboardingProgress: number
+    onboardingStep: number
+    onboardingStartedAt: number
+    onboardingCompletedAt: number
     ipAddress: number
     userAgent: number
     timezone: number
@@ -4267,10 +4286,14 @@ export namespace Prisma {
 
   export type UserAvgAggregateInputType = {
     loginAttempts?: true
+    onboardingProgress?: true
+    onboardingStep?: true
   }
 
   export type UserSumAggregateInputType = {
     loginAttempts?: true
+    onboardingProgress?: true
+    onboardingStep?: true
   }
 
   export type UserMinAggregateInputType = {
@@ -4290,6 +4313,11 @@ export namespace Prisma {
     dataRetentionUntil?: true
     isDeleted?: true
     deletedAt?: true
+    onboardingCompleted?: true
+    onboardingProgress?: true
+    onboardingStep?: true
+    onboardingStartedAt?: true
+    onboardingCompletedAt?: true
     ipAddress?: true
     userAgent?: true
     timezone?: true
@@ -4315,6 +4343,11 @@ export namespace Prisma {
     dataRetentionUntil?: true
     isDeleted?: true
     deletedAt?: true
+    onboardingCompleted?: true
+    onboardingProgress?: true
+    onboardingStep?: true
+    onboardingStartedAt?: true
+    onboardingCompletedAt?: true
     ipAddress?: true
     userAgent?: true
     timezone?: true
@@ -4340,6 +4373,11 @@ export namespace Prisma {
     dataRetentionUntil?: true
     isDeleted?: true
     deletedAt?: true
+    onboardingCompleted?: true
+    onboardingProgress?: true
+    onboardingStep?: true
+    onboardingStartedAt?: true
+    onboardingCompletedAt?: true
     ipAddress?: true
     userAgent?: true
     timezone?: true
@@ -4452,6 +4490,11 @@ export namespace Prisma {
     dataRetentionUntil: Date | null
     isDeleted: boolean
     deletedAt: Date | null
+    onboardingCompleted: boolean
+    onboardingProgress: number
+    onboardingStep: number
+    onboardingStartedAt: Date | null
+    onboardingCompletedAt: Date | null
     ipAddress: string | null
     userAgent: string | null
     timezone: string | null
@@ -4496,6 +4539,11 @@ export namespace Prisma {
     dataRetentionUntil?: boolean
     isDeleted?: boolean
     deletedAt?: boolean
+    onboardingCompleted?: boolean
+    onboardingProgress?: boolean
+    onboardingStep?: boolean
+    onboardingStartedAt?: boolean
+    onboardingCompletedAt?: boolean
     ipAddress?: boolean
     userAgent?: boolean
     timezone?: boolean
@@ -4537,6 +4585,11 @@ export namespace Prisma {
     dataRetentionUntil?: boolean
     isDeleted?: boolean
     deletedAt?: boolean
+    onboardingCompleted?: boolean
+    onboardingProgress?: boolean
+    onboardingStep?: boolean
+    onboardingStartedAt?: boolean
+    onboardingCompletedAt?: boolean
     ipAddress?: boolean
     userAgent?: boolean
     timezone?: boolean
@@ -4562,6 +4615,11 @@ export namespace Prisma {
     dataRetentionUntil?: boolean
     isDeleted?: boolean
     deletedAt?: boolean
+    onboardingCompleted?: boolean
+    onboardingProgress?: boolean
+    onboardingStep?: boolean
+    onboardingStartedAt?: boolean
+    onboardingCompletedAt?: boolean
     ipAddress?: boolean
     userAgent?: boolean
     timezone?: boolean
@@ -4626,6 +4684,11 @@ export namespace Prisma {
       dataRetentionUntil: Date | null
       isDeleted: boolean
       deletedAt: Date | null
+      onboardingCompleted: boolean
+      onboardingProgress: number
+      onboardingStep: number
+      onboardingStartedAt: Date | null
+      onboardingCompletedAt: Date | null
       ipAddress: string | null
       userAgent: string | null
       timezone: string | null
@@ -5056,6 +5119,11 @@ export namespace Prisma {
     readonly dataRetentionUntil: FieldRef<"User", 'DateTime'>
     readonly isDeleted: FieldRef<"User", 'Boolean'>
     readonly deletedAt: FieldRef<"User", 'DateTime'>
+    readonly onboardingCompleted: FieldRef<"User", 'Boolean'>
+    readonly onboardingProgress: FieldRef<"User", 'Int'>
+    readonly onboardingStep: FieldRef<"User", 'Int'>
+    readonly onboardingStartedAt: FieldRef<"User", 'DateTime'>
+    readonly onboardingCompletedAt: FieldRef<"User", 'DateTime'>
     readonly ipAddress: FieldRef<"User", 'String'>
     readonly userAgent: FieldRef<"User", 'String'>
     readonly timezone: FieldRef<"User", 'String'>
@@ -35407,6 +35475,11 @@ export namespace Prisma {
     dataRetentionUntil: 'dataRetentionUntil',
     isDeleted: 'isDeleted',
     deletedAt: 'deletedAt',
+    onboardingCompleted: 'onboardingCompleted',
+    onboardingProgress: 'onboardingProgress',
+    onboardingStep: 'onboardingStep',
+    onboardingStartedAt: 'onboardingStartedAt',
+    onboardingCompletedAt: 'onboardingCompletedAt',
     ipAddress: 'ipAddress',
     userAgent: 'userAgent',
     timezone: 'timezone',
@@ -37272,6 +37345,11 @@ export namespace Prisma {
     dataRetentionUntil?: DateTimeNullableFilter<"User"> | Date | string | null
     isDeleted?: BoolFilter<"User"> | boolean
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    onboardingCompleted?: BoolFilter<"User"> | boolean
+    onboardingProgress?: IntFilter<"User"> | number
+    onboardingStep?: IntFilter<"User"> | number
+    onboardingStartedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    onboardingCompletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     ipAddress?: StringNullableFilter<"User"> | string | null
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
@@ -37312,6 +37390,11 @@ export namespace Prisma {
     dataRetentionUntil?: SortOrderInput | SortOrder
     isDeleted?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
+    onboardingCompleted?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
+    onboardingStartedAt?: SortOrderInput | SortOrder
+    onboardingCompletedAt?: SortOrderInput | SortOrder
     ipAddress?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
@@ -37356,6 +37439,11 @@ export namespace Prisma {
     dataRetentionUntil?: DateTimeNullableFilter<"User"> | Date | string | null
     isDeleted?: BoolFilter<"User"> | boolean
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    onboardingCompleted?: BoolFilter<"User"> | boolean
+    onboardingProgress?: IntFilter<"User"> | number
+    onboardingStep?: IntFilter<"User"> | number
+    onboardingStartedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    onboardingCompletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     ipAddress?: StringNullableFilter<"User"> | string | null
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
@@ -37396,6 +37484,11 @@ export namespace Prisma {
     dataRetentionUntil?: SortOrderInput | SortOrder
     isDeleted?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
+    onboardingCompleted?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
+    onboardingStartedAt?: SortOrderInput | SortOrder
+    onboardingCompletedAt?: SortOrderInput | SortOrder
     ipAddress?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
@@ -37429,6 +37522,11 @@ export namespace Prisma {
     dataRetentionUntil?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     isDeleted?: BoolWithAggregatesFilter<"User"> | boolean
     deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    onboardingCompleted?: BoolWithAggregatesFilter<"User"> | boolean
+    onboardingProgress?: IntWithAggregatesFilter<"User"> | number
+    onboardingStep?: IntWithAggregatesFilter<"User"> | number
+    onboardingStartedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    onboardingCompletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     ipAddress?: StringNullableWithAggregatesFilter<"User"> | string | null
     userAgent?: StringNullableWithAggregatesFilter<"User"> | string | null
     timezone?: StringNullableWithAggregatesFilter<"User"> | string | null
@@ -41104,6 +41202,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -41144,6 +41247,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -41184,6 +41292,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41224,6 +41337,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41264,6 +41382,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -41289,6 +41412,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -41314,6 +41442,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -45998,6 +46131,11 @@ export namespace Prisma {
     dataRetentionUntil?: SortOrder
     isDeleted?: SortOrder
     deletedAt?: SortOrder
+    onboardingCompleted?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
+    onboardingStartedAt?: SortOrder
+    onboardingCompletedAt?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
     timezone?: SortOrder
@@ -46008,6 +46146,8 @@ export namespace Prisma {
 
   export type UserAvgOrderByAggregateInput = {
     loginAttempts?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -46027,6 +46167,11 @@ export namespace Prisma {
     dataRetentionUntil?: SortOrder
     isDeleted?: SortOrder
     deletedAt?: SortOrder
+    onboardingCompleted?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
+    onboardingStartedAt?: SortOrder
+    onboardingCompletedAt?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
     timezone?: SortOrder
@@ -46052,6 +46197,11 @@ export namespace Prisma {
     dataRetentionUntil?: SortOrder
     isDeleted?: SortOrder
     deletedAt?: SortOrder
+    onboardingCompleted?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
+    onboardingStartedAt?: SortOrder
+    onboardingCompletedAt?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
     timezone?: SortOrder
@@ -46062,6 +46212,8 @@ export namespace Prisma {
 
   export type UserSumOrderByAggregateInput = {
     loginAttempts?: SortOrder
+    onboardingProgress?: SortOrder
+    onboardingStep?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -54150,6 +54302,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54189,6 +54346,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54244,6 +54406,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54283,6 +54450,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54322,6 +54494,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54361,6 +54538,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54416,6 +54598,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54455,6 +54642,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54494,6 +54686,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54533,6 +54730,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54588,6 +54790,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54627,6 +54834,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54666,6 +54878,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54705,6 +54922,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54760,6 +54982,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54799,6 +55026,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -54838,6 +55070,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -54877,6 +55114,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -55051,6 +55293,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55090,6 +55337,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55254,6 +55506,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -55293,6 +55550,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -55600,6 +55862,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -55639,6 +55906,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56070,6 +56342,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56109,6 +56386,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56164,6 +56446,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56203,6 +56490,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56242,6 +56534,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56281,6 +56578,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56336,6 +56638,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56375,6 +56682,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56414,6 +56726,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56453,6 +56770,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56508,6 +56830,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56547,6 +56874,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -56937,6 +57269,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -56976,6 +57313,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -57118,6 +57460,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57157,6 +57504,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -57928,6 +58280,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -57967,6 +58324,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -58229,6 +58591,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58268,6 +58635,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -58938,6 +59310,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -58977,6 +59354,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -59362,6 +59744,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59401,6 +59788,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59888,6 +60280,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -59927,6 +60324,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -60101,6 +60503,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60140,6 +60547,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60304,6 +60716,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -60343,6 +60760,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -60478,6 +60900,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60517,6 +60944,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60748,6 +61180,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -60787,6 +61224,11 @@ export namespace Prisma {
     dataRetentionUntil?: Date | string | null
     isDeleted?: boolean
     deletedAt?: Date | string | null
+    onboardingCompleted?: boolean
+    onboardingProgress?: number
+    onboardingStep?: number
+    onboardingStartedAt?: Date | string | null
+    onboardingCompletedAt?: Date | string | null
     ipAddress?: string | null
     userAgent?: string | null
     timezone?: string | null
@@ -60909,6 +61351,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60948,6 +61395,11 @@ export namespace Prisma {
     dataRetentionUntil?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isDeleted?: BoolFieldUpdateOperationsInput | boolean
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompleted?: BoolFieldUpdateOperationsInput | boolean
+    onboardingProgress?: IntFieldUpdateOperationsInput | number
+    onboardingStep?: IntFieldUpdateOperationsInput | number
+    onboardingStartedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    onboardingCompletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
