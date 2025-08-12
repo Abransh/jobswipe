@@ -1,15 +1,13 @@
 import { Metadata } from 'next';
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
+import { SimplifiedOnboardingWizard } from '@/components/onboarding/SimplifiedOnboardingWizard';
 
 export const metadata: Metadata = {
-  title: 'Welcome to JobSwipe - Complete Your Profile',
-  description: 'Complete your JobSwipe profile to get personalized job recommendations and improve your application success rate.',
+  title: 'Welcome to JobSwipe - Let\'s Get Started! ✨',
+  description: 'Complete your JobSwipe profile in under 2 minutes to get personalized job recommendations and start your job search.',
 };
 
 export default function OnboardingPage() {
   return (
-    <div>
-      <OnboardingWizard />
-    </div>
+    <SimplifiedOnboardingWizard />
   );
 }
