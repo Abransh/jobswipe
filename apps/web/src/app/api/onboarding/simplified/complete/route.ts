@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest, AuthError } from '@/lib/api/auth';
-import { prisma } from '@jobswipe/database';
+import { db as prisma } from '@jobswipe/database';
 import { 
   simplifiedOnboardingSchema,
   type SimplifiedOnboardingData 
@@ -17,8 +17,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { id: authenticatedUser.id },
       include: {
-        profile: true,
-        onboardingProgress: true
+        profile: true
       }
     });
 
@@ -48,21 +47,14 @@ export async function POST(request: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // Update or create user profile
       const profileData = {
-        fullName: validatedData.essentialProfile.fullName,
+        displayName: validatedData.essentialProfile.fullName,
         phone: validatedData.essentialProfile.phone,
-        currentRole: validatedData.essentialProfile.roleType,
-        salaryExpectationMin: validatedData.essentialProfile.salaryMin,
-        salaryExpectationMax: validatedData.essentialProfile.salaryMax,
+        currentTitle: validatedData.essentialProfile.roleType,
+        desiredSalaryMin: validatedData.essentialProfile.salaryMin,
+        desiredSalaryMax: validatedData.essentialProfile.salaryMax,
         preferredCurrency: validatedData.essentialProfile.salaryCurrency || 'USD',
-        currentCountry: validatedData.workAuthorization.currentCountry,
-        currentLocation: validatedData.workAuthorization.currentLocation,
-        canWorkInCurrentCountry: validatedData.workAuthorization.canWorkInCurrentCountry,
-        currentCountryWorkAuth: validatedData.workAuthorization.currentCountryWorkAuth,
-        interestedInInternational: validatedData.workAuthorization.interestedInInternational,
-        targetRegions: validatedData.workAuthorization.targetRegions,
-        workAuthByRegion: validatedData.workAuthorization.workAuthByRegion,
-        onboardingCompleted: true,
-        onboardingCompletedAt: new Date()
+        country: validatedData.workAuthorization.currentCountry,
+        location: validatedData.workAuthorization.currentLocation
       };
 
       const profile = await tx.userProfile.upsert({
@@ -86,44 +78,23 @@ export async function POST(request: NextRequest) {
         await tx.resume.create({
           data: {
             userId: user.id,
-            fileName: 'resume.pdf', // Would be the actual filename
-            fileUrl: 'placeholder-url', // Would be the S3 URL
-            fileSize: 1024, // Would be actual file size
-            isPrimary: true,
-            uploadedAt: new Date()
+            name: 'Primary Resume', // Resume name
+            title: validatedData.essentialProfile.roleType,
+            content: {}, // Empty content for now
+            sections: {} // Empty sections for now
           }
         });
       }
-
-      // Update onboarding progress to completed
-      await tx.onboardingProgress.upsert({
-        where: { userId: user.id },
-        create: {
-          userId: user.id,
-          currentStep: 2,
-          completedSteps: completedSteps || [1, 2],
-          progress: 100,
-          isCompleted: true,
-          startedAt: new Date(),
-          completedAt: new Date(),
-          data: onboardingData
-        },
-        update: {
-          currentStep: 2,
-          completedSteps: completedSteps || [1, 2],
-          progress: 100,
-          isCompleted: true,
-          completedAt: new Date(),
-          data: onboardingData
-        }
-      });
 
       // Update user's onboarding status
       await tx.user.update({
         where: { id: user.id },
         data: {
           onboardingCompleted: true,
-          onboardingCompletedAt: new Date()
+          onboardingCompletedAt: new Date(),
+          onboardingProgress: 100,
+          onboardingStep: 2,
+          updatedAt: new Date()
         }
       });
 
@@ -153,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Handle specific error types
-    if (error.code === 'P2002') { // Prisma unique constraint error
+    if ((error as any)?.code === 'P2002') { // Prisma unique constraint error
       return NextResponse.json(
         { error: 'A profile with this information already exists' },
         { status: 409 }

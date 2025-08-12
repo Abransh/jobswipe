@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest, AuthError } from '@/lib/api/auth';
-import { prisma } from '@jobswipe/database';
+import { db as prisma } from '@jobswipe/database';
 import { 
   simplifiedProgressSchema,
   type SimplifiedProgressData 
@@ -11,12 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     const authenticatedUser = await authenticateRequest(request);
     
-    // Find user and their onboarding progress
+    // Find user 
     const user = await prisma.user.findUnique({
-      where: { id: authenticatedUser.id },
-      include: {
-        onboardingProgress: true
-      }
+      where: { id: authenticatedUser.id }
     });
 
     if (!user) {
@@ -26,26 +23,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If no progress exists, return default
-    if (!user.onboardingProgress) {
-      return NextResponse.json({
-        currentStep: 1,
-        completedSteps: [],
-        progress: 0,
-        isCompleted: false,
-        data: {}
-      });
-    }
-
-    // Return the progress data
+    // Return the progress data using User model fields
     return NextResponse.json({
-      currentStep: user.onboardingProgress.currentStep || 1,
-      completedSteps: user.onboardingProgress.completedSteps || [],
-      progress: user.onboardingProgress.progress || 0,
-      isCompleted: user.onboardingProgress.isCompleted || false,
-      startedAt: user.onboardingProgress.startedAt,
-      completedAt: user.onboardingProgress.completedAt,
-      data: user.onboardingProgress.data || {}
+      currentStep: user.onboardingStep || 1,
+      completedSteps: user.onboardingStep > 1 ? [1] : [],
+      progress: user.onboardingProgress || 0,
+      isCompleted: user.onboardingCompleted || false,
+      startedAt: user.onboardingStartedAt,
+      completedAt: user.onboardingCompletedAt,
+      data: {} // We'll store this in UserProfile for now
     });
 
   } catch (error) {
@@ -92,8 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Find user
     const user = await prisma.user.findUnique({
-      where: { id: authenticatedUser.id },
-      include: { onboardingProgress: true }
+      where: { id: authenticatedUser.id }
     });
 
     if (!user) {
@@ -103,35 +88,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update or create onboarding progress
-    const updatedProgress = await prisma.onboardingProgress.upsert({
-      where: {
-        userId: user.id
-      },
-      create: {
-        userId: user.id,
-        currentStep: progressData.currentStep,
-        completedSteps: progressData.completedSteps,
-        progress: progressData.progress,
-        isCompleted: progressData.isCompleted,
-        startedAt: progressData.startedAt || new Date(),
-        completedAt: progressData.completedAt,
-        data: body.data || {}
-      },
-      update: {
-        currentStep: progressData.currentStep,
-        completedSteps: progressData.completedSteps,
-        progress: progressData.progress,
-        isCompleted: progressData.isCompleted,
-        completedAt: progressData.completedAt,
-        data: body.data || {},
+    // Update user onboarding progress
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        onboardingStep: progressData.currentStep,
+        onboardingProgress: progressData.progress,
+        onboardingCompleted: progressData.isCompleted,
+        onboardingStartedAt: progressData.startedAt || user.onboardingStartedAt || new Date(),
+        onboardingCompletedAt: progressData.completedAt,
         updatedAt: new Date()
       }
     });
 
     return NextResponse.json({
       message: 'Progress saved successfully',
-      progress: updatedProgress
+      progress: {
+        currentStep: updatedUser.onboardingStep,
+        completedSteps: updatedUser.onboardingStep > 1 ? [1] : [],
+        progress: updatedUser.onboardingProgress,
+        isCompleted: updatedUser.onboardingCompleted
+      }
     });
 
   } catch (error) {

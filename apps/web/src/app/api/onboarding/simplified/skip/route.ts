@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest, AuthError } from '@/lib/api/auth';
-import { prisma } from '@jobswipe/database';
+import { db as prisma } from '@jobswipe/database';
 
 // POST - Skip simplified onboarding
 export async function POST(request: NextRequest) {
@@ -23,31 +23,10 @@ export async function POST(request: NextRequest) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        onboardingSkipped: true,
-        onboardingSkippedAt: new Date()
-      }
-    });
-
-    // Create or update onboarding progress to track that it was skipped
-    await prisma.onboardingProgress.upsert({
-      where: { userId: user.id },
-      create: {
-        userId: user.id,
-        currentStep: 1,
-        completedSteps: [],
-        progress: 0,
-        isCompleted: false,
-        isSkipped: true,
-        startedAt: new Date(),
-        data: { skipped: true, skippedAt: new Date().toISOString() }
-      },
-      update: {
-        isSkipped: true,
-        data: { 
-          ...{}, // preserve existing data
-          skipped: true, 
-          skippedAt: new Date().toISOString() 
-        }
+        onboardingCompleted: false,
+        onboardingProgress: 0,
+        onboardingStep: 1,
+        updatedAt: new Date()
       }
     });
 

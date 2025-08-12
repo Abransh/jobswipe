@@ -41,7 +41,7 @@ const WORK_AUTH_LABELS = {
   WORK_PERMIT: 'Work Permit/Visa',
   NEEDS_SPONSORSHIP: 'Need Sponsorship',
   UNKNOWN: 'Not Sure'
-};
+} as const;
 
 const WORK_AUTH_DESCRIPTIONS = {
   CITIZEN: 'I am a citizen of this country',
@@ -49,7 +49,7 @@ const WORK_AUTH_DESCRIPTIONS = {
   WORK_PERMIT: 'I have a valid work permit or visa',
   NEEDS_SPONSORSHIP: 'I would need visa sponsorship to work',
   UNKNOWN: 'I need to research work authorization requirements'
-};
+} as const;
 
 const REGION_LABELS = {
   US: 'United States 🇺🇸',
@@ -58,7 +58,7 @@ const REGION_LABELS = {
   CANADA: 'Canada 🇨🇦',
   AUSTRALIA: 'Australia 🇦🇺',
   APAC: 'Asia-Pacific 🌏'
-};
+} as const;
 
 const REGION_DESCRIPTIONS = {
   US: 'Jobs in the United States requiring US work authorization',
@@ -67,7 +67,7 @@ const REGION_DESCRIPTIONS = {
   CANADA: 'Jobs in Canada requiring Canadian work authorization',
   AUSTRALIA: 'Jobs in Australia and New Zealand',
   APAC: 'Jobs in Singapore, Japan, Hong Kong, and other APAC regions'
-};
+} as const;
 
 export function WorkAuthorizationStep({
   data,
@@ -386,8 +386,8 @@ export function WorkAuthorizationStep({
                             }
                           `}
                         >
-                          <p className="font-medium text-gray-900">{WORK_AUTH_LABELS[authType]}</p>
-                          <p className="text-sm text-gray-600">{WORK_AUTH_DESCRIPTIONS[authType]}</p>
+                          <p className="font-medium text-gray-900">{WORK_AUTH_LABELS[authType as keyof typeof WORK_AUTH_LABELS]}</p>
+                          <p className="text-sm text-gray-600">{WORK_AUTH_DESCRIPTIONS[authType as keyof typeof WORK_AUTH_DESCRIPTIONS]}</p>
                         </button>
                       ))}
                     </div>
@@ -563,7 +563,7 @@ export function WorkAuthorizationStep({
                 {selectedRegions.map((region) => (
                   <div key={region} className="space-y-4">
                     <h3 className="font-medium text-gray-900 flex items-center space-x-2">
-                      <span>{REGION_LABELS[region]}</span>
+                      <span>{REGION_LABELS[region as keyof typeof REGION_LABELS]}</span>
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -583,7 +583,7 @@ export function WorkAuthorizationStep({
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-gray-900">{label}</p>
-                              <p className="text-sm text-gray-600">{WORK_AUTH_DESCRIPTIONS[authType]}</p>
+                              <p className="text-sm text-gray-600">{WORK_AUTH_DESCRIPTIONS[authType as keyof typeof WORK_AUTH_DESCRIPTIONS]}</p>
                             </div>
                             {regionWorkAuth[region] === authType && (
                               <Check className="h-4 w-4 text-blue-500" />

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,10 +31,7 @@ import type {
   SimplifiedProgressData
 } from '@jobswipe/shared/schemas';
 
-interface SimplifiedOnboardingData {
-  step1: EssentialProfileData;
-  step2: WorkAuthorizationData;
-}
+// Remove duplicate interface - using the one from schemas
 
 const STEPS = [
   {
@@ -102,7 +100,7 @@ export function SimplifiedOnboardingWizard({
     try {
       const response = await fetch('/api/onboarding/simplified/progress');
       if (response.ok) {
-        const progress: SimplifiedProgressData = await response.json();
+        const progress: SimplifiedProgressData & { data?: Partial<SimplifiedOnboardingData> } = await response.json();
         if (progress.currentStep) {
           setCurrentStep(progress.currentStep);
         }
@@ -131,10 +129,7 @@ export function SimplifiedOnboardingWizard({
           currentStep,
           completedSteps,
           progress: calculateProgress(),
-          data: {
-            ...onboardingData,
-            [`step${currentStep}`]: stepData
-          }
+          data: onboardingData
         })
       });
 
@@ -158,10 +153,10 @@ export function SimplifiedOnboardingWizard({
     return Math.round((completedSteps.length / STEPS.length) * 100);
   };
 
-  const updateStepData = (step: number, data: any) => {
+  const updateStepData = (step: number, data: EssentialProfileData | WorkAuthorizationData) => {
     setOnboardingData(prev => ({
       ...prev,
-      [`step${step}`]: data
+      ...(step === 1 ? { essentialProfile: data as EssentialProfileData } : { workAuthorization: data as WorkAuthorizationData })
     }));
     setHasUnsavedChanges(true);
   };
@@ -251,20 +246,29 @@ export function SimplifiedOnboardingWizard({
   };
 
   const renderCurrentStep = () => {
-    const stepProps = {
-      data: onboardingData[`step${currentStep}` as keyof SimplifiedOnboardingData],
-      onDataChange: (data: any) => updateStepData(currentStep, data),
-      onNext: currentStep === STEPS.length ? completeOnboarding : goToNextStep,
-      onPrevious: goToPreviousStep,
-      onAutoSave: autoSave,
-      isLoading
-    };
-
     switch (currentStep) {
       case 1:
-        return <EssentialProfileStep {...stepProps} />;
+        return (
+          <EssentialProfileStep
+            data={onboardingData.essentialProfile}
+            onDataChange={(data: EssentialProfileData) => updateStepData(currentStep, data)}
+            onNext={currentStep === STEPS.length ? completeOnboarding : goToNextStep}
+            onPrevious={goToPreviousStep}
+            onAutoSave={autoSave}
+            isLoading={isLoading}
+          />
+        );
       case 2:
-        return <WorkAuthorizationStep {...stepProps} />;
+        return (
+          <WorkAuthorizationStep
+            data={onboardingData.workAuthorization}
+            onDataChange={(data: WorkAuthorizationData) => updateStepData(currentStep, data)}
+            onNext={currentStep === STEPS.length ? completeOnboarding : goToNextStep}
+            onPrevious={goToPreviousStep}
+            onAutoSave={autoSave}
+            isLoading={isLoading}
+          />
+        );
       default:
         return null;
     }
