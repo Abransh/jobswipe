@@ -19,7 +19,6 @@ export default function JobSwipePage() {
     expansions: 0
   });
   
-  const [currentTheme, setCurrentTheme] = useState<'default' | 'minimal' | 'dark' | 'warm'>('default');
   const [isApplying, setIsApplying] = useState<string | null>(null); // jobId being applied to
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
 
@@ -331,63 +330,38 @@ export default function JobSwipePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-md mx-auto px-4 py-4">
+      <div className="absolute top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-900">JobSwipe</h1>
+            <h1 className="text-lg font-semibold text-gray-900">JobSwipe</h1>
             
-            {/* Theme Selector & Stats */}
-            <div className="flex items-center space-x-6">
-              {/* Theme Selector */}
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500 font-medium">Theme:</span>
-                <select 
-                  value={currentTheme}
-                  onChange={(e) => setCurrentTheme(e.target.value as any)}
-                  className="text-xs bg-white/80 backdrop-blur-sm border border-gray-200 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                >
-                  <option value="default">Default</option>
-                  <option value="minimal">Minimal</option>
-                  <option value="dark">Dark</option>
-                  <option value="warm">Warm</option>
-                </select>
-              </div>
-              
-              {/* Stats and Applications Link */}
-              <div className="flex items-center space-x-4 text-sm text-gray-600">
-                <div className="flex items-center space-x-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span>{swipeStats.rightSwipes}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                  <span>{swipeStats.leftSwipes}</span>
-                </div>
-                <div className="flex items-center space-x-1">
+            {/* Essential Stats Only */}
+            <div className="flex items-center space-x-4">
+              {swipeStats.rightSwipes > 0 && (
+                <div className="flex items-center space-x-1 text-sm text-gray-600">
                   <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  <span>{swipeStats.expansions}</span>
+                  <span>{swipeStats.rightSwipes} applied</span>
                 </div>
-                
-                {/* Applications Dashboard Link */}
-                {swipeStats.rightSwipes > 0 && (
-                  <a
-                    href="/dashboard/applications"
-                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    <span>📊</span>
-                    <span>View Applications</span>
-                  </a>
-                )}
-              </div>
+              )}
+              
+              {/* Applications Dashboard Link */}
+              {swipeStats.rightSwipes > 0 && (
+                <a
+                  href="/dashboard/applications"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  View Applications
+                </a>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Main JobSwipe Interface */}
-      <div className="pt-20">
+      <div className="pt-16">
         <JobSwipeContainer
           jobs={mockJobs}
           fetchJobs={fetchMoreJobs}
@@ -397,7 +371,6 @@ export default function JobSwipePage() {
           onJobShare={handleJobShare}
           onJobExpand={handleJobExpand}
           onEmptyQueue={handleEmptyQueue}
-          className={`theme-${currentTheme}`}
           config={{
             enableAnimations: true,
             autoExpandOnHover: true,
@@ -408,84 +381,64 @@ export default function JobSwipePage() {
         />
       </div>
 
-      {/* Instructions overlay (for first time users) */}
+      {/* Simple instructions for first time users */}
       {swipeStats.totalSwipes === 0 && (
-        <div className="absolute bottom-4 left-4 right-4 z-40 pointer-events-none">
-          <div className="max-w-md mx-auto bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-white/50">
-            <h3 className="font-semibold text-gray-900 mb-2">How to JobSwipe</h3>
-            <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">👈</span>
-                <span>Swipe left to pass</span>
+        <div className="absolute bottom-6 left-4 right-4 z-40 pointer-events-none">
+          <div className="max-w-md mx-auto bg-white rounded-lg p-3 shadow-md border border-gray-200">
+            <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+              <div className="flex items-center space-x-1">
+                <span>←</span>
+                <span>Pass</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">👉</span>
-                <span>Swipe right to apply</span>
+              <div className="flex items-center space-x-1">
+                <span>→</span>
+                <span>Apply</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">👆</span>
-                <span>Tap/hover for details</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">⌨️</span>
-                <span>Use arrow keys</span>
+              <div className="flex items-center space-x-1">
+                <span>↑</span>
+                <span>Details</span>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Application Status Feedback */}
+      {/* Clean application feedback */}
       {feedback && (
-        <div className={`fixed top-20 left-4 right-4 z-60 pointer-events-none`}>
+        <div className="fixed top-16 left-4 right-4 z-50 pointer-events-none">
           <div className="max-w-md mx-auto">
             <div className={`
-              backdrop-blur-sm rounded-lg p-4 shadow-lg border
-              ${feedback.type === 'success' ? 'bg-green-500/90 border-green-400/50 text-white' : ''}
-              ${feedback.type === 'error' ? 'bg-red-500/90 border-red-400/50 text-white' : ''}
-              ${feedback.type === 'info' ? 'bg-blue-500/90 border-blue-400/50 text-white' : ''}
-              transition-all duration-300 ease-out
+              rounded-lg p-3 shadow-md border
+              ${feedback.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : ''}
+              ${feedback.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : ''}
+              ${feedback.type === 'info' ? 'bg-blue-50 border-blue-200 text-blue-800' : ''}
             `}>
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  {feedback.type === 'success' && <span className="text-xl">✅</span>}
-                  {feedback.type === 'error' && <span className="text-xl">❌</span>}
-                  {feedback.type === 'info' && <span className="text-xl">ℹ️</span>}
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{feedback.message}</p>
-                </div>
-              </div>
+              <p className="text-sm font-medium">{feedback.message}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Application Processing Indicator */}
+      {/* Clean processing indicator */}
       {isApplying && (
-        <div className="fixed top-20 left-4 right-4 z-60 pointer-events-none">
+        <div className="fixed top-16 left-4 right-4 z-50 pointer-events-none">
           <div className="max-w-md mx-auto">
-            <div className="bg-blue-500/90 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-blue-400/50 text-white">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Queueing job application...</p>
-                </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-md">
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                <p className="text-sm font-medium text-blue-800">Applying...</p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Development stats (visible in dev mode only) */}
+      {/* Clean dev stats */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-4 right-4 bg-black/80 text-white p-3 rounded-lg text-xs font-mono space-y-1 z-50">
-          <div>Total Swipes: {swipeStats.totalSwipes}</div>
-          <div>Apply Rate: {swipeStats.totalSwipes > 0 ? Math.round((swipeStats.rightSwipes / swipeStats.totalSwipes) * 100) : 0}%</div>
-          <div>Expansion Rate: {swipeStats.totalSwipes > 0 ? Math.round((swipeStats.expansions / swipeStats.totalSwipes) * 100) : 0}%</div>
-          {isApplying && <div className="text-blue-400">Applying: {isApplying}</div>}
+        <div className="fixed top-4 right-4 bg-gray-900 text-white p-2 rounded text-xs font-mono z-50">
+          <div>Swipes: {swipeStats.totalSwipes}</div>
+          <div>Applied: {swipeStats.rightSwipes}</div>
+          {isApplying && <div className="text-blue-400">Processing...</div>}
         </div>
       )}
     </div>

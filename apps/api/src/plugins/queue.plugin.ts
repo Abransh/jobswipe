@@ -133,8 +133,7 @@ class QueueService {
     this.config = config;
     this.redisConnection = new Redis({
       ...config.redis,
-      maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
+      maxRetriesPerRequest: null,
       lazyConnect: true,
     });
 

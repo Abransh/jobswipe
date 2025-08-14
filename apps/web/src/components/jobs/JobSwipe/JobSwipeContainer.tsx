@@ -25,8 +25,6 @@ import { CARD_DIMENSIONS } from '../types/jobSwipe';
 // Styles
 import styles from './JobSwipe.module.css';
 
-type Theme = 'default' | 'minimal' | 'dark' | 'warm';
-
 export function JobSwipeContainer({
   jobs = [],
   fetchJobs,
@@ -46,9 +44,6 @@ export function JobSwipeContainer({
   // Device detection for responsive design
   const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
   const [dimensions, setDimensions] = useState<CardDimensions>(CARD_DIMENSIONS.desktop);
-  
-  // Theme state
-  const [currentTheme, setCurrentTheme] = useState<Theme>('default');
   
   useEffect(() => {
     const updateDeviceType = () => {
@@ -100,18 +95,6 @@ export function JobSwipeContainer({
     config: userConfig
   });
 
-  // Handle card stack animations
-  const getStackCardStyle = (index: number) => {
-    const offset = index * 4;
-    const scale = 1 - (index * 0.02);
-    const opacity = 1 - (index * 0.1);
-    
-    return {
-      transform: `translateY(${offset}px) scale(${scale})`,
-      opacity: Math.max(opacity, 0.7),
-      zIndex: 10 - index
-    };
-  };
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -206,42 +189,28 @@ export function JobSwipeContainer({
     );
   }
 
-  // Get theme class
-  const getThemeClass = () => {
-    switch (currentTheme) {
-      case 'minimal': return styles.themeMinimal;
-      case 'dark': return styles.themeDark;
-      case 'warm': return styles.themeWarm;
-      default: return '';
-    }
-  };
 
   // Main swipe interface
   return (
     <div 
-      className={cn(styles.container, getThemeClass(), className)} 
+      className={cn(styles.container, className)} 
       style={style}
       role="application"
       aria-label="Job swipe interface"
       tabIndex={-1}
     >
-      {/* Background cards stack effect */}
+      {/* Simple background cards stack */}
       <div className={styles.cardStack}>
-        {/* Show preview of next cards */}
-        {[1, 2].map((index) => (
-          hasNextJob && (
-            <motion.div
-              key={`stack-${index}`}
-              className={cn(styles.stackCard, styles[`stack${index}`])}
-              style={getStackCardStyle(index)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
+        {hasNextJob && (
+          <>
+            <div className={cn(styles.stackCard, styles.stack1)}>
               <div className={styles.stackCardPlaceholder} />
-            </motion.div>
-          )
-        ))}
+            </div>
+            <div className={cn(styles.stackCard, styles.stack2)}>
+              <div className={styles.stackCardPlaceholder} />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Main card area */}
@@ -275,40 +244,35 @@ export function JobSwipeContainer({
         </AnimatePresence>
       </div>
 
-      {/* Status indicators */}
+      {/* Clean status bar */}
       <div className={styles.statusBar}>
-        {/* Queue indicator */}
-        <div className={styles.queueIndicator}>
-          <span className={styles.queueCount}>{queueLength}</span>
-          <span className={styles.queueLabel}>
-            {queueLength === 1 ? 'job left' : 'jobs left'}
-          </span>
-        </div>
+        {/* Simple queue indicator */}
+        {queueLength > 0 && (
+          <div className={styles.queueIndicator}>
+            <span className={styles.queueCount}>{queueLength}</span>
+            <span className={styles.queueLabel}>
+              {queueLength === 1 ? 'job left' : 'jobs left'}
+            </span>
+          </div>
+        )}
 
-        {/* Swipe hints for first-time users */}
-        {analytics.length === 0 && (
-          <motion.div
-            className={styles.swipeHints}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
+        {/* Simple hints for first-time users */}
+        {analytics.length === 0 && queueLength > 0 && (
+          <div className={styles.swipeHints}>
             <div className={styles.swipeHint}>
-              <span className={styles.swipeIcon}>👈</span>
+              <span className={styles.swipeIcon}>←</span>
               <span>Pass</span>
             </div>
             <div className={styles.swipeHint}>
-              <span className={styles.swipeIcon}>👉</span>
+              <span className={styles.swipeIcon}>→</span>
               <span>Apply</span>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* Debug info (development only) */}
+        {/* Clean debug info */}
         {config.debugMode && (
           <div className={styles.debugInfo}>
-            <div>State: {cardState.state}</div>
-            <div>Expanded: {cardState.isExpanded.toString()}</div>
             <div>Queue: {queueLength}</div>
             <div>Device: {deviceType}</div>
           </div>

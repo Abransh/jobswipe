@@ -318,7 +318,7 @@ async function websocketPlugin(
 export default fp(websocketPlugin, {
   fastify: '4.x',
   name: 'websocket',
-  dependencies: ['jwtService'], // Optional dependency
+  // dependencies: ['jwtService'], // Made optional to prevent loading issues
 });
 
 // =============================================================================

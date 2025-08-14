@@ -905,23 +905,26 @@ Ongoing: Performance and reliability metrics maintained
 
 **Let's build something we're proud to ship.** 🚀
 
-check   apps/api/src/plugins/queue.plugin.ts
- apps/api/src/plugins/websocket.plugin.ts
- apps/api/src/routes/queue.routes.ts
- apps/desktop/src/services/ErrorHandlingService.ts
-apps/desktop/src/services/MonitoringService.ts
- apps/desktop/src/services/QueueService.ts
-  apps/web/src/app/dashboard/applications/page.tsx
- apps/web/src/app/jobs/swipe/page.tsx
-  apps/web/src/components/jobs/JobSwipe/JobSwipe.module.css
-apps/web/src/components/jobs/JobSwipe/JobSwipeCard.tsx
-apps/web/src/components/jobs/JobSwipe/JobSwipeContainer.tsx
-apps/web/src/components/jobs/JobSwipe/JobSwipeDetails.tsx
- apps/web/src/components/jobs/JobSwipe/JobSwipeEmpty.tsx
-apps/web/src/components/jobs/JobSwipe/JobSwipeLoading.tsx
-apps/web/src/components/jobs/JobSwipe/index.ts
- apps/web/src/components/jobs/hooks/useGestures.ts
-apps/web/src/components/jobs/hooks/useJobSwipe.ts
-apps/web/src/components/jobs/types/jobSwipe.ts
-apps/web/src/lib/api/queue.ts
-apps/web/src/providers/QueueStatusProvider.tsx
+check   @apps/api/src/plugins/queue.plugin.ts @apps/api/src/plugins/websocket.plugin.ts
+ @apps/api/src/routes/queue.routes.ts
+ @apps/desktop/src/services/ErrorHandlingService.ts
+@apps/desktop/src/services/MonitoringService.ts
+ @apps/desktop/src/services/QueueService.ts
+  @apps/web/src/app/dashboard/applications/page.tsx
+ @apps/web/src/app/jobs/swipe/page.tsx
+  @apps/web/src/components/jobs/JobSwipe/JobSwipe.module.css
+@apps/web/src/components/jobs/JobSwipe/JobSwipeCard.tsx
+@apps/web/src/components/jobs/JobSwipe/JobSwipeContainer.tsx
+@apps/web/src/components/jobs/JobSwipe/JobSwipeDetails.tsx
+ @apps/web/src/components/jobs/JobSwipe/JobSwipeEmpty.tsx
+@apps/web/src/components/jobs/JobSwipe/JobSwipeLoading.tsx
+@apps/web/src/components/jobs/JobSwipe/index.ts
+ @apps/web/src/components/jobs/hooks/useGestures.ts
+@apps/web/src/components/jobs/hooks/useJobSwipe.ts
+@apps/web/src/components/jobs/types/jobSwipe.ts
+@apps/web/src/lib/api/queue.ts
+@apps/web/src/providers/QueueStatusProvider.tsx
+ @IMPLEMENTATION_COMPLETE.md
+ @apps/api/src/start-workers.ts
+  @apps/api/src/workers/index.ts
+@apps/api/src/workers/job-application.worker.ts

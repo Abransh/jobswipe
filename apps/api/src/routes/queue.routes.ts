@@ -794,7 +794,27 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
       summary: 'Queue job application when user swipes right',
       description: 'Creates a job application queue entry when user swipes right on a job',
       tags: ['Queue'],
-      body: SwipeRightRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          jobId: { type: 'string', format: 'uuid' },
+          resumeId: { type: 'string', format: 'uuid' },
+          coverLetter: { type: 'string', maxLength: 2000 },
+          priority: { type: 'integer', minimum: 1, maximum: 10, default: 5 },
+          customFields: { type: 'object', additionalProperties: { type: 'string' } },
+          metadata: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', enum: ['web', 'mobile', 'desktop'] },
+              deviceId: { type: 'string' },
+              userAgent: { type: 'string' },
+              ipAddress: { type: 'string' }
+            },
+            required: ['source']
+          }
+        },
+        required: ['jobId', 'metadata']
+      },
       response: {
         201: {
           type: 'object',
@@ -822,7 +842,17 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
       summary: 'Get user job applications from queue',
       description: 'Retrieves paginated list of user job applications',
       tags: ['Queue'],
-      querystring: GetApplicationsRequestSchema,
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
+          offset: { type: 'integer', minimum: 0, default: 0 },
+          status: { 
+            type: 'string', 
+            enum: ['pending', 'queued', 'processing', 'completed', 'failed', 'cancelled'] 
+          }
+        }
+      },
       response: {
         200: {
           type: 'object',
@@ -864,7 +894,20 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
         },
         required: ['id'],
       },
-      body: ApplicationActionRequestSchema,
+      body: {
+        type: 'object',
+        properties: {
+          action: { 
+            type: 'string', 
+            enum: ['cancel', 'retry', 'prioritize'] 
+          },
+          reason: { 
+            type: 'string', 
+            maxLength: 500 
+          }
+        },
+        required: ['action']
+      },
     },
   }, applicationActionHandler);
   

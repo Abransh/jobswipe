@@ -66,13 +66,7 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // Motion values for smooth animations
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
-  const opacity = useTransform(x, [-150, 0, 150], [0.7, 1, 0.7]);
-  
-  // Animation controls
+  // Simple animation controls
   const controls = useAnimation();
   
   // Gesture handling
@@ -171,74 +165,79 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
       .slice(0, 2);
   }, [job.company.name]);
 
+  // Motion values for real-time drag movement
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
+  
+  // Transform drag movement into rotation and opacity
+  const rotateZ = useTransform(dragX, [-200, 0, 200], [-15, 0, 15]);
+  const opacity = useTransform(dragX, [-300, -150, 0, 150, 300], [0.5, 0.8, 1, 0.8, 0.5]);
+  
   // Update motion values based on gesture state
   useEffect(() => {
-    x.set(gestureState.dragOffset.x);
-    y.set(gestureState.dragOffset.y);
-  }, [gestureState.dragOffset, x, y]);
+    if (gestureState.isDragging) {
+      dragX.set(gestureState.dragOffset.x);
+      dragY.set(gestureState.dragOffset.y);
+    } else if (!gestureState.isDragging && gestureState.swipeProgress < 0.3) {
+      // Reset to center if not swiping
+      controls.start({ 
+        x: 0, 
+        y: 0, 
+        rotate: 0,
+        opacity: 1,
+        transition: { type: "spring", stiffness: 300, damping: 30 }
+      });
+    }
+  }, [gestureState.isDragging, gestureState.dragOffset, gestureState.swipeProgress, controls, dragX, dragY]);
 
-  // Handle swipe animation completion
+  // Handle swipe completion with exit animations
   useEffect(() => {
-    if (gestureState.swipeProgress > 0.8) {
+    if (gestureState.swipeProgress > 0.8 || (gestureState.swipeProgress > 0.3 && Math.abs(gestureState.velocity.x) > 500)) {
       if (gestureState.swipeDirection === 'left') {
-        controls.start({ x: -400, opacity: 0, transition: { duration: 0.3 } });
+        controls.start({ 
+          x: -400, 
+          y: gestureState.dragOffset.y + (gestureState.velocity.y * 0.2),
+          rotate: -30,
+          opacity: 0, 
+          transition: { duration: 0.3, ease: "easeOut" }
+        });
       } else if (gestureState.swipeDirection === 'right') {
-        controls.start({ x: 400, opacity: 0, transition: { duration: 0.3 } });
+        controls.start({ 
+          x: 400, 
+          y: gestureState.dragOffset.y + (gestureState.velocity.y * 0.2),
+          rotate: 30,
+          opacity: 0, 
+          transition: { duration: 0.3, ease: "easeOut" }
+        });
       }
     }
-  }, [gestureState.swipeProgress, gestureState.swipeDirection, controls]);
+  }, [gestureState.swipeProgress, gestureState.swipeDirection, gestureState.dragOffset, gestureState.velocity, controls]);
 
-  // Card animation variants
+  // Simplified card animations
   const cardVariants = {
     enter: {
-      scale: 0.8,
+      scale: 0.9,
       opacity: 0,
-      y: 50,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30
-      }
+      transition: { duration: 0.2 }
     },
     idle: {
       scale: 1,
       opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30
-      }
+      transition: { duration: 0.2 }
     },
     hover: {
       scale: deviceType === 'desktop' ? 1.02 : 1,
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 30
-      }
-    },
-    drag: {
-      scale: 0.95,
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 30
-      }
+      transition: { duration: 0.2 }
     },
     exit: {
-      scale: 0.8,
+      scale: 0.9,
       opacity: 0,
-      y: -50,
-      transition: {
-        duration: 0.2
-      }
+      transition: { duration: 0.2 }
     }
   };
 
   // Get current animation variant
   const getAnimationVariant = () => {
-    if (gestureState.isDragging) return 'drag';
     if (gestureState.isHovered && deviceType === 'desktop') return 'hover';
     return 'idle';
   };
@@ -252,14 +251,16 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
         zIndex,
         width: dimensions.width,
         height: state.isExpanded ? dimensions.height.expanded : dimensions.height.collapsed,
+        x: gestureState.isDragging ? dragX : undefined,
+        y: gestureState.isDragging ? dragY : undefined,
+        rotateZ: gestureState.isDragging ? rotateZ : undefined,
+        opacity: gestureState.isDragging ? opacity : undefined,
         ...style
       }}
       variants={cardVariants}
       initial="enter"
-      animate={controls.mount ? getAnimationVariant() : controls}
+      animate={controls}
       exit="exit"
-      whileHover={deviceType === 'desktop' ? 'hover' : undefined}
-      whileTap={deviceType !== 'desktop' ? 'drag' : undefined}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -275,63 +276,74 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
       {...props}
     >
       {/* Swipe feedback overlay */}
-      {gestureState.swipeDirection && gestureState.swipeProgress > 0.2 && (
+      {gestureState.swipeDirection && gestureState.swipeProgress > 0.1 && (
         <motion.div
           className={cn(
             styles.swipeOverlay,
             gestureState.swipeDirection === 'left' ? styles.swipeOverlayLeft : styles.swipeOverlayRight
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: Math.min(gestureState.swipeProgress, 0.8) }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: Math.min(gestureState.swipeProgress * 1.2, 0.9),
+            scale: 0.8 + (gestureState.swipeProgress * 0.4)
+          }}
+          transition={{ duration: 0.1 }}
         >
-          <div className={styles.swipeIcon}>
+          <motion.div 
+            className={styles.swipeIcon}
+            animate={{ 
+              scale: 1 + (gestureState.swipeProgress * 0.3),
+              rotate: gestureState.swipeDirection === 'left' ? -15 : 15
+            }}
+            transition={{ duration: 0.1 }}
+          >
             {gestureState.swipeDirection === 'left' ? '✕' : '✓'}
-          </div>
-          <div className={styles.swipeText}>
+          </motion.div>
+          <motion.div 
+            className={styles.swipeText}
+            animate={{ 
+              y: -10 + (gestureState.swipeProgress * 10),
+              opacity: gestureState.swipeProgress > 0.3 ? 1 : 0.7
+            }}
+            transition={{ duration: 0.1 }}
+          >
             {gestureState.swipeDirection === 'left' ? 'Pass' : 'Apply'}
-          </div>
+          </motion.div>
         </motion.div>
       )}
 
       {/* Match score badge */}
       {matchScore && matchScore >= 75 && (
-        <motion.div
+        <div
           className={cn(styles.matchBadge, {
             [styles.matchHigh]: matchScore >= 90,
             [styles.matchMedium]: matchScore >= 80 && matchScore < 90
           })}
-          initial={{ scale: 0, rotate: -10 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 500, damping: 30 }}
         >
           <HeartSolidIcon className="w-3 h-3" />
           <span>{Math.round(matchScore)}% Match</span>
-        </motion.div>
+        </div>
       )}
 
       {/* Action buttons */}
       <div className={cn(styles.actionButtons, {
         [styles.actionButtonsVisible]: gestureState.isHovered || state.isExpanded || deviceType === 'mobile'
       })}>
-        <motion.button
+        <button
           className={cn(styles.actionButton, styles.saveButton, { [styles.saved]: isSaved })}
           onClick={handleSave}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
           aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
         >
           {isSaved ? <BookmarkSolidIcon className="w-5 h-5" /> : <BookmarkIcon className="w-5 h-5" />}
-        </motion.button>
+        </button>
         
-        <motion.button
+        <button
           className={cn(styles.actionButton, styles.shareButton)}
           onClick={handleShare}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
           aria-label="Share job"
         >
           <ShareIcon className="w-5 h-5" />
-        </motion.button>
+        </button>
       </div>
 
       {/* Main card content */}
@@ -379,14 +391,9 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
         </div>
 
         {/* Job title */}
-        <motion.h1 
-          className={styles.jobTitle}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
+        <h1 className={styles.jobTitle}>
           {job.title}
-        </motion.h1>
+        </h1>
 
         {/* Job metadata */}
         <div className={styles.jobMeta}>
@@ -408,25 +415,19 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
         </div>
 
         {/* Salary highlight */}
-        <motion.div 
-          className={styles.salaryHighlight}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 400 }}
-        >
+        <div className={styles.salaryHighlight}>
           <CurrencyDollarIcon className="w-5 h-5" />
           <span className={styles.salaryAmount}>{formatSalary()}</span>
           {job.equity && (
             <span className={styles.equityBadge}>+ Equity</span>
           )}
-        </motion.div>
+        </div>
 
         {/* Expansion trigger for mobile */}
         {deviceType === 'mobile' && (
-          <motion.button
+          <button
             className={styles.expandButton}
             onClick={handleExpansionToggle}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             aria-label={state.isExpanded ? 'Show less details' : 'Show more details'}
           >
             {state.isExpanded ? (
@@ -440,7 +441,7 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
                 <span>Show More</span>
               </>
             )}
-          </motion.button>
+          </button>
         )}
       </div>
 

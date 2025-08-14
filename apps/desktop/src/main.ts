@@ -72,9 +72,9 @@ class JobSwipeApp {
 
     // Security: Prevent new window creation
     app.on('web-contents-created', (_, contents) => {
-      contents.on('new-window', (navigationEvent, navigationUrl) => {
-        navigationEvent.preventDefault();
-        shell.openExternal(navigationUrl);
+      contents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
       });
     });
   }
@@ -98,7 +98,6 @@ class JobSwipeApp {
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        enableRemoteModule: false,
         sandbox: true,
         preload: path.join(__dirname, 'preload.js'),
       },
@@ -111,6 +110,7 @@ class JobSwipeApp {
 
     // Load the app
     if (isDev) {
+      // Load Next.js dev server running on port 3000
       this.mainWindow.loadURL('http://localhost:3000');
       this.mainWindow.webContents.openDevTools();
     } else {
@@ -231,7 +231,7 @@ class JobSwipeApp {
           { role: 'cut' },
           { role: 'copy' },
           { role: 'paste' },
-          { role: 'selectall' },
+          { role: 'selectAll' },
         ],
       },
       {
@@ -466,7 +466,7 @@ class JobSwipeApp {
       try {
         return await this.queueService.getQueueStats();
       } catch (error) {
-        console.error('Failed to get queue stats:', error);
+        console.error('Failed to get queue stats:', (error as Error).message);
         return null;
       }
     });
@@ -475,7 +475,7 @@ class JobSwipeApp {
       try {
         return await this.queueService.getAvailableJobs();
       } catch (error) {
-        console.error('Failed to get available jobs:', error);
+        console.error('Failed to get available jobs:', (error as Error).message);
         return [];
       }
     });
@@ -486,7 +486,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to start queue processing:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -496,7 +496,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to stop queue processing:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -514,7 +514,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to update queue settings:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -525,7 +525,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to reconnect queue service:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -536,7 +536,7 @@ class JobSwipeApp {
         return { success: stopped, error: stopped ? undefined : 'Failed to stop automation' };
       } catch (error) {
         console.error('Failed to stop job automation:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -555,7 +555,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to update browser config:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -611,7 +611,7 @@ class JobSwipeApp {
         return { success: resolved, error: resolved ? undefined : 'Error not found' };
       } catch (error) {
         console.error('Failed to resolve error:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -630,7 +630,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to update monitoring config:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -640,7 +640,7 @@ class JobSwipeApp {
         return { success: true, trackingId };
       } catch (error) {
         console.error('Failed to start performance tracking:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -650,7 +650,7 @@ class JobSwipeApp {
         return { success: true };
       } catch (error) {
         console.error('Failed to end performance tracking:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: (error as Error).message };
       }
     });
 
@@ -660,11 +660,11 @@ class JobSwipeApp {
     });
 
     ipcMain.handle('store-set', (_, key: string, value: any) => {
-      store.set(key, value);
+      store.set(key as any, value);
     });
 
     ipcMain.handle('store-delete', (_, key: string) => {
-      store.delete(key);
+      store.delete(key as 'windowBounds' | 'userPreferences');
     });
 
     // Handle file operations
