@@ -5,6 +5,8 @@ import Store from 'electron-store';
 import isDev from 'electron-is-dev';
 import path from 'path';
 import { AuthService } from './services/AuthService';
+import { QueueService } from './services/QueueService';
+import { MonitoringService } from './services/MonitoringService';
 
 // Initialize electron store for persistent data
 const store = new Store({
@@ -22,9 +24,13 @@ class JobSwipeApp {
   private mainWindow: BrowserWindow | null = null;
   private isQuitting = false;
   private authService: AuthService;
+  private queueService: QueueService;
+  private monitoringService: MonitoringService;
 
   constructor() {
     this.authService = AuthService.getInstance();
+    this.queueService = new QueueService();
+    this.monitoringService = new MonitoringService();
     this.initializeApp();
   }
 
@@ -37,6 +43,8 @@ class JobSwipeApp {
     // Handle app events
     app.whenReady().then(async () => {
       await this.authService.initialize();
+      await this.initializeMonitoringService();
+      await this.initializeQueueService();
       this.createMainWindow();
       this.setupApplicationMenu();
       this.setupAutoUpdater();
@@ -58,6 +66,8 @@ class JobSwipeApp {
     app.on('before-quit', async () => {
       this.isQuitting = true;
       await this.authService.cleanup();
+      await this.queueService.cleanup();
+      await this.monitoringService.shutdown();
     });
 
     // Security: Prevent new window creation
@@ -298,6 +308,148 @@ class JobSwipeApp {
     }
   }
 
+  private async initializeMonitoringService(): Promise<void> {
+    try {
+      // Setup monitoring service event listeners
+      this.monitoringService.on('error-tracked', (error) => {
+        console.log('🚨 Error tracked:', error.message);
+        this.mainWindow?.webContents.send('error-tracked', error);
+      });
+
+      this.monitoringService.on('alert', (alert) => {
+        console.log('⚠️ Alert triggered:', alert.message);
+        this.mainWindow?.webContents.send('monitoring-alert', alert);
+      });
+
+      this.monitoringService.on('health-check', (health) => {
+        this.mainWindow?.webContents.send('health-check', health);
+      });
+
+      this.monitoringService.on('system-metrics', (metrics) => {
+        this.mainWindow?.webContents.send('system-metrics', metrics);
+      });
+
+      this.monitoringService.on('application-metrics', (metrics) => {
+        this.mainWindow?.webContents.send('application-metrics', metrics);
+      });
+
+      this.monitoringService.on('performance-metric', (metric) => {
+        this.mainWindow?.webContents.send('performance-metric', metric);
+      });
+
+      // Initialize monitoring
+      await this.monitoringService.initialize();
+      
+      console.log('✅ Monitoring service initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize monitoring service:', error);
+    }
+  }
+
+  private async initializeQueueService(): Promise<void> {
+    try {
+      // Setup queue service event listeners
+      this.queueService.on('connected', () => {
+        console.log('✅ Queue service connected');
+        this.mainWindow?.webContents.send('queue-status-changed', { connected: true });
+      });
+
+      this.queueService.on('disconnected', (reason) => {
+        console.log('❌ Queue service disconnected:', reason);
+        this.mainWindow?.webContents.send('queue-status-changed', { connected: false, reason });
+      });
+
+      this.queueService.on('job-claimed', (data) => {
+        console.log('🎯 Job claimed:', data);
+        this.mainWindow?.webContents.send('job-claimed', data);
+      });
+
+      this.queueService.on('job-processed', (data) => {
+        console.log('✅ Job processed:', data);
+        this.mainWindow?.webContents.send('job-processed', data);
+      });
+
+      this.queueService.on('job-error', (data) => {
+        console.error('❌ Job processing error:', data);
+        this.mainWindow?.webContents.send('job-error', data);
+      });
+
+      this.queueService.on('error', (error) => {
+        console.error('❌ Queue service error:', error);
+        this.mainWindow?.webContents.send('queue-error', error);
+      });
+
+      // Browser automation event listeners
+      this.queueService.on('browser-automation-started', (data) => {
+        this.mainWindow?.webContents.send('browser-automation-started', data);
+      });
+
+      this.queueService.on('browser-automation-completed', (data) => {
+        this.mainWindow?.webContents.send('browser-automation-completed', data);
+      });
+
+      this.queueService.on('browser-automation-failed', (data) => {
+        this.mainWindow?.webContents.send('browser-automation-failed', data);
+      });
+
+      this.queueService.on('automation-step-completed', (data) => {
+        this.mainWindow?.webContents.send('automation-step-completed', data);
+      });
+
+      this.queueService.on('automation-step-failed', (data) => {
+        this.mainWindow?.webContents.send('automation-step-failed', data);
+      });
+
+      this.queueService.on('automation-output', (data) => {
+        this.mainWindow?.webContents.send('automation-output', data);
+      });
+
+      this.queueService.on('job-stopped', (data) => {
+        this.mainWindow?.webContents.send('job-stopped', data);
+      });
+
+      this.queueService.on('browser-config-updated', (data) => {
+        this.mainWindow?.webContents.send('browser-config-updated', data);
+      });
+
+      // Integrate queue service with monitoring
+      this.queueService.on('job-claimed', (data) => {
+        this.monitoringService.incrementCounter('totalJobs');
+        this.monitoringService.trackError('queue', 'info', 'Job claimed', `Job ${data.jobId} claimed`);
+      });
+
+      this.queueService.on('job-processed', (data) => {
+        this.monitoringService.incrementCounter('completedJobs');
+      });
+
+      this.queueService.on('job-error', (data) => {
+        this.monitoringService.incrementCounter('failedJobs');
+        this.monitoringService.trackError('queue', 'error', 'Job processing failed', data.error?.message || 'Unknown error', undefined, { jobId: data.jobId });
+      });
+
+      this.queueService.on('error', (error) => {
+        this.monitoringService.trackError('queue', 'error', 'Queue service error', error.message || String(error));
+      });
+
+      this.queueService.on('browser-automation-started', (data) => {
+        this.monitoringService.incrementCounter('automationExecutions');
+      });
+
+      this.queueService.on('browser-automation-failed', (data) => {
+        this.monitoringService.trackError('automation', 'error', 'Browser automation failed', data.error || 'Unknown error', undefined, { jobId: data.jobId });
+      });
+
+      // Initialize if user is authenticated
+      if (this.authService.isAuthenticated()) {
+        await this.queueService.initialize();
+      } else {
+        console.log('⏳ Waiting for authentication before initializing queue service');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize queue service:', error);
+    }
+  }
+
   private setupIpcHandlers(): void {
     // Handle app info requests
     ipcMain.handle('get-app-info', () => {
@@ -307,6 +459,199 @@ class JobSwipeApp {
         platform: process.platform,
         arch: process.arch,
       };
+    });
+
+    // Queue service handlers
+    ipcMain.handle('queue-get-stats', async () => {
+      try {
+        return await this.queueService.getQueueStats();
+      } catch (error) {
+        console.error('Failed to get queue stats:', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('queue-get-available-jobs', async () => {
+      try {
+        return await this.queueService.getAvailableJobs();
+      } catch (error) {
+        console.error('Failed to get available jobs:', error);
+        return [];
+      }
+    });
+
+    ipcMain.handle('queue-start-processing', async () => {
+      try {
+        this.queueService.startPolling();
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to start queue processing:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('queue-stop-processing', async () => {
+      try {
+        this.queueService.stopPolling();
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to stop queue processing:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('queue-get-processing-jobs', () => {
+      return this.queueService.getProcessingJobs();
+    });
+
+    ipcMain.handle('queue-get-settings', () => {
+      return this.queueService.getSettings();
+    });
+
+    ipcMain.handle('queue-update-settings', (_, settings) => {
+      try {
+        this.queueService.updateSettings(settings);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to update queue settings:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('queue-reconnect', async () => {
+      try {
+        await this.queueService.disconnect();
+        await this.queueService.initialize();
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to reconnect queue service:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    // Browser automation handlers
+    ipcMain.handle('queue-stop-job-automation', async (_, jobId: string) => {
+      try {
+        const stopped = await this.queueService.stopJobAutomation(jobId);
+        return { success: stopped, error: stopped ? undefined : 'Failed to stop automation' };
+      } catch (error) {
+        console.error('Failed to stop job automation:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('queue-get-browser-config', () => {
+      try {
+        return this.queueService.getBrowserAutomationConfig();
+      } catch (error) {
+        console.error('Failed to get browser config:', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('queue-update-browser-config', (_, config) => {
+      try {
+        this.queueService.updateBrowserAutomationConfig(config);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to update browser config:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('queue-get-automation-logs', () => {
+      try {
+        return this.queueService.getJobAutomationLogs();
+      } catch (error) {
+        console.error('Failed to get automation logs:', error);
+        return {};
+      }
+    });
+
+    ipcMain.handle('queue-get-running-automations-count', () => {
+      try {
+        return this.queueService.getRunningAutomationsCount();
+      } catch (error) {
+        console.error('Failed to get running automations count:', error);
+        return 0;
+      }
+    });
+
+    // Monitoring service handlers
+    ipcMain.handle('monitoring-get-summary', () => {
+      try {
+        return this.monitoringService.getMetricsSummary();
+      } catch (error) {
+        console.error('Failed to get monitoring summary:', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('monitoring-get-errors', (_, limit?: number) => {
+      try {
+        return this.monitoringService.getErrorHistory(limit);
+      } catch (error) {
+        console.error('Failed to get error history:', error);
+        return [];
+      }
+    });
+
+    ipcMain.handle('monitoring-get-performance', (_, category?: string, limit?: number) => {
+      try {
+        return this.monitoringService.getPerformanceMetrics(category, limit);
+      } catch (error) {
+        console.error('Failed to get performance metrics:', error);
+        return [];
+      }
+    });
+
+    ipcMain.handle('monitoring-resolve-error', (_, errorId: string) => {
+      try {
+        const resolved = this.monitoringService.resolveError(errorId);
+        return { success: resolved, error: resolved ? undefined : 'Error not found' };
+      } catch (error) {
+        console.error('Failed to resolve error:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('monitoring-get-config', () => {
+      try {
+        return this.monitoringService.getConfig();
+      } catch (error) {
+        console.error('Failed to get monitoring config:', error);
+        return null;
+      }
+    });
+
+    ipcMain.handle('monitoring-update-config', (_, config) => {
+      try {
+        this.monitoringService.updateConfig(config);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to update monitoring config:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('monitoring-start-performance-tracking', (_, name: string, category?: string) => {
+      try {
+        const trackingId = this.monitoringService.startPerformanceTracking(name, category);
+        return { success: true, trackingId };
+      } catch (error) {
+        console.error('Failed to start performance tracking:', error);
+        return { success: false, error: error.message };
+      }
+    });
+
+    ipcMain.handle('monitoring-end-performance-tracking', (_, trackingId: string, metadata?: Record<string, any>) => {
+      try {
+        this.monitoringService.endPerformanceTracking(trackingId, metadata);
+        return { success: true };
+      } catch (error) {
+        console.error('Failed to end performance tracking:', error);
+        return { success: false, error: error.message };
+      }
     });
 
     // Handle store operations

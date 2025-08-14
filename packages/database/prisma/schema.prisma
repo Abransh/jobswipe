@@ -338,6 +338,7 @@ model ApplicationQueue {
   
   // Desktop App Integration
   desktopSessionId String?    // Session ID from desktop app
+  jobSnapshot      JobSnapshot? // Optional snapshot of job data at time of queuing
   automationLogs   AutomationLog[]
   
   createdAt       DateTime    @default(now())
@@ -795,6 +796,7 @@ model JobPosting {
   savedBy         SavedJob[]
   swipes          UserJobSwipe[]
   queueItems      ApplicationQueue[]
+  snapshots       JobSnapshot[] // Snapshots of this job when queued for applications
   enhancements    ResumeEnhancement[]
 
   @@map("job_postings")
@@ -810,6 +812,103 @@ model JobPosting {
   @@index([qualityScore])
   @@index([title])
   @@index([description])
+}
+
+// Job Snapshot - Immutable copy of job data at application time
+model JobSnapshot {
+  id              String      @id @default(uuid())
+  
+  // References
+  originalJobId   String      // Original JobPosting ID
+  originalJob     JobPosting  @relation(fields: [originalJobId], references: [id], onDelete: Cascade)
+  applicationQueueId String   @unique // One-to-one with ApplicationQueue
+  applicationQueue ApplicationQueue @relation(fields: [applicationQueueId], references: [id], onDelete: Cascade)
+  
+  // Frozen Job Data (snapshot at time of application)
+  title           String
+  description     String
+  requirements    String?
+  benefits        String?
+  
+  // Job Classification (frozen)
+  type            String      // Stored as string to preserve original value
+  level           String
+  department      String?
+  category        String
+  
+  // Work Arrangement (frozen)
+  remote          Boolean
+  remoteType      String
+  location        String?
+  timeZone        String?
+  
+  // Location Details (frozen)
+  city            String?
+  state           String?
+  country         String?
+  coordinates     Json?
+  
+  // Compensation (frozen)
+  salaryMin       Int?
+  salaryMax       Int?
+  currency        String?
+  salaryType      String?
+  equity          String?
+  bonus           String?
+  
+  // Job Requirements (frozen)
+  experienceYears Int?
+  skills          String[]
+  education       String?
+  languages       String[]
+  
+  // Company Data (frozen snapshot)
+  companyName     String
+  companyLogo     String?
+  companyWebsite  String?
+  companyIndustry String?
+  companySize     String?
+  companyDescription String?
+  
+  // External Integration (frozen)
+  externalId      String?
+  source          String
+  sourceUrl       String?
+  applyUrl        String?
+  
+  // Metadata
+  qualityScore    Float?
+  isVerified      Boolean
+  
+  // Original Status at time of snapshot
+  originalStatus  String
+  isActive        Boolean
+  isFeatured      Boolean
+  isUrgent        Boolean
+  
+  // Original Dates
+  originalPostedAt DateTime?
+  originalExpiresAt DateTime?
+  
+  // Analytics at time of snapshot
+  viewCount       Int         @default(0)
+  applicationCount Int        @default(0)
+  rightSwipeCount Int         @default(0)
+  leftSwipeCount  Int         @default(0)
+  
+  // Snapshot Metadata
+  snapshotVersion String      @default("1.0")
+  snapshotReason  String      @default("USER_SWIPE_RIGHT")
+  
+  createdAt       DateTime    @default(now())
+
+  @@map("job_snapshots")
+  @@index([originalJobId])
+  @@index([applicationQueueId])
+  @@index([companyName])
+  @@index([title])
+  @@index([createdAt])
+  @@index([originalPostedAt])
 }
 
 // =============================================================================

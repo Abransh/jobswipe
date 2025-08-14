@@ -22,7 +22,14 @@ async function loadRoutes() {
     const tokenExchangeRoutes = await import('./routes/token-exchange.routes');
     console.log('Token exchange routes loaded successfully');
     
-    return { registerAuthRoutes, tokenExchangeRoutes: tokenExchangeRoutes.default };
+    const { registerQueueRoutes } = await import('./routes/queue.routes');
+    console.log('Queue routes loaded successfully');
+    
+    return { 
+      registerAuthRoutes, 
+      tokenExchangeRoutes: tokenExchangeRoutes.default,
+      registerQueueRoutes
+    };
   } catch (error) {
     console.error('❌ Failed to load enterprise routes:', error);
     console.error('Error details:', {
@@ -65,6 +72,12 @@ async function loadPlugins() {
     const monitoringPlugin = await import('./plugins/monitoring.plugin');
     console.log('Monitoring plugin loaded');
     
+    const queuePlugin = await import('./plugins/queue.plugin');
+    console.log('Queue plugin loaded');
+    
+    const websocketPlugin = await import('./plugins/websocket.plugin');
+    console.log('WebSocket plugin loaded');
+    
     console.log('✅ All enterprise plugins loaded successfully');
     
     return {
@@ -73,6 +86,8 @@ async function loadPlugins() {
       advancedSecurityPlugin: advancedSecurityPlugin.default,
       loggingPlugin: loggingPlugin.default,
       monitoringPlugin: monitoringPlugin.default,
+      queuePlugin: queuePlugin.default,
+      websocketPlugin: websocketPlugin.default,
     };
   } catch (error) {
     console.error('❌ Failed to load enterprise plugins:', error);
@@ -291,6 +306,14 @@ async function createServer(): Promise<FastifyInstance> {
       // Register monitoring and observability plugin
       server.log.info('Registering enterprise monitoring plugin...');
       await server.register(plugins.monitoringPlugin as any);
+
+      // Register queue management plugin
+      server.log.info('Registering queue management plugin...');
+      await server.register(plugins.queuePlugin as any);
+
+      // Register WebSocket plugin
+      server.log.info('Registering WebSocket plugin...');
+      await server.register(plugins.websocketPlugin as any);
 
       // Register advanced security plugin
       server.log.info('Registering advanced security plugin...');
@@ -603,6 +626,12 @@ async function createServer(): Promise<FastifyInstance> {
       // Enterprise token exchange routes
       server.log.info('Registering enterprise token exchange routes...');
       await server.register(routes.tokenExchangeRoutes, { prefix: '/token-exchange' });
+
+      // Enterprise queue management routes
+      server.log.info('Registering enterprise queue management routes...');
+      await server.register(async function (fastify) {
+        await routes.registerQueueRoutes(fastify);
+      }, { prefix: `${apiPrefix}/queue` });
       
       server.log.info('✅ Enterprise routes registered successfully');
     } catch (error) {

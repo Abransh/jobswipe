@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 
 import '@/styles/globals.css';
 import { AuthProvider } from '@/components/providers/AuthProvider';
+import { QueueStatusProvider } from '@/providers/QueueStatusProvider';
 
 
 const inter = Inter({
@@ -100,9 +101,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
         className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
         <AuthProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <div className="flex-1">{children}</div>
-          </div>
+          <QueueStatusProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <div className="flex-1">{children}</div>
+            </div>
+          </QueueStatusProvider>
         </AuthProvider>
       </body>
     </html>
