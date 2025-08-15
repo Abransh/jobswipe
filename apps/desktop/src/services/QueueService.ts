@@ -5,42 +5,8 @@
  * @author JobSwipe Team
  */
 
-// import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-// import { io, Socket } from 'socket.io-client';
-
-// Temporary types for compilation
-interface AxiosInstance {
-  get: (url: string, config?: any) => Promise<any>;
-  post: (url: string, data: any, config?: any) => Promise<any>;
-  interceptors: {
-    request: { use: (onFulfilled: any, onRejected: any) => void };
-    response: { use: (onFulfilled: any, onRejected: any) => void };
-  };
-}
-
-interface Socket {
-  on: (event: string, callback: (...args: any[]) => void) => void;
-  emit: (event: string, ...args: any[]) => void;
-  disconnect: () => void;
-}
-
-// Temporary stubs
-const axios = {
-  create: (): AxiosInstance => ({
-    get: async () => ({ data: { success: true, data: {} } }),
-    post: async () => ({ data: { success: true } }),
-    interceptors: {
-      request: { use: () => {} },
-      response: { use: () => {} }
-    }
-  })
-};
-
-const io = (url: string, options?: any): Socket => ({
-  on: () => {},
-  emit: () => {},
-  disconnect: () => {}
-});
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { io, Socket } from 'socket.io-client';
 import { EventEmitter } from 'events';
 import Store from 'electron-store';
 import { AuthService } from './AuthService';
@@ -143,8 +109,14 @@ export class QueueService extends EventEmitter {
       },
     }) as any;
 
-    // Initialize API client
-    this.apiClient = axios.create();
+    // Initialize API client with base configuration
+    this.apiClient = axios.create({
+      baseURL: process.env.API_URL || 'http://localhost:3001',
+      timeout: 30000, // 30 second timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
 
     // Setup request interceptor for authentication
     this.apiClient.interceptors.request.use(
@@ -229,11 +201,13 @@ export class QueueService extends EventEmitter {
    */
   private async testConnection(): Promise<void> {
     try {
-      await this.apiClient.get('/queue/stats');
-      console.log('✅ API connection established');
+      const response = await this.apiClient.get('/api/queue/stats');
+      if (response.data) {
+        console.log('✅ API connection established');
+      }
     } catch (error) {
-      console.error('❌ Failed to connect to API:', error);
-      throw new Error('Unable to connect to JobSwipe API');
+      console.warn('⚠️ API connection failed, will retry:', error instanceof Error ? error.message : String(error));
+      // Don't throw error for now - allow offline development
     }
   }
 
@@ -241,59 +215,75 @@ export class QueueService extends EventEmitter {
    * Connect to WebSocket for real-time updates
    */
   private async connectWebSocket(): Promise<void> {
-    const token = this.authService.getAccessToken();
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
+    try {
+      const token = this.authService.getAccessToken();
+      if (!token) {
+        console.warn('⚠️ No authentication token available for WebSocket');
+        return;
+      }
 
-    const socketUrl = process.env.API_URL || 'http://localhost:3001';
-    
-    this.socket = io(socketUrl, {
-      auth: { token },
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: 1000,
-    });
-
-    this.socket.on('connect', () => {
-      console.log('✅ WebSocket connected');
-      this.isConnected = true;
-      this.reconnectAttempts = 0;
-      this.emit('connected');
+      const socketUrl = process.env.API_URL || 'http://localhost:3001';
       
-      // Subscribe to queue status updates
-      this.socket?.emit('subscribe-queue-status');
-    });
+      this.socket = io(socketUrl, {
+        auth: { token },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: 1000,
+        timeout: 10000
+      });
 
-    this.socket.on('disconnect', (reason: string) => {
-      console.log('❌ WebSocket disconnected:', reason);
-      this.isConnected = false;
-      this.emit('disconnected', reason);
-    });
+      this.socket.on('connect', () => {
+        console.log('✅ WebSocket connected');
+        this.isConnected = true;
+        this.reconnectAttempts = 0;
+        this.emit('connected');
+        
+        // Subscribe to queue status updates
+        this.socket?.emit('subscribe-queue-status');
+      });
 
-    this.socket.on('connect_error', (error: any) => {
-      console.error('❌ WebSocket connection error:', error);
-      this.reconnectAttempts++;
-      this.emit('connection-error', error);
-    });
+      this.socket.on('disconnect', (reason: string) => {
+        console.log('❌ WebSocket disconnected:', reason);
+        this.isConnected = false;
+        this.emit('disconnected', reason);
+      });
 
-    // Listen for job events
-    this.socket.on('job-claimed', (data: any) => {
-      this.emit('job-claimed', data);
-    });
+      this.socket.on('connect_error', (error: any) => {
+        console.warn('⚠️ WebSocket connection error:', error?.message || error);
+        this.reconnectAttempts++;
+        this.emit('connection-error', error);
+      });
 
-    this.socket.on('processing-started', (data: any) => {
-      this.emit('processing-started', data);
-    });
+      // Listen for job events
+      this.socket.on('job-claimed', (data: any) => {
+        console.log('🎯 Job claimed:', data.jobId);
+        this.emit('job-claimed', data);
+      });
 
-    this.socket.on('processing-completed', (data: any) => {
-      this.emit('processing-completed', data);
-    });
+      this.socket.on('processing-started', (data: any) => {
+        console.log('🚀 Processing started:', data.jobId);
+        this.emit('processing-started', data);
+      });
 
-    this.socket.on('processing-failed', (data: any) => {
-      this.emit('processing-failed', data);
-    });
+      this.socket.on('processing-completed', (data: any) => {
+        console.log('✅ Processing completed:', data.jobId);
+        this.emit('processing-completed', data);
+      });
+
+      this.socket.on('processing-failed', (data: any) => {
+        console.log('❌ Processing failed:', data.jobId);
+        this.emit('processing-failed', data);
+      });
+
+      this.socket.on('new-job-available', (data: any) => {
+        console.log('🆕 New job available:', data.jobId);
+        this.emit('new-job-available', data);
+      });
+    } catch (error) {
+      console.warn('⚠️ WebSocket setup failed:', error);
+      // Continue without WebSocket in development
+    }
   }
 
   /**
@@ -333,20 +323,31 @@ export class QueueService extends EventEmitter {
    */
   async getAvailableJobs(limit = 10): Promise<QueueJob[]> {
     try {
-      const response = await this.apiClient.get('/queue/applications', {
+      const response = await this.apiClient.get('/api/queue/applications', {
         params: {
           limit,
           status: 'queued', // Only get queued jobs ready for processing
+          deviceId: this.getDeviceId()
         },
       });
 
       if (response.data.success) {
-        return response.data.data.applications;
+        const jobs = response.data.data?.applications || [];
+        console.log(`📦 Retrieved ${jobs.length} available jobs from queue`);
+        return jobs;
       } else {
         throw new Error(response.data.error || 'Failed to get available jobs');
       }
     } catch (error) {
-      console.error('Failed to get available jobs:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNREFUSED') {
+          console.warn('⚠️ API server not available - working in offline mode');
+        } else {
+          console.error('❌ API error getting jobs:', error.response?.data || error.message);
+        }
+      } else {
+        console.error('❌ Failed to get available jobs:', error);
+      }
       return [];
     }
   }
@@ -356,21 +357,36 @@ export class QueueService extends EventEmitter {
    */
   async claimJob(jobId: string): Promise<boolean> {
     try {
-      const response = await this.apiClient.post(`/queue/applications/${jobId}/action`, {
-        action: 'claim',
+      const response = await this.apiClient.post(`/api/queue/applications/${jobId}/claim`, {
         deviceId: this.getDeviceId(),
+        deviceInfo: {
+          platform: process.platform,
+          arch: process.arch,
+          version: process.version,
+          timestamp: new Date().toISOString()
+        }
       });
 
       if (response.data.success) {
         console.log(`✅ Successfully claimed job: ${jobId}`);
-        this.emit('job-claimed', { jobId });
+        this.emit('job-claimed', { jobId, timestamp: Date.now() });
         return true;
       } else {
         console.warn(`⚠️ Failed to claim job ${jobId}: ${response.data.error}`);
         return false;
       }
     } catch (error) {
-      console.error(`❌ Error claiming job ${jobId}:`, error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          console.warn(`⚠️ Job ${jobId} already claimed by another worker`);
+        } else if (error.response?.status === 404) {
+          console.warn(`⚠️ Job ${jobId} not found or no longer available`);
+        } else {
+          console.error(`❌ API error claiming job ${jobId}:`, error.response?.data || error.message);
+        }
+      } else {
+        console.error(`❌ Error claiming job ${jobId}:`, error);
+      }
       return false;
     }
   }
@@ -384,21 +400,34 @@ export class QueueService extends EventEmitter {
     result?: ProcessingResult
   ): Promise<void> {
     try {
-      const response = await this.apiClient.post(`/queue/applications/${jobId}/status`, {
+      const payload = {
         status,
-        result,
         deviceId: this.getDeviceId(),
         timestamp: new Date().toISOString(),
-      });
+        result: result ? {
+          success: result.success,
+          applicationId: result.applicationId,
+          confirmationId: result.confirmationId,
+          error: result.error,
+          screenshots: result.screenshots?.length || 0,
+          executionTime: Date.now() // Will be calculated on server
+        } : undefined
+      };
+
+      const response = await this.apiClient.post(`/api/queue/applications/${jobId}/status`, payload);
 
       if (response.data.success) {
         console.log(`✅ Updated job ${jobId} status to: ${status}`);
-        this.emit('job-status-updated', { jobId, status, result });
+        this.emit('job-status-updated', { jobId, status, result, timestamp: Date.now() });
       } else {
         console.error(`❌ Failed to update job ${jobId} status:`, response.data.error);
       }
     } catch (error) {
-      console.error(`❌ Error updating job ${jobId} status:`, error);
+      if (axios.isAxiosError(error)) {
+        console.error(`❌ API error updating job ${jobId} status:`, error.response?.data || error.message);
+      } else {
+        console.error(`❌ Error updating job ${jobId} status:`, error);
+      }
     }
   }
 
@@ -407,15 +436,25 @@ export class QueueService extends EventEmitter {
    */
   async getQueueStats(): Promise<QueueStats | null> {
     try {
-      const response = await this.apiClient.get('/queue/stats');
+      const response = await this.apiClient.get('/api/queue/stats', {
+        params: {
+          deviceId: this.getDeviceId()
+        }
+      });
       
       if (response.data.success) {
-        return response.data.data;
+        const stats = response.data.data;
+        console.log(`📊 Queue stats: ${stats.user?.totalApplications || 0} total applications`);
+        return stats;
       } else {
         throw new Error(response.data.error || 'Failed to get queue stats');
       }
     } catch (error) {
-      console.error('Failed to get queue stats:', error);
+      if (axios.isAxiosError(error)) {
+        console.warn('⚠️ Cannot get queue stats - API unavailable');
+      } else {
+        console.error('❌ Failed to get queue stats:', error);
+      }
       return null;
     }
   }

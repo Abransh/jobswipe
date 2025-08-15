@@ -22,6 +22,9 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "test:integration": "npm run build:main:dev && node dist/test-integration.js",
+    "test:health": "npm run build:main:dev && node dist/test-integration.js health",
+    "test:automation": "npm run build:main:dev && node dist/services/TestJobApplication.js",
     "clean": "rm -rf dist out node_modules"
   },
   "dependencies": {

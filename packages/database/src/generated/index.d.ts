@@ -99,6 +99,11 @@ export type CompanyReview = $Result.DefaultSelection<Prisma.$CompanyReviewPayloa
  */
 export type JobPosting = $Result.DefaultSelection<Prisma.$JobPostingPayload>
 /**
+ * Model JobSnapshot
+ * 
+ */
+export type JobSnapshot = $Result.DefaultSelection<Prisma.$JobSnapshotPayload>
+/**
  * Model ResumeTemplate
  * 
  */
@@ -1186,6 +1191,16 @@ export class PrismaClient<
   get jobPosting(): Prisma.JobPostingDelegate<ExtArgs>;
 
   /**
+   * `prisma.jobSnapshot`: Exposes CRUD operations for the **JobSnapshot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more JobSnapshots
+    * const jobSnapshots = await prisma.jobSnapshot.findMany()
+    * ```
+    */
+  get jobSnapshot(): Prisma.JobSnapshotDelegate<ExtArgs>;
+
+  /**
    * `prisma.resumeTemplate`: Exposes CRUD operations for the **ResumeTemplate** model.
     * Example usage:
     * ```ts
@@ -1732,6 +1747,7 @@ export namespace Prisma {
     Company: 'Company',
     CompanyReview: 'CompanyReview',
     JobPosting: 'JobPosting',
+    JobSnapshot: 'JobSnapshot',
     ResumeTemplate: 'ResumeTemplate',
     Resume: 'Resume',
     ResumeEnhancement: 'ResumeEnhancement',
@@ -1756,7 +1772,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "userJobSwipe" | "applicationQueue" | "automationLog" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
+      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "userJobSwipe" | "applicationQueue" | "automationLog" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "jobSnapshot" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2950,6 +2966,76 @@ export namespace Prisma {
           }
         }
       }
+      JobSnapshot: {
+        payload: Prisma.$JobSnapshotPayload<ExtArgs>
+        fields: Prisma.JobSnapshotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.JobSnapshotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.JobSnapshotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          findFirst: {
+            args: Prisma.JobSnapshotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.JobSnapshotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          findMany: {
+            args: Prisma.JobSnapshotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>[]
+          }
+          create: {
+            args: Prisma.JobSnapshotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          createMany: {
+            args: Prisma.JobSnapshotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.JobSnapshotCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>[]
+          }
+          delete: {
+            args: Prisma.JobSnapshotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          update: {
+            args: Prisma.JobSnapshotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          deleteMany: {
+            args: Prisma.JobSnapshotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.JobSnapshotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.JobSnapshotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobSnapshotPayload>
+          }
+          aggregate: {
+            args: Prisma.JobSnapshotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateJobSnapshot>
+          }
+          groupBy: {
+            args: Prisma.JobSnapshotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<JobSnapshotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.JobSnapshotCountArgs<ExtArgs>
+            result: $Utils.Optional<JobSnapshotCountAggregateOutputType> | number
+          }
+        }
+      }
       ResumeTemplate: {
         payload: Prisma.$ResumeTemplatePayload<ExtArgs>
         fields: Prisma.ResumeTemplateFieldRefs
@@ -3946,6 +4032,7 @@ export namespace Prisma {
     savedBy: number
     swipes: number
     queueItems: number
+    snapshots: number
     enhancements: number
   }
 
@@ -3954,6 +4041,7 @@ export namespace Prisma {
     savedBy?: boolean | JobPostingCountOutputTypeCountSavedByArgs
     swipes?: boolean | JobPostingCountOutputTypeCountSwipesArgs
     queueItems?: boolean | JobPostingCountOutputTypeCountQueueItemsArgs
+    snapshots?: boolean | JobPostingCountOutputTypeCountSnapshotsArgs
     enhancements?: boolean | JobPostingCountOutputTypeCountEnhancementsArgs
   }
 
@@ -3994,6 +4082,13 @@ export namespace Prisma {
    */
   export type JobPostingCountOutputTypeCountQueueItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ApplicationQueueWhereInput
+  }
+
+  /**
+   * JobPostingCountOutputType without action
+   */
+  export type JobPostingCountOutputTypeCountSnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JobSnapshotWhereInput
   }
 
   /**
@@ -12764,6 +12859,7 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
     jobPosting?: boolean | JobPostingDefaultArgs<ExtArgs>
     application?: boolean | ApplicationQueue$applicationArgs<ExtArgs>
+    jobSnapshot?: boolean | ApplicationQueue$jobSnapshotArgs<ExtArgs>
     automationLogs?: boolean | ApplicationQueue$automationLogsArgs<ExtArgs>
     _count?: boolean | ApplicationQueueCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["applicationQueue"]>
@@ -12835,6 +12931,7 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
     jobPosting?: boolean | JobPostingDefaultArgs<ExtArgs>
     application?: boolean | ApplicationQueue$applicationArgs<ExtArgs>
+    jobSnapshot?: boolean | ApplicationQueue$jobSnapshotArgs<ExtArgs>
     automationLogs?: boolean | ApplicationQueue$automationLogsArgs<ExtArgs>
     _count?: boolean | ApplicationQueueCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -12850,6 +12947,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs>
       jobPosting: Prisma.$JobPostingPayload<ExtArgs>
       application: Prisma.$JobApplicationPayload<ExtArgs> | null
+      jobSnapshot: Prisma.$JobSnapshotPayload<ExtArgs> | null
       automationLogs: Prisma.$AutomationLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -13247,6 +13345,7 @@ export namespace Prisma {
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     jobPosting<T extends JobPostingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobPostingDefaultArgs<ExtArgs>>): Prisma__JobPostingClient<$Result.GetResult<Prisma.$JobPostingPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     application<T extends ApplicationQueue$applicationArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationQueue$applicationArgs<ExtArgs>>): Prisma__JobApplicationClient<$Result.GetResult<Prisma.$JobApplicationPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    jobSnapshot<T extends ApplicationQueue$jobSnapshotArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationQueue$jobSnapshotArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     automationLogs<T extends ApplicationQueue$automationLogsArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationQueue$automationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AutomationLogPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -13643,6 +13742,21 @@ export namespace Prisma {
      */
     include?: JobApplicationInclude<ExtArgs> | null
     where?: JobApplicationWhereInput
+  }
+
+  /**
+   * ApplicationQueue.jobSnapshot
+   */
+  export type ApplicationQueue$jobSnapshotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    where?: JobSnapshotWhereInput
   }
 
   /**
@@ -23405,6 +23519,7 @@ export namespace Prisma {
     savedBy?: boolean | JobPosting$savedByArgs<ExtArgs>
     swipes?: boolean | JobPosting$swipesArgs<ExtArgs>
     queueItems?: boolean | JobPosting$queueItemsArgs<ExtArgs>
+    snapshots?: boolean | JobPosting$snapshotsArgs<ExtArgs>
     enhancements?: boolean | JobPosting$enhancementsArgs<ExtArgs>
     _count?: boolean | JobPostingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
@@ -23522,6 +23637,7 @@ export namespace Prisma {
     savedBy?: boolean | JobPosting$savedByArgs<ExtArgs>
     swipes?: boolean | JobPosting$swipesArgs<ExtArgs>
     queueItems?: boolean | JobPosting$queueItemsArgs<ExtArgs>
+    snapshots?: boolean | JobPosting$snapshotsArgs<ExtArgs>
     enhancements?: boolean | JobPosting$enhancementsArgs<ExtArgs>
     _count?: boolean | JobPostingCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -23537,6 +23653,7 @@ export namespace Prisma {
       savedBy: Prisma.$SavedJobPayload<ExtArgs>[]
       swipes: Prisma.$UserJobSwipePayload<ExtArgs>[]
       queueItems: Prisma.$ApplicationQueuePayload<ExtArgs>[]
+      snapshots: Prisma.$JobSnapshotPayload<ExtArgs>[]
       enhancements: Prisma.$ResumeEnhancementPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -23959,6 +24076,7 @@ export namespace Prisma {
     savedBy<T extends JobPosting$savedByArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$savedByArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SavedJobPayload<ExtArgs>, T, "findMany"> | Null>
     swipes<T extends JobPosting$swipesArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$swipesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserJobSwipePayload<ExtArgs>, T, "findMany"> | Null>
     queueItems<T extends JobPosting$queueItemsArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$queueItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApplicationQueuePayload<ExtArgs>, T, "findMany"> | Null>
+    snapshots<T extends JobPosting$snapshotsArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$snapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findMany"> | Null>
     enhancements<T extends JobPosting$enhancementsArgs<ExtArgs> = {}>(args?: Subset<T, JobPosting$enhancementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ResumeEnhancementPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -24446,6 +24564,26 @@ export namespace Prisma {
   }
 
   /**
+   * JobPosting.snapshots
+   */
+  export type JobPosting$snapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    where?: JobSnapshotWhereInput
+    orderBy?: JobSnapshotOrderByWithRelationInput | JobSnapshotOrderByWithRelationInput[]
+    cursor?: JobSnapshotWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: JobSnapshotScalarFieldEnum | JobSnapshotScalarFieldEnum[]
+  }
+
+  /**
    * JobPosting.enhancements
    */
   export type JobPosting$enhancementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -24477,6 +24615,1592 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: JobPostingInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model JobSnapshot
+   */
+
+  export type AggregateJobSnapshot = {
+    _count: JobSnapshotCountAggregateOutputType | null
+    _avg: JobSnapshotAvgAggregateOutputType | null
+    _sum: JobSnapshotSumAggregateOutputType | null
+    _min: JobSnapshotMinAggregateOutputType | null
+    _max: JobSnapshotMaxAggregateOutputType | null
+  }
+
+  export type JobSnapshotAvgAggregateOutputType = {
+    salaryMin: number | null
+    salaryMax: number | null
+    experienceYears: number | null
+    qualityScore: number | null
+    viewCount: number | null
+    applicationCount: number | null
+    rightSwipeCount: number | null
+    leftSwipeCount: number | null
+  }
+
+  export type JobSnapshotSumAggregateOutputType = {
+    salaryMin: number | null
+    salaryMax: number | null
+    experienceYears: number | null
+    qualityScore: number | null
+    viewCount: number | null
+    applicationCount: number | null
+    rightSwipeCount: number | null
+    leftSwipeCount: number | null
+  }
+
+  export type JobSnapshotMinAggregateOutputType = {
+    id: string | null
+    originalJobId: string | null
+    applicationQueueId: string | null
+    title: string | null
+    description: string | null
+    requirements: string | null
+    benefits: string | null
+    type: string | null
+    level: string | null
+    department: string | null
+    category: string | null
+    remote: boolean | null
+    remoteType: string | null
+    location: string | null
+    timeZone: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    salaryMin: number | null
+    salaryMax: number | null
+    currency: string | null
+    salaryType: string | null
+    equity: string | null
+    bonus: string | null
+    experienceYears: number | null
+    education: string | null
+    companyName: string | null
+    companyLogo: string | null
+    companyWebsite: string | null
+    companyIndustry: string | null
+    companySize: string | null
+    companyDescription: string | null
+    externalId: string | null
+    source: string | null
+    sourceUrl: string | null
+    applyUrl: string | null
+    qualityScore: number | null
+    isVerified: boolean | null
+    originalStatus: string | null
+    isActive: boolean | null
+    isFeatured: boolean | null
+    isUrgent: boolean | null
+    originalPostedAt: Date | null
+    originalExpiresAt: Date | null
+    viewCount: number | null
+    applicationCount: number | null
+    rightSwipeCount: number | null
+    leftSwipeCount: number | null
+    snapshotVersion: string | null
+    snapshotReason: string | null
+    createdAt: Date | null
+  }
+
+  export type JobSnapshotMaxAggregateOutputType = {
+    id: string | null
+    originalJobId: string | null
+    applicationQueueId: string | null
+    title: string | null
+    description: string | null
+    requirements: string | null
+    benefits: string | null
+    type: string | null
+    level: string | null
+    department: string | null
+    category: string | null
+    remote: boolean | null
+    remoteType: string | null
+    location: string | null
+    timeZone: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    salaryMin: number | null
+    salaryMax: number | null
+    currency: string | null
+    salaryType: string | null
+    equity: string | null
+    bonus: string | null
+    experienceYears: number | null
+    education: string | null
+    companyName: string | null
+    companyLogo: string | null
+    companyWebsite: string | null
+    companyIndustry: string | null
+    companySize: string | null
+    companyDescription: string | null
+    externalId: string | null
+    source: string | null
+    sourceUrl: string | null
+    applyUrl: string | null
+    qualityScore: number | null
+    isVerified: boolean | null
+    originalStatus: string | null
+    isActive: boolean | null
+    isFeatured: boolean | null
+    isUrgent: boolean | null
+    originalPostedAt: Date | null
+    originalExpiresAt: Date | null
+    viewCount: number | null
+    applicationCount: number | null
+    rightSwipeCount: number | null
+    leftSwipeCount: number | null
+    snapshotVersion: string | null
+    snapshotReason: string | null
+    createdAt: Date | null
+  }
+
+  export type JobSnapshotCountAggregateOutputType = {
+    id: number
+    originalJobId: number
+    applicationQueueId: number
+    title: number
+    description: number
+    requirements: number
+    benefits: number
+    type: number
+    level: number
+    department: number
+    category: number
+    remote: number
+    remoteType: number
+    location: number
+    timeZone: number
+    city: number
+    state: number
+    country: number
+    coordinates: number
+    salaryMin: number
+    salaryMax: number
+    currency: number
+    salaryType: number
+    equity: number
+    bonus: number
+    experienceYears: number
+    skills: number
+    education: number
+    languages: number
+    companyName: number
+    companyLogo: number
+    companyWebsite: number
+    companyIndustry: number
+    companySize: number
+    companyDescription: number
+    externalId: number
+    source: number
+    sourceUrl: number
+    applyUrl: number
+    qualityScore: number
+    isVerified: number
+    originalStatus: number
+    isActive: number
+    isFeatured: number
+    isUrgent: number
+    originalPostedAt: number
+    originalExpiresAt: number
+    viewCount: number
+    applicationCount: number
+    rightSwipeCount: number
+    leftSwipeCount: number
+    snapshotVersion: number
+    snapshotReason: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type JobSnapshotAvgAggregateInputType = {
+    salaryMin?: true
+    salaryMax?: true
+    experienceYears?: true
+    qualityScore?: true
+    viewCount?: true
+    applicationCount?: true
+    rightSwipeCount?: true
+    leftSwipeCount?: true
+  }
+
+  export type JobSnapshotSumAggregateInputType = {
+    salaryMin?: true
+    salaryMax?: true
+    experienceYears?: true
+    qualityScore?: true
+    viewCount?: true
+    applicationCount?: true
+    rightSwipeCount?: true
+    leftSwipeCount?: true
+  }
+
+  export type JobSnapshotMinAggregateInputType = {
+    id?: true
+    originalJobId?: true
+    applicationQueueId?: true
+    title?: true
+    description?: true
+    requirements?: true
+    benefits?: true
+    type?: true
+    level?: true
+    department?: true
+    category?: true
+    remote?: true
+    remoteType?: true
+    location?: true
+    timeZone?: true
+    city?: true
+    state?: true
+    country?: true
+    salaryMin?: true
+    salaryMax?: true
+    currency?: true
+    salaryType?: true
+    equity?: true
+    bonus?: true
+    experienceYears?: true
+    education?: true
+    companyName?: true
+    companyLogo?: true
+    companyWebsite?: true
+    companyIndustry?: true
+    companySize?: true
+    companyDescription?: true
+    externalId?: true
+    source?: true
+    sourceUrl?: true
+    applyUrl?: true
+    qualityScore?: true
+    isVerified?: true
+    originalStatus?: true
+    isActive?: true
+    isFeatured?: true
+    isUrgent?: true
+    originalPostedAt?: true
+    originalExpiresAt?: true
+    viewCount?: true
+    applicationCount?: true
+    rightSwipeCount?: true
+    leftSwipeCount?: true
+    snapshotVersion?: true
+    snapshotReason?: true
+    createdAt?: true
+  }
+
+  export type JobSnapshotMaxAggregateInputType = {
+    id?: true
+    originalJobId?: true
+    applicationQueueId?: true
+    title?: true
+    description?: true
+    requirements?: true
+    benefits?: true
+    type?: true
+    level?: true
+    department?: true
+    category?: true
+    remote?: true
+    remoteType?: true
+    location?: true
+    timeZone?: true
+    city?: true
+    state?: true
+    country?: true
+    salaryMin?: true
+    salaryMax?: true
+    currency?: true
+    salaryType?: true
+    equity?: true
+    bonus?: true
+    experienceYears?: true
+    education?: true
+    companyName?: true
+    companyLogo?: true
+    companyWebsite?: true
+    companyIndustry?: true
+    companySize?: true
+    companyDescription?: true
+    externalId?: true
+    source?: true
+    sourceUrl?: true
+    applyUrl?: true
+    qualityScore?: true
+    isVerified?: true
+    originalStatus?: true
+    isActive?: true
+    isFeatured?: true
+    isUrgent?: true
+    originalPostedAt?: true
+    originalExpiresAt?: true
+    viewCount?: true
+    applicationCount?: true
+    rightSwipeCount?: true
+    leftSwipeCount?: true
+    snapshotVersion?: true
+    snapshotReason?: true
+    createdAt?: true
+  }
+
+  export type JobSnapshotCountAggregateInputType = {
+    id?: true
+    originalJobId?: true
+    applicationQueueId?: true
+    title?: true
+    description?: true
+    requirements?: true
+    benefits?: true
+    type?: true
+    level?: true
+    department?: true
+    category?: true
+    remote?: true
+    remoteType?: true
+    location?: true
+    timeZone?: true
+    city?: true
+    state?: true
+    country?: true
+    coordinates?: true
+    salaryMin?: true
+    salaryMax?: true
+    currency?: true
+    salaryType?: true
+    equity?: true
+    bonus?: true
+    experienceYears?: true
+    skills?: true
+    education?: true
+    languages?: true
+    companyName?: true
+    companyLogo?: true
+    companyWebsite?: true
+    companyIndustry?: true
+    companySize?: true
+    companyDescription?: true
+    externalId?: true
+    source?: true
+    sourceUrl?: true
+    applyUrl?: true
+    qualityScore?: true
+    isVerified?: true
+    originalStatus?: true
+    isActive?: true
+    isFeatured?: true
+    isUrgent?: true
+    originalPostedAt?: true
+    originalExpiresAt?: true
+    viewCount?: true
+    applicationCount?: true
+    rightSwipeCount?: true
+    leftSwipeCount?: true
+    snapshotVersion?: true
+    snapshotReason?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type JobSnapshotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which JobSnapshot to aggregate.
+     */
+    where?: JobSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobSnapshots to fetch.
+     */
+    orderBy?: JobSnapshotOrderByWithRelationInput | JobSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: JobSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned JobSnapshots
+    **/
+    _count?: true | JobSnapshotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: JobSnapshotAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: JobSnapshotSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: JobSnapshotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: JobSnapshotMaxAggregateInputType
+  }
+
+  export type GetJobSnapshotAggregateType<T extends JobSnapshotAggregateArgs> = {
+        [P in keyof T & keyof AggregateJobSnapshot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateJobSnapshot[P]>
+      : GetScalarType<T[P], AggregateJobSnapshot[P]>
+  }
+
+
+
+
+  export type JobSnapshotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JobSnapshotWhereInput
+    orderBy?: JobSnapshotOrderByWithAggregationInput | JobSnapshotOrderByWithAggregationInput[]
+    by: JobSnapshotScalarFieldEnum[] | JobSnapshotScalarFieldEnum
+    having?: JobSnapshotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: JobSnapshotCountAggregateInputType | true
+    _avg?: JobSnapshotAvgAggregateInputType
+    _sum?: JobSnapshotSumAggregateInputType
+    _min?: JobSnapshotMinAggregateInputType
+    _max?: JobSnapshotMaxAggregateInputType
+  }
+
+  export type JobSnapshotGroupByOutputType = {
+    id: string
+    originalJobId: string
+    applicationQueueId: string
+    title: string
+    description: string
+    requirements: string | null
+    benefits: string | null
+    type: string
+    level: string
+    department: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location: string | null
+    timeZone: string | null
+    city: string | null
+    state: string | null
+    country: string | null
+    coordinates: JsonValue | null
+    salaryMin: number | null
+    salaryMax: number | null
+    currency: string | null
+    salaryType: string | null
+    equity: string | null
+    bonus: string | null
+    experienceYears: number | null
+    skills: string[]
+    education: string | null
+    languages: string[]
+    companyName: string
+    companyLogo: string | null
+    companyWebsite: string | null
+    companyIndustry: string | null
+    companySize: string | null
+    companyDescription: string | null
+    externalId: string | null
+    source: string
+    sourceUrl: string | null
+    applyUrl: string | null
+    qualityScore: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt: Date | null
+    originalExpiresAt: Date | null
+    viewCount: number
+    applicationCount: number
+    rightSwipeCount: number
+    leftSwipeCount: number
+    snapshotVersion: string
+    snapshotReason: string
+    createdAt: Date
+    _count: JobSnapshotCountAggregateOutputType | null
+    _avg: JobSnapshotAvgAggregateOutputType | null
+    _sum: JobSnapshotSumAggregateOutputType | null
+    _min: JobSnapshotMinAggregateOutputType | null
+    _max: JobSnapshotMaxAggregateOutputType | null
+  }
+
+  type GetJobSnapshotGroupByPayload<T extends JobSnapshotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<JobSnapshotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof JobSnapshotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], JobSnapshotGroupByOutputType[P]>
+            : GetScalarType<T[P], JobSnapshotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type JobSnapshotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    originalJobId?: boolean
+    applicationQueueId?: boolean
+    title?: boolean
+    description?: boolean
+    requirements?: boolean
+    benefits?: boolean
+    type?: boolean
+    level?: boolean
+    department?: boolean
+    category?: boolean
+    remote?: boolean
+    remoteType?: boolean
+    location?: boolean
+    timeZone?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    coordinates?: boolean
+    salaryMin?: boolean
+    salaryMax?: boolean
+    currency?: boolean
+    salaryType?: boolean
+    equity?: boolean
+    bonus?: boolean
+    experienceYears?: boolean
+    skills?: boolean
+    education?: boolean
+    languages?: boolean
+    companyName?: boolean
+    companyLogo?: boolean
+    companyWebsite?: boolean
+    companyIndustry?: boolean
+    companySize?: boolean
+    companyDescription?: boolean
+    externalId?: boolean
+    source?: boolean
+    sourceUrl?: boolean
+    applyUrl?: boolean
+    qualityScore?: boolean
+    isVerified?: boolean
+    originalStatus?: boolean
+    isActive?: boolean
+    isFeatured?: boolean
+    isUrgent?: boolean
+    originalPostedAt?: boolean
+    originalExpiresAt?: boolean
+    viewCount?: boolean
+    applicationCount?: boolean
+    rightSwipeCount?: boolean
+    leftSwipeCount?: boolean
+    snapshotVersion?: boolean
+    snapshotReason?: boolean
+    createdAt?: boolean
+    originalJob?: boolean | JobPostingDefaultArgs<ExtArgs>
+    applicationQueue?: boolean | ApplicationQueueDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["jobSnapshot"]>
+
+  export type JobSnapshotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    originalJobId?: boolean
+    applicationQueueId?: boolean
+    title?: boolean
+    description?: boolean
+    requirements?: boolean
+    benefits?: boolean
+    type?: boolean
+    level?: boolean
+    department?: boolean
+    category?: boolean
+    remote?: boolean
+    remoteType?: boolean
+    location?: boolean
+    timeZone?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    coordinates?: boolean
+    salaryMin?: boolean
+    salaryMax?: boolean
+    currency?: boolean
+    salaryType?: boolean
+    equity?: boolean
+    bonus?: boolean
+    experienceYears?: boolean
+    skills?: boolean
+    education?: boolean
+    languages?: boolean
+    companyName?: boolean
+    companyLogo?: boolean
+    companyWebsite?: boolean
+    companyIndustry?: boolean
+    companySize?: boolean
+    companyDescription?: boolean
+    externalId?: boolean
+    source?: boolean
+    sourceUrl?: boolean
+    applyUrl?: boolean
+    qualityScore?: boolean
+    isVerified?: boolean
+    originalStatus?: boolean
+    isActive?: boolean
+    isFeatured?: boolean
+    isUrgent?: boolean
+    originalPostedAt?: boolean
+    originalExpiresAt?: boolean
+    viewCount?: boolean
+    applicationCount?: boolean
+    rightSwipeCount?: boolean
+    leftSwipeCount?: boolean
+    snapshotVersion?: boolean
+    snapshotReason?: boolean
+    createdAt?: boolean
+    originalJob?: boolean | JobPostingDefaultArgs<ExtArgs>
+    applicationQueue?: boolean | ApplicationQueueDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["jobSnapshot"]>
+
+  export type JobSnapshotSelectScalar = {
+    id?: boolean
+    originalJobId?: boolean
+    applicationQueueId?: boolean
+    title?: boolean
+    description?: boolean
+    requirements?: boolean
+    benefits?: boolean
+    type?: boolean
+    level?: boolean
+    department?: boolean
+    category?: boolean
+    remote?: boolean
+    remoteType?: boolean
+    location?: boolean
+    timeZone?: boolean
+    city?: boolean
+    state?: boolean
+    country?: boolean
+    coordinates?: boolean
+    salaryMin?: boolean
+    salaryMax?: boolean
+    currency?: boolean
+    salaryType?: boolean
+    equity?: boolean
+    bonus?: boolean
+    experienceYears?: boolean
+    skills?: boolean
+    education?: boolean
+    languages?: boolean
+    companyName?: boolean
+    companyLogo?: boolean
+    companyWebsite?: boolean
+    companyIndustry?: boolean
+    companySize?: boolean
+    companyDescription?: boolean
+    externalId?: boolean
+    source?: boolean
+    sourceUrl?: boolean
+    applyUrl?: boolean
+    qualityScore?: boolean
+    isVerified?: boolean
+    originalStatus?: boolean
+    isActive?: boolean
+    isFeatured?: boolean
+    isUrgent?: boolean
+    originalPostedAt?: boolean
+    originalExpiresAt?: boolean
+    viewCount?: boolean
+    applicationCount?: boolean
+    rightSwipeCount?: boolean
+    leftSwipeCount?: boolean
+    snapshotVersion?: boolean
+    snapshotReason?: boolean
+    createdAt?: boolean
+  }
+
+  export type JobSnapshotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    originalJob?: boolean | JobPostingDefaultArgs<ExtArgs>
+    applicationQueue?: boolean | ApplicationQueueDefaultArgs<ExtArgs>
+  }
+  export type JobSnapshotIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    originalJob?: boolean | JobPostingDefaultArgs<ExtArgs>
+    applicationQueue?: boolean | ApplicationQueueDefaultArgs<ExtArgs>
+  }
+
+  export type $JobSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "JobSnapshot"
+    objects: {
+      originalJob: Prisma.$JobPostingPayload<ExtArgs>
+      applicationQueue: Prisma.$ApplicationQueuePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      originalJobId: string
+      applicationQueueId: string
+      title: string
+      description: string
+      requirements: string | null
+      benefits: string | null
+      type: string
+      level: string
+      department: string | null
+      category: string
+      remote: boolean
+      remoteType: string
+      location: string | null
+      timeZone: string | null
+      city: string | null
+      state: string | null
+      country: string | null
+      coordinates: Prisma.JsonValue | null
+      salaryMin: number | null
+      salaryMax: number | null
+      currency: string | null
+      salaryType: string | null
+      equity: string | null
+      bonus: string | null
+      experienceYears: number | null
+      skills: string[]
+      education: string | null
+      languages: string[]
+      companyName: string
+      companyLogo: string | null
+      companyWebsite: string | null
+      companyIndustry: string | null
+      companySize: string | null
+      companyDescription: string | null
+      externalId: string | null
+      source: string
+      sourceUrl: string | null
+      applyUrl: string | null
+      qualityScore: number | null
+      isVerified: boolean
+      originalStatus: string
+      isActive: boolean
+      isFeatured: boolean
+      isUrgent: boolean
+      originalPostedAt: Date | null
+      originalExpiresAt: Date | null
+      viewCount: number
+      applicationCount: number
+      rightSwipeCount: number
+      leftSwipeCount: number
+      snapshotVersion: string
+      snapshotReason: string
+      createdAt: Date
+    }, ExtArgs["result"]["jobSnapshot"]>
+    composites: {}
+  }
+
+  type JobSnapshotGetPayload<S extends boolean | null | undefined | JobSnapshotDefaultArgs> = $Result.GetResult<Prisma.$JobSnapshotPayload, S>
+
+  type JobSnapshotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<JobSnapshotFindManyArgs, 'select' | 'include' | 'distinct' | 'relationLoadStrategy'> & {
+      select?: JobSnapshotCountAggregateInputType | true
+    }
+
+  export interface JobSnapshotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['JobSnapshot'], meta: { name: 'JobSnapshot' } }
+    /**
+     * Find zero or one JobSnapshot that matches the filter.
+     * @param {JobSnapshotFindUniqueArgs} args - Arguments to find a JobSnapshot
+     * @example
+     * // Get one JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends JobSnapshotFindUniqueArgs>(args: SelectSubset<T, JobSnapshotFindUniqueArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one JobSnapshot that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {JobSnapshotFindUniqueOrThrowArgs} args - Arguments to find a JobSnapshot
+     * @example
+     * // Get one JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends JobSnapshotFindUniqueOrThrowArgs>(args: SelectSubset<T, JobSnapshotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first JobSnapshot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotFindFirstArgs} args - Arguments to find a JobSnapshot
+     * @example
+     * // Get one JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends JobSnapshotFindFirstArgs>(args?: SelectSubset<T, JobSnapshotFindFirstArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first JobSnapshot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotFindFirstOrThrowArgs} args - Arguments to find a JobSnapshot
+     * @example
+     * // Get one JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends JobSnapshotFindFirstOrThrowArgs>(args?: SelectSubset<T, JobSnapshotFindFirstOrThrowArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more JobSnapshots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all JobSnapshots
+     * const jobSnapshots = await prisma.jobSnapshot.findMany()
+     * 
+     * // Get first 10 JobSnapshots
+     * const jobSnapshots = await prisma.jobSnapshot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const jobSnapshotWithIdOnly = await prisma.jobSnapshot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends JobSnapshotFindManyArgs>(args?: SelectSubset<T, JobSnapshotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a JobSnapshot.
+     * @param {JobSnapshotCreateArgs} args - Arguments to create a JobSnapshot.
+     * @example
+     * // Create one JobSnapshot
+     * const JobSnapshot = await prisma.jobSnapshot.create({
+     *   data: {
+     *     // ... data to create a JobSnapshot
+     *   }
+     * })
+     * 
+     */
+    create<T extends JobSnapshotCreateArgs>(args: SelectSubset<T, JobSnapshotCreateArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many JobSnapshots.
+     * @param {JobSnapshotCreateManyArgs} args - Arguments to create many JobSnapshots.
+     * @example
+     * // Create many JobSnapshots
+     * const jobSnapshot = await prisma.jobSnapshot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends JobSnapshotCreateManyArgs>(args?: SelectSubset<T, JobSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many JobSnapshots and returns the data saved in the database.
+     * @param {JobSnapshotCreateManyAndReturnArgs} args - Arguments to create many JobSnapshots.
+     * @example
+     * // Create many JobSnapshots
+     * const jobSnapshot = await prisma.jobSnapshot.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many JobSnapshots and only return the `id`
+     * const jobSnapshotWithIdOnly = await prisma.jobSnapshot.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends JobSnapshotCreateManyAndReturnArgs>(args?: SelectSubset<T, JobSnapshotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a JobSnapshot.
+     * @param {JobSnapshotDeleteArgs} args - Arguments to delete one JobSnapshot.
+     * @example
+     * // Delete one JobSnapshot
+     * const JobSnapshot = await prisma.jobSnapshot.delete({
+     *   where: {
+     *     // ... filter to delete one JobSnapshot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends JobSnapshotDeleteArgs>(args: SelectSubset<T, JobSnapshotDeleteArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one JobSnapshot.
+     * @param {JobSnapshotUpdateArgs} args - Arguments to update one JobSnapshot.
+     * @example
+     * // Update one JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends JobSnapshotUpdateArgs>(args: SelectSubset<T, JobSnapshotUpdateArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more JobSnapshots.
+     * @param {JobSnapshotDeleteManyArgs} args - Arguments to filter JobSnapshots to delete.
+     * @example
+     * // Delete a few JobSnapshots
+     * const { count } = await prisma.jobSnapshot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends JobSnapshotDeleteManyArgs>(args?: SelectSubset<T, JobSnapshotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more JobSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many JobSnapshots
+     * const jobSnapshot = await prisma.jobSnapshot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends JobSnapshotUpdateManyArgs>(args: SelectSubset<T, JobSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one JobSnapshot.
+     * @param {JobSnapshotUpsertArgs} args - Arguments to update or create a JobSnapshot.
+     * @example
+     * // Update or create a JobSnapshot
+     * const jobSnapshot = await prisma.jobSnapshot.upsert({
+     *   create: {
+     *     // ... data to create a JobSnapshot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the JobSnapshot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends JobSnapshotUpsertArgs>(args: SelectSubset<T, JobSnapshotUpsertArgs<ExtArgs>>): Prisma__JobSnapshotClient<$Result.GetResult<Prisma.$JobSnapshotPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of JobSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotCountArgs} args - Arguments to filter JobSnapshots to count.
+     * @example
+     * // Count the number of JobSnapshots
+     * const count = await prisma.jobSnapshot.count({
+     *   where: {
+     *     // ... the filter for the JobSnapshots we want to count
+     *   }
+     * })
+    **/
+    count<T extends JobSnapshotCountArgs>(
+      args?: Subset<T, JobSnapshotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], JobSnapshotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a JobSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends JobSnapshotAggregateArgs>(args: Subset<T, JobSnapshotAggregateArgs>): Prisma.PrismaPromise<GetJobSnapshotAggregateType<T>>
+
+    /**
+     * Group by JobSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobSnapshotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends JobSnapshotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: JobSnapshotGroupByArgs['orderBy'] }
+        : { orderBy?: JobSnapshotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, JobSnapshotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetJobSnapshotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the JobSnapshot model
+   */
+  readonly fields: JobSnapshotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for JobSnapshot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__JobSnapshotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    originalJob<T extends JobPostingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobPostingDefaultArgs<ExtArgs>>): Prisma__JobPostingClient<$Result.GetResult<Prisma.$JobPostingPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    applicationQueue<T extends ApplicationQueueDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ApplicationQueueDefaultArgs<ExtArgs>>): Prisma__ApplicationQueueClient<$Result.GetResult<Prisma.$ApplicationQueuePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the JobSnapshot model
+   */ 
+  interface JobSnapshotFieldRefs {
+    readonly id: FieldRef<"JobSnapshot", 'String'>
+    readonly originalJobId: FieldRef<"JobSnapshot", 'String'>
+    readonly applicationQueueId: FieldRef<"JobSnapshot", 'String'>
+    readonly title: FieldRef<"JobSnapshot", 'String'>
+    readonly description: FieldRef<"JobSnapshot", 'String'>
+    readonly requirements: FieldRef<"JobSnapshot", 'String'>
+    readonly benefits: FieldRef<"JobSnapshot", 'String'>
+    readonly type: FieldRef<"JobSnapshot", 'String'>
+    readonly level: FieldRef<"JobSnapshot", 'String'>
+    readonly department: FieldRef<"JobSnapshot", 'String'>
+    readonly category: FieldRef<"JobSnapshot", 'String'>
+    readonly remote: FieldRef<"JobSnapshot", 'Boolean'>
+    readonly remoteType: FieldRef<"JobSnapshot", 'String'>
+    readonly location: FieldRef<"JobSnapshot", 'String'>
+    readonly timeZone: FieldRef<"JobSnapshot", 'String'>
+    readonly city: FieldRef<"JobSnapshot", 'String'>
+    readonly state: FieldRef<"JobSnapshot", 'String'>
+    readonly country: FieldRef<"JobSnapshot", 'String'>
+    readonly coordinates: FieldRef<"JobSnapshot", 'Json'>
+    readonly salaryMin: FieldRef<"JobSnapshot", 'Int'>
+    readonly salaryMax: FieldRef<"JobSnapshot", 'Int'>
+    readonly currency: FieldRef<"JobSnapshot", 'String'>
+    readonly salaryType: FieldRef<"JobSnapshot", 'String'>
+    readonly equity: FieldRef<"JobSnapshot", 'String'>
+    readonly bonus: FieldRef<"JobSnapshot", 'String'>
+    readonly experienceYears: FieldRef<"JobSnapshot", 'Int'>
+    readonly skills: FieldRef<"JobSnapshot", 'String[]'>
+    readonly education: FieldRef<"JobSnapshot", 'String'>
+    readonly languages: FieldRef<"JobSnapshot", 'String[]'>
+    readonly companyName: FieldRef<"JobSnapshot", 'String'>
+    readonly companyLogo: FieldRef<"JobSnapshot", 'String'>
+    readonly companyWebsite: FieldRef<"JobSnapshot", 'String'>
+    readonly companyIndustry: FieldRef<"JobSnapshot", 'String'>
+    readonly companySize: FieldRef<"JobSnapshot", 'String'>
+    readonly companyDescription: FieldRef<"JobSnapshot", 'String'>
+    readonly externalId: FieldRef<"JobSnapshot", 'String'>
+    readonly source: FieldRef<"JobSnapshot", 'String'>
+    readonly sourceUrl: FieldRef<"JobSnapshot", 'String'>
+    readonly applyUrl: FieldRef<"JobSnapshot", 'String'>
+    readonly qualityScore: FieldRef<"JobSnapshot", 'Float'>
+    readonly isVerified: FieldRef<"JobSnapshot", 'Boolean'>
+    readonly originalStatus: FieldRef<"JobSnapshot", 'String'>
+    readonly isActive: FieldRef<"JobSnapshot", 'Boolean'>
+    readonly isFeatured: FieldRef<"JobSnapshot", 'Boolean'>
+    readonly isUrgent: FieldRef<"JobSnapshot", 'Boolean'>
+    readonly originalPostedAt: FieldRef<"JobSnapshot", 'DateTime'>
+    readonly originalExpiresAt: FieldRef<"JobSnapshot", 'DateTime'>
+    readonly viewCount: FieldRef<"JobSnapshot", 'Int'>
+    readonly applicationCount: FieldRef<"JobSnapshot", 'Int'>
+    readonly rightSwipeCount: FieldRef<"JobSnapshot", 'Int'>
+    readonly leftSwipeCount: FieldRef<"JobSnapshot", 'Int'>
+    readonly snapshotVersion: FieldRef<"JobSnapshot", 'String'>
+    readonly snapshotReason: FieldRef<"JobSnapshot", 'String'>
+    readonly createdAt: FieldRef<"JobSnapshot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * JobSnapshot findUnique
+   */
+  export type JobSnapshotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which JobSnapshot to fetch.
+     */
+    where: JobSnapshotWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot findUniqueOrThrow
+   */
+  export type JobSnapshotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which JobSnapshot to fetch.
+     */
+    where: JobSnapshotWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot findFirst
+   */
+  export type JobSnapshotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which JobSnapshot to fetch.
+     */
+    where?: JobSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobSnapshots to fetch.
+     */
+    orderBy?: JobSnapshotOrderByWithRelationInput | JobSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for JobSnapshots.
+     */
+    cursor?: JobSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of JobSnapshots.
+     */
+    distinct?: JobSnapshotScalarFieldEnum | JobSnapshotScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot findFirstOrThrow
+   */
+  export type JobSnapshotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which JobSnapshot to fetch.
+     */
+    where?: JobSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobSnapshots to fetch.
+     */
+    orderBy?: JobSnapshotOrderByWithRelationInput | JobSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for JobSnapshots.
+     */
+    cursor?: JobSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of JobSnapshots.
+     */
+    distinct?: JobSnapshotScalarFieldEnum | JobSnapshotScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot findMany
+   */
+  export type JobSnapshotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which JobSnapshots to fetch.
+     */
+    where?: JobSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobSnapshots to fetch.
+     */
+    orderBy?: JobSnapshotOrderByWithRelationInput | JobSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing JobSnapshots.
+     */
+    cursor?: JobSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobSnapshots.
+     */
+    skip?: number
+    distinct?: JobSnapshotScalarFieldEnum | JobSnapshotScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot create
+   */
+  export type JobSnapshotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to create a JobSnapshot.
+     */
+    data: XOR<JobSnapshotCreateInput, JobSnapshotUncheckedCreateInput>
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot createMany
+   */
+  export type JobSnapshotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many JobSnapshots.
+     */
+    data: JobSnapshotCreateManyInput | JobSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * JobSnapshot createManyAndReturn
+   */
+  export type JobSnapshotCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many JobSnapshots.
+     */
+    data: JobSnapshotCreateManyInput | JobSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * JobSnapshot update
+   */
+  export type JobSnapshotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to update a JobSnapshot.
+     */
+    data: XOR<JobSnapshotUpdateInput, JobSnapshotUncheckedUpdateInput>
+    /**
+     * Choose, which JobSnapshot to update.
+     */
+    where: JobSnapshotWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot updateMany
+   */
+  export type JobSnapshotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update JobSnapshots.
+     */
+    data: XOR<JobSnapshotUpdateManyMutationInput, JobSnapshotUncheckedUpdateManyInput>
+    /**
+     * Filter which JobSnapshots to update
+     */
+    where?: JobSnapshotWhereInput
+  }
+
+  /**
+   * JobSnapshot upsert
+   */
+  export type JobSnapshotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * The filter to search for the JobSnapshot to update in case it exists.
+     */
+    where: JobSnapshotWhereUniqueInput
+    /**
+     * In case the JobSnapshot found by the `where` argument doesn't exist, create a new JobSnapshot with this data.
+     */
+    create: XOR<JobSnapshotCreateInput, JobSnapshotUncheckedCreateInput>
+    /**
+     * In case the JobSnapshot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<JobSnapshotUpdateInput, JobSnapshotUncheckedUpdateInput>
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot delete
+   */
+  export type JobSnapshotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter which JobSnapshot to delete.
+     */
+    where: JobSnapshotWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * JobSnapshot deleteMany
+   */
+  export type JobSnapshotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which JobSnapshots to delete
+     */
+    where?: JobSnapshotWhereInput
+  }
+
+  /**
+   * JobSnapshot without action
+   */
+  export type JobSnapshotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobSnapshot
+     */
+    select?: JobSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobSnapshotInclude<ExtArgs> | null
   }
 
 
@@ -35944,6 +37668,66 @@ export namespace Prisma {
   export type JobPostingScalarFieldEnum = (typeof JobPostingScalarFieldEnum)[keyof typeof JobPostingScalarFieldEnum]
 
 
+  export const JobSnapshotScalarFieldEnum: {
+    id: 'id',
+    originalJobId: 'originalJobId',
+    applicationQueueId: 'applicationQueueId',
+    title: 'title',
+    description: 'description',
+    requirements: 'requirements',
+    benefits: 'benefits',
+    type: 'type',
+    level: 'level',
+    department: 'department',
+    category: 'category',
+    remote: 'remote',
+    remoteType: 'remoteType',
+    location: 'location',
+    timeZone: 'timeZone',
+    city: 'city',
+    state: 'state',
+    country: 'country',
+    coordinates: 'coordinates',
+    salaryMin: 'salaryMin',
+    salaryMax: 'salaryMax',
+    currency: 'currency',
+    salaryType: 'salaryType',
+    equity: 'equity',
+    bonus: 'bonus',
+    experienceYears: 'experienceYears',
+    skills: 'skills',
+    education: 'education',
+    languages: 'languages',
+    companyName: 'companyName',
+    companyLogo: 'companyLogo',
+    companyWebsite: 'companyWebsite',
+    companyIndustry: 'companyIndustry',
+    companySize: 'companySize',
+    companyDescription: 'companyDescription',
+    externalId: 'externalId',
+    source: 'source',
+    sourceUrl: 'sourceUrl',
+    applyUrl: 'applyUrl',
+    qualityScore: 'qualityScore',
+    isVerified: 'isVerified',
+    originalStatus: 'originalStatus',
+    isActive: 'isActive',
+    isFeatured: 'isFeatured',
+    isUrgent: 'isUrgent',
+    originalPostedAt: 'originalPostedAt',
+    originalExpiresAt: 'originalExpiresAt',
+    viewCount: 'viewCount',
+    applicationCount: 'applicationCount',
+    rightSwipeCount: 'rightSwipeCount',
+    leftSwipeCount: 'leftSwipeCount',
+    snapshotVersion: 'snapshotVersion',
+    snapshotReason: 'snapshotReason',
+    createdAt: 'createdAt'
+  };
+
+  export type JobSnapshotScalarFieldEnum = (typeof JobSnapshotScalarFieldEnum)[keyof typeof JobSnapshotScalarFieldEnum]
+
+
   export const ResumeTemplateScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -36547,6 +38331,49 @@ export namespace Prisma {
   };
 
   export type JobPostingOrderByRelevanceFieldEnum = (typeof JobPostingOrderByRelevanceFieldEnum)[keyof typeof JobPostingOrderByRelevanceFieldEnum]
+
+
+  export const JobSnapshotOrderByRelevanceFieldEnum: {
+    id: 'id',
+    originalJobId: 'originalJobId',
+    applicationQueueId: 'applicationQueueId',
+    title: 'title',
+    description: 'description',
+    requirements: 'requirements',
+    benefits: 'benefits',
+    type: 'type',
+    level: 'level',
+    department: 'department',
+    category: 'category',
+    remoteType: 'remoteType',
+    location: 'location',
+    timeZone: 'timeZone',
+    city: 'city',
+    state: 'state',
+    country: 'country',
+    currency: 'currency',
+    salaryType: 'salaryType',
+    equity: 'equity',
+    bonus: 'bonus',
+    skills: 'skills',
+    education: 'education',
+    languages: 'languages',
+    companyName: 'companyName',
+    companyLogo: 'companyLogo',
+    companyWebsite: 'companyWebsite',
+    companyIndustry: 'companyIndustry',
+    companySize: 'companySize',
+    companyDescription: 'companyDescription',
+    externalId: 'externalId',
+    source: 'source',
+    sourceUrl: 'sourceUrl',
+    applyUrl: 'applyUrl',
+    originalStatus: 'originalStatus',
+    snapshotVersion: 'snapshotVersion',
+    snapshotReason: 'snapshotReason'
+  };
+
+  export type JobSnapshotOrderByRelevanceFieldEnum = (typeof JobSnapshotOrderByRelevanceFieldEnum)[keyof typeof JobSnapshotOrderByRelevanceFieldEnum]
 
 
   export const ResumeTemplateOrderByRelevanceFieldEnum: {
@@ -38301,6 +40128,7 @@ export namespace Prisma {
     user?: XOR<UserRelationFilter, UserWhereInput>
     jobPosting?: XOR<JobPostingRelationFilter, JobPostingWhereInput>
     application?: XOR<JobApplicationNullableRelationFilter, JobApplicationWhereInput> | null
+    jobSnapshot?: XOR<JobSnapshotNullableRelationFilter, JobSnapshotWhereInput> | null
     automationLogs?: AutomationLogListRelationFilter
   }
 
@@ -38335,6 +40163,7 @@ export namespace Prisma {
     user?: UserOrderByWithRelationInput
     jobPosting?: JobPostingOrderByWithRelationInput
     application?: JobApplicationOrderByWithRelationInput
+    jobSnapshot?: JobSnapshotOrderByWithRelationInput
     automationLogs?: AutomationLogOrderByRelationAggregateInput
     _relevance?: ApplicationQueueOrderByRelevanceInput
   }
@@ -38373,6 +40202,7 @@ export namespace Prisma {
     user?: XOR<UserRelationFilter, UserWhereInput>
     jobPosting?: XOR<JobPostingRelationFilter, JobPostingWhereInput>
     application?: XOR<JobApplicationNullableRelationFilter, JobApplicationWhereInput> | null
+    jobSnapshot?: XOR<JobSnapshotNullableRelationFilter, JobSnapshotWhereInput> | null
     automationLogs?: AutomationLogListRelationFilter
   }, "id">
 
@@ -39586,6 +41416,7 @@ export namespace Prisma {
     savedBy?: SavedJobListRelationFilter
     swipes?: UserJobSwipeListRelationFilter
     queueItems?: ApplicationQueueListRelationFilter
+    snapshots?: JobSnapshotListRelationFilter
     enhancements?: ResumeEnhancementListRelationFilter
   }
 
@@ -39645,6 +41476,7 @@ export namespace Prisma {
     savedBy?: SavedJobOrderByRelationAggregateInput
     swipes?: UserJobSwipeOrderByRelationAggregateInput
     queueItems?: ApplicationQueueOrderByRelationAggregateInput
+    snapshots?: JobSnapshotOrderByRelationAggregateInput
     enhancements?: ResumeEnhancementOrderByRelationAggregateInput
     _relevance?: JobPostingOrderByRelevanceInput
   }
@@ -39708,6 +41540,7 @@ export namespace Prisma {
     savedBy?: SavedJobListRelationFilter
     swipes?: UserJobSwipeListRelationFilter
     queueItems?: ApplicationQueueListRelationFilter
+    snapshots?: JobSnapshotListRelationFilter
     enhancements?: ResumeEnhancementListRelationFilter
   }, "id">
 
@@ -39823,6 +41656,312 @@ export namespace Prisma {
     leftSwipeCount?: IntWithAggregatesFilter<"JobPosting"> | number
     createdAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
+  }
+
+  export type JobSnapshotWhereInput = {
+    AND?: JobSnapshotWhereInput | JobSnapshotWhereInput[]
+    OR?: JobSnapshotWhereInput[]
+    NOT?: JobSnapshotWhereInput | JobSnapshotWhereInput[]
+    id?: StringFilter<"JobSnapshot"> | string
+    originalJobId?: StringFilter<"JobSnapshot"> | string
+    applicationQueueId?: StringFilter<"JobSnapshot"> | string
+    title?: StringFilter<"JobSnapshot"> | string
+    description?: StringFilter<"JobSnapshot"> | string
+    requirements?: StringNullableFilter<"JobSnapshot"> | string | null
+    benefits?: StringNullableFilter<"JobSnapshot"> | string | null
+    type?: StringFilter<"JobSnapshot"> | string
+    level?: StringFilter<"JobSnapshot"> | string
+    department?: StringNullableFilter<"JobSnapshot"> | string | null
+    category?: StringFilter<"JobSnapshot"> | string
+    remote?: BoolFilter<"JobSnapshot"> | boolean
+    remoteType?: StringFilter<"JobSnapshot"> | string
+    location?: StringNullableFilter<"JobSnapshot"> | string | null
+    timeZone?: StringNullableFilter<"JobSnapshot"> | string | null
+    city?: StringNullableFilter<"JobSnapshot"> | string | null
+    state?: StringNullableFilter<"JobSnapshot"> | string | null
+    country?: StringNullableFilter<"JobSnapshot"> | string | null
+    coordinates?: JsonNullableFilter<"JobSnapshot">
+    salaryMin?: IntNullableFilter<"JobSnapshot"> | number | null
+    salaryMax?: IntNullableFilter<"JobSnapshot"> | number | null
+    currency?: StringNullableFilter<"JobSnapshot"> | string | null
+    salaryType?: StringNullableFilter<"JobSnapshot"> | string | null
+    equity?: StringNullableFilter<"JobSnapshot"> | string | null
+    bonus?: StringNullableFilter<"JobSnapshot"> | string | null
+    experienceYears?: IntNullableFilter<"JobSnapshot"> | number | null
+    skills?: StringNullableListFilter<"JobSnapshot">
+    education?: StringNullableFilter<"JobSnapshot"> | string | null
+    languages?: StringNullableListFilter<"JobSnapshot">
+    companyName?: StringFilter<"JobSnapshot"> | string
+    companyLogo?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyWebsite?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyIndustry?: StringNullableFilter<"JobSnapshot"> | string | null
+    companySize?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyDescription?: StringNullableFilter<"JobSnapshot"> | string | null
+    externalId?: StringNullableFilter<"JobSnapshot"> | string | null
+    source?: StringFilter<"JobSnapshot"> | string
+    sourceUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    applyUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    qualityScore?: FloatNullableFilter<"JobSnapshot"> | number | null
+    isVerified?: BoolFilter<"JobSnapshot"> | boolean
+    originalStatus?: StringFilter<"JobSnapshot"> | string
+    isActive?: BoolFilter<"JobSnapshot"> | boolean
+    isFeatured?: BoolFilter<"JobSnapshot"> | boolean
+    isUrgent?: BoolFilter<"JobSnapshot"> | boolean
+    originalPostedAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    originalExpiresAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    viewCount?: IntFilter<"JobSnapshot"> | number
+    applicationCount?: IntFilter<"JobSnapshot"> | number
+    rightSwipeCount?: IntFilter<"JobSnapshot"> | number
+    leftSwipeCount?: IntFilter<"JobSnapshot"> | number
+    snapshotVersion?: StringFilter<"JobSnapshot"> | string
+    snapshotReason?: StringFilter<"JobSnapshot"> | string
+    createdAt?: DateTimeFilter<"JobSnapshot"> | Date | string
+    originalJob?: XOR<JobPostingRelationFilter, JobPostingWhereInput>
+    applicationQueue?: XOR<ApplicationQueueRelationFilter, ApplicationQueueWhereInput>
+  }
+
+  export type JobSnapshotOrderByWithRelationInput = {
+    id?: SortOrder
+    originalJobId?: SortOrder
+    applicationQueueId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    requirements?: SortOrderInput | SortOrder
+    benefits?: SortOrderInput | SortOrder
+    type?: SortOrder
+    level?: SortOrder
+    department?: SortOrderInput | SortOrder
+    category?: SortOrder
+    remote?: SortOrder
+    remoteType?: SortOrder
+    location?: SortOrderInput | SortOrder
+    timeZone?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    state?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    coordinates?: SortOrderInput | SortOrder
+    salaryMin?: SortOrderInput | SortOrder
+    salaryMax?: SortOrderInput | SortOrder
+    currency?: SortOrderInput | SortOrder
+    salaryType?: SortOrderInput | SortOrder
+    equity?: SortOrderInput | SortOrder
+    bonus?: SortOrderInput | SortOrder
+    experienceYears?: SortOrderInput | SortOrder
+    skills?: SortOrder
+    education?: SortOrderInput | SortOrder
+    languages?: SortOrder
+    companyName?: SortOrder
+    companyLogo?: SortOrderInput | SortOrder
+    companyWebsite?: SortOrderInput | SortOrder
+    companyIndustry?: SortOrderInput | SortOrder
+    companySize?: SortOrderInput | SortOrder
+    companyDescription?: SortOrderInput | SortOrder
+    externalId?: SortOrderInput | SortOrder
+    source?: SortOrder
+    sourceUrl?: SortOrderInput | SortOrder
+    applyUrl?: SortOrderInput | SortOrder
+    qualityScore?: SortOrderInput | SortOrder
+    isVerified?: SortOrder
+    originalStatus?: SortOrder
+    isActive?: SortOrder
+    isFeatured?: SortOrder
+    isUrgent?: SortOrder
+    originalPostedAt?: SortOrderInput | SortOrder
+    originalExpiresAt?: SortOrderInput | SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+    snapshotVersion?: SortOrder
+    snapshotReason?: SortOrder
+    createdAt?: SortOrder
+    originalJob?: JobPostingOrderByWithRelationInput
+    applicationQueue?: ApplicationQueueOrderByWithRelationInput
+    _relevance?: JobSnapshotOrderByRelevanceInput
+  }
+
+  export type JobSnapshotWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    applicationQueueId?: string
+    AND?: JobSnapshotWhereInput | JobSnapshotWhereInput[]
+    OR?: JobSnapshotWhereInput[]
+    NOT?: JobSnapshotWhereInput | JobSnapshotWhereInput[]
+    originalJobId?: StringFilter<"JobSnapshot"> | string
+    title?: StringFilter<"JobSnapshot"> | string
+    description?: StringFilter<"JobSnapshot"> | string
+    requirements?: StringNullableFilter<"JobSnapshot"> | string | null
+    benefits?: StringNullableFilter<"JobSnapshot"> | string | null
+    type?: StringFilter<"JobSnapshot"> | string
+    level?: StringFilter<"JobSnapshot"> | string
+    department?: StringNullableFilter<"JobSnapshot"> | string | null
+    category?: StringFilter<"JobSnapshot"> | string
+    remote?: BoolFilter<"JobSnapshot"> | boolean
+    remoteType?: StringFilter<"JobSnapshot"> | string
+    location?: StringNullableFilter<"JobSnapshot"> | string | null
+    timeZone?: StringNullableFilter<"JobSnapshot"> | string | null
+    city?: StringNullableFilter<"JobSnapshot"> | string | null
+    state?: StringNullableFilter<"JobSnapshot"> | string | null
+    country?: StringNullableFilter<"JobSnapshot"> | string | null
+    coordinates?: JsonNullableFilter<"JobSnapshot">
+    salaryMin?: IntNullableFilter<"JobSnapshot"> | number | null
+    salaryMax?: IntNullableFilter<"JobSnapshot"> | number | null
+    currency?: StringNullableFilter<"JobSnapshot"> | string | null
+    salaryType?: StringNullableFilter<"JobSnapshot"> | string | null
+    equity?: StringNullableFilter<"JobSnapshot"> | string | null
+    bonus?: StringNullableFilter<"JobSnapshot"> | string | null
+    experienceYears?: IntNullableFilter<"JobSnapshot"> | number | null
+    skills?: StringNullableListFilter<"JobSnapshot">
+    education?: StringNullableFilter<"JobSnapshot"> | string | null
+    languages?: StringNullableListFilter<"JobSnapshot">
+    companyName?: StringFilter<"JobSnapshot"> | string
+    companyLogo?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyWebsite?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyIndustry?: StringNullableFilter<"JobSnapshot"> | string | null
+    companySize?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyDescription?: StringNullableFilter<"JobSnapshot"> | string | null
+    externalId?: StringNullableFilter<"JobSnapshot"> | string | null
+    source?: StringFilter<"JobSnapshot"> | string
+    sourceUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    applyUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    qualityScore?: FloatNullableFilter<"JobSnapshot"> | number | null
+    isVerified?: BoolFilter<"JobSnapshot"> | boolean
+    originalStatus?: StringFilter<"JobSnapshot"> | string
+    isActive?: BoolFilter<"JobSnapshot"> | boolean
+    isFeatured?: BoolFilter<"JobSnapshot"> | boolean
+    isUrgent?: BoolFilter<"JobSnapshot"> | boolean
+    originalPostedAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    originalExpiresAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    viewCount?: IntFilter<"JobSnapshot"> | number
+    applicationCount?: IntFilter<"JobSnapshot"> | number
+    rightSwipeCount?: IntFilter<"JobSnapshot"> | number
+    leftSwipeCount?: IntFilter<"JobSnapshot"> | number
+    snapshotVersion?: StringFilter<"JobSnapshot"> | string
+    snapshotReason?: StringFilter<"JobSnapshot"> | string
+    createdAt?: DateTimeFilter<"JobSnapshot"> | Date | string
+    originalJob?: XOR<JobPostingRelationFilter, JobPostingWhereInput>
+    applicationQueue?: XOR<ApplicationQueueRelationFilter, ApplicationQueueWhereInput>
+  }, "id" | "applicationQueueId">
+
+  export type JobSnapshotOrderByWithAggregationInput = {
+    id?: SortOrder
+    originalJobId?: SortOrder
+    applicationQueueId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    requirements?: SortOrderInput | SortOrder
+    benefits?: SortOrderInput | SortOrder
+    type?: SortOrder
+    level?: SortOrder
+    department?: SortOrderInput | SortOrder
+    category?: SortOrder
+    remote?: SortOrder
+    remoteType?: SortOrder
+    location?: SortOrderInput | SortOrder
+    timeZone?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    state?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    coordinates?: SortOrderInput | SortOrder
+    salaryMin?: SortOrderInput | SortOrder
+    salaryMax?: SortOrderInput | SortOrder
+    currency?: SortOrderInput | SortOrder
+    salaryType?: SortOrderInput | SortOrder
+    equity?: SortOrderInput | SortOrder
+    bonus?: SortOrderInput | SortOrder
+    experienceYears?: SortOrderInput | SortOrder
+    skills?: SortOrder
+    education?: SortOrderInput | SortOrder
+    languages?: SortOrder
+    companyName?: SortOrder
+    companyLogo?: SortOrderInput | SortOrder
+    companyWebsite?: SortOrderInput | SortOrder
+    companyIndustry?: SortOrderInput | SortOrder
+    companySize?: SortOrderInput | SortOrder
+    companyDescription?: SortOrderInput | SortOrder
+    externalId?: SortOrderInput | SortOrder
+    source?: SortOrder
+    sourceUrl?: SortOrderInput | SortOrder
+    applyUrl?: SortOrderInput | SortOrder
+    qualityScore?: SortOrderInput | SortOrder
+    isVerified?: SortOrder
+    originalStatus?: SortOrder
+    isActive?: SortOrder
+    isFeatured?: SortOrder
+    isUrgent?: SortOrder
+    originalPostedAt?: SortOrderInput | SortOrder
+    originalExpiresAt?: SortOrderInput | SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+    snapshotVersion?: SortOrder
+    snapshotReason?: SortOrder
+    createdAt?: SortOrder
+    _count?: JobSnapshotCountOrderByAggregateInput
+    _avg?: JobSnapshotAvgOrderByAggregateInput
+    _max?: JobSnapshotMaxOrderByAggregateInput
+    _min?: JobSnapshotMinOrderByAggregateInput
+    _sum?: JobSnapshotSumOrderByAggregateInput
+  }
+
+  export type JobSnapshotScalarWhereWithAggregatesInput = {
+    AND?: JobSnapshotScalarWhereWithAggregatesInput | JobSnapshotScalarWhereWithAggregatesInput[]
+    OR?: JobSnapshotScalarWhereWithAggregatesInput[]
+    NOT?: JobSnapshotScalarWhereWithAggregatesInput | JobSnapshotScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    originalJobId?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    applicationQueueId?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    title?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    description?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    requirements?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    benefits?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    type?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    level?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    department?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    category?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    remote?: BoolWithAggregatesFilter<"JobSnapshot"> | boolean
+    remoteType?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    location?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    timeZone?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    city?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    state?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    country?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    coordinates?: JsonNullableWithAggregatesFilter<"JobSnapshot">
+    salaryMin?: IntNullableWithAggregatesFilter<"JobSnapshot"> | number | null
+    salaryMax?: IntNullableWithAggregatesFilter<"JobSnapshot"> | number | null
+    currency?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    salaryType?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    equity?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    bonus?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    experienceYears?: IntNullableWithAggregatesFilter<"JobSnapshot"> | number | null
+    skills?: StringNullableListFilter<"JobSnapshot">
+    education?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    languages?: StringNullableListFilter<"JobSnapshot">
+    companyName?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    companyLogo?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    companyWebsite?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    companyIndustry?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    companySize?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    companyDescription?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    externalId?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    source?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    sourceUrl?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    applyUrl?: StringNullableWithAggregatesFilter<"JobSnapshot"> | string | null
+    qualityScore?: FloatNullableWithAggregatesFilter<"JobSnapshot"> | number | null
+    isVerified?: BoolWithAggregatesFilter<"JobSnapshot"> | boolean
+    originalStatus?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    isActive?: BoolWithAggregatesFilter<"JobSnapshot"> | boolean
+    isFeatured?: BoolWithAggregatesFilter<"JobSnapshot"> | boolean
+    isUrgent?: BoolWithAggregatesFilter<"JobSnapshot"> | boolean
+    originalPostedAt?: DateTimeNullableWithAggregatesFilter<"JobSnapshot"> | Date | string | null
+    originalExpiresAt?: DateTimeNullableWithAggregatesFilter<"JobSnapshot"> | Date | string | null
+    viewCount?: IntWithAggregatesFilter<"JobSnapshot"> | number
+    applicationCount?: IntWithAggregatesFilter<"JobSnapshot"> | number
+    rightSwipeCount?: IntWithAggregatesFilter<"JobSnapshot"> | number
+    leftSwipeCount?: IntWithAggregatesFilter<"JobSnapshot"> | number
+    snapshotVersion?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    snapshotReason?: StringWithAggregatesFilter<"JobSnapshot"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"JobSnapshot"> | Date | string
   }
 
   export type ResumeTemplateWhereInput = {
@@ -42352,6 +44491,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutApplicationQueueInput
     jobPosting: JobPostingCreateNestedOneWithoutQueueItemsInput
     application?: JobApplicationCreateNestedOneWithoutQueueItemsInput
+    jobSnapshot?: JobSnapshotCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogCreateNestedManyWithoutQueueInput
   }
 
@@ -42383,6 +44523,7 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    jobSnapshot?: JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogUncheckedCreateNestedManyWithoutQueueInput
   }
 
@@ -42414,6 +44555,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutApplicationQueueNestedInput
     jobPosting?: JobPostingUpdateOneRequiredWithoutQueueItemsNestedInput
     application?: JobApplicationUpdateOneWithoutQueueItemsNestedInput
+    jobSnapshot?: JobSnapshotUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUpdateManyWithoutQueueNestedInput
   }
 
@@ -42445,6 +44587,7 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobSnapshot?: JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUncheckedUpdateManyWithoutQueueNestedInput
   }
 
@@ -43915,6 +46058,7 @@ export namespace Prisma {
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -43973,6 +46117,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -44031,6 +46176,7 @@ export namespace Prisma {
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -44089,6 +46235,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -44248,6 +46395,403 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobSnapshotCreateInput = {
+    id?: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+    originalJob: JobPostingCreateNestedOneWithoutSnapshotsInput
+    applicationQueue: ApplicationQueueCreateNestedOneWithoutJobSnapshotInput
+  }
+
+  export type JobSnapshotUncheckedCreateInput = {
+    id?: string
+    originalJobId: string
+    applicationQueueId: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+  }
+
+  export type JobSnapshotUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    originalJob?: JobPostingUpdateOneRequiredWithoutSnapshotsNestedInput
+    applicationQueue?: ApplicationQueueUpdateOneRequiredWithoutJobSnapshotNestedInput
+  }
+
+  export type JobSnapshotUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    originalJobId?: StringFieldUpdateOperationsInput | string
+    applicationQueueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobSnapshotCreateManyInput = {
+    id?: string
+    originalJobId: string
+    applicationQueueId: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+  }
+
+  export type JobSnapshotUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobSnapshotUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    originalJobId?: StringFieldUpdateOperationsInput | string
+    applicationQueueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ResumeTemplateCreateInput = {
@@ -46976,6 +49520,11 @@ export namespace Prisma {
     isNot?: JobApplicationWhereInput | null
   }
 
+  export type JobSnapshotNullableRelationFilter = {
+    is?: JobSnapshotWhereInput | null
+    isNot?: JobSnapshotWhereInput | null
+  }
+
   export type AutomationLogListRelationFilter = {
     every?: AutomationLogWhereInput
     some?: AutomationLogWhereInput
@@ -48060,10 +50609,20 @@ export namespace Prisma {
     not?: NestedEnumJobStatusFilter<$PrismaModel> | $Enums.JobStatus
   }
 
+  export type JobSnapshotListRelationFilter = {
+    every?: JobSnapshotWhereInput
+    some?: JobSnapshotWhereInput
+    none?: JobSnapshotWhereInput
+  }
+
   export type ResumeEnhancementListRelationFilter = {
     every?: ResumeEnhancementWhereInput
     some?: ResumeEnhancementWhereInput
     none?: ResumeEnhancementWhereInput
+  }
+
+  export type JobSnapshotOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type ResumeEnhancementOrderByRelationAggregateInput = {
@@ -48315,6 +50874,199 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumJobStatusFilter<$PrismaModel>
     _max?: NestedEnumJobStatusFilter<$PrismaModel>
+  }
+
+  export type JobSnapshotOrderByRelevanceInput = {
+    fields: JobSnapshotOrderByRelevanceFieldEnum | JobSnapshotOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type JobSnapshotCountOrderByAggregateInput = {
+    id?: SortOrder
+    originalJobId?: SortOrder
+    applicationQueueId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    requirements?: SortOrder
+    benefits?: SortOrder
+    type?: SortOrder
+    level?: SortOrder
+    department?: SortOrder
+    category?: SortOrder
+    remote?: SortOrder
+    remoteType?: SortOrder
+    location?: SortOrder
+    timeZone?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    coordinates?: SortOrder
+    salaryMin?: SortOrder
+    salaryMax?: SortOrder
+    currency?: SortOrder
+    salaryType?: SortOrder
+    equity?: SortOrder
+    bonus?: SortOrder
+    experienceYears?: SortOrder
+    skills?: SortOrder
+    education?: SortOrder
+    languages?: SortOrder
+    companyName?: SortOrder
+    companyLogo?: SortOrder
+    companyWebsite?: SortOrder
+    companyIndustry?: SortOrder
+    companySize?: SortOrder
+    companyDescription?: SortOrder
+    externalId?: SortOrder
+    source?: SortOrder
+    sourceUrl?: SortOrder
+    applyUrl?: SortOrder
+    qualityScore?: SortOrder
+    isVerified?: SortOrder
+    originalStatus?: SortOrder
+    isActive?: SortOrder
+    isFeatured?: SortOrder
+    isUrgent?: SortOrder
+    originalPostedAt?: SortOrder
+    originalExpiresAt?: SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+    snapshotVersion?: SortOrder
+    snapshotReason?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobSnapshotAvgOrderByAggregateInput = {
+    salaryMin?: SortOrder
+    salaryMax?: SortOrder
+    experienceYears?: SortOrder
+    qualityScore?: SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+  }
+
+  export type JobSnapshotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    originalJobId?: SortOrder
+    applicationQueueId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    requirements?: SortOrder
+    benefits?: SortOrder
+    type?: SortOrder
+    level?: SortOrder
+    department?: SortOrder
+    category?: SortOrder
+    remote?: SortOrder
+    remoteType?: SortOrder
+    location?: SortOrder
+    timeZone?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    salaryMin?: SortOrder
+    salaryMax?: SortOrder
+    currency?: SortOrder
+    salaryType?: SortOrder
+    equity?: SortOrder
+    bonus?: SortOrder
+    experienceYears?: SortOrder
+    education?: SortOrder
+    companyName?: SortOrder
+    companyLogo?: SortOrder
+    companyWebsite?: SortOrder
+    companyIndustry?: SortOrder
+    companySize?: SortOrder
+    companyDescription?: SortOrder
+    externalId?: SortOrder
+    source?: SortOrder
+    sourceUrl?: SortOrder
+    applyUrl?: SortOrder
+    qualityScore?: SortOrder
+    isVerified?: SortOrder
+    originalStatus?: SortOrder
+    isActive?: SortOrder
+    isFeatured?: SortOrder
+    isUrgent?: SortOrder
+    originalPostedAt?: SortOrder
+    originalExpiresAt?: SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+    snapshotVersion?: SortOrder
+    snapshotReason?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobSnapshotMinOrderByAggregateInput = {
+    id?: SortOrder
+    originalJobId?: SortOrder
+    applicationQueueId?: SortOrder
+    title?: SortOrder
+    description?: SortOrder
+    requirements?: SortOrder
+    benefits?: SortOrder
+    type?: SortOrder
+    level?: SortOrder
+    department?: SortOrder
+    category?: SortOrder
+    remote?: SortOrder
+    remoteType?: SortOrder
+    location?: SortOrder
+    timeZone?: SortOrder
+    city?: SortOrder
+    state?: SortOrder
+    country?: SortOrder
+    salaryMin?: SortOrder
+    salaryMax?: SortOrder
+    currency?: SortOrder
+    salaryType?: SortOrder
+    equity?: SortOrder
+    bonus?: SortOrder
+    experienceYears?: SortOrder
+    education?: SortOrder
+    companyName?: SortOrder
+    companyLogo?: SortOrder
+    companyWebsite?: SortOrder
+    companyIndustry?: SortOrder
+    companySize?: SortOrder
+    companyDescription?: SortOrder
+    externalId?: SortOrder
+    source?: SortOrder
+    sourceUrl?: SortOrder
+    applyUrl?: SortOrder
+    qualityScore?: SortOrder
+    isVerified?: SortOrder
+    originalStatus?: SortOrder
+    isActive?: SortOrder
+    isFeatured?: SortOrder
+    isUrgent?: SortOrder
+    originalPostedAt?: SortOrder
+    originalExpiresAt?: SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
+    snapshotVersion?: SortOrder
+    snapshotReason?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobSnapshotSumOrderByAggregateInput = {
+    salaryMin?: SortOrder
+    salaryMax?: SortOrder
+    experienceYears?: SortOrder
+    qualityScore?: SortOrder
+    viewCount?: SortOrder
+    applicationCount?: SortOrder
+    rightSwipeCount?: SortOrder
+    leftSwipeCount?: SortOrder
   }
 
   export type EnumTemplateCategoryFilter<$PrismaModel = never> = {
@@ -50339,11 +53091,23 @@ export namespace Prisma {
     connect?: JobApplicationWhereUniqueInput
   }
 
+  export type JobSnapshotCreateNestedOneWithoutApplicationQueueInput = {
+    create?: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutApplicationQueueInput
+    connect?: JobSnapshotWhereUniqueInput
+  }
+
   export type AutomationLogCreateNestedManyWithoutQueueInput = {
     create?: XOR<AutomationLogCreateWithoutQueueInput, AutomationLogUncheckedCreateWithoutQueueInput> | AutomationLogCreateWithoutQueueInput[] | AutomationLogUncheckedCreateWithoutQueueInput[]
     connectOrCreate?: AutomationLogCreateOrConnectWithoutQueueInput | AutomationLogCreateOrConnectWithoutQueueInput[]
     createMany?: AutomationLogCreateManyQueueInputEnvelope
     connect?: AutomationLogWhereUniqueInput | AutomationLogWhereUniqueInput[]
+  }
+
+  export type JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput = {
+    create?: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutApplicationQueueInput
+    connect?: JobSnapshotWhereUniqueInput
   }
 
   export type AutomationLogUncheckedCreateNestedManyWithoutQueueInput = {
@@ -50387,6 +53151,16 @@ export namespace Prisma {
     update?: XOR<XOR<JobApplicationUpdateToOneWithWhereWithoutQueueItemsInput, JobApplicationUpdateWithoutQueueItemsInput>, JobApplicationUncheckedUpdateWithoutQueueItemsInput>
   }
 
+  export type JobSnapshotUpdateOneWithoutApplicationQueueNestedInput = {
+    create?: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutApplicationQueueInput
+    upsert?: JobSnapshotUpsertWithoutApplicationQueueInput
+    disconnect?: JobSnapshotWhereInput | boolean
+    delete?: JobSnapshotWhereInput | boolean
+    connect?: JobSnapshotWhereUniqueInput
+    update?: XOR<XOR<JobSnapshotUpdateToOneWithWhereWithoutApplicationQueueInput, JobSnapshotUpdateWithoutApplicationQueueInput>, JobSnapshotUncheckedUpdateWithoutApplicationQueueInput>
+  }
+
   export type AutomationLogUpdateManyWithoutQueueNestedInput = {
     create?: XOR<AutomationLogCreateWithoutQueueInput, AutomationLogUncheckedCreateWithoutQueueInput> | AutomationLogCreateWithoutQueueInput[] | AutomationLogUncheckedCreateWithoutQueueInput[]
     connectOrCreate?: AutomationLogCreateOrConnectWithoutQueueInput | AutomationLogCreateOrConnectWithoutQueueInput[]
@@ -50399,6 +53173,16 @@ export namespace Prisma {
     update?: AutomationLogUpdateWithWhereUniqueWithoutQueueInput | AutomationLogUpdateWithWhereUniqueWithoutQueueInput[]
     updateMany?: AutomationLogUpdateManyWithWhereWithoutQueueInput | AutomationLogUpdateManyWithWhereWithoutQueueInput[]
     deleteMany?: AutomationLogScalarWhereInput | AutomationLogScalarWhereInput[]
+  }
+
+  export type JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput = {
+    create?: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutApplicationQueueInput
+    upsert?: JobSnapshotUpsertWithoutApplicationQueueInput
+    disconnect?: JobSnapshotWhereInput | boolean
+    delete?: JobSnapshotWhereInput | boolean
+    connect?: JobSnapshotWhereUniqueInput
+    update?: XOR<XOR<JobSnapshotUpdateToOneWithWhereWithoutApplicationQueueInput, JobSnapshotUpdateWithoutApplicationQueueInput>, JobSnapshotUncheckedUpdateWithoutApplicationQueueInput>
   }
 
   export type AutomationLogUncheckedUpdateManyWithoutQueueNestedInput = {
@@ -50753,6 +53537,13 @@ export namespace Prisma {
     connect?: ApplicationQueueWhereUniqueInput | ApplicationQueueWhereUniqueInput[]
   }
 
+  export type JobSnapshotCreateNestedManyWithoutOriginalJobInput = {
+    create?: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput> | JobSnapshotCreateWithoutOriginalJobInput[] | JobSnapshotUncheckedCreateWithoutOriginalJobInput[]
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutOriginalJobInput | JobSnapshotCreateOrConnectWithoutOriginalJobInput[]
+    createMany?: JobSnapshotCreateManyOriginalJobInputEnvelope
+    connect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+  }
+
   export type ResumeEnhancementCreateNestedManyWithoutJobPostingInput = {
     create?: XOR<ResumeEnhancementCreateWithoutJobPostingInput, ResumeEnhancementUncheckedCreateWithoutJobPostingInput> | ResumeEnhancementCreateWithoutJobPostingInput[] | ResumeEnhancementUncheckedCreateWithoutJobPostingInput[]
     connectOrCreate?: ResumeEnhancementCreateOrConnectWithoutJobPostingInput | ResumeEnhancementCreateOrConnectWithoutJobPostingInput[]
@@ -50786,6 +53577,13 @@ export namespace Prisma {
     connectOrCreate?: ApplicationQueueCreateOrConnectWithoutJobPostingInput | ApplicationQueueCreateOrConnectWithoutJobPostingInput[]
     createMany?: ApplicationQueueCreateManyJobPostingInputEnvelope
     connect?: ApplicationQueueWhereUniqueInput | ApplicationQueueWhereUniqueInput[]
+  }
+
+  export type JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput = {
+    create?: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput> | JobSnapshotCreateWithoutOriginalJobInput[] | JobSnapshotUncheckedCreateWithoutOriginalJobInput[]
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutOriginalJobInput | JobSnapshotCreateOrConnectWithoutOriginalJobInput[]
+    createMany?: JobSnapshotCreateManyOriginalJobInputEnvelope
+    connect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
   }
 
   export type ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput = {
@@ -50907,6 +53705,20 @@ export namespace Prisma {
     deleteMany?: ApplicationQueueScalarWhereInput | ApplicationQueueScalarWhereInput[]
   }
 
+  export type JobSnapshotUpdateManyWithoutOriginalJobNestedInput = {
+    create?: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput> | JobSnapshotCreateWithoutOriginalJobInput[] | JobSnapshotUncheckedCreateWithoutOriginalJobInput[]
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutOriginalJobInput | JobSnapshotCreateOrConnectWithoutOriginalJobInput[]
+    upsert?: JobSnapshotUpsertWithWhereUniqueWithoutOriginalJobInput | JobSnapshotUpsertWithWhereUniqueWithoutOriginalJobInput[]
+    createMany?: JobSnapshotCreateManyOriginalJobInputEnvelope
+    set?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    disconnect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    delete?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    connect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    update?: JobSnapshotUpdateWithWhereUniqueWithoutOriginalJobInput | JobSnapshotUpdateWithWhereUniqueWithoutOriginalJobInput[]
+    updateMany?: JobSnapshotUpdateManyWithWhereWithoutOriginalJobInput | JobSnapshotUpdateManyWithWhereWithoutOriginalJobInput[]
+    deleteMany?: JobSnapshotScalarWhereInput | JobSnapshotScalarWhereInput[]
+  }
+
   export type ResumeEnhancementUpdateManyWithoutJobPostingNestedInput = {
     create?: XOR<ResumeEnhancementCreateWithoutJobPostingInput, ResumeEnhancementUncheckedCreateWithoutJobPostingInput> | ResumeEnhancementCreateWithoutJobPostingInput[] | ResumeEnhancementUncheckedCreateWithoutJobPostingInput[]
     connectOrCreate?: ResumeEnhancementCreateOrConnectWithoutJobPostingInput | ResumeEnhancementCreateOrConnectWithoutJobPostingInput[]
@@ -50977,6 +53789,20 @@ export namespace Prisma {
     deleteMany?: ApplicationQueueScalarWhereInput | ApplicationQueueScalarWhereInput[]
   }
 
+  export type JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput = {
+    create?: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput> | JobSnapshotCreateWithoutOriginalJobInput[] | JobSnapshotUncheckedCreateWithoutOriginalJobInput[]
+    connectOrCreate?: JobSnapshotCreateOrConnectWithoutOriginalJobInput | JobSnapshotCreateOrConnectWithoutOriginalJobInput[]
+    upsert?: JobSnapshotUpsertWithWhereUniqueWithoutOriginalJobInput | JobSnapshotUpsertWithWhereUniqueWithoutOriginalJobInput[]
+    createMany?: JobSnapshotCreateManyOriginalJobInputEnvelope
+    set?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    disconnect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    delete?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    connect?: JobSnapshotWhereUniqueInput | JobSnapshotWhereUniqueInput[]
+    update?: JobSnapshotUpdateWithWhereUniqueWithoutOriginalJobInput | JobSnapshotUpdateWithWhereUniqueWithoutOriginalJobInput[]
+    updateMany?: JobSnapshotUpdateManyWithWhereWithoutOriginalJobInput | JobSnapshotUpdateManyWithWhereWithoutOriginalJobInput[]
+    deleteMany?: JobSnapshotScalarWhereInput | JobSnapshotScalarWhereInput[]
+  }
+
   export type ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput = {
     create?: XOR<ResumeEnhancementCreateWithoutJobPostingInput, ResumeEnhancementUncheckedCreateWithoutJobPostingInput> | ResumeEnhancementCreateWithoutJobPostingInput[] | ResumeEnhancementUncheckedCreateWithoutJobPostingInput[]
     connectOrCreate?: ResumeEnhancementCreateOrConnectWithoutJobPostingInput | ResumeEnhancementCreateOrConnectWithoutJobPostingInput[]
@@ -50989,6 +53815,52 @@ export namespace Prisma {
     update?: ResumeEnhancementUpdateWithWhereUniqueWithoutJobPostingInput | ResumeEnhancementUpdateWithWhereUniqueWithoutJobPostingInput[]
     updateMany?: ResumeEnhancementUpdateManyWithWhereWithoutJobPostingInput | ResumeEnhancementUpdateManyWithWhereWithoutJobPostingInput[]
     deleteMany?: ResumeEnhancementScalarWhereInput | ResumeEnhancementScalarWhereInput[]
+  }
+
+  export type JobSnapshotCreateskillsInput = {
+    set: string[]
+  }
+
+  export type JobSnapshotCreatelanguagesInput = {
+    set: string[]
+  }
+
+  export type JobPostingCreateNestedOneWithoutSnapshotsInput = {
+    create?: XOR<JobPostingCreateWithoutSnapshotsInput, JobPostingUncheckedCreateWithoutSnapshotsInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutSnapshotsInput
+    connect?: JobPostingWhereUniqueInput
+  }
+
+  export type ApplicationQueueCreateNestedOneWithoutJobSnapshotInput = {
+    create?: XOR<ApplicationQueueCreateWithoutJobSnapshotInput, ApplicationQueueUncheckedCreateWithoutJobSnapshotInput>
+    connectOrCreate?: ApplicationQueueCreateOrConnectWithoutJobSnapshotInput
+    connect?: ApplicationQueueWhereUniqueInput
+  }
+
+  export type JobSnapshotUpdateskillsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type JobSnapshotUpdatelanguagesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type JobPostingUpdateOneRequiredWithoutSnapshotsNestedInput = {
+    create?: XOR<JobPostingCreateWithoutSnapshotsInput, JobPostingUncheckedCreateWithoutSnapshotsInput>
+    connectOrCreate?: JobPostingCreateOrConnectWithoutSnapshotsInput
+    upsert?: JobPostingUpsertWithoutSnapshotsInput
+    connect?: JobPostingWhereUniqueInput
+    update?: XOR<XOR<JobPostingUpdateToOneWithWhereWithoutSnapshotsInput, JobPostingUpdateWithoutSnapshotsInput>, JobPostingUncheckedUpdateWithoutSnapshotsInput>
+  }
+
+  export type ApplicationQueueUpdateOneRequiredWithoutJobSnapshotNestedInput = {
+    create?: XOR<ApplicationQueueCreateWithoutJobSnapshotInput, ApplicationQueueUncheckedCreateWithoutJobSnapshotInput>
+    connectOrCreate?: ApplicationQueueCreateOrConnectWithoutJobSnapshotInput
+    upsert?: ApplicationQueueUpsertWithoutJobSnapshotInput
+    connect?: ApplicationQueueWhereUniqueInput
+    update?: XOR<XOR<ApplicationQueueUpdateToOneWithWhereWithoutJobSnapshotInput, ApplicationQueueUpdateWithoutJobSnapshotInput>, ApplicationQueueUncheckedUpdateWithoutJobSnapshotInput>
   }
 
   export type ResumeTemplateCreatejobTypesInput = {
@@ -53496,6 +56368,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     jobPosting: JobPostingCreateNestedOneWithoutQueueItemsInput
     application?: JobApplicationCreateNestedOneWithoutQueueItemsInput
+    jobSnapshot?: JobSnapshotCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogCreateNestedManyWithoutQueueInput
   }
 
@@ -53526,6 +56399,7 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    jobSnapshot?: JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogUncheckedCreateNestedManyWithoutQueueInput
   }
 
@@ -55200,6 +58074,7 @@ export namespace Prisma {
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -55257,6 +58132,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -55429,6 +58305,7 @@ export namespace Prisma {
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -55486,6 +58363,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -55636,6 +58514,7 @@ export namespace Prisma {
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -55693,6 +58572,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -55786,6 +58666,123 @@ export namespace Prisma {
   export type JobApplicationCreateOrConnectWithoutQueueItemsInput = {
     where: JobApplicationWhereUniqueInput
     create: XOR<JobApplicationCreateWithoutQueueItemsInput, JobApplicationUncheckedCreateWithoutQueueItemsInput>
+  }
+
+  export type JobSnapshotCreateWithoutApplicationQueueInput = {
+    id?: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+    originalJob: JobPostingCreateNestedOneWithoutSnapshotsInput
+  }
+
+  export type JobSnapshotUncheckedCreateWithoutApplicationQueueInput = {
+    id?: string
+    originalJobId: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+  }
+
+  export type JobSnapshotCreateOrConnectWithoutApplicationQueueInput = {
+    where: JobSnapshotWhereUniqueInput
+    create: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
   }
 
   export type AutomationLogCreateWithoutQueueInput = {
@@ -55998,6 +58995,7 @@ export namespace Prisma {
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -56055,6 +59053,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -56151,6 +59150,129 @@ export namespace Prisma {
     interactions?: ApplicationInteractionUncheckedUpdateManyWithoutApplicationNestedInput
   }
 
+  export type JobSnapshotUpsertWithoutApplicationQueueInput = {
+    update: XOR<JobSnapshotUpdateWithoutApplicationQueueInput, JobSnapshotUncheckedUpdateWithoutApplicationQueueInput>
+    create: XOR<JobSnapshotCreateWithoutApplicationQueueInput, JobSnapshotUncheckedCreateWithoutApplicationQueueInput>
+    where?: JobSnapshotWhereInput
+  }
+
+  export type JobSnapshotUpdateToOneWithWhereWithoutApplicationQueueInput = {
+    where?: JobSnapshotWhereInput
+    data: XOR<JobSnapshotUpdateWithoutApplicationQueueInput, JobSnapshotUncheckedUpdateWithoutApplicationQueueInput>
+  }
+
+  export type JobSnapshotUpdateWithoutApplicationQueueInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    originalJob?: JobPostingUpdateOneRequiredWithoutSnapshotsNestedInput
+  }
+
+  export type JobSnapshotUncheckedUpdateWithoutApplicationQueueInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    originalJobId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AutomationLogUpsertWithWhereUniqueWithoutQueueInput = {
     where: AutomationLogWhereUniqueInput
     update: XOR<AutomationLogUpdateWithoutQueueInput, AutomationLogUncheckedUpdateWithoutQueueInput>
@@ -56217,6 +59339,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutApplicationQueueInput
     jobPosting: JobPostingCreateNestedOneWithoutQueueItemsInput
     application?: JobApplicationCreateNestedOneWithoutQueueItemsInput
+    jobSnapshot?: JobSnapshotCreateNestedOneWithoutApplicationQueueInput
   }
 
   export type ApplicationQueueUncheckedCreateWithoutAutomationLogsInput = {
@@ -56247,6 +59370,7 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    jobSnapshot?: JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput
   }
 
   export type ApplicationQueueCreateOrConnectWithoutAutomationLogsInput = {
@@ -56293,6 +59417,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutApplicationQueueNestedInput
     jobPosting?: JobPostingUpdateOneRequiredWithoutQueueItemsNestedInput
     application?: JobApplicationUpdateOneWithoutQueueItemsNestedInput
+    jobSnapshot?: JobSnapshotUpdateOneWithoutApplicationQueueNestedInput
   }
 
   export type ApplicationQueueUncheckedUpdateWithoutAutomationLogsInput = {
@@ -56323,6 +59448,7 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobSnapshot?: JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -56955,6 +60081,7 @@ export namespace Prisma {
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -57012,6 +60139,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -57821,6 +60949,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutApplicationQueueInput
     application?: JobApplicationCreateNestedOneWithoutQueueItemsInput
+    jobSnapshot?: JobSnapshotCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogCreateNestedManyWithoutQueueInput
   }
 
@@ -57851,6 +60980,7 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    jobSnapshot?: JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogUncheckedCreateNestedManyWithoutQueueInput
   }
 
@@ -57861,6 +60991,128 @@ export namespace Prisma {
 
   export type ApplicationQueueCreateManyJobPostingInputEnvelope = {
     data: ApplicationQueueCreateManyJobPostingInput | ApplicationQueueCreateManyJobPostingInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type JobSnapshotCreateWithoutOriginalJobInput = {
+    id?: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+    applicationQueue: ApplicationQueueCreateNestedOneWithoutJobSnapshotInput
+  }
+
+  export type JobSnapshotUncheckedCreateWithoutOriginalJobInput = {
+    id?: string
+    applicationQueueId: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
+  }
+
+  export type JobSnapshotCreateOrConnectWithoutOriginalJobInput = {
+    where: JobSnapshotWhereUniqueInput
+    create: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput>
+  }
+
+  export type JobSnapshotCreateManyOriginalJobInputEnvelope = {
+    data: JobSnapshotCreateManyOriginalJobInput | JobSnapshotCreateManyOriginalJobInput[]
     skipDuplicates?: boolean
   }
 
@@ -58065,6 +61317,82 @@ export namespace Prisma {
     data: XOR<ApplicationQueueUpdateManyMutationInput, ApplicationQueueUncheckedUpdateManyWithoutJobPostingInput>
   }
 
+  export type JobSnapshotUpsertWithWhereUniqueWithoutOriginalJobInput = {
+    where: JobSnapshotWhereUniqueInput
+    update: XOR<JobSnapshotUpdateWithoutOriginalJobInput, JobSnapshotUncheckedUpdateWithoutOriginalJobInput>
+    create: XOR<JobSnapshotCreateWithoutOriginalJobInput, JobSnapshotUncheckedCreateWithoutOriginalJobInput>
+  }
+
+  export type JobSnapshotUpdateWithWhereUniqueWithoutOriginalJobInput = {
+    where: JobSnapshotWhereUniqueInput
+    data: XOR<JobSnapshotUpdateWithoutOriginalJobInput, JobSnapshotUncheckedUpdateWithoutOriginalJobInput>
+  }
+
+  export type JobSnapshotUpdateManyWithWhereWithoutOriginalJobInput = {
+    where: JobSnapshotScalarWhereInput
+    data: XOR<JobSnapshotUpdateManyMutationInput, JobSnapshotUncheckedUpdateManyWithoutOriginalJobInput>
+  }
+
+  export type JobSnapshotScalarWhereInput = {
+    AND?: JobSnapshotScalarWhereInput | JobSnapshotScalarWhereInput[]
+    OR?: JobSnapshotScalarWhereInput[]
+    NOT?: JobSnapshotScalarWhereInput | JobSnapshotScalarWhereInput[]
+    id?: StringFilter<"JobSnapshot"> | string
+    originalJobId?: StringFilter<"JobSnapshot"> | string
+    applicationQueueId?: StringFilter<"JobSnapshot"> | string
+    title?: StringFilter<"JobSnapshot"> | string
+    description?: StringFilter<"JobSnapshot"> | string
+    requirements?: StringNullableFilter<"JobSnapshot"> | string | null
+    benefits?: StringNullableFilter<"JobSnapshot"> | string | null
+    type?: StringFilter<"JobSnapshot"> | string
+    level?: StringFilter<"JobSnapshot"> | string
+    department?: StringNullableFilter<"JobSnapshot"> | string | null
+    category?: StringFilter<"JobSnapshot"> | string
+    remote?: BoolFilter<"JobSnapshot"> | boolean
+    remoteType?: StringFilter<"JobSnapshot"> | string
+    location?: StringNullableFilter<"JobSnapshot"> | string | null
+    timeZone?: StringNullableFilter<"JobSnapshot"> | string | null
+    city?: StringNullableFilter<"JobSnapshot"> | string | null
+    state?: StringNullableFilter<"JobSnapshot"> | string | null
+    country?: StringNullableFilter<"JobSnapshot"> | string | null
+    coordinates?: JsonNullableFilter<"JobSnapshot">
+    salaryMin?: IntNullableFilter<"JobSnapshot"> | number | null
+    salaryMax?: IntNullableFilter<"JobSnapshot"> | number | null
+    currency?: StringNullableFilter<"JobSnapshot"> | string | null
+    salaryType?: StringNullableFilter<"JobSnapshot"> | string | null
+    equity?: StringNullableFilter<"JobSnapshot"> | string | null
+    bonus?: StringNullableFilter<"JobSnapshot"> | string | null
+    experienceYears?: IntNullableFilter<"JobSnapshot"> | number | null
+    skills?: StringNullableListFilter<"JobSnapshot">
+    education?: StringNullableFilter<"JobSnapshot"> | string | null
+    languages?: StringNullableListFilter<"JobSnapshot">
+    companyName?: StringFilter<"JobSnapshot"> | string
+    companyLogo?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyWebsite?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyIndustry?: StringNullableFilter<"JobSnapshot"> | string | null
+    companySize?: StringNullableFilter<"JobSnapshot"> | string | null
+    companyDescription?: StringNullableFilter<"JobSnapshot"> | string | null
+    externalId?: StringNullableFilter<"JobSnapshot"> | string | null
+    source?: StringFilter<"JobSnapshot"> | string
+    sourceUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    applyUrl?: StringNullableFilter<"JobSnapshot"> | string | null
+    qualityScore?: FloatNullableFilter<"JobSnapshot"> | number | null
+    isVerified?: BoolFilter<"JobSnapshot"> | boolean
+    originalStatus?: StringFilter<"JobSnapshot"> | string
+    isActive?: BoolFilter<"JobSnapshot"> | boolean
+    isFeatured?: BoolFilter<"JobSnapshot"> | boolean
+    isUrgent?: BoolFilter<"JobSnapshot"> | boolean
+    originalPostedAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    originalExpiresAt?: DateTimeNullableFilter<"JobSnapshot"> | Date | string | null
+    viewCount?: IntFilter<"JobSnapshot"> | number
+    applicationCount?: IntFilter<"JobSnapshot"> | number
+    rightSwipeCount?: IntFilter<"JobSnapshot"> | number
+    leftSwipeCount?: IntFilter<"JobSnapshot"> | number
+    snapshotVersion?: StringFilter<"JobSnapshot"> | string
+    snapshotReason?: StringFilter<"JobSnapshot"> | string
+    createdAt?: DateTimeFilter<"JobSnapshot"> | Date | string
+  }
+
   export type ResumeEnhancementUpsertWithWhereUniqueWithoutJobPostingInput = {
     where: ResumeEnhancementWhereUniqueInput
     update: XOR<ResumeEnhancementUpdateWithoutJobPostingInput, ResumeEnhancementUncheckedUpdateWithoutJobPostingInput>
@@ -58103,6 +61431,394 @@ export namespace Prisma {
     successRate?: FloatNullableFilter<"ResumeEnhancement"> | number | null
     createdAt?: DateTimeFilter<"ResumeEnhancement"> | Date | string
     updatedAt?: DateTimeFilter<"ResumeEnhancement"> | Date | string
+  }
+
+  export type JobPostingCreateWithoutSnapshotsInput = {
+    id?: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type?: $Enums.JobType
+    level?: $Enums.JobLevel
+    department?: string | null
+    category?: $Enums.JobCategory
+    remote?: boolean
+    remoteType?: $Enums.RemoteType
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: $Enums.SalaryType | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobPostingCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobPostingCreatelanguagesInput | string[]
+    externalId?: string | null
+    source?: $Enums.JobSource
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    keywords?: JobPostingCreatekeywordsInput | string[]
+    tags?: JobPostingCreatetagsInput | string[]
+    qualityScore?: number | null
+    isVerified?: boolean
+    verifiedAt?: Date | string | null
+    status?: $Enums.JobStatus
+    isActive?: boolean
+    isFeatured?: boolean
+    isUrgent?: boolean
+    postedAt?: Date | string | null
+    expiresAt?: Date | string | null
+    lastScrapedAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    company: CompanyCreateNestedOneWithoutJobPostingsInput
+    applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
+    savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
+    swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
+    queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
+  }
+
+  export type JobPostingUncheckedCreateWithoutSnapshotsInput = {
+    id?: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type?: $Enums.JobType
+    level?: $Enums.JobLevel
+    department?: string | null
+    category?: $Enums.JobCategory
+    remote?: boolean
+    remoteType?: $Enums.RemoteType
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: $Enums.SalaryType | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobPostingCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobPostingCreatelanguagesInput | string[]
+    companyId: string
+    externalId?: string | null
+    source?: $Enums.JobSource
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    keywords?: JobPostingCreatekeywordsInput | string[]
+    tags?: JobPostingCreatetagsInput | string[]
+    qualityScore?: number | null
+    isVerified?: boolean
+    verifiedAt?: Date | string | null
+    status?: $Enums.JobStatus
+    isActive?: boolean
+    isFeatured?: boolean
+    isUrgent?: boolean
+    postedAt?: Date | string | null
+    expiresAt?: Date | string | null
+    lastScrapedAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
+    savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
+    swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
+    queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
+  }
+
+  export type JobPostingCreateOrConnectWithoutSnapshotsInput = {
+    where: JobPostingWhereUniqueInput
+    create: XOR<JobPostingCreateWithoutSnapshotsInput, JobPostingUncheckedCreateWithoutSnapshotsInput>
+  }
+
+  export type ApplicationQueueCreateWithoutJobSnapshotInput = {
+    id?: string
+    status?: $Enums.QueueStatus
+    priority?: $Enums.QueuePriority
+    attempts?: number
+    maxAttempts?: number
+    scheduledAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    failedAt?: Date | string | null
+    nextRetryAt?: Date | string | null
+    useCustomResume?: boolean
+    resumeId?: string | null
+    coverLetter?: string | null
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    automationConfig?: NullableJsonNullValueInput | InputJsonValue
+    requiresCaptcha?: boolean
+    captchaSolved?: boolean
+    success?: boolean | null
+    errorMessage?: string | null
+    errorType?: string | null
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    desktopSessionId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutApplicationQueueInput
+    jobPosting: JobPostingCreateNestedOneWithoutQueueItemsInput
+    application?: JobApplicationCreateNestedOneWithoutQueueItemsInput
+    automationLogs?: AutomationLogCreateNestedManyWithoutQueueInput
+  }
+
+  export type ApplicationQueueUncheckedCreateWithoutJobSnapshotInput = {
+    id?: string
+    userId: string
+    jobPostingId: string
+    applicationId?: string | null
+    status?: $Enums.QueueStatus
+    priority?: $Enums.QueuePriority
+    attempts?: number
+    maxAttempts?: number
+    scheduledAt?: Date | string | null
+    startedAt?: Date | string | null
+    completedAt?: Date | string | null
+    failedAt?: Date | string | null
+    nextRetryAt?: Date | string | null
+    useCustomResume?: boolean
+    resumeId?: string | null
+    coverLetter?: string | null
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    automationConfig?: NullableJsonNullValueInput | InputJsonValue
+    requiresCaptcha?: boolean
+    captchaSolved?: boolean
+    success?: boolean | null
+    errorMessage?: string | null
+    errorType?: string | null
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    desktopSessionId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    automationLogs?: AutomationLogUncheckedCreateNestedManyWithoutQueueInput
+  }
+
+  export type ApplicationQueueCreateOrConnectWithoutJobSnapshotInput = {
+    where: ApplicationQueueWhereUniqueInput
+    create: XOR<ApplicationQueueCreateWithoutJobSnapshotInput, ApplicationQueueUncheckedCreateWithoutJobSnapshotInput>
+  }
+
+  export type JobPostingUpsertWithoutSnapshotsInput = {
+    update: XOR<JobPostingUpdateWithoutSnapshotsInput, JobPostingUncheckedUpdateWithoutSnapshotsInput>
+    create: XOR<JobPostingCreateWithoutSnapshotsInput, JobPostingUncheckedCreateWithoutSnapshotsInput>
+    where?: JobPostingWhereInput
+  }
+
+  export type JobPostingUpdateToOneWithWhereWithoutSnapshotsInput = {
+    where?: JobPostingWhereInput
+    data: XOR<JobPostingUpdateWithoutSnapshotsInput, JobPostingUncheckedUpdateWithoutSnapshotsInput>
+  }
+
+  export type JobPostingUpdateWithoutSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+    level?: EnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: EnumRemoteTypeFieldUpdateOperationsInput | $Enums.RemoteType
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableEnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobPostingUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobPostingUpdatelanguagesInput | string[]
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: EnumJobSourceFieldUpdateOperationsInput | $Enums.JobSource
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    keywords?: JobPostingUpdatekeywordsInput | string[]
+    tags?: JobPostingUpdatetagsInput | string[]
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastScrapedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
+    applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
+    savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
+    swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
+    queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
+  }
+
+  export type JobPostingUncheckedUpdateWithoutSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+    level?: EnumJobLevelFieldUpdateOperationsInput | $Enums.JobLevel
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: EnumRemoteTypeFieldUpdateOperationsInput | $Enums.RemoteType
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableEnumSalaryTypeFieldUpdateOperationsInput | $Enums.SalaryType | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobPostingUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobPostingUpdatelanguagesInput | string[]
+    companyId?: StringFieldUpdateOperationsInput | string
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: EnumJobSourceFieldUpdateOperationsInput | $Enums.JobSource
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    keywords?: JobPostingUpdatekeywordsInput | string[]
+    tags?: JobPostingUpdatetagsInput | string[]
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    postedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastScrapedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
+    savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
+    swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
+    queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
+  }
+
+  export type ApplicationQueueUpsertWithoutJobSnapshotInput = {
+    update: XOR<ApplicationQueueUpdateWithoutJobSnapshotInput, ApplicationQueueUncheckedUpdateWithoutJobSnapshotInput>
+    create: XOR<ApplicationQueueCreateWithoutJobSnapshotInput, ApplicationQueueUncheckedCreateWithoutJobSnapshotInput>
+    where?: ApplicationQueueWhereInput
+  }
+
+  export type ApplicationQueueUpdateToOneWithWhereWithoutJobSnapshotInput = {
+    where?: ApplicationQueueWhereInput
+    data: XOR<ApplicationQueueUpdateWithoutJobSnapshotInput, ApplicationQueueUncheckedUpdateWithoutJobSnapshotInput>
+  }
+
+  export type ApplicationQueueUpdateWithoutJobSnapshotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumQueueStatusFieldUpdateOperationsInput | $Enums.QueueStatus
+    priority?: EnumQueuePriorityFieldUpdateOperationsInput | $Enums.QueuePriority
+    attempts?: IntFieldUpdateOperationsInput | number
+    maxAttempts?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextRetryAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCustomResume?: BoolFieldUpdateOperationsInput | boolean
+    resumeId?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    automationConfig?: NullableJsonNullValueInput | InputJsonValue
+    requiresCaptcha?: BoolFieldUpdateOperationsInput | boolean
+    captchaSolved?: BoolFieldUpdateOperationsInput | boolean
+    success?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    errorType?: NullableStringFieldUpdateOperationsInput | string | null
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutApplicationQueueNestedInput
+    jobPosting?: JobPostingUpdateOneRequiredWithoutQueueItemsNestedInput
+    application?: JobApplicationUpdateOneWithoutQueueItemsNestedInput
+    automationLogs?: AutomationLogUpdateManyWithoutQueueNestedInput
+  }
+
+  export type ApplicationQueueUncheckedUpdateWithoutJobSnapshotInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    jobPostingId?: StringFieldUpdateOperationsInput | string
+    applicationId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumQueueStatusFieldUpdateOperationsInput | $Enums.QueueStatus
+    priority?: EnumQueuePriorityFieldUpdateOperationsInput | $Enums.QueuePriority
+    attempts?: IntFieldUpdateOperationsInput | number
+    maxAttempts?: IntFieldUpdateOperationsInput | number
+    scheduledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    completedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    failedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    nextRetryAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    useCustomResume?: BoolFieldUpdateOperationsInput | boolean
+    resumeId?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetter?: NullableStringFieldUpdateOperationsInput | string | null
+    customFields?: NullableJsonNullValueInput | InputJsonValue
+    automationConfig?: NullableJsonNullValueInput | InputJsonValue
+    requiresCaptcha?: BoolFieldUpdateOperationsInput | boolean
+    captchaSolved?: BoolFieldUpdateOperationsInput | boolean
+    success?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    errorType?: NullableStringFieldUpdateOperationsInput | string | null
+    responseData?: NullableJsonNullValueInput | InputJsonValue
+    desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    automationLogs?: AutomationLogUncheckedUpdateManyWithoutQueueNestedInput
   }
 
   export type ResumeCreateWithoutTemplateInput = {
@@ -58956,6 +62672,7 @@ export namespace Prisma {
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
   }
 
   export type JobPostingUncheckedCreateWithoutEnhancementsInput = {
@@ -59013,6 +62730,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
   }
 
   export type JobPostingCreateOrConnectWithoutEnhancementsInput = {
@@ -59234,6 +62952,7 @@ export namespace Prisma {
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
   }
 
   export type JobPostingUncheckedUpdateWithoutEnhancementsInput = {
@@ -59291,6 +63010,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
   }
 
   export type UserCreateWithoutApplicationsInput = {
@@ -59440,6 +63160,7 @@ export namespace Prisma {
     savedBy?: SavedJobCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -59497,6 +63218,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -59673,6 +63395,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutApplicationQueueInput
     jobPosting: JobPostingCreateNestedOneWithoutQueueItemsInput
+    jobSnapshot?: JobSnapshotCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogCreateNestedManyWithoutQueueInput
   }
 
@@ -59703,6 +63426,7 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    jobSnapshot?: JobSnapshotUncheckedCreateNestedOneWithoutApplicationQueueInput
     automationLogs?: AutomationLogUncheckedCreateNestedManyWithoutQueueInput
   }
 
@@ -59880,6 +63604,7 @@ export namespace Prisma {
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -59937,6 +63662,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -60410,6 +64136,7 @@ export namespace Prisma {
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementCreateNestedManyWithoutJobPostingInput
   }
 
@@ -60467,6 +64194,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     swipes?: UserJobSwipeUncheckedCreateNestedManyWithoutJobPostingInput
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
+    snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
   }
 
@@ -60639,6 +64367,7 @@ export namespace Prisma {
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -60696,6 +64425,7 @@ export namespace Prisma {
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -62495,6 +66225,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     jobPosting?: JobPostingUpdateOneRequiredWithoutQueueItemsNestedInput
     application?: JobApplicationUpdateOneWithoutQueueItemsNestedInput
+    jobSnapshot?: JobSnapshotUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUpdateManyWithoutQueueNestedInput
   }
 
@@ -62525,6 +66256,7 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobSnapshot?: JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUncheckedUpdateManyWithoutQueueNestedInput
   }
 
@@ -62759,6 +66491,7 @@ export namespace Prisma {
     savedBy?: SavedJobUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -62816,6 +66549,7 @@ export namespace Prisma {
     savedBy?: SavedJobUncheckedUpdateManyWithoutJobPostingNestedInput
     swipes?: UserJobSwipeUncheckedUpdateManyWithoutJobPostingNestedInput
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
+    snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
   }
 
@@ -63044,6 +66778,62 @@ export namespace Prisma {
     desktopSessionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type JobSnapshotCreateManyOriginalJobInput = {
+    id?: string
+    applicationQueueId: string
+    title: string
+    description: string
+    requirements?: string | null
+    benefits?: string | null
+    type: string
+    level: string
+    department?: string | null
+    category: string
+    remote: boolean
+    remoteType: string
+    location?: string | null
+    timeZone?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: number | null
+    salaryMax?: number | null
+    currency?: string | null
+    salaryType?: string | null
+    equity?: string | null
+    bonus?: string | null
+    experienceYears?: number | null
+    skills?: JobSnapshotCreateskillsInput | string[]
+    education?: string | null
+    languages?: JobSnapshotCreatelanguagesInput | string[]
+    companyName: string
+    companyLogo?: string | null
+    companyWebsite?: string | null
+    companyIndustry?: string | null
+    companySize?: string | null
+    companyDescription?: string | null
+    externalId?: string | null
+    source: string
+    sourceUrl?: string | null
+    applyUrl?: string | null
+    qualityScore?: number | null
+    isVerified: boolean
+    originalStatus: string
+    isActive: boolean
+    isFeatured: boolean
+    isUrgent: boolean
+    originalPostedAt?: Date | string | null
+    originalExpiresAt?: Date | string | null
+    viewCount?: number
+    applicationCount?: number
+    rightSwipeCount?: number
+    leftSwipeCount?: number
+    snapshotVersion?: string
+    snapshotReason?: string
+    createdAt?: Date | string
   }
 
   export type ResumeEnhancementCreateManyJobPostingInput = {
@@ -63319,6 +67109,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutApplicationQueueNestedInput
     application?: JobApplicationUpdateOneWithoutQueueItemsNestedInput
+    jobSnapshot?: JobSnapshotUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUpdateManyWithoutQueueNestedInput
   }
 
@@ -63349,6 +67140,7 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobSnapshot?: JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUncheckedUpdateManyWithoutQueueNestedInput
   }
 
@@ -63379,6 +67171,174 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobSnapshotUpdateWithoutOriginalJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    applicationQueue?: ApplicationQueueUpdateOneRequiredWithoutJobSnapshotNestedInput
+  }
+
+  export type JobSnapshotUncheckedUpdateWithoutOriginalJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationQueueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobSnapshotUncheckedUpdateManyWithoutOriginalJobInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    applicationQueueId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: StringFieldUpdateOperationsInput | string
+    requirements?: NullableStringFieldUpdateOperationsInput | string | null
+    benefits?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: StringFieldUpdateOperationsInput | string
+    level?: StringFieldUpdateOperationsInput | string
+    department?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: StringFieldUpdateOperationsInput | string
+    remote?: BoolFieldUpdateOperationsInput | boolean
+    remoteType?: StringFieldUpdateOperationsInput | string
+    location?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    coordinates?: NullableJsonNullValueInput | InputJsonValue
+    salaryMin?: NullableIntFieldUpdateOperationsInput | number | null
+    salaryMax?: NullableIntFieldUpdateOperationsInput | number | null
+    currency?: NullableStringFieldUpdateOperationsInput | string | null
+    salaryType?: NullableStringFieldUpdateOperationsInput | string | null
+    equity?: NullableStringFieldUpdateOperationsInput | string | null
+    bonus?: NullableStringFieldUpdateOperationsInput | string | null
+    experienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    skills?: JobSnapshotUpdateskillsInput | string[]
+    education?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: JobSnapshotUpdatelanguagesInput | string[]
+    companyName?: StringFieldUpdateOperationsInput | string
+    companyLogo?: NullableStringFieldUpdateOperationsInput | string | null
+    companyWebsite?: NullableStringFieldUpdateOperationsInput | string | null
+    companyIndustry?: NullableStringFieldUpdateOperationsInput | string | null
+    companySize?: NullableStringFieldUpdateOperationsInput | string | null
+    companyDescription?: NullableStringFieldUpdateOperationsInput | string | null
+    externalId?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    applyUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    qualityScore?: NullableFloatFieldUpdateOperationsInput | number | null
+    isVerified?: BoolFieldUpdateOperationsInput | boolean
+    originalStatus?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    isFeatured?: BoolFieldUpdateOperationsInput | boolean
+    isUrgent?: BoolFieldUpdateOperationsInput | boolean
+    originalPostedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    originalExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    viewCount?: IntFieldUpdateOperationsInput | number
+    applicationCount?: IntFieldUpdateOperationsInput | number
+    rightSwipeCount?: IntFieldUpdateOperationsInput | number
+    leftSwipeCount?: IntFieldUpdateOperationsInput | number
+    snapshotVersion?: StringFieldUpdateOperationsInput | string
+    snapshotReason?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ResumeEnhancementUpdateWithoutJobPostingInput = {
@@ -64065,6 +68025,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutApplicationQueueNestedInput
     jobPosting?: JobPostingUpdateOneRequiredWithoutQueueItemsNestedInput
+    jobSnapshot?: JobSnapshotUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUpdateManyWithoutQueueNestedInput
   }
 
@@ -64095,6 +68056,7 @@ export namespace Prisma {
     desktopSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobSnapshot?: JobSnapshotUncheckedUpdateOneWithoutApplicationQueueNestedInput
     automationLogs?: AutomationLogUncheckedUpdateManyWithoutQueueNestedInput
   }
 
@@ -64352,6 +68314,10 @@ export namespace Prisma {
      * @deprecated Use JobPostingDefaultArgs instead
      */
     export type JobPostingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobPostingDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use JobSnapshotDefaultArgs instead
+     */
+    export type JobSnapshotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobSnapshotDefaultArgs<ExtArgs>
     /**
      * @deprecated Use ResumeTemplateDefaultArgs instead
      */
