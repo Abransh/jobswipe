@@ -1,71 +1,178 @@
 #!/usr/bin/env node
 /**
- * @fileoverview JobSwipe Integration Test Runner
- * @description Complete end-to-end test of the browser automation system
+ * @fileoverview JobSwipe Integration Test Runner  
+ * @description Complete end-to-end test of the new automation system
  * @version 1.0.0
  * @author JobSwipe Team
  */
 
-import path from 'path';
-import { BrowserAutomationService } from './services/BrowserAutomationService';
-import { PythonBridge } from './services/PythonBridge';
+import { JobSwipeAutomationEngine } from './automation/JobSwipeAutomationEngine';
+import { StrategyRegistry } from './strategies/StrategyRegistry';
+import { AdvancedCaptchaHandler } from './captcha/AdvancedCaptchaHandler';
+import { FormAnalyzer } from './intelligence/FormAnalyzer';
+import { EnterpriseQueueManager } from './queue/EnterpriseQueueManager';
 
 // =============================================================================
 // INTEGRATION TEST RUNNER
 // =============================================================================
 
 async function runBasicIntegrationTest() {
-  console.log('🚀 JobSwipe Integration Test Suite');
-  console.log('=' .repeat(50));
+  console.log('🚀 JobSwipe New Automation System - Integration Tests');
+  console.log('=' .repeat(60));
 
   const startTime = Date.now();
   
   try {
-    // Test 1: Python Bridge Validation
-    console.log('\n📋 Test 1: Python Bridge Initialization');
-    const pythonBridge = new PythonBridge();
-    await pythonBridge.initialize();
-    console.log('✅ Python bridge initialized successfully');
-
-    // Test 2: Browser Automation Service
-    console.log('\n📋 Test 2: Browser Automation Service');
-    const automationService = new BrowserAutomationService();
-    await automationService.initialize();
-    console.log('✅ Browser automation service initialized');
-
-    // Test 3: Simple Python Script Execution
-    console.log('\n📋 Test 3: Python Script Execution');
-    const testScriptPath = path.join(__dirname, '../data/temp/test_automation_simple.py');
-    
-    const result = await pythonBridge.executeScript(testScriptPath, [], {
-      timeout: 60000, // 1 minute timeout for test
-      priority: 'high'
+    // Test 1: Strategy Registry Initialization
+    console.log('\n📋 Test 1: Strategy Registry System');
+    const strategyRegistry = new StrategyRegistry({
+      strategyDirectory: './strategies/companies',
+      cacheStrategy: true,
+      autoReload: true
     });
 
-    console.log(`📊 Test execution result:`);
-    console.log(`   Success: ${result.success ? '✅' : '❌'}`);
-    console.log(`   Execution Time: ${result.executionTime}ms`);
-    console.log(`   Process ID: ${result.processId}`);
+    const strategies = strategyRegistry.getAllStrategies();
+    console.log(`✅ Strategy registry initialized with ${strategies.length} strategies`);
+    strategies.forEach(strategy => {
+      console.log(`   - ${strategy.name}: ${strategy.domains?.join(', ') || 'no domains'}`);
+    });
+
+    // Test 2: Advanced Captcha Handler  
+    console.log('\n📋 Test 2: Advanced Captcha Handler');
+    const captchaHandler = new AdvancedCaptchaHandler({
+      enabledMethods: ['ai-vision', 'manual-intervention'],
+      aiVision: {
+        provider: 'anthropic',
+        model: 'claude-3-sonnet-20240229',
+        apiKey: process.env.ANTHROPIC_API_KEY || 'test-key',
+        maxTokens: 1000,
+        temperature: 0.1
+      }
+    });
     
-    if (result.success && result.data) {
-      console.log(`   Test Results:`, result.data);
-    } else if (result.error) {
-      console.log(`   Error: ${result.error}`);
+    console.log('✅ Captcha handler initialized successfully');
+    const captchaStats = captchaHandler.getStats();
+    console.log(`   - Total encountered: ${captchaStats.totalEncountered}`);
+    console.log(`   - Success rate: ${(captchaStats.successRate * 100).toFixed(1)}%`);
+
+    // Test 3: Form Analyzer
+    console.log('\n📋 Test 3: AI Form Intelligence System');
+    const formAnalyzer = new FormAnalyzer();
+    console.log('✅ Form analyzer initialized successfully');
+
+    // Test 4: Enterprise Queue Manager
+    console.log('\n📋 Test 4: Enterprise Queue Management');
+    const queueManager = new EnterpriseQueueManager({
+      redis: {
+        cluster: false,
+        host: 'localhost',
+        port: 6379
+      },
+      performance: {
+        concurrency: 2,
+        stalledInterval: 30000,
+        maxStalledCount: 2,
+        removeOnComplete: 100,
+        removeOnFail: 50,
+        defaultJobOptions: {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 2000 },
+          removeOnComplete: true,
+          removeOnFail: true
+        }
+      },
+      monitoring: {
+        enabled: true,
+        metricsInterval: 30000,
+        alertThresholds: {
+          queueSize: 1000,
+          processingTime: 120000,
+          failureRate: 0.1,
+          stalledJobs: 10,
+          memoryUsage: 0.8
+        }
+      }
+    });
+
+    try {
+      await queueManager.initialize();
+      console.log('✅ Queue manager initialized successfully');
+    } catch (queueError) {
+      console.log('⚠️  Queue manager initialization skipped (Redis not available)');
+      console.log(`   Error: ${queueError}`);
     }
 
-    // Test 4: Bridge Statistics
-    console.log('\n📋 Test 4: System Statistics');
-    const bridgeStats = pythonBridge.getStats();
-    console.log(`   🐍 Total Processes: ${bridgeStats.totalProcesses}`);
-    console.log(`   ⚡ Active Tasks: ${bridgeStats.activeTasks}`);
-    console.log(`   📦 Total Tasks Executed: ${bridgeStats.totalTasksExecuted}`);
-    console.log(`   ⏱️ Average Execution Time: ${bridgeStats.averageExecutionTime.toFixed(0)}ms`);
-    console.log(`   💾 Memory Usage: ${(bridgeStats.memoryUsage / 1024 / 1024).toFixed(1)}MB`);
+    // Test 5: Main Automation Engine
+    console.log('\n📋 Test 5: JobSwipe Automation Engine');
+    const automationEngine = new JobSwipeAutomationEngine({
+      browser: {
+        headless: true,
+        timeout: 30000,
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        viewport: { width: 1920, height: 1080 }
+      },
+      captcha: {
+        enabledMethods: ['manual-intervention'],
+        aiVisionProvider: 'anthropic',
+        externalServices: {},
+        manualFallbackTimeout: 60000
+      },
+      intelligence: {
+        formAnalysisCache: true,
+        semanticAnalysisDepth: 'advanced',
+        confidenceThreshold: 0.7
+      },
+      queue: {
+        redisConnection: null,
+        defaultConcurrency: 2,
+        batchingEnabled: false,
+        monitoringEnabled: true
+      }
+    });
+
+    await automationEngine.initialize();
+    console.log('✅ Main automation engine initialized successfully');
+
+    // Test 6: Strategy Matching
+    console.log('\n📋 Test 6: Strategy Selection & Matching');
+    const testJob = {
+      jobData: {
+        company: 'LinkedIn',
+        url: 'https://www.linkedin.com/jobs/view/123456789/',
+        title: 'Software Engineer'
+      },
+      userProfile: {
+        personalInfo: {
+          firstName: 'Test',
+          lastName: 'User',
+          email: 'test@example.com',
+          phone: '555-0123'
+        },
+        professional: {
+          resumeUrl: '/path/to/resume.pdf'
+        },
+        preferences: {}
+      }
+    };
+
+    const matchResult = await strategyRegistry.findStrategy(testJob);
+    console.log(`✅ Strategy matching test: ${matchResult.matched ? 'SUCCESS' : 'FAILED'}`);
+    if (matchResult.matched && matchResult.strategy) {
+      console.log(`   - Selected strategy: ${matchResult.strategy.name}`);
+      console.log(`   - Match confidence: ${(matchResult.confidence * 100).toFixed(1)}%`);
+    }
+
+    // Test 7: Health Check
+    console.log('\n📋 Test 7: System Health Check');
+    const engineHealth = await automationEngine.getHealthStatus();
+    console.log('✅ Health check completed');
+    console.log(`   - Engine status: ${engineHealth.engine.status}`);
+    console.log(`   - Active jobs: ${engineHealth.engine.activeJobs}`);
+    console.log(`   - Uptime: ${Math.floor(engineHealth.engine.uptime / 1000)}s`);
 
     // Cleanup
     console.log('\n🧹 Cleaning up test environment...');
-    await automationService.cleanup();
-    await pythonBridge.shutdown();
+    await automationEngine.shutdown();
 
     const totalTime = Date.now() - startTime;
     
@@ -90,36 +197,60 @@ async function runBasicIntegrationTest() {
 }
 
 async function runHealthCheck() {
-  console.log('🏥 JobSwipe Health Check');
-  console.log('=' .repeat(30));
+  console.log('🏥 JobSwipe New System Health Check');
+  console.log('=' .repeat(40));
 
   try {
-    // Health check for browser automation service
-    const automationService = new BrowserAutomationService();
-    const healthResult = await automationService.healthCheck();
-
-    console.log(`📊 Health Status: ${healthResult.status.toUpperCase()}`);
-    console.log('\n🔍 Component Checks:');
-    
-    Object.entries(healthResult.checks).forEach(([component, status]) => {
-      console.log(`   ${status ? '✅' : '❌'} ${component}`);
+    // Initialize automation engine for health check
+    const automationEngine = new JobSwipeAutomationEngine({
+      browser: { 
+        headless: true, 
+        timeout: 15000,
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        viewport: { width: 1920, height: 1080 }
+      },
+      captcha: { enabledMethods: ['manual-intervention'], aiVisionProvider: 'anthropic', externalServices: {}, manualFallbackTimeout: 30000 },
+      intelligence: { formAnalysisCache: true, semanticAnalysisDepth: 'advanced', confidenceThreshold: 0.7 },
+      queue: { redisConnection: null, defaultConcurrency: 1, batchingEnabled: false, monitoringEnabled: false }
     });
 
-    console.log('\n📈 System Details:');
-    console.log(`   Active Processes: ${healthResult.details.activeProcesses}`);
-    console.log(`   Max Concurrent Jobs: ${healthResult.details.maxConcurrentJobs}`);
-    console.log(`   Queued Jobs: ${healthResult.details.queuedJobs}`);
+    await automationEngine.initialize();
+    const healthResult = await automationEngine.getHealthStatus();
 
-    if (healthResult.status === 'healthy') {
+    console.log(`📊 Health Status: ${healthResult.engine.status.toUpperCase()}`);
+    console.log('\n🔍 Component Status:');
+    
+    console.log(`   ${healthResult.engine.status === 'healthy' ? '✅' : '❌'} Automation Engine`);
+    console.log(`   ${healthResult.strategyRegistry.status === 'healthy' ? '✅' : '❌'} Strategy Registry`);
+    console.log(`   ${healthResult.captchaHandler.status === 'healthy' ? '✅' : '❌'} Captcha Handler`);
+    console.log(`   ${healthResult.queueManager ? '✅' : '⚠️'} Queue Manager ${healthResult.queueManager ? '' : '(Optional)'}`);
+
+    console.log('\n📈 System Details:');
+    console.log(`   Uptime: ${Math.floor(healthResult.engine.uptime / 1000)}s`);
+    console.log(`   Active Jobs: ${healthResult.engine.activeJobs}`);
+    console.log(`   Strategies Loaded: ${healthResult.strategyRegistry.strategiesLoaded || 0}`);
+    console.log(`   Captcha Success Rate: ${(healthResult.captchaHandler.stats.successRate * 100).toFixed(1)}%`);
+
+    const engineStats = automationEngine.getStats();
+    console.log(`   Total Jobs Processed: ${engineStats.totalJobsProcessed}`);
+    console.log(`   Success Rate: ${engineStats.totalJobsProcessed > 0 ? ((engineStats.successfulApplications / engineStats.totalJobsProcessed) * 100).toFixed(1) : 0}%`);
+
+    await automationEngine.shutdown();
+
+    if (healthResult.engine.status === 'healthy') {
       console.log('\n🎉 System is HEALTHY');
       process.exit(0);
     } else {
-      console.log(`\n⚠️ System is ${healthResult.status.toUpperCase()}`);
+      console.log(`\n⚠️ System status: ${healthResult.engine.status.toUpperCase()}`);
       process.exit(1);
     }
 
   } catch (error) {
     console.error('💥 Health check failed:', error);
+    console.error('\nCommon issues:');
+    console.error('- Make sure you have run: npm install');
+    console.error('- Install browsers: npx playwright install chromium');
+    console.error('- Check that all dependencies are available');
     process.exit(1);
   }
 }

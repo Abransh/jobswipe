@@ -135,10 +135,10 @@ export class JobSwipeAutomationEngine extends EventEmitter {
   private store: Store;
   
   // Core Components
-  private strategyRegistry: StrategyRegistry;
-  private captchaHandler: AdvancedCaptchaHandler;
-  private formAnalyzer: FormAnalyzer;
-  private queueManager: EnterpriseQueueManager;
+  private strategyRegistry!: StrategyRegistry;
+  private captchaHandler!: AdvancedCaptchaHandler;
+  private formAnalyzer!: FormAnalyzer;
+  private queueManager!: EnterpriseQueueManager;
   
   // State Management
   private initialized = false;

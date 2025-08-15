@@ -425,7 +425,7 @@ export class AdvancedCaptchaHandler extends EventEmitter {
 
       return {
         success: !!solution,
-        solution,
+        solution: solution || undefined,
         confidence: solution ? 0.9 : 0,
         method: ResolutionMethod.AI_VISION,
         executionTime: Date.now() - startTime,
@@ -469,7 +469,7 @@ export class AdvancedCaptchaHandler extends EventEmitter {
 
       return {
         success: !!solution && confidence > 0.6,
-        solution,
+        solution: solution || undefined,
         confidence,
         method: ResolutionMethod.OCR_TESSERACT,
         executionTime: Date.now() - startTime,
@@ -584,7 +584,7 @@ export class AdvancedCaptchaHandler extends EventEmitter {
 
       return {
         success: !!solution,
-        solution,
+        solution: solution || undefined,
         confidence: solution ? 1.0 : 0,
         method: ResolutionMethod.MANUAL_INTERVENTION,
         executionTime: Date.now() - startTime,
@@ -788,8 +788,11 @@ export class AdvancedCaptchaHandler extends EventEmitter {
       [CaptchaType.TEXT]: 0.5,
       [CaptchaType.IMAGE]: 1.0,
       [CaptchaType.RECAPTCHA_V2]: 2.0,
+      [CaptchaType.RECAPTCHA_V3]: 2.5,
       [CaptchaType.HCAPTCHA]: 2.0,
-      [CaptchaType.CLOUDFLARE]: 3.0
+      [CaptchaType.CLOUDFLARE]: 3.0,
+      [CaptchaType.CUSTOM]: 1.5,
+      [CaptchaType.UNKNOWN]: 1.0
     };
     return costs[captchaType] || 1.0;
   }

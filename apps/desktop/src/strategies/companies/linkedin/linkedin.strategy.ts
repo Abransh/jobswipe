@@ -14,6 +14,7 @@ import {
   WorkflowStep,
   WorkflowAction
 } from '../../types/StrategyTypes';
+import VisionServiceManager, { VisionAnalysisRequest } from '../../../services/VisionServiceManager';
 
 // =============================================================================
 // LINKEDIN STRATEGY IMPLEMENTATION
@@ -23,6 +24,15 @@ export default class LinkedInStrategy extends BaseStrategy {
   private easyApplyDetected = false;
   private currentStep = 0;
   private maxEasyApplySteps = 5;
+  private visionService?: VisionServiceManager;
+
+  /**
+   * Set vision service for AI-powered form analysis and captcha resolution
+   */
+  setVisionService(visionService: VisionServiceManager): void {
+    this.visionService = visionService;
+    this.log('🤖 Vision AI service integrated with LinkedIn strategy');
+  }
 
   // =============================================================================
   // MAIN WORKFLOW EXECUTION
@@ -477,31 +487,314 @@ export default class LinkedInStrategy extends BaseStrategy {
   protected async handleCompanyCaptcha(context: StrategyContext): Promise<boolean> {
     const { page } = context;
     
-    this.log('🤖 Handling LinkedIn-specific captcha');
+    this.log('🤖 Handling LinkedIn-specific captcha with AI vision');
     
-    // Check for LinkedIn security challenge
-    const hasSecurityChallenge = await this.checkElementExists(page, [
+    // Check for various LinkedIn security challenges
+    const challengeSelectors = [
       '.challenge-page',
-      '.security-challenge-form'
-    ]);
+      '.security-challenge-form',
+      'iframe[src*="recaptcha"]',
+      '.g-recaptcha',
+      '.h-captcha',
+      '.arkose-challenge'
+    ];
+
+    const hasSecurityChallenge = await this.checkElementExists(page, challengeSelectors);
 
     if (hasSecurityChallenge) {
-      this.log('🔒 LinkedIn security challenge detected');
+      this.log('🔒 LinkedIn security challenge detected, attempting AI resolution');
       
-      // For now, just wait and hope it resolves
-      // In production, would implement more sophisticated handling
+      // Try AI-powered captcha resolution if vision service available
+      if (this.visionService) {
+        const resolved = await this.resolveWithAI(context);
+        if (resolved) {
+          this.log('✅ Captcha resolved using AI vision');
+          return true;
+        }
+      }
+      
+      // Fallback to traditional handling
+      this.log('⚠️ AI resolution failed, using fallback method');
       await this.delay(10000);
       
       // Check if challenge was resolved
-      const challengeResolved = !await this.checkElementExists(page, [
-        '.challenge-page',
-        '.security-challenge-form'
-      ]);
+      const challengeResolved = !await this.checkElementExists(page, challengeSelectors);
       
       return challengeResolved;
     }
 
     return true; // No captcha detected
+  }
+
+  /**
+   * Resolve captcha using AI vision services
+   */
+  private async resolveWithAI(context: StrategyContext): Promise<boolean> {
+    const { page } = context;
+    
+    try {
+      this.log('🧠 Attempting AI-powered captcha resolution');
+      
+      // Take screenshot of the captcha area
+      const captchaScreenshot = await page.screenshot({ 
+        type: 'png',
+        fullPage: false,
+        clip: await this.getCaptchaArea(page)
+      });
+
+      // Prepare vision analysis request
+      const analysisRequest: VisionAnalysisRequest = {
+        image: captchaScreenshot,
+        imageType: 'png',
+        analysisType: 'captcha-resolution',
+        context: {
+          jobSite: 'linkedin',
+          formType: 'application',
+          language: 'en'
+        },
+        options: {
+          preferredProviders: ['claude-vision', 'gpt-4-vision'],
+          requireHighAccuracy: true,
+          urgentProcessing: true
+        }
+      };
+
+      // Analyze captcha with AI
+      const analysisResult = await this.visionService!.analyzeImage(analysisRequest);
+      
+      if (analysisResult.success && analysisResult.captchaSolution) {
+        this.log(`🎯 AI identified captcha type: ${analysisResult.captchaType}`);
+        this.log(`💡 Solution: ${analysisResult.captchaSolution}`);
+        
+        // Apply solution based on captcha type
+        const applied = await this.applyCaptchaSolution(page, analysisResult);
+        
+        if (applied) {
+          // Wait for verification
+          await this.delay(3000);
+          
+          // Check if captcha was resolved
+          const resolved = !await this.checkElementExists(page, [
+            '.challenge-page',
+            '.security-challenge-form',
+            'iframe[src*="recaptcha"]'
+          ]);
+          
+          return resolved;
+        }
+      }
+
+      return false;
+
+    } catch (error) {
+      this.log(`❌ AI captcha resolution failed: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Get captcha area coordinates for screenshot
+   */
+  private async getCaptchaArea(page: any): Promise<{ x: number; y: number; width: number; height: number } | undefined> {
+    try {
+      // Try to find captcha container
+      const captchaSelectors = [
+        '.challenge-page',
+        '.security-challenge-form',
+        'iframe[src*="recaptcha"]',
+        '.g-recaptcha',
+        '.h-captcha'
+      ];
+
+      for (const selector of captchaSelectors) {
+        try {
+          const element = page.locator(selector);
+          const isVisible = await element.isVisible({ timeout: 1000 });
+          
+          if (isVisible) {
+            const boundingBox = await element.boundingBox();
+            if (boundingBox) {
+              return {
+                x: Math.max(0, boundingBox.x - 50),
+                y: Math.max(0, boundingBox.y - 50),
+                width: Math.min(boundingBox.width + 100, 800),
+                height: Math.min(boundingBox.height + 100, 600)
+              };
+            }
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      // Default to center portion of screen
+      return {
+        x: 200,
+        y: 200,
+        width: 600,
+        height: 400
+      };
+
+    } catch (error) {
+      this.log(`⚠️ Could not determine captcha area: ${error}`);
+      return undefined;
+    }
+  }
+
+  /**
+   * Apply captcha solution based on AI analysis
+   */
+  private async applyCaptchaSolution(page: any, analysisResult: any): Promise<boolean> {
+    try {
+      const { captchaType, captchaSolution, captchaInstructions } = analysisResult;
+
+      switch (captchaType) {
+        case 'recaptcha-v2':
+          return await this.solveRecaptchaV2(page, captchaSolution);
+          
+        case 'text-based':
+          return await this.solveTextCaptcha(page, captchaSolution);
+          
+        case 'image-based':
+          return await this.solveImageCaptcha(page, captchaInstructions);
+          
+        case 'hcaptcha':
+          return await this.solveHCaptcha(page, captchaSolution);
+          
+        default:
+          this.log(`❓ Unknown captcha type: ${captchaType}`);
+          return false;
+      }
+
+    } catch (error) {
+      this.log(`❌ Failed to apply captcha solution: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Solve reCAPTCHA v2 checkbox
+   */
+  private async solveRecaptchaV2(page: any, solution: string): Promise<boolean> {
+    try {
+      // Find and click the reCAPTCHA checkbox
+      const checkbox = await page.locator('.recaptcha-checkbox').first();
+      const isVisible = await checkbox.isVisible({ timeout: 5000 });
+      
+      if (isVisible) {
+        await this.humanizeClick(checkbox, page);
+        await this.delay(2000);
+        
+        // Check if additional challenge appeared
+        const hasChallenge = await this.checkElementExists(page, [
+          '.recaptcha-challenge-container',
+          '.rc-imageselect'
+        ]);
+        
+        if (hasChallenge && solution) {
+          // This would require more sophisticated image analysis
+          this.log('🖼️ reCAPTCHA image challenge detected, needs advanced handling');
+        }
+        
+        return true;
+      }
+
+      return false;
+
+    } catch (error) {
+      this.log(`❌ reCAPTCHA v2 solving failed: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Solve text-based captcha
+   */
+  private async solveTextCaptcha(page: any, solution: string): Promise<boolean> {
+    try {
+      // Find text input field
+      const textInput = await page.locator([
+        'input[type="text"][name*="captcha"]',
+        'input[type="text"][id*="captcha"]',
+        '.captcha-input input',
+        '.challenge-input input'
+      ].join(', ')).first();
+
+      const isVisible = await textInput.isVisible({ timeout: 5000 });
+      
+      if (isVisible && solution) {
+        await this.humanizeType(textInput, solution, page);
+        
+        // Find and click submit button
+        const submitButton = await page.locator([
+          'button[type="submit"]',
+          'input[type="submit"]',
+          '.submit-button',
+          '.challenge-submit'
+        ].join(', ')).first();
+        
+        const submitVisible = await submitButton.isVisible({ timeout: 2000 });
+        if (submitVisible) {
+          await this.humanizeClick(submitButton, page);
+        }
+        
+        return true;
+      }
+
+      return false;
+
+    } catch (error) {
+      this.log(`❌ Text captcha solving failed: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Solve image-based captcha (requires AI guidance)
+   */
+  private async solveImageCaptcha(page: any, instructions: string): Promise<boolean> {
+    try {
+      this.log(`🖼️ Image captcha instructions: ${instructions}`);
+      
+      // For image-based captchas, we would need to:
+      // 1. Identify clickable image tiles
+      // 2. Use AI to determine which tiles match the instructions
+      // 3. Click the appropriate tiles
+      // 4. Submit the solution
+      
+      // This is a complex implementation that would require 
+      // additional AI vision analysis of individual image tiles
+      
+      this.log('🚧 Image-based captcha solving requires advanced implementation');
+      return false;
+
+    } catch (error) {
+      this.log(`❌ Image captcha solving failed: ${error}`);
+      return false;
+    }
+  }
+
+  /**
+   * Solve hCaptcha
+   */
+  private async solveHCaptcha(page: any, solution: string): Promise<boolean> {
+    try {
+      // hCaptcha has similar structure to reCAPTCHA
+      const checkbox = await page.locator('.hcaptcha-checkbox').first();
+      const isVisible = await checkbox.isVisible({ timeout: 5000 });
+      
+      if (isVisible) {
+        await this.humanizeClick(checkbox, page);
+        await this.delay(2000);
+        return true;
+      }
+
+      return false;
+
+    } catch (error) {
+      this.log(`❌ hCaptcha solving failed: ${error}`);
+      return false;
+    }
   }
 
   protected async extractConfirmation(context: StrategyContext): Promise<{

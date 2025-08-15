@@ -130,7 +130,7 @@ export interface ProcessingResult {
 export class EnterpriseQueueManager extends EventEmitter {
   private config: EnterpriseQueueConfig;
   private store: Store;
-  private redisConnection: IORedis | Cluster;
+  private redisConnection!: IORedis | Cluster;
   
   // Queue Management
   private queues = new Map<string, Queue>();
@@ -293,8 +293,7 @@ export class EnterpriseQueueManager extends EventEmitter {
         redisOptions: {
           password: redisConfig.password,
           keyPrefix: redisConfig.keyPrefix,
-          maxRetriesPerRequest: redisConfig.maxRetriesPerRequest,
-          retryDelayOnFailover: redisConfig.retryDelayOnFailover
+          maxRetriesPerRequest: redisConfig.maxRetriesPerRequest
         }
       });
     } else {
@@ -304,8 +303,7 @@ export class EnterpriseQueueManager extends EventEmitter {
         port: redisConfig.port,
         password: redisConfig.password,
         keyPrefix: redisConfig.keyPrefix,
-        maxRetriesPerRequest: redisConfig.maxRetriesPerRequest,
-        retryDelayOnFailover: redisConfig.retryDelayOnFailover
+        maxRetriesPerRequest: redisConfig.maxRetriesPerRequest
       });
     }
 

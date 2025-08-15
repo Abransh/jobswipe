@@ -10,7 +10,7 @@ import { EventEmitter } from 'events';
 import { Page } from 'playwright';
 import { randomUUID } from 'crypto';
 import Store from 'electron-store';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 // =============================================================================
 // INTERFACES & TYPES
@@ -224,9 +224,9 @@ export interface UserProfile {
 
 export class FormAnalyzer extends EventEmitter {
   private store: Store;
-  private schemaCache = new LRU<string, FormSchema>({ max: 1000 });
-  private mappingCache = new LRU<string, FormFillPlan>({ max: 500 });
-  private analysisCache = new LRU<string, SemanticMeaning>({ max: 2000 });
+  private schemaCache = new LRUCache<string, FormSchema>({ max: 1000 });
+  private mappingCache = new LRUCache<string, FormFillPlan>({ max: 500 });
+  private analysisCache = new LRUCache<string, SemanticMeaning>({ max: 2000 });
   
   // Semantic analysis patterns
   private semanticPatterns = new Map<SemanticFieldType, RegExp[]>();

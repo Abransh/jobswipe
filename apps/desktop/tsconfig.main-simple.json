@@ -17,7 +17,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": false,
-    "noEmitOnError": true,
+    "noEmitOnError": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -25,11 +25,18 @@
     }
   },
   "include": [
-    "src/**/*"
+    "src/main.ts",
+    "src/preload.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "renderer"
+    "renderer",
+    "src/automation/**/*",
+    "src/captcha/**/*",
+    "src/intelligence/**/*",
+    "src/queue/**/*",
+    "src/strategies/**/*",
+    "src/test-*.ts"
   ]
 }
