@@ -1,0 +1,504 @@
+{
+  "id": "linkedin-automation-v1",
+  "name": "LinkedIn Job Application Automation",
+  "companyDomain": "linkedin.com",
+  "version": "1.0.0",
+  "description": "Automated job application strategy for LinkedIn Easy Apply and standard applications",
+  
+  "selectors": {
+    "login": {
+      "loginButton": [
+        ".nav__button-secondary",
+        "[data-tracking-control-name='guest_homepage-basic_nav-header-signin']",
+        "a[href*='/login']"
+      ],
+      "emailField": [
+        "#username",
+        "input[name='session_key']",
+        "input[type='email']"
+      ],
+      "passwordField": [
+        "#password",
+        "input[name='session_password']",
+        "input[type='password']"
+      ],
+      "submitButton": [
+        ".login__form_action_container button[type='submit']",
+        "button[data-litms-control-urn='login-submit']"
+      ],
+      "twoFactorField": [
+        "input[name='challengeId']",
+        "input[name='pin']"
+      ]
+    },
+    
+    "application": {
+      "applyButton": [
+        ".jobs-apply-button--top-card .jobs-apply-button",
+        ".jobs-s-apply .jobs-apply-button",
+        "button[aria-label*='Apply']"
+      ],
+      "easyApplyButton": [
+        ".jobs-apply-button[data-easy-apply-id]",
+        ".jobs-apply-button .jobs-apply-button__text:contains('Easy Apply')"
+      ],
+      "resumeUpload": [
+        "input[type='file'][name='file']",
+        ".file-input input[type='file']",
+        "[data-test-file-input] input[type='file']"
+      ],
+      "submitButton": [
+        "button[aria-label='Submit application']",
+        ".artdeco-button--primary[data-control-name*='submit']",
+        "footer button[type='submit']"
+      ],
+      "nextButton": [
+        "button[aria-label='Continue to next step']",
+        ".artdeco-button--primary[data-control-name*='continue']",
+        "footer button:contains('Next')"
+      ],
+      "continueButton": [
+        "button[data-control-name='continue_unify']",
+        ".artdeco-button--primary:contains('Continue')"
+      ]
+    },
+    
+    "formFields": {
+      "firstName": [
+        "input[name='firstName']",
+        "#first-name",
+        "[data-test-text-selectable-input__input='firstName']"
+      ],
+      "lastName": [
+        "input[name='lastName']", 
+        "#last-name",
+        "[data-test-text-selectable-input__input='lastName']"
+      ],
+      "email": [
+        "input[name='email']",
+        "input[type='email']"
+      ],
+      "phone": [
+        "input[name='phoneNumber']",
+        "input[type='tel']"
+      ],
+      "address": [
+        "input[name='address']",
+        "textarea[name='address']"
+      ],
+      "city": [
+        "input[name='city']",
+        "[data-test-text-selectable-input__input='city']"
+      ],
+      "state": [
+        "select[name='state']",
+        "input[name='state']"
+      ],
+      "zipCode": [
+        "input[name='postalCode']",
+        "input[name='zipCode']"
+      ],
+      "country": [
+        "select[name='country']",
+        "[data-test-single-typeahead-entity='country']"
+      ],
+      "linkedinUrl": [
+        "input[name='website']",
+        "input[placeholder*='LinkedIn']"
+      ],
+      "currentCompany": [
+        "input[name='currentCompany']",
+        "[data-test-text-selectable-input__input='currentCompany']"
+      ],
+      "yearsExperience": [
+        "input[name='experience']",
+        "select[name='experienceLevel']"
+      ],
+      "salaryExpectation": [
+        "input[name='salary']",
+        "input[name='expectedSalary']"
+      ]
+    },
+    
+    "confirmation": {
+      "successMessages": [
+        ".artdeco-inline-feedback--success",
+        ".jobs-apply-success",
+        "[data-test-modal-id='application-submitted-modal']",
+        "h3:contains('Application submitted')",
+        ".application-outlet__success-message"
+      ],
+      "confirmationIds": [
+        ".application-outlet__confirmation-number",
+        ".jobs-apply-success .confirmation-number"
+      ],
+      "errorMessages": [
+        ".artdeco-inline-feedback--error",
+        ".form-element__error-text",
+        ".jobs-apply-form__error"
+      ],
+      "applicationStatus": [
+        ".jobs-apply-status",
+        ".application-status-indicator"
+      ]
+    },
+    
+    "captcha": {
+      "recaptcha": [
+        "iframe[src*='recaptcha']",
+        ".g-recaptcha"
+      ],
+      "hcaptcha": [
+        "iframe[src*='hcaptcha']",
+        ".h-captcha"
+      ],
+      "imageBasedCaptcha": [
+        ".challenge-page",
+        ".security-challenge-form"
+      ],
+      "textBasedCaptcha": [
+        "input[name='challengeId']"
+      ],
+      "cloudflareChallenge": [
+        ".cf-browser-verification",
+        "#challenge-form"
+      ]
+    },
+    
+    "navigation": {
+      "closeModal": [
+        ".artdeco-modal__dismiss",
+        "button[aria-label='Dismiss']",
+        ".artdeco-button[data-control-name*='dismiss']"
+      ],
+      "skipStep": [
+        "button[data-control-name*='skip']",
+        "button:contains('Skip')"
+      ],
+      "backButton": [
+        "button[aria-label='Go back']",
+        ".artdeco-button[data-control-name*='back']"
+      ],
+      "cancelButton": [
+        "button[data-control-name*='cancel']",
+        ".artdeco-button--secondary:contains('Cancel')"
+      ]
+    }
+  },
+  
+  "workflow": {
+    "preApplication": [
+      {
+        "id": "check-authentication",
+        "name": "Check Authentication Status",
+        "description": "Verify user is logged in or handle login",
+        "action": "validate",
+        "selectors": [".nav__user-info", ".global-nav__me"],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 2,
+        "successCriteria": [".nav__user-info", ".global-nav__me"],
+        "metadata": {
+          "authenticatedSelectors": [".nav__user-info", ".global-nav__me"],
+          "loginRequired": true
+        }
+      },
+      {
+        "id": "navigate-to-job",
+        "name": "Navigate to Job Page",
+        "description": "Navigate to the specific job listing",
+        "action": "navigate",
+        "selectors": [],
+        "required": true,
+        "timeout": 15000,
+        "retryCount": 3,
+        "successCriteria": [".jobs-unified-top-card", ".job-details-jobs-unified-top-card"],
+        "metadata": {
+          "waitForNetworkIdle": true,
+          "allowRedirects": true
+        }
+      },
+      {
+        "id": "detect-application-type",
+        "name": "Detect Application Type",
+        "description": "Determine if this is Easy Apply or external application",
+        "action": "validate",
+        "selectors": [".jobs-apply-button", ".jobs-apply-button[data-easy-apply-id]"],
+        "required": true,
+        "timeout": 5000,
+        "retryCount": 1,
+        "successCriteria": [".jobs-apply-button"],
+        "metadata": {
+          "easyApplySelector": ".jobs-apply-button[data-easy-apply-id]",
+          "externalSelector": ".jobs-apply-button:not([data-easy-apply-id])"
+        }
+      }
+    ],
+    
+    "application": [
+      {
+        "id": "click-apply-button",
+        "name": "Click Apply Button",
+        "description": "Click the main apply button to start application process",
+        "action": "click",
+        "selectors": [
+          ".jobs-apply-button--top-card .jobs-apply-button",
+          ".jobs-s-apply .jobs-apply-button"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 3,
+        "successCriteria": [".jobs-easy-apply-modal", ".application-outlet"],
+        "metadata": {
+          "scrollIntoView": true,
+          "waitForStability": 2000
+        }
+      },
+      {
+        "id": "handle-easy-apply-flow",
+        "name": "Handle Easy Apply Flow",
+        "description": "Process LinkedIn Easy Apply multi-step form",
+        "action": "custom",
+        "selectors": [".jobs-easy-apply-modal"],
+        "required": false,
+        "timeout": 30000,
+        "retryCount": 2,
+        "successCriteria": [".jobs-apply-success", ".application-outlet__success-message"],
+        "metadata": {
+          "maxSteps": 5,
+          "fillAllFields": true,
+          "uploadResume": true
+        }
+      },
+      {
+        "id": "fill-application-form",
+        "name": "Fill Application Form",
+        "description": "Fill standard LinkedIn application form",
+        "action": "custom",
+        "selectors": [".application-outlet form", ".jobs-apply-form"],
+        "required": true,
+        "timeout": 20000,
+        "retryCount": 3,
+        "successCriteria": [".form-element:not(.form-element--error)"],
+        "metadata": {
+          "validateFields": true,
+          "requiredOnly": false
+        }
+      },
+      {
+        "id": "upload-resume",
+        "name": "Upload Resume",
+        "description": "Upload resume file if required",
+        "action": "upload",
+        "selectors": [
+          "input[type='file'][name='file']",
+          ".file-input input[type='file']"
+        ],
+        "required": false,
+        "timeout": 15000,
+        "retryCount": 2,
+        "successCriteria": [".file-input__file-name", ".upload-success"],
+        "metadata": {
+          "acceptedFormats": ["pdf", "doc", "docx"],
+          "maxFileSize": "5MB"
+        }
+      },
+      {
+        "id": "submit-application",
+        "name": "Submit Application",
+        "description": "Submit the completed application",
+        "action": "click",
+        "selectors": [
+          "button[aria-label='Submit application']",
+          ".artdeco-button--primary[data-control-name*='submit']"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 2,
+        "successCriteria": [
+          ".jobs-apply-success",
+          ".application-outlet__success-message"
+        ],
+        "metadata": {
+          "confirmSubmission": true,
+          "waitForRedirect": 5000
+        }
+      }
+    ],
+    
+    "postApplication": [
+      {
+        "id": "verify-submission-success",
+        "name": "Verify Submission Success",
+        "description": "Confirm application was submitted successfully",
+        "action": "validate",
+        "selectors": [
+          ".jobs-apply-success",
+          ".application-outlet__success-message",
+          "h3:contains('Application submitted')"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 2,
+        "successCriteria": [
+          ".jobs-apply-success",
+          ".application-outlet__success-message"
+        ]
+      },
+      {
+        "id": "extract-confirmation",
+        "name": "Extract Confirmation Details",
+        "description": "Extract confirmation ID and application details",
+        "action": "extract",
+        "selectors": [
+          ".application-outlet__confirmation-number",
+          ".jobs-apply-success .confirmation-number"
+        ],
+        "required": false,
+        "timeout": 5000,
+        "retryCount": 1,
+        "successCriteria": [],
+        "metadata": {
+          "extractPatterns": [
+            "confirmation.*?([A-Z0-9]{6,})",
+            "reference.*?([A-Z0-9]{6,})",
+            "application.*?id.*?([A-Z0-9]{6,})"
+          ]
+        }
+      },
+      {
+        "id": "capture-final-screenshot",
+        "name": "Capture Final Screenshot",
+        "description": "Take screenshot of successful application page",
+        "action": "screenshot",
+        "selectors": [],
+        "required": false,
+        "timeout": 5000,
+        "retryCount": 1,
+        "successCriteria": [],
+        "metadata": {
+          "fullPage": true,
+          "filename": "linkedin_success_{jobId}_{timestamp}"
+        }
+      }
+    ],
+    
+    "errorRecovery": [
+      {
+        "id": "handle-form-errors",
+        "name": "Handle Form Validation Errors",
+        "description": "Detect and fix form validation errors",
+        "action": "custom",
+        "selectors": [".form-element--error", ".artdeco-inline-feedback--error"],
+        "required": false,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": [".form-element:not(.form-element--error)"],
+        "metadata": {
+          "fixValidationErrors": true,
+          "skipOptionalFields": true
+        }
+      },
+      {
+        "id": "retry-submission",
+        "name": "Retry Application Submission",
+        "description": "Retry submission after fixing errors",
+        "action": "click",
+        "selectors": [
+          "button[aria-label='Submit application']",
+          ".artdeco-button--primary[data-control-name*='submit']"
+        ],
+        "required": false,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": [".jobs-apply-success"]
+      }
+    ]
+  },
+  
+  "captchaHandling": {
+    "detection": {
+      "selectors": [
+        "iframe[src*='recaptcha']",
+        ".challenge-page",
+        ".security-challenge-form",
+        ".g-recaptcha"
+      ],
+      "patterns": [
+        "challenge",
+        "captcha", 
+        "verify",
+        "security check"
+      ],
+      "imageAnalysis": true
+    },
+    "resolution": {
+      "aiVision": true,
+      "ocrEnabled": true,
+      "externalService": "2captcha",
+      "manualFallback": true,
+      "maxAttempts": 3
+    },
+    "fallback": {
+      "switchToHeadful": true,
+      "notifyUser": true,
+      "skipApplication": false
+    }
+  },
+  
+  "rateLimit": {
+    "requestsPerMinute": 10,
+    "requestsPerHour": 200,
+    "burstLimit": 3,
+    "backoffStrategy": "exponential",
+    "respectRobotsTxt": true,
+    "userAgentRotation": false
+  },
+  
+  "antiDetection": {
+    "browserFingerprinting": {
+      "randomizeViewport": true,
+      "randomizeUserAgent": false,
+      "randomizeTimezone": false,
+      "randomizeLanguage": false
+    },
+    "humanBehavior": {
+      "naturalMouseMovements": true,
+      "variableTypingSpeed": true,
+      "randomDelays": true,
+      "scrollingBehavior": true
+    },
+    "networkBehavior": {
+      "proxyRotation": false,
+      "ipThrottling": true,
+      "cookieManagement": true,
+      "sessionPersistence": true
+    }
+  },
+  
+  "metadata": {
+    "author": "JobSwipe Team",
+    "createdAt": "2024-01-15T00:00:00Z",
+    "lastModified": "2024-01-15T00:00:00Z",
+    "supportedRegions": ["US", "CA", "UK", "EU"],
+    "requiredAuth": true,
+    "premiumOnly": false,
+    "beta": false
+  },
+  
+  "metrics": {
+    "successRate": 0,
+    "averageExecutionTime": 0,
+    "captchaEncounterRate": 0,
+    "errorRate": 0,
+    "lastUpdated": "2024-01-15T00:00:00Z",
+    "totalApplications": 0,
+    "recentPerformance": []
+  },
+  
+  "abTesting": {
+    "enabled": false,
+    "variants": [],
+    "trafficSplit": 100
+  }
+}

@@ -1,0 +1,403 @@
+{
+  "id": "indeed-automation-v1",
+  "name": "Indeed Job Application Automation",
+  "companyDomain": "indeed.com",
+  "version": "1.0.0",
+  "description": "Automated job application strategy for Indeed job postings and applications",
+  
+  "selectors": {
+    "login": {
+      "loginButton": [
+        ".np:last-child a[href*='account']",
+        "a[data-jk='header-signin-link']",
+        ".gnav-SignInLink",
+        "a[href*='/account/login']"
+      ],
+      "emailField": [
+        "input[name='__email']",
+        "input[type='email']",
+        "#signin-EmailField"
+      ],
+      "passwordField": [
+        "input[name='__password']", 
+        "input[type='password']",
+        "#signin-PasswordField"
+      ],
+      "submitButton": [
+        "button[type='submit']",
+        ".np button:contains('Sign in')",
+        "#signin-SignInButton"
+      ]
+    },
+    
+    "application": {
+      "applyButton": [
+        ".jobsearch-IndeedApplyButton-newDesign",
+        ".jobsearch-IndeedApplyButton",
+        "button[data-jk='indeed-apply-button']",
+        ".ia-BasePage-footer button[data-testid='IndeedApplyButton']",
+        "button:contains('Apply now')"
+      ],
+      "resumeUpload": [
+        "input[type='file'][data-testid='FileInput']",
+        ".ia-FileInput input[type='file']",
+        "input[name='resume']"
+      ],
+      "submitButton": [
+        "button[data-testid='ContactInfoSubmitButton']",
+        "button[data-testid='QuestionsSubmitButton']", 
+        "button[data-testid='ReviewSubmitButton']",
+        ".ia-BasePage-footer button[type='submit']",
+        "button:contains('Submit application')"
+      ],
+      "nextButton": [
+        "button[data-testid='ContactInfoSubmitButton']",
+        "button[data-testid='QuestionsSubmitButton']",
+        ".ia-BasePage-footer button:contains('Continue')",
+        "button:contains('Next')"
+      ]
+    },
+    
+    "formFields": {
+      "firstName": [
+        "input[data-testid='ContactInfoFirstNameInput']",
+        "input[name='applicant.firstName']",
+        "input[name='firstName']"
+      ],
+      "lastName": [
+        "input[data-testid='ContactInfoLastNameInput']",
+        "input[name='applicant.lastName']", 
+        "input[name='lastName']"
+      ],
+      "email": [
+        "input[data-testid='ContactInfoEmailInput']",
+        "input[name='applicant.emailAddress']",
+        "input[type='email']"
+      ],
+      "phone": [
+        "input[data-testid='ContactInfoPhoneNumberInput']",
+        "input[name='applicant.phoneNumber']",
+        "input[type='tel']"
+      ],
+      "address": [
+        "input[name='applicant.address']",
+        "textarea[name='address']"
+      ],
+      "city": [
+        "input[data-testid='ContactInfoCityInput']",
+        "input[name='applicant.city']"
+      ],
+      "state": [
+        "select[data-testid='ContactInfoStateSelect']",
+        "select[name='applicant.state']"
+      ],
+      "zipCode": [
+        "input[data-testid='ContactInfoPostalCodeInput']",
+        "input[name='applicant.postalCode']"
+      ],
+      "country": [
+        "select[data-testid='ContactInfoCountrySelect']",
+        "select[name='applicant.country']"
+      ],
+      "yearsExperience": [
+        "select[name='years_experience']",
+        "input[name='experience']"
+      ],
+      "salaryExpectation": [
+        "input[name='desired_salary']",
+        "input[name='salary_expectation']"
+      ]
+    },
+    
+    "confirmation": {
+      "successMessages": [
+        ".ia-ConfirmationPage",
+        ".ia-ConfirmationPage-title:contains('Application submitted')",
+        "h1:contains('Your application has been submitted')",
+        ".confirmation-message",
+        ".application-success"
+      ],
+      "confirmationIds": [
+        ".confirmation-id",
+        ".application-reference-number"
+      ],
+      "errorMessages": [
+        ".ia-ValidationMessage",
+        ".validation-error",
+        ".error-message",
+        "[data-testid='ValidationMessage']"
+      ]
+    },
+    
+    "captcha": {
+      "recaptcha": [
+        "iframe[src*='recaptcha']",
+        ".g-recaptcha"
+      ],
+      "hcaptcha": [
+        "iframe[src*='hcaptcha']", 
+        ".h-captcha"
+      ],
+      "cloudflareChallenge": [
+        ".cf-browser-verification",
+        "#challenge-form"
+      ]
+    },
+    
+    "navigation": {
+      "closeModal": [
+        "button[data-testid='CloseButton']",
+        ".ia-Modal-closeButton",
+        "button[aria-label='Close']"
+      ],
+      "skipStep": [
+        "button:contains('Skip')",
+        "[data-testid='SkipButton']"
+      ],
+      "backButton": [
+        "button:contains('Back')",
+        "[data-testid='BackButton']"
+      ]
+    }
+  },
+  
+  "workflow": {
+    "preApplication": [
+      {
+        "id": "navigate-to-job",
+        "name": "Navigate to Job Page", 
+        "description": "Navigate to the Indeed job listing",
+        "action": "navigate",
+        "selectors": [],
+        "required": true,
+        "timeout": 15000,
+        "retryCount": 3,
+        "successCriteria": [".jobsearch-JobComponent", ".jobsearch-ViewJobLayout"]
+      },
+      {
+        "id": "detect-apply-method",
+        "name": "Detect Application Method",
+        "description": "Determine if this uses Indeed Apply or external redirect", 
+        "action": "validate",
+        "selectors": [
+          ".jobsearch-IndeedApplyButton",
+          "button[data-jk='indeed-apply-button']"
+        ],
+        "required": true,
+        "timeout": 5000,
+        "retryCount": 1,
+        "successCriteria": [".jobsearch-IndeedApplyButton"],
+        "metadata": {
+          "indeedApplySelector": ".jobsearch-IndeedApplyButton",
+          "externalSelector": "a[href*='apply']"
+        }
+      }
+    ],
+    
+    "application": [
+      {
+        "id": "click-apply-button",
+        "name": "Click Apply Button",
+        "description": "Click the Indeed Apply button to start application",
+        "action": "click",
+        "selectors": [
+          ".jobsearch-IndeedApplyButton-newDesign",
+          ".jobsearch-IndeedApplyButton",
+          "button[data-jk='indeed-apply-button']"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 3,
+        "successCriteria": [".ia-BasePage", ".indeed-apply-popup"]
+      },
+      {
+        "id": "fill-contact-info",
+        "name": "Fill Contact Information",
+        "description": "Fill required contact information fields",
+        "action": "custom",
+        "selectors": [".ia-ContactInfo"],
+        "required": true,
+        "timeout": 15000,
+        "retryCount": 2,
+        "successCriteria": ["input:not(.validation-error)"]
+      },
+      {
+        "id": "upload-resume",
+        "name": "Upload Resume",
+        "description": "Upload resume file if required",
+        "action": "upload",
+        "selectors": [
+          "input[type='file'][data-testid='FileInput']",
+          ".ia-FileInput input[type='file']"
+        ],
+        "required": false,
+        "timeout": 15000,
+        "retryCount": 2,
+        "successCriteria": [".file-uploaded", ".upload-success"]
+      },
+      {
+        "id": "answer-questions",
+        "name": "Answer Application Questions",
+        "description": "Answer any additional screening questions",
+        "action": "custom",
+        "selectors": [".ia-Questions"],
+        "required": false,
+        "timeout": 20000,
+        "retryCount": 2,
+        "successCriteria": [".question-answered"]
+      },
+      {
+        "id": "review-application",
+        "name": "Review Application",
+        "description": "Review and confirm application details",
+        "action": "validate",
+        "selectors": [".ia-Review"],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": ["button[data-testid='ReviewSubmitButton']"]
+      },
+      {
+        "id": "submit-application",
+        "name": "Submit Application",
+        "description": "Submit the completed application",
+        "action": "click",
+        "selectors": [
+          "button[data-testid='ReviewSubmitButton']",
+          "button:contains('Submit application')"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 2,
+        "successCriteria": [".ia-ConfirmationPage"]
+      }
+    ],
+    
+    "postApplication": [
+      {
+        "id": "verify-submission",
+        "name": "Verify Submission Success",
+        "description": "Confirm application was submitted successfully",
+        "action": "validate",
+        "selectors": [
+          ".ia-ConfirmationPage",
+          "h1:contains('Your application has been submitted')"
+        ],
+        "required": true,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": [".ia-ConfirmationPage"]
+      },
+      {
+        "id": "extract-confirmation",
+        "name": "Extract Confirmation Details",
+        "description": "Extract confirmation ID if available",
+        "action": "extract",
+        "selectors": [".confirmation-id", ".application-reference-number"],
+        "required": false,
+        "timeout": 5000,
+        "retryCount": 1,
+        "successCriteria": []
+      }
+    ],
+    
+    "errorRecovery": [
+      {
+        "id": "fix-validation-errors",
+        "name": "Fix Validation Errors",
+        "description": "Address any form validation errors",
+        "action": "custom",
+        "selectors": [".ia-ValidationMessage", ".validation-error"],
+        "required": false,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": ["input:not(.validation-error)"]
+      },
+      {
+        "id": "retry-submission",
+        "name": "Retry Submission",
+        "description": "Retry application submission after fixing errors",
+        "action": "click",
+        "selectors": ["button[type='submit']"],
+        "required": false,
+        "timeout": 10000,
+        "retryCount": 1,
+        "successCriteria": [".ia-ConfirmationPage"]
+      }
+    ]
+  },
+  
+  "captchaHandling": {
+    "detection": {
+      "selectors": [
+        "iframe[src*='recaptcha']",
+        ".g-recaptcha",
+        "iframe[src*='hcaptcha']"
+      ],
+      "patterns": ["verify", "captcha", "human"],
+      "imageAnalysis": true
+    },
+    "resolution": {
+      "aiVision": true,
+      "ocrEnabled": true, 
+      "externalService": "2captcha",
+      "manualFallback": true,
+      "maxAttempts": 3
+    },
+    "fallback": {
+      "switchToHeadful": true,
+      "notifyUser": true,
+      "skipApplication": false
+    }
+  },
+  
+  "rateLimit": {
+    "requestsPerMinute": 15,
+    "requestsPerHour": 250,
+    "burstLimit": 5,
+    "backoffStrategy": "exponential",
+    "respectRobotsTxt": true,
+    "userAgentRotation": true
+  },
+  
+  "antiDetection": {
+    "browserFingerprinting": {
+      "randomizeViewport": true,
+      "randomizeUserAgent": true,
+      "randomizeTimezone": false,
+      "randomizeLanguage": false
+    },
+    "humanBehavior": {
+      "naturalMouseMovements": true,
+      "variableTypingSpeed": true,
+      "randomDelays": true,
+      "scrollingBehavior": true
+    },
+    "networkBehavior": {
+      "proxyRotation": true,
+      "ipThrottling": true,
+      "cookieManagement": true,
+      "sessionPersistence": true
+    }
+  },
+  
+  "metadata": {
+    "author": "JobSwipe Team",
+    "createdAt": "2024-01-15T00:00:00Z",
+    "lastModified": "2024-01-15T00:00:00Z", 
+    "supportedRegions": ["US", "CA", "UK", "AU", "DE", "FR"],
+    "requiredAuth": false,
+    "premiumOnly": false,
+    "beta": false
+  },
+  
+  "metrics": {
+    "successRate": 0,
+    "averageExecutionTime": 0,
+    "captchaEncounterRate": 0,
+    "errorRate": 0,
+    "lastUpdated": "2024-01-15T00:00:00Z",
+    "totalApplications": 0,
+    "recentPerformance": []
+  }
+}
