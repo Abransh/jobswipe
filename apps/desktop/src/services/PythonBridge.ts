@@ -610,7 +610,7 @@ export class PythonBridge extends EventEmitter {
           taskId: task.id,
           stdout,
           stderr,
-          exitCode: code
+          exitCode: code || undefined
         };
 
         if (code === 0) {
