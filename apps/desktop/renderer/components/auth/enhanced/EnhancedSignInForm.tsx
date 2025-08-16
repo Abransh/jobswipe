@@ -90,7 +90,7 @@ export function EnhancedSignInForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/jobs';
   
   // Use the desktop auth hook
   const { login, isLoading, error, clearError } = useAuth();

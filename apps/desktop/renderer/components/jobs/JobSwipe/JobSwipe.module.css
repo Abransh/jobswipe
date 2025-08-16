@@ -1,0 +1,594 @@
+/**
+ * JobSwipe Minimal Styles
+ * Clean, professional design focused on content over effects
+ */
+
+/* ===== CONTAINER ===== */
+.container {
+  @apply relative w-full h-screen flex flex-col items-center justify-center;
+  @apply bg-gray-50;
+}
+
+/* ===== CARD STACK ===== */
+.cardStack {
+  @apply absolute inset-0 flex items-center justify-center pointer-events-none;
+}
+
+.stackCard {
+  @apply absolute w-80 h-96 rounded-xl border border-gray-100 shadow-sm;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  transition: opacity 0.3s ease;
+}
+
+.stack1 {
+  @apply z-10;
+  transform: translateY(8px) scale(0.96);
+  opacity: 0.5;
+}
+
+.stack2 {
+  z-index: 5;
+  transform: translateY(16px) scale(0.92);
+  opacity: 0.3;
+}
+
+.stackCardPlaceholder {
+  @apply w-full h-full rounded-xl;
+  background: transparent;
+}
+
+/* Hide stack cards when main card is interacted with */
+.cardArea:hover .stackCard {
+  opacity: 0.1;
+}
+
+/* ===== CARD AREA ===== */
+.cardArea {
+  @apply relative z-20 flex items-center justify-center w-full h-full max-w-md mx-auto px-4;
+}
+
+/* ===== MAIN CARD ===== */
+.card {
+  @apply relative rounded-xl overflow-hidden cursor-grab bg-white border border-gray-200;
+  @apply shadow-lg transition-all duration-200 ease-out;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+}
+
+.card:hover {
+  @apply shadow-xl;
+  transform: translateY(-2px);
+}
+
+.card:active {
+  @apply cursor-grabbing;
+}
+
+/* ===== SWIPE OVERLAYS ===== */
+.swipeOverlay {
+  @apply absolute inset-0 flex flex-col items-center justify-center text-white font-bold text-4xl z-30;
+}
+
+.swipeOverlayLeft {
+  @apply bg-red-500/80;
+}
+
+.swipeOverlayRight {
+  @apply bg-green-500/80;
+}
+
+.swipeIcon {
+  @apply text-6xl mb-2;
+}
+
+.swipeText {
+  @apply text-lg font-semibold uppercase tracking-wide;
+}
+
+/* ===== MATCH BADGE ===== */
+.matchBadge {
+  @apply absolute top-4 right-4 z-20 flex items-center space-x-1;
+  @apply px-3 py-1 rounded-full text-sm font-semibold text-white;
+  @apply bg-green-500 shadow-md;
+}
+
+.matchHigh {
+  @apply bg-green-600;
+}
+
+.matchMedium {
+  @apply bg-green-500;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.actionButtons {
+  @apply absolute top-4 left-4 z-20 flex flex-col space-y-2;
+  @apply opacity-0 transition-opacity duration-200;
+}
+
+.actionButtonsVisible {
+  @apply opacity-100;
+}
+
+.actionButton {
+  @apply w-10 h-10 rounded-full flex items-center justify-center;
+  @apply bg-white text-gray-600 hover:text-gray-900;
+  @apply border border-gray-200 shadow-sm hover:shadow-md;
+  @apply transition-all duration-200;
+}
+
+.actionButton:hover {
+  @apply bg-gray-50 scale-105;
+}
+
+.saveButton.saved {
+  @apply bg-yellow-500 text-white border-yellow-500;
+}
+
+/* ===== CARD CONTENT ===== */
+.cardContent {
+  @apply p-6 space-y-4;
+}
+
+/* ===== COMPANY HEADER ===== */
+.companyHeader {
+  @apply flex items-center space-x-3;
+}
+
+.companyLogo {
+  @apply relative flex-shrink-0;
+}
+
+.logoImage {
+  @apply w-12 h-12 rounded-lg object-cover border border-gray-200;
+}
+
+.logoFallback {
+  @apply w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center;
+  @apply text-gray-600 font-semibold text-sm;
+}
+
+.verifiedBadge {
+  @apply absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full;
+  @apply flex items-center justify-center text-white;
+}
+
+.companyInfo {
+  @apply flex-1 min-w-0;
+}
+
+.companyName {
+  @apply text-lg font-semibold text-gray-900 truncate;
+}
+
+.companyMeta {
+  @apply flex items-center space-x-2 text-sm text-gray-500 mt-1;
+}
+
+.industry,
+.size {
+  @apply capitalize;
+}
+
+/* ===== JOB TITLE ===== */
+.jobTitle {
+  @apply text-2xl font-bold text-gray-900 leading-tight line-clamp-2;
+}
+
+/* ===== JOB METADATA ===== */
+.jobMeta {
+  @apply flex items-center flex-wrap gap-3 text-sm text-gray-600;
+}
+
+.location {
+  @apply flex items-center space-x-1 px-2 py-1 bg-gray-100 rounded-md;
+}
+
+.remoteBadge {
+  @apply px-2 py-1 rounded-md text-xs font-medium text-white;
+}
+
+.remoteREMOTE {
+  @apply bg-green-500;
+}
+
+.remoteHYBRID {
+  @apply bg-blue-500;
+}
+
+.timePosted {
+  @apply flex items-center space-x-1 px-2 py-1 bg-gray-100 rounded-md;
+}
+
+/* ===== SALARY HIGHLIGHT ===== */
+.salaryHighlight {
+  @apply flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg;
+}
+
+.salaryAmount {
+  @apply font-semibold text-green-800;
+}
+
+.equityBadge {
+  @apply ml-auto text-xs font-medium px-2 py-1 bg-yellow-500 text-white rounded-md;
+}
+
+/* ===== EXPAND BUTTON ===== */
+.expandButton {
+  @apply flex items-center justify-center space-x-2 w-full mt-4 py-2;
+  @apply text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100;
+  @apply border border-gray-200 rounded-lg transition-colors duration-200;
+}
+
+/* ===== JOB DETAILS ===== */
+.jobDetails {
+  @apply mt-0 overflow-hidden border-t border-gray-200;
+}
+
+.detailsContent {
+  @apply p-6 space-y-6 max-h-80 overflow-y-auto;
+}
+
+.detailsContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.detailsContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.detailsContent::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.detailsSection {
+  @apply space-y-3;
+}
+
+.sectionTitle {
+  @apply flex items-center space-x-2 text-base font-semibold text-gray-900;
+}
+
+.jobDescription {
+  @apply text-sm text-gray-600 leading-relaxed;
+}
+
+/* ===== REQUIREMENTS ===== */
+.requirementsList {
+  @apply space-y-2;
+}
+
+.requirementItem {
+  @apply flex items-start space-x-2 text-sm text-gray-600;
+}
+
+/* ===== SKILLS ===== */
+.skillsGrid {
+  @apply flex flex-wrap gap-2;
+}
+
+.skillBadge {
+  @apply inline-block px-2 py-1 text-xs font-medium;
+  @apply bg-gray-100 text-gray-700 rounded-md;
+}
+
+/* ===== COMPANY DETAILS ===== */
+.companyDetails {
+  @apply space-y-2;
+}
+
+.companyDetailItem {
+  @apply flex items-center space-x-2 text-sm text-gray-600;
+}
+
+/* ===== BENEFITS ===== */
+.benefitsGrid {
+  @apply grid grid-cols-1 gap-2;
+}
+
+.benefitItem {
+  @apply flex items-center space-x-2 text-sm text-gray-600;
+}
+
+/* ===== DETAILS ACTIONS ===== */
+.detailsActions {
+  @apply flex flex-wrap gap-3 pt-4 mt-4 border-t border-gray-200;
+}
+
+.primaryAction {
+  @apply flex-1 flex items-center justify-center gap-2 px-4 py-2;
+  @apply bg-blue-600 hover:bg-blue-700 text-white;
+  @apply rounded-lg font-medium transition-colors duration-200;
+}
+
+.secondaryAction {
+  @apply flex items-center justify-center gap-2 px-4 py-2;
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700;
+  @apply rounded-lg font-medium transition-colors duration-200;
+}
+
+.tertiaryAction {
+  @apply flex items-center justify-center gap-2 px-4 py-2;
+  @apply border border-gray-300 hover:bg-gray-50 text-gray-600;
+  @apply rounded-lg font-medium transition-colors duration-200;
+}
+
+/* ===== APPLICATION STATS ===== */
+.applicationStats {
+  @apply pt-3 mt-4 border-t border-gray-200;
+}
+
+.statsGrid {
+  @apply flex items-center gap-4 text-xs text-gray-500;
+}
+
+.statItem {
+  @apply flex items-center gap-1 px-2 py-1 bg-gray-50 rounded-md;
+}
+
+/* ===== STATUS BAR ===== */
+.statusBar {
+  @apply absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30;
+  @apply flex flex-col items-center space-y-3;
+}
+
+.queueIndicator {
+  @apply flex items-center space-x-2 px-3 py-2;
+  @apply bg-white border border-gray-200 rounded-full shadow-sm;
+  @apply text-sm text-gray-600;
+}
+
+.queueCount {
+  @apply font-semibold text-gray-900;
+}
+
+.queueLabel {
+  @apply text-gray-500;
+}
+
+/* ===== SWIPE HINTS ===== */
+.swipeHints {
+  @apply flex items-center space-x-6 px-4 py-2;
+  @apply bg-white border border-gray-200 rounded-full shadow-sm;
+}
+
+.swipeHint {
+  @apply flex items-center space-x-1 text-sm text-gray-600;
+}
+
+.swipeIcon {
+  @apply text-base;
+}
+
+/* ===== DEBUG INFO ===== */
+.debugInfo {
+  @apply absolute top-4 left-4 p-2 bg-gray-900 text-white text-xs;
+  @apply rounded font-mono space-y-1 z-50;
+}
+
+/* ===== ERROR STATES ===== */
+.error {
+  @apply bg-red-50 border border-red-200;
+}
+
+.errorContent {
+  @apply text-center space-y-4 p-8;
+}
+
+.errorIcon {
+  @apply text-4xl;
+}
+
+.errorTitle {
+  @apply text-lg font-semibold text-red-900;
+}
+
+.errorMessage {
+  @apply text-sm text-red-700;
+}
+
+.retryButton {
+  @apply px-4 py-2 bg-red-600 text-white rounded-lg font-medium;
+  @apply hover:bg-red-700 transition-colors duration-200;
+}
+
+/* ===== LOADING STATES ===== */
+.loadingContainer {
+  @apply relative w-full h-full flex items-center justify-center bg-gray-50;
+}
+
+.loadingCard {
+  @apply relative w-80 bg-white rounded-xl shadow-md border border-gray-200 p-6 space-y-4;
+  min-height: 320px;
+}
+
+.loadingHeader {
+  @apply flex items-center space-x-3;
+}
+
+.loadingTitle {
+  @apply space-y-2;
+}
+
+.loadingMeta {
+  @apply flex items-center space-x-3;
+}
+
+.loadingSalary {
+  @apply p-3 bg-gray-50 rounded-lg;
+}
+
+.loadingDescription {
+  @apply space-y-2;
+}
+
+.loadingSkills {
+  @apply flex space-x-2;
+}
+
+.loadingIndicator {
+  @apply absolute bottom-6 left-1/2 transform -translate-x-1/2;
+  @apply flex flex-col items-center space-y-2;
+}
+
+.loadingSpinner {
+  @apply relative w-6 h-6;
+}
+
+.spinnerRing {
+  @apply w-full h-full border-2 border-gray-200 border-t-blue-600 rounded-full animate-spin;
+}
+
+.loadingText {
+  @apply text-sm text-gray-600 font-medium;
+}
+
+/* ===== EMPTY STATES ===== */
+.emptyState {
+  @apply relative w-full h-full flex items-center justify-center p-8 bg-gray-50;
+}
+
+.emptyContent {
+  @apply text-center max-w-sm mx-auto space-y-6;
+}
+
+.emptyIllustration {
+  @apply mx-auto w-24 h-24;
+}
+
+.illustrationCircle {
+  @apply w-full h-full rounded-full bg-gray-200 flex items-center justify-center;
+  @apply border-4 border-white shadow-md;
+}
+
+.emptyTitle {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.emptyDescription {
+  @apply text-gray-600 leading-relaxed;
+}
+
+.emptyActions {
+  @apply flex flex-col sm:flex-row gap-3 justify-center;
+}
+
+.refreshButton {
+  @apply flex items-center justify-center space-x-2 px-4 py-2;
+  @apply bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium;
+  @apply transition-colors duration-200;
+}
+
+.secondaryButton {
+  @apply flex items-center justify-center space-x-2 px-4 py-2;
+  @apply bg-white text-gray-700 border border-gray-300 rounded-lg font-medium;
+  @apply hover:bg-gray-50 transition-colors duration-200;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .card {
+    @apply max-w-none w-full mx-4 h-auto min-h-96 rounded-lg;
+  }
+  
+  .cardContent {
+    @apply p-4 space-y-3;
+  }
+  
+  .jobTitle {
+    @apply text-xl;
+  }
+  
+  .detailsContent {
+    @apply p-4 max-h-64;
+  }
+  
+  .detailsActions {
+    @apply flex-col gap-2;
+  }
+  
+  .primaryAction,
+  .secondaryAction,
+  .tertiaryAction {
+    @apply w-full py-3;
+  }
+  
+  .statusBar {
+    @apply bottom-4;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    @apply max-w-sm h-auto min-h-80;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    @apply max-w-md h-auto min-h-96;
+  }
+  
+  .card:hover {
+    @apply shadow-2xl;
+    transform: translateY(-4px);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .actionButton,
+  .expandButton,
+  .primaryAction,
+  .secondaryAction,
+  .tertiaryAction {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-gray-400 shadow-2xl;
+  }
+  
+  .actionButton {
+    @apply border-2 border-gray-400;
+  }
+  
+  .salaryHighlight {
+    @apply border-2 border-green-400;
+  }
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .container {
+    @apply bg-gray-900;
+  }
+  
+  .card {
+    @apply bg-gray-800 border-gray-700 text-white;
+  }
+  
+  .companyName,
+  .jobTitle,
+  .sectionTitle {
+    @apply text-white;
+  }
+  
+  .companyMeta,
+  .jobMeta,
+  .jobDescription {
+    @apply text-gray-300;
+  }
+  
+  .salaryHighlight {
+    @apply bg-green-900/50 border-green-700 text-green-300;
+  }
+  
+  .queueIndicator,
+  .swipeHints {
+    @apply bg-gray-800 border-gray-700 text-gray-300;
+  }
+}

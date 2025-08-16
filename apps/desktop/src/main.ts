@@ -83,11 +83,11 @@ class JobSwipeApp {
 
     // Load the app
     if (isDev) {
-      // Try to load development server, fallback to local HTML
-      this.mainWindow.loadURL('http://localhost:3000').catch(() => {
-        console.log('Development server not available, loading fallback HTML');
+      // Try to load Next.js development server
+      this.loadDevelopmentRenderer().catch(() => {
+        console.log('Next.js development server not available, loading fallback');
         if (this.mainWindow) {
-          this.mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+          this.mainWindow.loadFile(path.join(__dirname, '../renderer/.next/server/pages/index.html'));
         }
       });
     } else {
@@ -115,6 +115,32 @@ class JobSwipeApp {
       shell.openExternal(url);
       return { action: 'deny' };
     });
+  }
+
+  private async loadDevelopmentRenderer(): Promise<void> {
+    const nextUrl = 'http://localhost:3002'; // Updated to match running Next.js server
+    const maxRetries = 30; // 30 seconds timeout
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      try {
+        await this.mainWindow!.loadURL(nextUrl);
+        console.log('✅ Connected to Next.js development server');
+        return;
+      } catch (error) {
+        retries++;
+        if (retries === 1) {
+          console.log('⏳ Waiting for Next.js development server to start...');
+        }
+        
+        if (retries >= maxRetries) {
+          throw new Error('Next.js development server timeout');
+        }
+        
+        // Wait 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
   }
 
   private setupApplicationMenu(): void {
@@ -237,6 +263,38 @@ class JobSwipeApp {
         return await dialog.showSaveDialog(this.mainWindow, options);
       }
       return { canceled: true };
+    });
+
+    // Setup JobSwipe IPC handlers
+    this.setupJobSwipeIPC();
+  }
+
+  private setupJobSwipeIPC(): void {
+    // Import and setup simplified IPC handlers for job functionality
+    try {
+      require('./main/ipcHandlers-simple');
+      console.log('✅ JobSwipe IPC handlers loaded successfully');
+    } catch (error) {
+      console.error('❌ Failed to load JobSwipe IPC handlers:', error);
+      // Set up minimal fallback handlers
+      this.setupFallbackIPC();
+    }
+  }
+
+  private setupFallbackIPC(): void {
+    // Fallback IPC handlers if simplified handlers fail to load
+    ipcMain.handle('jobs:getJobs', async () => {
+      console.log('Using fallback job handler');
+      return [];
+    });
+
+    ipcMain.handle('jobs:apply', async (_, jobId: string) => {
+      console.log('Using fallback apply handler for job:', jobId);
+      return { success: false, message: 'Job application system not available' };
+    });
+
+    ipcMain.handle('auth:login', async () => {
+      return { success: false, message: 'Authentication system not available' };
     });
   }
 

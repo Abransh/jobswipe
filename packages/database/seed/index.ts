@@ -68,13 +68,13 @@ async function createResumeTemplates() {
     },
   ];
 
-  return Promise.all(
-    templates.map((template) =>
-      prisma.resumeTemplate.create({
-        data: template,
-      })
-    )
-  );
+  // return Promise.all(
+  //   templates.map((template) =>
+  //     prisma.resumeTemplate.create({
+  //       data: template,
+  //     })
+  //   )
+  // );
 }
 
 async function createSampleCompanies() {

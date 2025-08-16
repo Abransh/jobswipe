@@ -65,7 +65,7 @@ class GeminiProductionAutomationService extends EventEmitter {
     
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ 
-      model: productionConfig.ai.gemini?.model || 'gemini-1.5-pro-vision-latest'
+      model: productionConfig.ai.gemini?.model || 'gemini-1.5-pro'
     });
   }
 

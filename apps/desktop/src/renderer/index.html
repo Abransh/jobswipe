@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;">
+    <title>JobSwipe Desktop</title>
+    <style>
+        /* Prevent flash of unstyled content */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f9fafb;
+            overflow: hidden;
+        }
+        
+        #root {
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f9fafb;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading-text {
+            margin-left: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Disable text selection for better app feel */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Re-enable text selection for inputs and text areas */
+        input, textarea, [contenteditable] {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Custom scrollbar for Windows/Linux */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* macOS-style window controls */
+        .titlebar {
+            height: 32px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            -webkit-app-region: drag;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .titlebar-text {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- macOS-style titlebar (hidden on Windows/Linux) -->
+    <div class="titlebar" style="display: none;" id="titlebar">
+        <span class="titlebar-text">JobSwipe Desktop</span>
+    </div>
+    
+    <!-- React app root -->
+    <div id="root">
+        <!-- Loading state -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading JobSwipe...</div>
+        </div>
+    </div>
+
+    <!-- Error boundary -->
+    <div id="error-boundary" style="display: none; padding: 40px; text-align: center;">
+        <h2 style="color: #dc2626; margin-bottom: 16px;">Something went wrong</h2>
+        <p style="color: #6b7280; margin-bottom: 24px;" id="error-message">
+            An unexpected error occurred. Please restart the application.
+        </p>
+        <button 
+            onclick="window.location.reload()" 
+            style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;"
+        >
+            Reload App
+        </button>
+    </div>
+
+    <script>
+        // Show/hide titlebar based on platform
+        if (navigator.platform.toLowerCase().includes('mac')) {
+            document.getElementById('titlebar').style.display = 'flex';
+        }
+        
+        // Global error handler
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            showErrorBoundary(event.error.message);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            showErrorBoundary('An unexpected error occurred');
+        });
+        
+        function showErrorBoundary(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('root').style.display = 'none';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-boundary').style.display = 'block';
+        }
+        
+        // Hide loading when React app starts
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            }, 100);
+        });
+        
+        // Log app startup
+        console.log('🎯 JobSwipe Desktop renderer starting...');
+        
+        // Check if electronAPI is available
+        if (window.electronAPI) {
+            console.log('✅ Electron API is available');
+            
+            // Get system info for debugging
+            window.electronAPI.getSystemInfo().then(info => {
+                console.log('📊 System info:', info);
+            }).catch(err => {
+                console.warn('⚠️ Could not get system info:', err);
+            });
+        } else {
+            console.warn('⚠️ Electron API not available - running in web mode');
+        }
+    </script>
+
+    <!-- React app will be injected here by the build process -->
+    <script src="./renderer.js"></script>
+</body>
+</html>

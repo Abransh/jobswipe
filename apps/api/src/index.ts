@@ -25,10 +25,14 @@ async function loadRoutes() {
     const { registerQueueRoutes } = await import('./routes/queue.routes');
     console.log('Queue routes loaded successfully');
     
+    const jobsRoutes = await import('./routes/jobs.routes');
+    console.log('Jobs routes loaded successfully');
+    
     return { 
       registerAuthRoutes, 
       tokenExchangeRoutes: tokenExchangeRoutes.default,
-      registerQueueRoutes
+      registerQueueRoutes,
+      jobsRoutes: jobsRoutes.default
     };
   } catch (error) {
     console.error('❌ Failed to load enterprise routes:', error);
@@ -632,6 +636,10 @@ async function createServer(): Promise<FastifyInstance> {
       await server.register(async function (fastify) {
         await routes.registerQueueRoutes(fastify);
       }, { prefix: `${apiPrefix}/queue` });
+
+      // Enterprise jobs routes
+      server.log.info('Registering enterprise jobs routes...');
+      await server.register(routes.jobsRoutes, { prefix: apiPrefix });
       
       server.log.info('✅ Enterprise routes registered successfully');
     } catch (error) {

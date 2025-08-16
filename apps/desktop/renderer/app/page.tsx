@@ -72,7 +72,7 @@ export default function Home() {
             Start Job Queue
           </button>
           <a 
-            href="/jobs"
+            href="/auth/signin"
             className="bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-secondary/80 transition-colors"
           >
             Browse Jobs
