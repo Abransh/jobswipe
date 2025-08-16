@@ -26,6 +26,11 @@ import {
 import { BaseStrategy } from './base/BaseStrategy';
 import BrowserUseService, { JobApplicationTask, AutomationResult } from '../services/BrowserUseService';
 
+// Import company strategies
+import LinkedInStrategy from './companies/linkedin/linkedin.strategy';
+import IndeedStrategy from './companies/indeed/indeed.strategy';
+import GreenhouseStrategy from './companies/greenhouse/greenhouse.strategy';
+
 // =============================================================================
 // STRATEGY REGISTRY CLASS
 // =============================================================================
@@ -98,6 +103,9 @@ export class StrategyRegistry extends EventEmitter {
     try {
       console.log('🏗️ Initializing Strategy Registry...');
 
+      // Load built-in strategies first
+      await this.loadBuiltInStrategies();
+
       // Load cached strategies
       await this.loadCachedStrategies();
 
@@ -120,6 +128,146 @@ export class StrategyRegistry extends EventEmitter {
       this.emit('registry-error', { error, timestamp: new Date() });
       throw error;
     }
+  }
+
+  /**
+   * Load built-in strategy implementations
+   */
+  private async loadBuiltInStrategies(): Promise<void> {
+    console.log('📦 Loading built-in strategies...');
+
+    // LinkedIn Strategy
+    const linkedinStrategy: CompanyAutomationStrategy = {
+      id: 'linkedin',
+      name: 'LinkedIn',
+      domains: ['linkedin.com'],
+      version: '1.0.0',
+      confidence: 0.95,
+      supportedJobTypes: ['easy-apply', 'standard'],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        description: 'LinkedIn job application automation with Easy Apply support',
+        maintainer: 'JobSwipe Team',
+        tags: ['social-network', 'professional', 'easy-apply']
+      },
+      selectors: {
+        applyButton: [
+          '.jobs-apply-button[data-easy-apply-id]',
+          '.jobs-apply-button'
+        ],
+        forms: {
+          personalInfo: 'form[data-step="personal-info"]',
+          resume: 'form[data-step="resume"]',
+          questions: 'form[data-step="questions"]'
+        },
+        confirmation: [
+          '.jobs-apply-success',
+          '.application-outlet__success-message'
+        ]
+      },
+      workflow: {
+        steps: [
+          { name: 'navigate', action: 'goto', target: 'job.url' },
+          { name: 'apply', action: 'click', target: 'selectors.applyButton' },
+          { name: 'fill-form', action: 'form-fill', target: 'auto-detect' },
+          { name: 'submit', action: 'submit', target: 'form' }
+        ]
+      }
+    };
+
+    const linkedinInstance = new LinkedInStrategy(linkedinStrategy);
+    this.strategies.set('linkedin', linkedinStrategy);
+    this.strategyInstances.set('linkedin', linkedinInstance);
+
+    // Indeed Strategy
+    const indeedStrategy: CompanyAutomationStrategy = {
+      id: 'indeed',
+      name: 'Indeed',
+      domains: ['indeed.com'],
+      version: '1.0.0',
+      confidence: 0.90,
+      supportedJobTypes: ['standard', 'quick-apply'],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        description: 'Indeed job application automation',
+        maintainer: 'JobSwipe Team',
+        tags: ['job-board', 'general']
+      },
+      selectors: {
+        applyButton: [
+          '.ia-IndeedApplyButton',
+          '.indeed-apply-button'
+        ],
+        forms: {
+          personalInfo: '.ia-BasePage-content form',
+          resume: '.resume-upload',
+          questions: '.application-questions'
+        },
+        confirmation: [
+          '.ia-ApplicationConfirmation'
+        ]
+      },
+      workflow: {
+        steps: [
+          { name: 'navigate', action: 'goto', target: 'job.url' },
+          { name: 'apply', action: 'click', target: 'selectors.applyButton' },
+          { name: 'fill-form', action: 'form-fill', target: 'auto-detect' },
+          { name: 'submit', action: 'submit', target: 'form' }
+        ]
+      }
+    };
+
+    const indeedInstance = new IndeedStrategy(indeedStrategy);
+    this.strategies.set('indeed', indeedStrategy);
+    this.strategyInstances.set('indeed', indeedInstance);
+
+    // Greenhouse Strategy
+    const greenhouseStrategy: CompanyAutomationStrategy = {
+      id: 'greenhouse',
+      name: 'Greenhouse',
+      domains: ['boards.greenhouse.io', 'greenhouse.io'],
+      version: '1.0.0',
+      confidence: 0.98,
+      supportedJobTypes: ['greenhouse-form'],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        description: 'Greenhouse job board automation (used by many companies)',
+        maintainer: 'JobSwipe Team',
+        tags: ['job-board', 'ats', 'greenhouse']
+      },
+      selectors: {
+        applyButton: [
+          'a[href*="boards.greenhouse.io"][href*="application"]',
+          'button:has-text("Apply for this job")',
+          'a:has-text("Apply for this job")'
+        ],
+        forms: {
+          personalInfo: '.application-form',
+          resume: 'input[type="file"]',
+          questions: '.application-questions'
+        },
+        confirmation: [
+          '.application-confirmation',
+          '.success-message',
+          'h1:has-text("Thank you")'
+        ]
+      },
+      workflow: {
+        steps: [
+          { name: 'navigate', action: 'goto', target: 'job.url' },
+          { name: 'apply', action: 'click', target: 'selectors.applyButton' },
+          { name: 'analyze-form', action: 'ai-analyze', target: 'form-structure' },
+          { name: 'fill-steps', action: 'multi-step-fill', target: 'detected-steps' },
+          { name: 'submit', action: 'submit', target: 'form' }
+        ]
+      }
+    };
+
+    const greenhouseInstance = new GreenhouseStrategy(greenhouseStrategy);
+    this.strategies.set('greenhouse', greenhouseStrategy);
+    this.strategyInstances.set('greenhouse', greenhouseInstance);
+
+    console.log(`✅ Loaded ${this.strategies.size} built-in strategies`);
   }
 
   /**

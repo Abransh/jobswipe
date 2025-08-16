@@ -1,6 +1,8 @@
 import { Agent } from 'browser-use';
 import { Page, Browser } from 'playwright';
 import { EventEmitter } from 'events';
+import { VisionServiceManager } from './VisionServiceManager';
+import { FormAnalyzer } from '../intelligence/FormAnalyzer';
 
 /**
  * Browser-Use Service Bridge
@@ -19,13 +21,22 @@ import { EventEmitter } from 'events';
 export interface BrowserUseConfig {
   anthropicApiKey: string;
   headless: boolean;
-  viewport: {
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  viewport?: {
     width: number;
     height: number;
   };
   userAgent?: string;
   slowMo?: number;
   timeout?: number;
+  useVisionService?: boolean;
+  captchaHandling?: {
+    enableVisionFallback: boolean;
+    enableManualFallback: boolean;
+    manualFallbackTimeout: number;
+  };
 }
 
 export interface JobApplicationTask {
@@ -103,10 +114,31 @@ export class BrowserUseService extends EventEmitter {
   private page: Page | null = null;
   private config: BrowserUseConfig;
   private isInitialized = false;
+  private visionService: VisionServiceManager | null = null;
+  private formAnalyzer: FormAnalyzer | null = null;
 
   constructor(config: BrowserUseConfig) {
     super();
-    this.config = config;
+    this.config = {
+      ...config,
+      viewport: config.viewport || { width: 1920, height: 1080 },
+      model: config.model || 'claude-3-sonnet-20240229',
+      maxTokens: config.maxTokens || 4000,
+      temperature: config.temperature || 0.1
+    };
+    
+    // Initialize form analyzer if requested
+    if (config.useVisionService) {
+      this.formAnalyzer = new FormAnalyzer();
+    }
+  }
+
+  /**
+   * Set the vision service for captcha handling
+   */
+  setVisionService(visionService: VisionServiceManager): void {
+    this.visionService = visionService;
+    console.log('🔗 Vision service connected to BrowserUseService');
   }
 
   /**
@@ -123,15 +155,24 @@ export class BrowserUseService extends EventEmitter {
 
       // Initialize the AI agent with browser-use library
       this.agent = new Agent({
+        task: 'JobSwipe AI Automation Agent - Intelligent job application processing',
         llm: {
           provider: 'anthropic',
-          model: 'claude-3-5-sonnet-20241022',
+          model: this.config.model!,
           apiKey: this.config.anthropicApiKey,
+          maxTokens: this.config.maxTokens!,
+          temperature: this.config.temperature!
         },
         browser: {
           headless: this.config.headless,
-          viewport: this.config.viewport,
+          viewport: this.config.viewport!,
           slowMo: this.config.slowMo || 100,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor'
+          ]
         },
         timeout: this.config.timeout || 300000, // 5 minutes default
       });

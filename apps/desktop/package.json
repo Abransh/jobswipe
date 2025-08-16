@@ -29,6 +29,13 @@
     "test:health": "npx tsx src/test-simple.ts",
     "test:automation": "npm run build:main:dev && ./node_modules/.bin/electron dist/test-basic-automation.js",
     "test:automation:direct": "npx tsx src/test-simple.ts && echo '✅ Core test passed - electron-store works in Electron context'",
+    "test:anthropic": "npx tsx test-anthropic-application.ts",
+    "demo:system": "npx tsx test-system-demo.ts",
+    "demo:headful": "npx tsx test-headful-demo.ts",
+    "demo:production": "npx tsx production-demo.ts",
+    "demo:node": "npx tsx node-production-demo.ts",
+    "demo:simple": "npx tsx simple-production-demo.ts",
+    "demo:gemini": "npx tsx gemini-production-demo.ts",
     "clean": "rm -rf dist out node_modules"
   },
   "dependencies": {
@@ -37,6 +44,7 @@
     "@azure/ai-form-recognizer": "^5.1.0",
     "@google-cloud/documentai": "^9.3.0",
     "@google-cloud/vision": "^5.3.3",
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@jobswipe/shared": "workspace:*",
     "axios": "^1.6.2",
