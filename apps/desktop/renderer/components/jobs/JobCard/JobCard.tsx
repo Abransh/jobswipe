@@ -163,7 +163,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
-      aria-label={`Job: ${job.title} at ${job.company.name}. Press Enter to apply, Escape to skip.`}
+      aria-label={`Job: ${job.title} at ${typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown Company'}. Press Enter to apply, Escape to skip.`}
       aria-describedby={`job-description-${job.id}`}
       {...props}
     >
@@ -223,7 +223,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
 
       {/* Accessibility enhancement: Screen reader content */}
       <div className="sr-only">
-        Job posting: {job.title} at {job.company.name}.
+        Job posting: {job.title} at {typeof job.company === 'string' ? job.company : job.company?.name || 'Unknown Company'}.
         {formattedSalary.display && ` Salary: ${formattedSalary.display}.`}
         {job.location && ` Location: ${job.location}.`}
         {job.remote && ' Remote work available.'}

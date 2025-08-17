@@ -109,7 +109,8 @@ export function useJobCard({ job, matchScore }: UseJobCardProps): UseJobCardRetu
     }
 
     // Verified company badge
-    if (job.isVerified || job.company.isVerified) {
+    const isCompanyVerified = typeof job.company === 'object' ? job.company?.isVerified : false;
+    if (job.isVerified || isCompanyVerified) {
       badges.push({
         type: 'verified',
         label: 'Verified',
@@ -208,6 +209,9 @@ export function useJobCard({ job, matchScore }: UseJobCardProps): UseJobCardRetu
     
     // Generate company initials fallback
     const generateInitials = (name: string): string => {
+      if (!name || typeof name !== 'string') {
+        return 'XX';
+      }
       return name
         .split(' ')
         .map(word => word.charAt(0).toUpperCase())
@@ -215,10 +219,14 @@ export function useJobCard({ job, matchScore }: UseJobCardProps): UseJobCardRetu
         .slice(0, 2);
     };
 
+    // Handle both string and object company formats from backend
+    const companyName = typeof company === 'string' ? company : company?.name || 'Unknown Company';
+    const companyLogo = typeof company === 'object' ? company?.logo : undefined;
+
     return {
-      url: company.logo,
-      fallback: generateInitials(company.name),
-      hasLogo: Boolean(company.logo)
+      url: companyLogo,
+      fallback: generateInitials(companyName),
+      hasLogo: Boolean(companyLogo)
     };
   }, [job.company]);
 

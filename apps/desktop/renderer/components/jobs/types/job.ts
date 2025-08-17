@@ -46,7 +46,7 @@ export interface JobData {
   
   // Company Context
   companyId: string;
-  company: CompanyData;
+  company: CompanyData | string; // Allow both object and string formats for backend compatibility
   
   // External Integration
   sourceUrl?: string;

@@ -118,7 +118,7 @@ class JobSwipeApp {
   }
 
   private async loadDevelopmentRenderer(): Promise<void> {
-    const nextUrl = 'http://localhost:3002'; // Updated to match running Next.js server
+    const nextUrl = 'http://localhost:3000'; // Updated to match running Next.js server
     const maxRetries = 30; // 30 seconds timeout
     let retries = 0;
 

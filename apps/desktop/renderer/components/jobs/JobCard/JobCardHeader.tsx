@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import type { CompanyData, CompanyLogo } from '../types/job';
 
 interface JobCardHeaderProps {
-  company: CompanyData;
+  company: CompanyData | string;
   companyLogo: CompanyLogo;
   isVerified: boolean;
   qualityScore?: number;
@@ -38,7 +38,7 @@ export function JobCardHeader({
         {companyLogo.hasLogo && companyLogo.url ? (
           <img
             src={companyLogo.url}
-            alt={`${company.name} logo`}
+            alt={`${typeof company === 'string' ? company : company?.name || 'Company'} logo`}
             className="w-12 h-12 rounded-xl object-cover border border-gray-200 bg-white"
             loading="lazy"
             onError={(e) => {
@@ -78,7 +78,7 @@ export function JobCardHeader({
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
           <h3 className="text-base font-semibold text-gray-900 truncate">
-            {company.name}
+            {typeof company === 'string' ? company : company?.name || 'Unknown Company'}
           </h3>
           
           {/* Quality score indicator */}
@@ -94,25 +94,25 @@ export function JobCardHeader({
 
         {/* Company details */}
         <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
-          {company.industry && (
+          {typeof company === 'object' && company?.industry && (
             <span className="capitalize">{company.industry.toLowerCase()}</span>
           )}
           
-          {company.industry && company.size && (
+          {typeof company === 'object' && company?.industry && company?.size && (
             <span>•</span>
           )}
           
-          {company.size && (
+          {typeof company === 'object' && company?.size && (
             <span className="capitalize">
               {formatCompanySize(company.size)}
             </span>
           )}
           
-          {(company.industry || company.size) && company.headquarters && (
+          {typeof company === 'object' && (company?.industry || company?.size) && company?.headquarters && (
             <span>•</span>
           )}
           
-          {company.headquarters && (
+          {typeof company === 'object' && company?.headquarters && (
             <span className="truncate">{company.headquarters}</span>
           )}
         </div>
