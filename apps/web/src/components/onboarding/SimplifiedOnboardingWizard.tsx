@@ -72,8 +72,26 @@ export function SimplifiedOnboardingWizard({
   const router = useRouter();
   const { user } = useAuth();
 
-  // Store simplified onboarding data
-  const [onboardingData, setOnboardingData] = useState<Partial<SimplifiedOnboardingData>>({});
+  // Store simplified onboarding data - pre-populate with user data from signup
+  const [onboardingData, setOnboardingData] = useState<Partial<SimplifiedOnboardingData>>(() => {
+    const initialData: Partial<SimplifiedOnboardingData> = {};
+    
+    // Pre-populate from user data if available
+    if (user?.name) {
+      const nameParts = user.name.split(' ');
+      initialData.essentialProfile = {
+        fullName: user.name,
+        // Don't include phone as it's not from signup
+        phone: '',
+        roleType: '',
+        salaryMin: undefined,
+        salaryMax: undefined,
+        salaryCurrency: 'USD'
+      };
+    }
+    
+    return initialData;
+  });
 
   // Load saved progress on mount
   useEffect(() => {

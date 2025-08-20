@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
@@ -58,7 +58,7 @@ export function EssentialProfileStep({
     resolver: zodResolver(essentialProfileSchema),
     mode: 'onChange',
     defaultValues: {
-      fullName: data?.fullName || '',
+      fullName: data?.fullName || '', // Keep for compatibility but don't show in UI
       phone: data?.phone || '',
       roleType: data?.roleType || '',
       salaryMin: data?.salaryMin,
@@ -69,7 +69,7 @@ export function EssentialProfileStep({
 
   const watchedData = watch();
 
-  // Auto-save when data changes
+  // Auto-save when data changes (debounced)
   useEffect(() => {
     if (isDirty && isValid && onAutoSave) {
       const formData = {
@@ -84,18 +84,23 @@ export function EssentialProfileStep({
 
       return () => clearTimeout(timeout);
     }
-  }, [watchedData, selectedRole, resumeFile, isDirty, isValid, onAutoSave]);
+  }, [isDirty, isValid, watchedData, selectedRole, resumeFile]); // Removed onAutoSave from dependencies
 
-  // Update parent component when form data changes
+  // Update parent component when form data changes (also debounced to prevent excessive updates)
   useEffect(() => {
-    const updatedData = {
-      ...watchedData,
-      roleType: selectedRole,
-      resumeFile: resumeFile || undefined
-    };
-    
-    onDataChange(updatedData);
-  }, [watchedData, selectedRole, resumeFile, onDataChange]);
+    const timeout = setTimeout(() => {
+      const updatedData = {
+        ...watchedData,
+        fullName: data?.fullName || watchedData.fullName, // Ensure fullName is preserved
+        roleType: selectedRole,
+        resumeFile: resumeFile || undefined
+      };
+      
+      onDataChange(updatedData);
+    }, 300); // Short debounce for parent updates
+
+    return () => clearTimeout(timeout);
+  }, [watchedData, selectedRole, resumeFile, data?.fullName]); // Removed onDataChange from dependencies
 
   // Filter roles based on search term
   const filteredRoles = POPULAR_ROLES.filter(role =>
@@ -118,15 +123,15 @@ export function EssentialProfileStep({
     }
   };
 
-  const handleSalaryChange = (min: number | undefined, max: number | undefined) => {
+  const handleSalaryChange = useCallback((min: number | undefined, max: number | undefined) => {
     setValue('salaryMin', min);
     setValue('salaryMax', max);
     clearErrors(['salaryMin', 'salaryMax']);
-  };
+  }, [setValue, clearErrors]);
 
-  const handleCurrencyChange = (currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD') => {
+  const handleCurrencyChange = useCallback((currency: 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD') => {
     setValue('salaryCurrency', currency);
-  };
+  }, [setValue]);
 
   const handleFileSelect = (file: File) => {
     setResumeFile(file);
@@ -148,6 +153,7 @@ export function EssentialProfileStep({
 
     const finalData = {
       ...formData,
+      fullName: data?.fullName || formData.fullName, // Ensure fullName is included
       roleType: selectedRole,
       resumeFile: resumeFile
     };
@@ -199,18 +205,16 @@ export function EssentialProfileStep({
               <h2 className="text-xl font-semibold text-gray-900">About You</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput
-                id="fullName"
-                label="Full Name"
-                type="text"
-                placeholder="John Smith"
-                icon={User}
-                {...register('fullName')}
-                error={errors.fullName?.message}
-                className="transition-all duration-200 focus:scale-[1.02]"
-              />
+            {/* Welcome message with pre-filled name */}
+            {data?.fullName && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800">
+                  <span className="font-semibold">Welcome, {data.fullName}!</span> Let's complete your profile.
+                </p>
+              </div>
+            )}
 
+            <div className="space-y-6">
               <div className="relative">
                 <FormInput
                   id="phone"

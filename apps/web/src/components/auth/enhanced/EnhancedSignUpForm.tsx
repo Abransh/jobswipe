@@ -271,8 +271,8 @@ export function EnhancedSignUpForm() {
 
       if (response.success && response.user) {
         addSecurityEvent('success', 'Registration successful');
-        // Redirect to callback URL on successful registration
-        router.push(callbackUrl);
+        // Redirect to onboarding for new users (they need to complete their profile)
+        router.push('/onboarding');
       } else {
         // Handle specific error cases
         let errorMessage = error || 'Registration failed';

@@ -52,7 +52,7 @@ export function SalarySlider({
     } else {
       onRangeChange(undefined, undefined);
     }
-  }, [isEnabled, localMin, localMax, onRangeChange]);
+  }, [isEnabled, localMin, localMax]); // Removed onRangeChange from dependencies
 
   const formatSalary = (amount: number) => {
     if (amount >= 1000000) {

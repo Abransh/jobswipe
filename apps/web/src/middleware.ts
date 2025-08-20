@@ -86,6 +86,16 @@ export default function middleware(req: NextRequest) {
         }
       }
       
+      // User is authenticated, now check if they need to complete onboarding
+      // Skip onboarding check for onboarding pages themselves
+      if (isAuthenticated && !pathname.startsWith('/onboarding') && !pathname.startsWith('/auth/')) {
+        // Add onboarding check here - this would need to be done via an API call
+        // For now, we'll add a response header to signal the frontend to check onboarding status
+        const response = NextResponse.next();
+        response.headers.set('x-check-onboarding', 'true');
+        return response;
+      }
+      
       // User is authenticated, allow access to protected route
       return NextResponse.next();
     }
