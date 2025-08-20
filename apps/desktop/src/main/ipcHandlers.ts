@@ -7,25 +7,25 @@
 import { ipcMain, shell } from 'electron';
 import type { JobData } from '../renderer/types/job';
 
-// Import existing enterprise services
-import { JobSwipeAutomationEngine } from '../automation/JobSwipeAutomationEngine';
-import { ProductionConfig } from '../config/ProductionConfig';
+// Import new simplified automation service
+import { SimplifiedAutomationService } from '../services/SimplifiedAutomationService';
 
-// Initialize automation engine
-let automationEngine: JobSwipeAutomationEngine | null = null;
+// Initialize automation service
+let automationService: SimplifiedAutomationService | null = null;
 
-async function initializeAutomationEngine() {
-  if (!automationEngine) {
+async function initializeAutomationService() {
+  if (!automationService) {
     try {
-      const config = new ProductionConfig();
-      automationEngine = new JobSwipeAutomationEngine(config.getConfig());
-      await automationEngine.initialize();
-      console.log('✅ JobSwipe automation engine initialized');
+      automationService = new SimplifiedAutomationService({
+        companiesPath: './companies',
+        pythonPath: 'python3'
+      });
+      console.log('✅ JobSwipe automation service initialized');
     } catch (error) {
-      console.error('❌ Failed to initialize automation engine:', error);
+      console.error('❌ Failed to initialize automation service:', error);
     }
   }
-  return automationEngine;
+  return automationService;
 }
 
 // Job management handlers
@@ -115,42 +115,46 @@ export function setupJobHandlers() {
     try {
       console.log('🚀 Starting job application process for:', jobData.title);
       
-      const engine = await initializeAutomationEngine();
+      const service = await initializeAutomationService();
       
-      if (!engine) {
-        throw new Error('Automation engine not available');
+      if (!service) {
+        throw new Error('Automation service not available');
       }
 
-      // Generate a unique queue ID
-      const queueId = `job_${jobId}_${Date.now()}`;
+      // Generate a unique application ID
+      const applicationId = `app_${jobId}_${Date.now()}`;
       
       // Queue the job application (non-blocking)
-      const applicationPromise = engine.processJobApplication({
-        jobId: jobData.id,
-        companyName: jobData.company.name,
-        jobTitle: jobData.title,
-        jobUrl: jobData.applicationUrl,
-        applicationData: {
-          source: 'desktop',
-          queueId,
-          timestamp: new Date(),
-          jobData
+      const applicationPromise = service.applyToJob({
+        user: {
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'user@example.com',
+          phone: '123-456-7890',
+          resume_local_path: '/path/to/resume.pdf'
+        },
+        job: {
+          job_id: jobData.id,
+          title: jobData.title,
+          company: jobData.company.name,
+          apply_url: jobData.applicationUrl,
+          location: jobData.location
         }
-      });
+      }, applicationId);
 
       // Don't await - let it run in background
       applicationPromise.then((result) => {
         console.log('✅ Job application completed:', result);
         // Could send result back to renderer via event
-        event.sender.send('application:completed', { queueId, result });
+        event.sender.send('application:completed', { applicationId, result });
       }).catch((error) => {
         console.error('❌ Job application failed:', error);
-        event.sender.send('application:failed', { queueId, error: error.message });
+        event.sender.send('application:failed', { applicationId, error: error.message });
       });
 
       return {
         success: true,
-        queueId,
+        applicationId,
         message: `Application queued for ${jobData.title}`
       };
       
@@ -217,7 +221,7 @@ export function setupSystemHandlers() {
         electronVersion: process.versions.electron,
         chromeVersion: process.versions.chrome,
         nodeVersion: process.versions.node,
-        automationEnabled: automationEngine !== null
+        automationEnabled: automationService !== null
       };
     } catch (error) {
       console.error('Failed to get system info:', error);
@@ -276,8 +280,8 @@ export function setupAllIPCHandlers() {
   setupSystemHandlers();
   setupUIHandlers();
   
-  // Initialize automation engine on startup
-  initializeAutomationEngine();
+  // Initialize automation service on startup
+  initializeAutomationService();
   
   console.log('✅ IPC handlers set up successfully');
 }

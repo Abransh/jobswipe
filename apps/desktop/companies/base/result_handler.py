@@ -1,6 +1,7 @@
+'''
 Result Handler for JobSwipe Automation
 Standardized result processing and validation for all company automations
-"""
+'''
 
 import json
 import time
