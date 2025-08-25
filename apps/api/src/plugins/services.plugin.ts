@@ -8,6 +8,10 @@
 
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
+import { AutomationService } from '../services/AutomationService';
+import { ServerAutomationService } from '../services/ServerAutomationService';
+import { AutomationLimits } from '../services/AutomationLimits';
+import { ProxyRotator } from '../services/ProxyRotator';
 // Import server services conditionally
 let ServerJwtTokenService: any = null;
 let RedisSessionService: any = null; 
@@ -485,6 +489,62 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   }
 
   // =============================================================================
+  // AUTOMATION SERVICES
+  // =============================================================================
+
+  fastify.log.info('Initializing Automation Services...');
+  
+  let automationService: AutomationService;
+  try {
+    // Create ProxyRotator service
+    const proxyRotator = new ProxyRotator(fastify);
+    
+    // Create ServerAutomationService
+    const serverAutomationService = new ServerAutomationService(fastify, proxyRotator);
+    
+    // Create AutomationLimits service
+    const automationLimits = new AutomationLimits(fastify);
+    
+    // Create main AutomationService
+    automationService = new AutomationService(fastify, serverAutomationService, automationLimits);
+    
+    // Register all automation services
+    serviceRegistry.register('proxyRotator', proxyRotator);
+    serviceRegistry.register('serverAutomation', serverAutomationService);
+    serviceRegistry.register('automationLimits', automationLimits);
+    serviceRegistry.register(
+      'automation',
+      automationService,
+      async () => {
+        try {
+          const healthStatus = await automationService.getHealthStatus();
+          return {
+            status: healthStatus.status,
+            details: {
+              activeProcesses: healthStatus.activeProcesses,
+              queueHealth: healthStatus.queueHealth,
+              systemInfo: healthStatus.systemInfo,
+              issues: healthStatus.issues
+            }
+          };
+        } catch (error) {
+          return {
+            status: 'unhealthy',
+            details: {
+              error: error instanceof Error ? error.message : 'Health check failed'
+            }
+          };
+        }
+      }
+    );
+    
+    fastify.log.info('✅ Automation Services initialized successfully');
+  } catch (error) {
+    fastify.log.error('❌ Failed to initialize Automation Services:', error);
+    throw new Error(`Automation services initialization failed: ${error}`);
+  }
+
+  // =============================================================================
   // REGISTER SERVICES WITH FASTIFY
   // =============================================================================
 
@@ -493,6 +553,12 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.decorate('sessionService', sessionService);
   fastify.decorate('securityService', securityService);
   fastify.decorate('serviceRegistry', serviceRegistry);
+  
+  // Decorate automation services
+  fastify.decorate('automationService', automationService);
+  fastify.decorate('proxyRotator', serviceRegistry.get('proxyRotator'));
+  fastify.decorate('serverAutomationService', serviceRegistry.get('serverAutomation'));
+  fastify.decorate('automationLimits', serviceRegistry.get('automationLimits'));
   
   if (db) {
     fastify.decorate('db', db);
@@ -594,6 +660,11 @@ declare module 'fastify' {
     securityService: SecurityMiddlewareService;
     serviceRegistry: ServiceRegistry;
     db?: any; // Prisma client (optional)
+    // Automation services
+    automationService: AutomationService;
+    proxyRotator: ProxyRotator;
+    serverAutomationService: ServerAutomationService;
+    automationLimits: AutomationLimits;
   }
 }
 

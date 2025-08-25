@@ -17,9 +17,10 @@ interface JobSwipeInterfaceProps {
   searchQuery?: string;
   filters?: JobFilters;
   onApplicationUpdate?: (stats: { totalApplications: number; todayApplications: number; successRate: number }) => void;
+  fetchMoreJobs?: (offset: number, limit: number) => Promise<JobData[]>;
 }
 
-export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpdate }: JobSwipeInterfaceProps) {
+export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpdate, fetchMoreJobs: parentFetchMoreJobs }: JobSwipeInterfaceProps) {
   const [swipeStats, setSwipeStats] = useState({
     totalSwipes: 0,
     leftSwipes: 0,
@@ -139,10 +140,13 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   }, []);
 
   const fetchMoreJobs = useCallback(async (offset: number, limit: number): Promise<JobData[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (parentFetchMoreJobs) {
+      return await parentFetchMoreJobs(offset, limit);
+    }
+    // Fallback: return empty array if no parent fetch function provided
+    console.log('No parent fetchMoreJobs function provided');
     return [];
-  }, []);
+  }, [parentFetchMoreJobs]);
 
   // Show empty state if no jobs match filters
   if (jobs.length === 0) {

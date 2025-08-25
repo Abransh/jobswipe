@@ -43,7 +43,7 @@ GREENHOUSE_TEST_CASES = [
         ),
         "job_data": create_test_job_data(
             company="TechCorp",
-            apply_url="https://job-boards.greenhouse.io/techcorp/jobs/1234567",
+            apply_url="https://boards-api.greenhouse.io/v1/boards/airbnb/jobs/7113677",
             location="San Francisco, CA"
         ),
         "mock_responses": {

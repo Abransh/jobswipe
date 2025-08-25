@@ -1,0 +1,17 @@
+[Error] ❌ WebSocket connection error:
+Error: Invalid or expired token
+onpacket
+(anonymous function)
+(anonymous function)
+	error (intercept-console-error.js:57)
+	QueueStatusProvider.useCallback[initializeConnection] (QueueStatusProvider.tsx:92)
+	(anonymous function) (index.js:140)
+	onpacket (socket.js:516)
+	(anonymous function) (index.js:140)
+	(anonymous function) (manager.js:219)
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (swipe-right, line 0)
+[Error] ❌ Failed to queue job application:
+Error: Invalid or expired token
+(anonymous function)
+	error (intercept-console-error.js:57)
+	(anonymous function) (JobSwipeInterface.tsx:83)

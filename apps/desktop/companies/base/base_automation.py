@@ -246,7 +246,7 @@ class BaseJobAutomation(ABC):
         elif os.getenv('GOOGLE_API_KEY'):
             return ChatGoogle(
                 api_key=os.getenv('GOOGLE_API_KEY'),
-                model="gemini-1.5-pro",
+                model="gemini-2.5-pro",
                 temperature=0.1
             )
         else:
@@ -257,8 +257,7 @@ class BaseJobAutomation(ABC):
         browser_config = BrowserConfig(
             headless=self.config.headless,
             disable_security=True,
-            window_width=1920,
-            window_height=1080
+            window_size={'width': 1920, 'height': 1080}
         )
         
         return BrowserSession(browser_config=browser_config)

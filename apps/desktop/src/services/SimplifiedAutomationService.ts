@@ -294,8 +294,8 @@ export class SimplifiedAutomationService extends EventEmitter {
 
       console.log(`🎯 Using ${companyAutomation} automation`);
 
-      // Execute the automation
-      const result = await this.executeAutomation(companyAutomation, data, applicationId);
+      // Execute the automation with database integration
+      const result = await this.executeAutomationWithDatabase(companyAutomation, data, applicationId);
 
       // Update statistics
       this.updateStats(true, Date.now() - startTime);
@@ -351,7 +351,106 @@ export class SimplifiedAutomationService extends EventEmitter {
   }
 
   /**
-   * Execute the company-specific automation script
+   * Execute automation with database integration
+   */
+  private async executeAutomationWithDatabase(
+    companyAutomation: string,
+    data: JobApplicationData,
+    applicationId: string
+  ): Promise<AutomationResult> {
+    return new Promise((resolve, reject) => {
+      // Create environment variables for Python script
+      const env = {
+        ...process.env,
+        
+        // Execution mode
+        EXECUTION_MODE: 'desktop',
+        DATA_SOURCE: 'database',
+        
+        // Database connection
+        DATABASE_URL: process.env.DATABASE_URL,
+        
+        // User and job identifiers
+        USER_ID: data.userId,
+        JOB_ID: data.jobData.id,
+        APPLICATION_ID: applicationId,
+        
+        // AI API keys
+        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+        OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+        GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+        
+        // Automation configuration
+        AUTOMATION_HEADLESS: (data.options?.headless !== false).toString(),
+        AUTOMATION_TIMEOUT: (data.options?.timeout || this.config.timeout).toString(),
+        SCREENSHOT_ENABLED: this.config.screenshotEnabled.toString(),
+        SCREENSHOT_PATH: this.config.screenshotPath
+      };
+
+      // Execute Python automation script
+      const scriptPath = path.join(this.config.companiesPath, companyAutomation, 'run_automation.py');
+      
+      const pythonProcess = spawn(this.config.pythonPath, [scriptPath], {
+        env,
+        cwd: path.join(this.config.companiesPath, companyAutomation)
+      });
+
+      this.activeProcesses.set(applicationId, pythonProcess);
+
+      let stdout = '';
+      let stderr = '';
+
+      pythonProcess.stdout?.on('data', (data) => {
+        const output = data.toString();
+        stdout += output;
+        console.log(`📝 [${applicationId}] ${output.trim()}`);
+        this.emit('process-output', { applicationId, type: 'stdout', data: output });
+      });
+
+      pythonProcess.stderr?.on('data', (data) => {
+        const output = data.toString();
+        stderr += output;
+        console.error(`⚠️ [${applicationId}] ${output.trim()}`);
+        this.emit('process-output', { applicationId, type: 'stderr', data: output });
+      });
+
+      pythonProcess.on('close', (code) => {
+        this.activeProcesses.delete(applicationId);
+
+        if (code === 0) {
+          try {
+            const result = this.parseAutomationResult(stdout, companyAutomation, data);
+            resolve(result);
+          } catch (parseError) {
+            reject(new Error(`Failed to parse automation result: ${parseError}`));
+          }
+        } else {
+          reject(new Error(`Automation script failed with code ${code}: ${stderr}`));
+        }
+      });
+
+      pythonProcess.on('error', (error) => {
+        this.activeProcesses.delete(applicationId);
+        reject(new Error(`Failed to start automation script: ${error.message}`));
+      });
+
+      // Set timeout
+      setTimeout(() => {
+        if (this.activeProcesses.has(applicationId)) {
+          pythonProcess.kill('SIGTERM');
+          setTimeout(() => {
+            if (this.activeProcesses.has(applicationId)) {
+              pythonProcess.kill('SIGKILL');
+            }
+          }, 5000);
+          reject(new Error(`Automation timed out after ${this.config.timeout}ms`));
+        }
+      }, this.config.timeout);
+    });
+  }
+
+  /**
+   * Execute the company-specific automation script (legacy file mode)
    */
   private async executeAutomation(
     companyAutomation: string,

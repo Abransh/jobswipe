@@ -130,11 +130,12 @@ user_data = {
     "resume_path": str(CV),
 }
 
-job_url = "https://job-boards.greenhouse.io/doordashusa/jobs/7118562"
+job_url = "https://www.google.com/about/careers/applications/jobs/results/77773300364649158-senior-service-strategy-activation-lead"
 
 # ----------------------------
 # 📌 Upload Action
 # ----------------------------
+
 @controller.action("Upload resume to a form field")
 async def upload_resume(index: int, browser_session: BrowserSession):
     """Upload the CV file to the file input element at given index."""

@@ -7,6 +7,8 @@
 
 import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
+import { ServerAutomationService } from './ServerAutomationService';
+import { AutomationLimits } from './AutomationLimits';
 
 // =============================================================================
 // INTERFACES & TYPES
@@ -122,11 +124,15 @@ export class AutomationService extends EventEmitter {
   
   // Supported companies and their URL patterns
   private supportedCompanies = new Map([
-    ['greenhouse', ['greenhouse.io', 'job-boards.greenhouse.io', 'boards.greenhouse.io', 'grnh.se']]
-    // Add more companies as they're implemented
+    ['greenhouse', ['greenhouse.io', 'job-boards.greenhouse.io', 'boards.greenhouse.io', 'grnh.se']],
+    ['linkedin', ['linkedin.com/jobs', 'linkedin.com/jobs/view', 'linkedin.com/jobs/collections', 'linkedin.com/jobs/search']]
   ]);
 
-  constructor(private fastify: any) {
+  constructor(
+    private fastify: any,
+    private serverAutomationService: ServerAutomationService,
+    private automationLimits: AutomationLimits
+  ) {
     super();
     
     // Start queue processing
@@ -386,7 +392,7 @@ export class AutomationService extends EventEmitter {
   }
 
   private async processApplication(application: QueuedApplication): Promise<void> {
-    const { applicationId } = application;
+    const { applicationId, userId } = application;
     
     try {
       this.processing.add(applicationId);
@@ -396,9 +402,25 @@ export class AutomationService extends EventEmitter {
       this.fastify.log.info(`Processing application: ${applicationId}`);
       this.emit('application-processing', application);
 
-      // In a real implementation, this would call the Desktop app's automation service
-      // For now, simulate the processing
-      const result = await this.simulateAutomation(application);
+      // Determine execution mode based on user limits
+      const executionMode = await this.determineExecutionMode(userId);
+      
+      let result: AutomationResult;
+      
+      if (executionMode === 'server') {
+        // Execute on server
+        result = await this.executeOnServer(application);
+        
+        // Record server usage
+        await this.automationLimits.recordServerApplication(userId);
+        
+      } else {
+        // Queue for desktop app
+        application.status = 'queued';
+        this.fastify.log.info(`Application queued for desktop: ${applicationId}`);
+        this.emit('application-queued-desktop', application);
+        return; // Don't complete processing yet
+      }
       
       application.status = result.success ? 'completed' : 'failed';
       application.completedAt = new Date();
@@ -444,41 +466,64 @@ export class AutomationService extends EventEmitter {
     }
   }
 
-  private async simulateAutomation(application: QueuedApplication): Promise<AutomationResult> {
-    // This is a simulation - in the real implementation, this would communicate
-    // with the desktop app's SimplifiedAutomationService
+  /**
+   * Determine execution mode for user
+   */
+  private async determineExecutionMode(userId: string): Promise<'server' | 'desktop'> {
+    const eligibility = await this.automationLimits.checkServerEligibility(userId);
+    return eligibility.allowed ? 'server' : 'desktop';
+  }
+
+  /**
+   * Execute automation on server
+   */
+  private async executeOnServer(application: QueuedApplication): Promise<AutomationResult> {
+    const companyAutomation = this.detectCompanyAutomation(application.jobData.applyUrl);
     
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Simulate processing time
-    
-    const success = Math.random() > 0.2; // 80% success rate for simulation
-    
-    return {
+    if (!companyAutomation) {
+      throw new Error(`No automation found for URL: ${application.jobData.applyUrl}`);
+    }
+
+    // Prepare request for server automation service
+    const request = {
+      userId: application.userId,
+      jobId: application.jobData.id,
       applicationId: application.applicationId,
-      success,
-      confirmationNumber: success ? `CONF-${Date.now()}` : undefined,
-      error: success ? undefined : 'Simulated error for testing',
-      executionTime: 5000,
-      companyAutomation: this.detectCompanyAutomation(application.jobData.applyUrl) || 'unknown',
-      status: success ? 'success' : 'failed',
-      steps: [
-        {
-          stepName: 'initialize',
-          action: 'Initialize browser and AI agent',
-          success: true,
-          timestamp: new Date().toISOString(),
-          durationMs: 2000
-        },
-        {
-          stepName: 'fill_form',
-          action: 'Fill application form',
-          success,
-          timestamp: new Date().toISOString(),
-          durationMs: 3000,
-          errorMessage: success ? undefined : 'Form validation failed'
-        }
-      ],
-      screenshots: success ? ['/path/to/screenshot1.png'] : [],
-      captchaEvents: []
+      companyAutomation,
+      userProfile: {
+        firstName: application.userProfile.firstName,
+        lastName: application.userProfile.lastName,
+        email: application.userProfile.email,
+        phone: application.userProfile.phone,
+        resumeUrl: application.userProfile.resumeUrl,
+        currentTitle: application.userProfile.currentTitle,
+        yearsExperience: application.userProfile.yearsExperience,
+        skills: application.userProfile.skills,
+        currentLocation: application.userProfile.currentLocation,
+        linkedinUrl: application.userProfile.linkedinUrl,
+        workAuthorization: application.userProfile.workAuthorization,
+        coverLetter: application.userProfile.coverLetter,
+        customFields: application.userProfile.customFields
+      },
+      jobData: application.jobData,
+      options: application.options
+    };
+
+    // Execute server automation
+    const serverResult = await this.serverAutomationService.executeAutomation(request);
+
+    // Convert server result to AutomationResult format
+    return {
+      applicationId: serverResult.applicationId,
+      success: serverResult.success,
+      confirmationNumber: serverResult.confirmationNumber,
+      error: serverResult.error,
+      executionTime: serverResult.executionTime,
+      companyAutomation: serverResult.companyAutomation,
+      status: serverResult.status,
+      steps: serverResult.steps,
+      screenshots: serverResult.screenshots,
+      captchaEvents: serverResult.captchaEvents
     };
   }
 

@@ -279,6 +279,109 @@ async function websocketPlugin(
     // Register the service
     fastify.decorate('websocket', websocketService);
 
+    // =============================================================================
+    // AUTOMATION EVENT LISTENERS
+    // =============================================================================
+
+    // Set up automation event listeners after services are initialized
+    const setupAutomationListeners = () => {
+      if (fastify.automationService) {
+        log.info('Setting up automation event listeners for WebSocket...');
+        
+        // Application queued event
+        fastify.automationService.on('application-queued', (application: any) => {
+          const { userId, applicationId } = application;
+          websocketService.emitToUser(userId, 'automation-queued', {
+            applicationId,
+            status: 'queued',
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            queuedAt: application.queuedAt,
+            message: 'Job application has been queued for automation'
+          });
+        });
+
+        // Application processing event
+        fastify.automationService.on('application-processing', (application: any) => {
+          const { userId, applicationId } = application;
+          websocketService.emitToUser(userId, 'automation-processing', {
+            applicationId,
+            status: 'processing',
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            startedAt: application.startedAt,
+            message: 'Job application automation is now processing'
+          });
+        });
+
+        // Application completed event
+        fastify.automationService.on('application-completed', (application: any) => {
+          const { userId, applicationId, result } = application;
+          websocketService.emitToUser(userId, 'automation-completed', {
+            applicationId,
+            status: 'completed',
+            success: result?.success || false,
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            completedAt: application.completedAt,
+            confirmationNumber: result?.confirmationNumber,
+            executionTime: result?.executionTime,
+            message: result?.success 
+              ? 'Job application completed successfully!' 
+              : 'Job application automation failed'
+          });
+        });
+
+        // Application failed event
+        fastify.automationService.on('application-failed', (application: any) => {
+          const { userId, applicationId, result } = application;
+          websocketService.emitToUser(userId, 'automation-failed', {
+            applicationId,
+            status: 'failed',
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            failedAt: application.completedAt,
+            error: result?.error,
+            executionTime: result?.executionTime,
+            retryAvailable: application.retryCount < 3,
+            message: 'Job application automation failed'
+          });
+        });
+
+        // Application cancelled event
+        fastify.automationService.on('application-cancelled', (application: any) => {
+          const { userId, applicationId } = application;
+          websocketService.emitToUser(userId, 'automation-cancelled', {
+            applicationId,
+            status: 'cancelled',
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            cancelledAt: new Date().toISOString(),
+            message: 'Job application automation was cancelled'
+          });
+        });
+
+        // Application queued for desktop event
+        fastify.automationService.on('application-queued-desktop', (application: any) => {
+          const { userId, applicationId } = application;
+          websocketService.emitToUser(userId, 'automation-queued-desktop', {
+            applicationId,
+            status: 'queued-desktop',
+            jobTitle: application.jobData.title,
+            company: application.jobData.company,
+            message: 'Application queued for desktop app - please ensure your desktop app is running'
+          });
+        });
+
+        log.info('✅ Automation event listeners setup complete');
+      } else {
+        log.warn('⚠️  AutomationService not available, skipping event listeners setup');
+      }
+    };
+
+    // Setup listeners after a short delay to ensure services are registered
+    setTimeout(setupAutomationListeners, 1000);
+
     log.info('✅ WebSocket plugin registered successfully');
 
     // =============================================================================
@@ -318,7 +421,7 @@ async function websocketPlugin(
 export default fp(websocketPlugin, {
   fastify: '4.x',
   name: 'websocket',
-  // dependencies: ['jwtService'], // Made optional to prevent loading issues
+  dependencies: ['services'], // Ensure services plugin loads before WebSocket
 });
 
 // =============================================================================

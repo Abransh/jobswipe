@@ -9,7 +9,7 @@
 import React, { useState, useCallback, Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 // Import icons will be replaced with inline SVGs to avoid type conflicts
-import { jobsApiClient } from '@/lib/services/jobsApiClient';
+import { useJobs } from '@/hooks/useJobs';
 
 // Job Components
 import { JobSwipeInterface } from '@/components/jobs/JobDiscovery/JobSwipeInterface';
@@ -48,13 +48,23 @@ function JobsPageContent() {
     successRate: 0
   });
   
-  // Job data state
-  const [jobs, setJobs] = useState<JobData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [page, setPage] = useState(1);
+  // Use real job data from API
+  const {
+    jobs,
+    loading,
+    error,
+    totalCount,
+    hasMore,
+    fetchMore,
+    refetch,
+    clearError
+  } = useJobs({
+    filters,
+    q: searchQuery,
+    sortBy: 'relevance',
+    limit: 50,
+    autoFetch: true
+  });
 
   // Mobile touch/swipe support
   const touchStartX = useRef<number | null>(null);
@@ -66,52 +76,6 @@ function JobsPageContent() {
   const [expandedResults, setExpandedResults] = useState<any>(null);
   const [showProximityExpansion, setShowProximityExpansion] = useState(false);
 
-  // Fetch jobs from API
-  const fetchJobs = useCallback(async (resetPage = false) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const currentPage = resetPage ? 1 : page;
-      const response = await jobsApiClient.getJobs({
-        page: currentPage,
-        limit: 50,
-        sortBy: 'relevance',
-        filters,
-        q: searchQuery,
-      });
-      
-      if (response.success && response.data) {
-        if (resetPage) {
-          setJobs(response.data?.jobs || []);
-          setPage(1);
-        } else {
-          setJobs(prev => [...prev, ...(response.data?.jobs || [])]);
-        }
-        setTotalCount(response.data?.totalCount || 0);
-        setHasMore(response.data?.hasMore || false);
-      } else {
-        setError(response.error || 'Failed to fetch jobs');
-      }
-    } catch (err) {
-      setError('Failed to load jobs. Please try again.');
-      console.error('Error fetching jobs:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, searchQuery, page]);
-
-  // Load jobs on component mount and when filters change
-  useEffect(() => {
-    fetchJobs(true); // Reset page when filters change
-  }, [filters, searchQuery]);
-
-  // Load more jobs when page changes
-  useEffect(() => {
-    if (page > 1) {
-      fetchJobs(false);
-    }
-  }, [page]);
 
   const handleViewChange = useCallback((newView: ViewMode) => {
     setViewMode(newView);
@@ -195,7 +159,7 @@ function JobsPageContent() {
 
     // Handle pull to refresh
     if (pullToRefresh && Math.abs(deltaY) > Math.abs(deltaX)) {
-      fetchJobs(true);
+      refetch();
       setPullToRefresh(false);
     }
 
@@ -203,7 +167,7 @@ function JobsPageContent() {
     touchStartX.current = null;
     touchStartY.current = null;
     setPullToRefresh(false);
-  }, [viewMode, handleViewChange, pullToRefresh, fetchJobs]);
+  }, [viewMode, handleViewChange, pullToRefresh, refetch]);
 
   // Proximity-based location handlers
   const handleProximityLocationChange = useCallback((location: string) => {
@@ -526,7 +490,10 @@ function JobsPageContent() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h3>
               <p className="text-gray-600 mb-6">{error}</p>
               <button
-                onClick={() => fetchJobs(true)}
+                onClick={() => {
+                  clearError();
+                  refetch();
+                }}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Try again

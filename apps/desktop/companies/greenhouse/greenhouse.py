@@ -13,19 +13,19 @@ from typing import List, Dict, Any
 # Add base automation to path
 sys.path.append(str(Path(__file__).parent.parent / "base"))
 
-from base_automation import BaseJobAutomation
-from user_profile import UserProfile, JobData
+from database_automation import DatabaseAutomation
+from user_profile import UserProfile, JobData, AutomationConfig
 from result_handler import ApplicationResult, ApplicationStatus
 
 
-class GreenhouseAutomation(BaseJobAutomation):
+class GreenhouseAutomation(DatabaseAutomation):
     """
     Greenhouse-specific job application automation
     Handles job applications on Greenhouse job boards (*.greenhouse.io)
     """
     
-    def __init__(self):
-        super().__init__("greenhouse")
+    def __init__(self, config: AutomationConfig = None):
+        super().__init__("greenhouse", config)
         self.logger.info("Greenhouse automation initialized")
     
     def get_url_patterns(self) -> List[str]:

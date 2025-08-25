@@ -24,24 +24,35 @@ from greenhouse import GreenhouseAutomation
 async def main():
     """Main execution function"""
     try:
-        # Get data file path from environment variable
-        data_file_path = os.getenv('JOBSWIPE_DATA_FILE')
-        
-        if not data_file_path or not Path(data_file_path).exists():
-            raise FileNotFoundError(f"Data file not found: {data_file_path}")
-        
-        # Load automation data
-        with open(data_file_path, 'r') as f:
-            data = json.load(f)
-        
-        # Validate and create data objects
-        user_profile, job_data = validate_automation_data(
-            data['user_profile'], 
-            data['job_data']
-        )
+        # Detect execution mode
+        data_source = os.getenv('DATA_SOURCE', 'file')  # database | file
         
         # Create automation instance
         automation = GreenhouseAutomation()
+        
+        if data_source == 'database':
+            # Database mode - get user and job data from database
+            user_profile, job_data = await automation.get_automation_data()
+            
+            if not user_profile or not job_data:
+                raise ValueError("Failed to load user profile or job data from database")
+                
+        else:
+            # File mode - existing behavior
+            data_file_path = os.getenv('JOBSWIPE_DATA_FILE')
+            
+            if not data_file_path or not Path(data_file_path).exists():
+                raise FileNotFoundError(f"Data file not found: {data_file_path}")
+            
+            # Load automation data
+            with open(data_file_path, 'r') as f:
+                data = json.load(f)
+            
+            # Validate and create data objects
+            user_profile, job_data = validate_automation_data(
+                data['user_profile'], 
+                data['job_data']
+            )
         
         # Run the automation
         result = await automation.apply_to_job(user_profile, job_data)

@@ -14,148 +14,7 @@
 //   const [loading, setLoading] = useState(true);
 //   const [error, setError] = useState<string | null>(null);
 
-//   // Load jobs on mount
-//   useEffect(() => {
-//     loadJobs();
-//   }, []);
-
-//   const loadJobs = async () => {
-//     try {
-//       setLoading(true);
-//       setError(null);
-      
-//       // Check if we're in Electron environment
-//       if (typeof window !== 'undefined' && window.electronAPI) {
-//         // Get jobs from Electron main process
-//         const jobsData = await window.electronAPI.getJobs();
-//         setJobs(jobsData || []);
-//       } else {
-//         // Fallback to mock data for web environment
-//         setJobs(generateMockJobs());
-//       }
-//     } catch (err) {
-//       setError(err instanceof Error ? err.message : 'Failed to load jobs');
-//       console.error('Failed to load jobs:', err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Enhanced mock jobs with proper structure
-//   const generateMockJobs = (): JobData[] => {
-//     return [
-//       {
-//         id: '1',
-//         title: 'Senior Software Engineer',
-//         company: {
-//           id: 'anthropic',
-//           name: 'Anthropic',
-//           logo: 'https://via.placeholder.com/64'
-//         },
-//         location: 'San Francisco, CA',
-//         salary: {
-//           min: 150000,
-//           max: 220000,
-//           currency: 'USD'
-//         },
-//         description: 'Join our AI safety team to build responsible AI systems that benefit humanity. Work on cutting-edge language models and safety research.',
-//         requirements: ['React', 'TypeScript', 'Node.js', 'AI/ML', 'Python', 'PyTorch'],
-//         benefits: ['Health insurance', 'Stock options', 'Remote work', 'Unlimited PTO', 'Learning stipend'],
-//         remote: true,
-//         isUrgent: false,
-//         postedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-//         applicationUrl: 'https://jobs.lever.co/anthropic/software-engineer'
-//       },
-//       {
-//         id: '2',
-//         title: 'Frontend Developer',
-//         company: {
-//           id: 'google',
-//           name: 'Google',
-//           logo: 'https://via.placeholder.com/64'
-//         },
-//         location: 'Mountain View, CA',
-//         salary: {
-//           min: 130000,
-//           max: 180000,
-//           currency: 'USD'
-//         },
-//         description: 'Build the next generation of web applications used by billions of people. Work on Google Search, Gmail, and other core products.',
-//         requirements: ['JavaScript', 'React', 'CSS', 'HTML', 'Angular', 'TypeScript'],
-//         benefits: ['Health insurance', 'Free meals', 'Gym access', 'Learning budget', '401k matching'],
-//         remote: false,
-//         isUrgent: true,
-//         postedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-//         applicationUrl: 'https://careers.google.com/jobs/frontend-developer'
-//       },
-//       {
-//         id: '3',
-//         title: 'Full Stack Engineer',
-//         company: {
-//           id: 'stripe',
-//           name: 'Stripe',
-//           logo: 'https://via.placeholder.com/64'
-//         },
-//         location: 'Remote',
-//         salary: {
-//           min: 140000,
-//           max: 200000,
-//           currency: 'USD'
-//         },
-//         description: 'Help build the economic infrastructure for the internet. Work on payment processing, financial tools, and developer APIs.',
-//         requirements: ['Ruby', 'JavaScript', 'React', 'PostgreSQL', 'AWS', 'Docker'],
-//         benefits: ['Equity', 'Remote work', 'Health insurance', 'Professional development', 'Flexible hours'],
-//         remote: true,
-//         isUrgent: false,
-//         postedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-//         applicationUrl: 'https://stripe.com/jobs/listing/full-stack-engineer'
-//       },
-//       {
-//         id: '4',
-//         title: 'React Developer',
-//         company: {
-//           id: 'webflow',
-//           name: 'Webflow',
-//           logo: 'https://via.placeholder.com/64'
-//         },
-//         location: 'San Francisco, CA',
-//         salary: {
-//           min: 120000,
-//           max: 160000,
-//           currency: 'USD'
-//         },
-//         description: 'Build the visual development platform that empowers designers and developers to create without limits.',
-//         requirements: ['React', 'TypeScript', 'CSS', 'Node.js', 'GraphQL'],
-//         benefits: ['Health insurance', 'Stock options', 'Flexible PTO', 'Home office stipend'],
-//         remote: true,
-//         isUrgent: false,
-//         postedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-//         applicationUrl: 'https://webflow.com/jobs/react-developer'
-//       },
-//       {
-//         id: '5',
-//         title: 'Backend Engineer',
-//         company: {
-//           id: 'notion',
-//           name: 'Notion',
-//           logo: 'https://via.placeholder.com/64'
-//         },
-//         location: 'San Francisco, CA',
-//         salary: {
-//           min: 135000,
-//           max: 185000,
-//           currency: 'USD'
-//         },
-//         description: 'Build the backend systems that power the all-in-one workspace used by millions of teams worldwide.',
-//         requirements: ['Python', 'Go', 'PostgreSQL', 'Redis', 'Kubernetes', 'AWS'],
-//         benefits: ['Health insurance', 'Equity', 'Unlimited PTO', 'Learning budget', 'Wellness stipend'],
-//         remote: false,
-//         isUrgent: true,
-//         postedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-//         applicationUrl: 'https://notion.so/jobs/backend-engineer'
-//       }
-//     ];
-//   };
+  // Mock data removed - using real API data only
 
 //   if (loading) {
 //     return (
@@ -245,7 +104,7 @@
 import React, { useState, useCallback, Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 // Import icons will be replaced with inline SVGs to avoid type conflicts
-import { jobsApiClient } from '@/lib/services/jobsApiClient';
+import { useJobs } from '@/hooks/useJobs';
 
 // Job Components
 import { JobSwipeInterface } from '@/components/jobs/JobDiscovery/JobSwipeInterface';
@@ -284,13 +143,23 @@ function JobsPageContent() {
     successRate: 0
   });
   
-  // Job data state
-  const [jobs, setJobs] = useState<JobData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [page, setPage] = useState(1);
+  // Use real job data from API
+  const {
+    jobs,
+    loading,
+    error,
+    totalCount,
+    hasMore,
+    fetchMore,
+    refetch,
+    clearError
+  } = useJobs({
+    filters,
+    q: searchQuery,
+    sortBy: 'relevance',
+    limit: 50,
+    autoFetch: true
+  });
 
   // Mobile touch/swipe support
   const touchStartX = useRef<number | null>(null);
@@ -302,52 +171,6 @@ function JobsPageContent() {
   const [expandedResults, setExpandedResults] = useState<any>(null);
   const [showProximityExpansion, setShowProximityExpansion] = useState(false);
 
-  // Fetch jobs from API
-  const fetchJobs = useCallback(async (resetPage = false) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const currentPage = resetPage ? 1 : page;
-      const response = await jobsApiClient.getJobs({
-        page: currentPage,
-        limit: 50,
-        sortBy: 'relevance',
-        filters,
-        q: searchQuery,
-      });
-      
-      if (response.success && response.data) {
-        if (resetPage) {
-          setJobs(response.data?.jobs || []);
-          setPage(1);
-        } else {
-          setJobs(prev => [...prev, ...(response.data?.jobs || [])]);
-        }
-        setTotalCount(response.data?.totalCount || 0);
-        setHasMore(response.data?.hasMore || false);
-      } else {
-        setError(response.error || 'Failed to fetch jobs');
-      }
-    } catch (err) {
-      setError('Failed to load jobs. Please try again.');
-      console.error('Error fetching jobs:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, searchQuery, page]);
-
-  // Load jobs on component mount and when filters change
-  useEffect(() => {
-    fetchJobs(true); // Reset page when filters change
-  }, [filters, searchQuery]);
-
-  // Load more jobs when page changes
-  useEffect(() => {
-    if (page > 1) {
-      fetchJobs(false);
-    }
-  }, [page]);
 
   const handleViewChange = useCallback((newView: ViewMode) => {
     setViewMode(newView);
@@ -431,7 +254,7 @@ function JobsPageContent() {
 
     // Handle pull to refresh
     if (pullToRefresh && Math.abs(deltaY) > Math.abs(deltaX)) {
-      fetchJobs(true);
+      refetch();
       setPullToRefresh(false);
     }
 
@@ -439,7 +262,7 @@ function JobsPageContent() {
     touchStartX.current = null;
     touchStartY.current = null;
     setPullToRefresh(false);
-  }, [viewMode, handleViewChange, pullToRefresh, fetchJobs]);
+  }, [viewMode, handleViewChange, pullToRefresh, refetch]);
 
   // Proximity-based location handlers
   const handleProximityLocationChange = useCallback((location: string) => {
@@ -762,7 +585,10 @@ function JobsPageContent() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h3>
               <p className="text-gray-600 mb-6">{error}</p>
               <button
-                onClick={() => fetchJobs(true)}
+                onClick={() => {
+                  clearError();
+                  refetch();
+                }}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 Try again
@@ -778,6 +604,14 @@ function JobsPageContent() {
                 searchQuery={searchQuery}
                 filters={filters}
                 onApplicationUpdate={(stats) => setApplicationStats(stats)}
+                fetchMoreJobs={async (offset: number, limit: number) => {
+                  console.log('Fetching more jobs from parent, offset:', offset, 'limit:', limit);
+                  if (hasMore && !loading) {
+                    await fetchMore();
+                    return jobs.slice(offset, offset + limit);
+                  }
+                  return [];
+                }}
               />
             )}
             

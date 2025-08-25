@@ -339,42 +339,68 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
       // Create job snapshot
       const snapshot = await createJobSnapshot(request.server, jobPosting, queueEntry.id);
       
-      // Add to queue service
-      if (request.server.queueService) {
-        const jobData = {
-          jobId: data.jobId,
+      // Queue job application with AutomationService
+      if (request.server.automationService) {
+        // Transform data to match AutomationService expected format
+        const automationData = {
           userId: user.id,
           jobData: {
+            id: data.jobId,
             title: jobPosting.title,
             company: jobPosting.company.name,
-            url: jobPosting.applyUrl || jobPosting.sourceUrl || '',
-            description: jobPosting.description,
-            requirements: jobPosting.requirements,
-            salary: {
-              min: jobPosting.salaryMin,
-              max: jobPosting.salaryMax,
-              currency: jobPosting.currency,
-            },
+            applyUrl: jobPosting.applyUrl || jobPosting.sourceUrl || '',
             location: jobPosting.location || `${jobPosting.city}, ${jobPosting.state}`,
-            remote: jobPosting.remote,
-            type: jobPosting.type,
-            level: jobPosting.level,
+            description: jobPosting.description,
+            requirements: jobPosting.requirements || []
           },
           userProfile: {
+            firstName: userProfile?.firstName || user.email.split('@')[0], // Fallback to email username
+            lastName: userProfile?.lastName || 'User',
+            email: user.email,
+            phone: userProfile?.phone || '',
             resumeUrl: userProfile?.resumeUrl,
+            currentTitle: userProfile?.currentTitle,
+            yearsExperience: userProfile?.yearsExperience,
+            skills: userProfile?.skills || [],
+            currentLocation: userProfile?.currentLocation || jobPosting.location,
+            linkedinUrl: userProfile?.linkedinUrl,
+            workAuthorization: userProfile?.workAuthorization,
             coverLetter: data.coverLetter,
-            preferences: userProfile?.preferences || {},
+            customFields: {
+              applicationId: queueEntry.id,
+              source: data.metadata.source,
+              deviceId: data.metadata.deviceId,
+              priority: data.priority
+            }
           },
-          priority: data.priority || 5,
-          metadata: {
-            source: data.metadata.source,
-            deviceId: data.metadata.deviceId,
-            timestamp: new Date().toISOString(),
-          },
+          options: {
+            headless: true,
+            timeout: 120000, // 2 minutes
+            maxRetries: 3
+          }
         };
         
-        const isPriority = data.priority >= 8;
-        await request.server.queueService.addJobApplication(jobData, isPriority);
+        // Queue the application for automation
+        try {
+          const applicationId = await request.server.automationService.queueApplication(automationData);
+          request.server.log.info(`Application queued for automation: ${applicationId}`);
+          
+          // Update the database entry with automation application ID
+          await tx.applicationQueue.update({
+            where: { id: queueEntry.id },
+            data: {
+              automationConfig: {
+                ...queueEntry.automationConfig,
+                automationApplicationId: applicationId,
+                queuedAt: new Date().toISOString()
+              }
+            }
+          });
+        } catch (automationError) {
+          request.server.log.error('Failed to queue automation:', automationError);
+          // Don't fail the entire request, just log the error
+          // The job is still saved in the database for manual processing
+        }
       }
       
       return {
@@ -537,10 +563,18 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
       });
     }
     
-    // Get queue status if available
-    let queueStatus = null;
-    if (request.server.queueService) {
-      queueStatus = await request.server.queueService.getJobStatus(id);
+    // Get automation status if available
+    let automationStatus = null;
+    if (request.server.automationService) {
+      try {
+        // Extract automation application ID from config
+        const automationApplicationId = application.automationConfig?.automationApplicationId;
+        if (automationApplicationId) {
+          automationStatus = await request.server.automationService.getApplicationStatus(automationApplicationId);
+        }
+      } catch (error) {
+        request.server.log.warn('Failed to get automation status:', error);
+      }
     }
     
     const formattedApplication = {
@@ -557,7 +591,7 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
       errorMessage: application.errorMessage,
       errorType: application.errorType,
       responseData: application.responseData,
-      queueStatus,
+      automationStatus,
       job: {
         title: application.jobSnapshot?.title || application.jobPosting.title,
         company: application.jobSnapshot?.companyName || application.jobPosting.company.name,
@@ -626,8 +660,23 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
     switch (data.action) {
       case 'cancel':
         updateData = { status: 'CANCELLED' };
-        if (request.server.queueService) {
-          queueAction = request.server.queueService.cancelJobApplication(id);
+        if (request.server.automationService) {
+          try {
+            // Extract automation application ID from config
+            const automationApplicationId = application.automationConfig?.automationApplicationId;
+            if (automationApplicationId) {
+              const cancelResult = await request.server.automationService.cancelApplication(automationApplicationId, user.id);
+              if (!cancelResult.cancelled) {
+                return reply.code(400).send({
+                  success: false,
+                  error: 'Cannot cancel application - it may already be processing',
+                  errorCode: 'CANCEL_FAILED',
+                });
+              }
+            }
+          } catch (error) {
+            request.server.log.warn('Failed to cancel automation:', error);
+          }
         }
         break;
         
@@ -733,13 +782,13 @@ async function getQueueStatsHandler(request: AuthenticatedRequest, reply: Fastif
       return acc;
     }, {} as Record<string, number>);
     
-    // Get queue service stats if available
-    let queueServiceStats = null;
-    if (request.server.queueService) {
+    // Get automation service stats if available
+    let automationServiceStats = null;
+    if (request.server.automationService) {
       try {
-        queueServiceStats = await request.server.queueService.getQueueStats();
+        automationServiceStats = await request.server.automationService.getQueueStats();
       } catch (error) {
-        request.server.log.warn('Failed to get queue service stats:', error);
+        request.server.log.warn('Failed to get automation service stats:', error);
       }
     }
     
@@ -762,7 +811,7 @@ async function getQueueStatsHandler(request: AuthenticatedRequest, reply: Fastif
           createdAt: app.createdAt,
         })),
       },
-      queue: queueServiceStats,
+      automation: automationServiceStats,
     };
     
     return reply.send({

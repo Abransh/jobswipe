@@ -41,7 +41,7 @@ export interface ProximityApiResponse {
 }
 
 export class JobsApiClient {
-  private baseUrl = '/api/jobs';
+  private baseUrl = 'http://localhost:3001/v1/jobs';
 
   /**
    * Fetch jobs with filtering and pagination

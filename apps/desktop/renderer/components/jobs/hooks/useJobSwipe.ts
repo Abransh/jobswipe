@@ -108,7 +108,18 @@ export function useJobSwipe({
   // Get current job
   const currentJob = jobQueue[currentIndex] || null;
   const hasNextJob = currentIndex + 1 < jobQueue.length;
-  const queueLength = jobQueue.length - currentIndex;
+  const queueLength = Math.max(0, jobQueue.length - currentIndex);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Job queue state:', {
+      currentIndex,
+      jobQueueLength: jobQueue.length,
+      currentJob: currentJob?.job?.title || 'None',
+      hasNextJob,
+      queueLength
+    });
+  }, [currentIndex, jobQueue.length, currentJob, hasNextJob, queueLength]);
 
   // Preload next jobs
   const preloadNext = useCallback(async () => {
@@ -171,7 +182,12 @@ export function useJobSwipe({
 
   // Handle swipe left
   const swipeLeft = useCallback(() => {
-    if (!currentJob) return;
+    if (!currentJob) {
+      console.log('swipeLeft: No current job available');
+      return;
+    }
+    
+    console.log('swipeLeft: Processing job', currentJob.job.title, 'currentIndex:', currentIndex, 'queueLength:', jobQueue.length);
     
     const analyticsData = createAnalytics(
       currentJob.job,
@@ -188,7 +204,9 @@ export function useJobSwipe({
     onSwipeLeft?.(currentJob.job, analyticsData);
     
     // Move to next job
-    setCurrentIndex(prev => prev + 1);
+    const nextIndex = currentIndex + 1;
+    console.log('swipeLeft: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
+    setCurrentIndex(nextIndex);
     
     // Reset card state
     setCardState(prev => ({
@@ -205,14 +223,20 @@ export function useJobSwipe({
     refillQueue();
     
     // Check if queue is empty
-    if (currentIndex + 1 >= jobQueue.length && !fetchJobs) {
+    if (nextIndex >= jobQueue.length && !fetchJobs) {
+      console.log('swipeLeft: Queue empty, calling onEmptyQueue');
       onEmptyQueue?.();
     }
   }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeLeft, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
 
   // Handle swipe right
   const swipeRight = useCallback(() => {
-    if (!currentJob) return;
+    if (!currentJob) {
+      console.log('swipeRight: No current job available');
+      return;
+    }
+    
+    console.log('swipeRight: Processing job', currentJob.job.title, 'currentIndex:', currentIndex, 'queueLength:', jobQueue.length);
     
     const analyticsData = createAnalytics(
       currentJob.job,
@@ -229,7 +253,9 @@ export function useJobSwipe({
     onSwipeRight?.(currentJob.job, analyticsData);
     
     // Move to next job
-    setCurrentIndex(prev => prev + 1);
+    const nextIndex = currentIndex + 1;
+    console.log('swipeRight: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
+    setCurrentIndex(nextIndex);
     
     // Reset card state
     setCardState(prev => ({
@@ -246,7 +272,8 @@ export function useJobSwipe({
     refillQueue();
     
     // Check if queue is empty
-    if (currentIndex + 1 >= jobQueue.length && !fetchJobs) {
+    if (nextIndex >= jobQueue.length && !fetchJobs) {
+      console.log('swipeRight: Queue empty, calling onEmptyQueue');
       onEmptyQueue?.();
     }
   }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeRight, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
@@ -433,6 +460,7 @@ export function useJobSwipe({
   useEffect(() => {
     const remainingJobs = jobQueue.length - currentIndex;
     if (remainingJobs <= 2 && fetchJobs && !isLoading) {
+      console.log('Auto-refilling queue, remaining jobs:', remainingJobs);
       preloadNext();
     }
   }, [currentIndex, jobQueue.length, fetchJobs, isLoading, preloadNext]);

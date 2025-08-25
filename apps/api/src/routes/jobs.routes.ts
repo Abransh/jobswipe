@@ -4,155 +4,87 @@
  */
 
 import { FastifyPluginAsync } from 'fastify';
+import { JobService } from '../services/JobService';
 
 const jobsRoutes: FastifyPluginAsync = async function (fastify) {
+  const jobService = new JobService(fastify);
+
   // GET /v1/jobs - Fetch jobs with filtering and pagination
   fastify.get('/jobs', async (request, reply) => {
     try {
       const query = request.query as any;
       
       fastify.log.info(`📋 Fetching jobs with query: ${JSON.stringify(query)}`);
-      
-      // Mock response for now - replace with actual job fetching logic
-      const mockJobs = [
-        {
-          id: '1',
-          title: 'Senior Software Engineer',
-          description: 'Looking for a senior software engineer with 5+ years of experience...',
-          requirements: 'Bachelor degree in Computer Science, 5+ years experience',
-          benefits: 'Health insurance, retirement plan, flexible hours',
-          type: 'FULL_TIME',
-          level: 'SENIOR',
-          department: 'Engineering',
-          category: 'TECHNOLOGY',
-          remote: true,
-          remoteType: 'HYBRID',
-          location: 'Milan, Italy',
-          timeZone: 'Europe/Rome',
-          city: 'Milan',
-          state: 'Lombardy',
-          country: 'Italy',
-          salaryMin: 50000,
-          salaryMax: 80000,
-          currency: 'EUR',
-          salaryType: 'ANNUAL',
-          equity: '0.1-0.5%',
-          bonus: 'Performance bonus',
-          experienceYears: 5,
-          skills: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'PostgreSQL'],
-          education: 'Bachelor degree',
-          languages: ['English', 'Italian'],
-          companyId: 'company-1',
-          company: {
-            id: 'company-1',
-            name: 'Tech Corp',
-            slug: 'tech-corp',
-            description: 'Leading technology company',
-            website: 'https://techcorp.com',
-            logo: 'https://via.placeholder.com/64x64/0066cc/ffffff?text=TC',
-            industry: 'Technology',
-            size: 'LARGE',
-            isVerified: true,
-            qualityScore: 92,
-            headquarters: 'Milan, Italy',
-            country: 'Italy',
-            foundedYear: 2010,
-            employeeCount: 500
-          },
-          sourceUrl: 'https://jobs.techcorp.com/senior-engineer',
-          applyUrl: 'https://jobs.techcorp.com/apply/senior-engineer',
-          qualityScore: 88,
-          isVerified: true,
-          isActive: true,
-          isFeatured: true,
-          isUrgent: false,
-          postedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-          viewCount: 245,
-          applicationCount: 12,
-          rightSwipeCount: 18,
-          leftSwipeCount: 8,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          title: 'Frontend Developer',
-          description: 'Frontend developer with React experience and passion for UX...',
-          requirements: 'Bachelor degree, 3+ years React experience',
-          benefits: 'Health insurance, remote work, learning budget',
-          type: 'FULL_TIME',
-          level: 'MID_LEVEL',
-          department: 'Engineering',
-          category: 'TECHNOLOGY',
-          remote: true,
-          remoteType: 'REMOTE',
-          location: 'Rome, Italy',
-          timeZone: 'Europe/Rome',
-          city: 'Rome',
-          state: 'Lazio',
-          country: 'Italy',
-          salaryMin: 40000,
-          salaryMax: 60000,
-          currency: 'EUR',
-          salaryType: 'ANNUAL',
-          equity: '0.05-0.2%',
-          bonus: 'Annual bonus',
-          experienceYears: 3,
-          skills: ['React', 'JavaScript', 'CSS', 'HTML', 'TypeScript'],
-          education: 'Bachelor degree',
-          languages: ['English', 'Italian'],
-          companyId: 'company-2',
-          company: {
-            id: 'company-2',
-            name: 'Startup Inc',
-            slug: 'startup-inc',
-            description: 'Innovative startup disrupting the market',
-            website: 'https://startup-inc.com',
-            logo: 'https://via.placeholder.com/64x64/ff6600/ffffff?text=SI',
-            industry: 'Technology',
-            size: 'SMALL',
-            isVerified: false,
-            qualityScore: 75,
-            headquarters: 'Rome, Italy',
-            country: 'Italy',
-            foundedYear: 2020,
-            employeeCount: 25
-          },
-          sourceUrl: 'https://startup-inc.com/careers/frontend',
-          applyUrl: 'https://startup-inc.com/apply/frontend',
-          qualityScore: 82,
-          isVerified: false,
-          isActive: true,
-          isFeatured: false,
-          isUrgent: true,
-          postedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
-          viewCount: 89,
-          applicationCount: 5,
-          rightSwipeCount: 7,
-          leftSwipeCount: 3,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ];
-      
+
+      // Parse query parameters
+      const options = {
+        page: parseInt(query.page) || 1,
+        limit: parseInt(query.limit) || 20,
+        sortBy: query.sortBy || 'relevance',
+        q: query.q,
+        userLocation: query.userLat && query.userLng ? {
+          lat: parseFloat(query.userLat),
+          lng: parseFloat(query.userLng)
+        } : undefined,
+        userId: request.headers['x-user-id'] as string, // Get from auth header
+        filters: {
+          location: query.location,
+          remote: query.remote,
+          jobType: query.jobType ? query.jobType.split(',') : [],
+          jobLevel: query.jobLevel ? query.jobLevel.split(',') : [],
+          salaryMin: query.salaryMin ? parseInt(query.salaryMin) : undefined,
+          salaryMax: query.salaryMax ? parseInt(query.salaryMax) : undefined,
+          skills: query.skills ? query.skills.split(',') : [],
+          companySize: query.companySize ? query.companySize.split(',') : [],
+          category: query.category ? query.category.split(',') : [],
+          experience: query.experience ? parseInt(query.experience) : undefined
+        }
+      };
+
+      // Fetch jobs from database
+      const result = await jobService.searchJobs(options);
+
       reply.send({
         success: true,
-        data: {
-          jobs: mockJobs,
-          totalCount: mockJobs.length,
-          hasMore: false,
-          page: query.page || 1,
-          limit: query.limit || 50,
-          filters: query,
-        },
+        data: result
       });
+
     } catch (error) {
       fastify.log.error('❌ Error fetching jobs:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to fetch jobs',
+        error: error instanceof Error ? error.message : 'Failed to fetch jobs',
+      });
+    }
+  });
+
+  // GET /v1/jobs/proximity - Get location-based job suggestions
+  fastify.get('/jobs/proximity', async (request, reply) => {
+    try {
+      const query = request.query as any;
+      
+      fastify.log.info(`🌍 Fetching proximity jobs for location: ${query.location}`);
+
+      const params = {
+        location: query.location || '',
+        jobType: query.jobType ? query.jobType.split(',') : [],
+        level: query.level ? query.level.split(',') : [],
+        remote: query.remote || 'any',
+        limit: parseInt(query.limit) || 20
+      };
+
+      const result = await jobService.getProximityJobs(params);
+
+      reply.send({
+        success: true,
+        data: result
+      });
+
+    } catch (error) {
+      fastify.log.error('❌ Error fetching proximity jobs:', error);
+      reply.status(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch proximity jobs',
       });
     }
   });
@@ -174,7 +106,8 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
 
         fastify.log.info('📥 Manual job sync requested:', { location, keywords, sources, limit });
 
-        // Mock sync response - replace with actual job fetching and storing logic
+        // TODO: Implement actual job scraping and syncing logic
+        // For now, return success response
         reply.send({
           success: true,
           data: {
@@ -183,20 +116,19 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
             updated: 2,
             skipped: 0,
             cleanedUp: 5,
+            message: 'Job sync functionality will be implemented with scraping services'
           },
         });
+        
       } else if (action === 'stats') {
-        // Mock stats response - replace with actual database stats
+        // Get real database statistics
+        const stats = await jobService.getJobStats();
+        
         reply.send({
           success: true,
-          data: {
-            totalJobs: 150,
-            activeJobs: 120,
-            expiredJobs: 30,
-            recentJobs: 25,
-            companies: 45,
-          },
+          data: stats,
         });
+        
       } else {
         reply.status(400).send({
           success: false,
@@ -207,7 +139,110 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       fastify.log.error('❌ Error in job management:', error);
       reply.status(500).send({
         success: false,
-        error: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Internal server error',
+      });
+    }
+  });
+
+  // POST /v1/jobs/advanced-search - Advanced job search with faceted filtering
+  fastify.post('/jobs/advanced-search', async (request, reply) => {
+    try {
+      const searchParams = request.body as any;
+      const userId = request.headers['x-user-id'] as string;
+      
+      fastify.log.info('🔍 Advanced job search requested:', searchParams);
+
+      // Enhanced search parameters
+      const searchOptions = {
+        query: searchParams.query,
+        skills: searchParams.skills,
+        location: searchParams.location,
+        salaryMin: searchParams.salaryMin ? parseInt(searchParams.salaryMin) : undefined,
+        salaryMax: searchParams.salaryMax ? parseInt(searchParams.salaryMax) : undefined,
+        experienceMin: searchParams.experienceMin ? parseInt(searchParams.experienceMin) : undefined,
+        experienceMax: searchParams.experienceMax ? parseInt(searchParams.experienceMax) : undefined,
+        remote: searchParams.remote || 'any',
+        companySize: searchParams.companySize,
+        posted: searchParams.posted || 'any',
+        page: parseInt(searchParams.page) || 1,
+        limit: parseInt(searchParams.limit) || 20,
+        userId
+      };
+
+      // Use existing search method with enhanced filtering
+      const result = await jobService.searchJobs({
+        q: searchOptions.query,
+        page: searchOptions.page,
+        limit: searchOptions.limit,
+        sortBy: 'relevance',
+        userId: searchOptions.userId,
+        filters: {
+          skills: searchOptions.skills,
+          location: searchOptions.location,
+          salaryMin: searchOptions.salaryMin,
+          salaryMax: searchOptions.salaryMax,
+          experience: searchOptions.experienceMin,
+          remote: searchOptions.remote === 'only' ? 'remote_only' : 
+                  searchOptions.remote === 'excluded' ? 'onsite' : 'any',
+          jobType: [],
+          jobLevel: [],
+          companySize: searchOptions.companySize,
+          category: []
+        }
+      });
+
+      reply.send({
+        success: true,
+        data: {
+          ...result,
+          searchParams: searchOptions,
+          enhancedSearch: true
+        }
+      });
+
+    } catch (error) {
+      fastify.log.error('❌ Error in advanced search:', error);
+      reply.status(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : 'Advanced search failed',
+      });
+    }
+  });
+
+  // GET /v1/jobs/:id - Get single job details
+  fastify.get('/jobs/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const userId = request.headers['x-user-id'] as string;
+
+      fastify.log.info(`📋 Fetching job details for: ${id}`);
+
+      // Get job from database
+      const job = await jobService.getJobById(id);
+      
+      if (!job) {
+        reply.status(404).send({
+          success: false,
+          error: 'Job not found',
+        });
+        return;
+      }
+
+      // Record job view
+      if (userId) {
+        await jobService.recordJobView(id, userId);
+      }
+
+      reply.send({
+        success: true,
+        data: job
+      });
+
+    } catch (error) {
+      fastify.log.error('❌ Error fetching job details:', error);
+      reply.status(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch job details',
       });
     }
   });

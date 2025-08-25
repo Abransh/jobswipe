@@ -82,7 +82,7 @@ const AutomationResultSchema = z.object({
 export async function automationRoutes(fastify: FastifyInstance) {
   
   /**
-   * Execute automation for a job application
+   * Execute automation for a job application (unified endpoint)
    */
   fastify.post('/automation/execute', {
     schema: {
@@ -143,6 +143,210 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
       } catch (error) {
         fastify.log.error('Automation execution failed:', error);
+        reply.code(500).send({
+          success: false,
+          error: error instanceof Error ? error.message : 'Internal server error'
+        });
+      }
+    }
+  });
+
+  /**
+   * Execute automation directly on server (for demo users)
+   */
+  fastify.post('/automation/server-execute', {
+    schema: {
+      description: 'Execute job application automation directly on server',
+      tags: ['automation'],
+      body: ExecuteAutomationRequestSchema,
+      response: {
+        200: z.object({
+          success: z.boolean(),
+          data: z.object({
+            applicationId: z.string(),
+            jobId: z.string(),
+            userId: z.string(),
+            result: z.object({
+              success: z.boolean(),
+              confirmationNumber: z.string().optional(),
+              executionTime: z.number(),
+              status: z.string(),
+              steps: z.array(z.object({
+                stepName: z.string(),
+                success: z.boolean(),
+                timestamp: z.string()
+              })),
+              proxyUsed: z.string().optional(),
+              serverInfo: z.object({
+                serverId: z.string(),
+                executionMode: z.string()
+              })
+            })
+          })
+        }),
+        400: z.object({
+          success: z.boolean(),
+          error: z.string()
+        }),
+        403: z.object({
+          success: z.boolean(),
+          error: z.string(),
+          upgradeRequired: z.boolean(),
+          suggestedAction: z.string().optional()
+        })
+      }
+    },
+    preHandler: fastify.auth,
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const { userId, jobData, userProfile, options } = request.body as z.infer<typeof ExecuteAutomationRequestSchema>;
+        
+        // Validate user owns this request
+        if (request.user.id !== userId) {
+          return reply.code(403).send({
+            success: false,
+            error: 'Access denied',
+            upgradeRequired: false
+          });
+        }
+
+        // Check if user can use server automation
+        const eligibility = await fastify.automationLimits.checkServerEligibility(userId);
+        if (!eligibility.allowed) {
+          return reply.code(403).send({
+            success: false,
+            error: eligibility.reason || 'Server automation not available',
+            upgradeRequired: eligibility.upgradeRequired,
+            suggestedAction: eligibility.suggestedAction
+          });
+        }
+
+        // Execute server automation directly
+        const applicationId = fastify.generateId();
+        
+        const serverRequest = {
+          userId,
+          jobId: jobData.id,
+          applicationId,
+          companyAutomation: fastify.automationService.detectCompanyAutomation(jobData.applyUrl),
+          userProfile,
+          jobData,
+          options: options || {}
+        };
+
+        const result = await fastify.serverAutomationService.executeAutomation(serverRequest);
+        
+        // Record usage
+        await fastify.automationLimits.recordServerApplication(userId);
+
+        reply.send({
+          success: true,
+          data: {
+            applicationId,
+            jobId: jobData.id,
+            userId,
+            result
+          }
+        });
+
+      } catch (error) {
+        fastify.log.error('Server automation execution failed:', error);
+        reply.code(500).send({
+          success: false,
+          error: error instanceof Error ? error.message : 'Internal server error',
+          upgradeRequired: false
+        });
+      }
+    }
+  });
+
+  /**
+   * Get user automation limits and eligibility
+   */
+  fastify.get('/automation/limits', {
+    schema: {
+      description: 'Get user automation limits and server eligibility',
+      tags: ['automation'],
+      response: {
+        200: z.object({
+          success: z.boolean(),
+          data: z.object({
+            canUseServerAutomation: z.boolean(),
+            remainingServerApplications: z.number(),
+            serverApplicationsUsed: z.number(),
+            serverApplicationsLimit: z.number(),
+            plan: z.string(),
+            upgradeRequired: z.boolean(),
+            suggestedAction: z.string().optional()
+          })
+        })
+      }
+    },
+    preHandler: fastify.auth,
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const userId = request.user.id;
+        
+        const eligibility = await fastify.automationLimits.checkServerEligibility(userId);
+        const userStats = fastify.automationLimits.getUserStats(userId);
+
+        reply.send({
+          success: true,
+          data: {
+            canUseServerAutomation: eligibility.allowed,
+            remainingServerApplications: eligibility.remainingServerApplications,
+            serverApplicationsUsed: userStats?.serverApplicationsUsed || 0,
+            serverApplicationsLimit: userStats?.serverApplicationsLimit || 0,
+            plan: userStats?.plan || 'free',
+            upgradeRequired: eligibility.upgradeRequired,
+            suggestedAction: eligibility.suggestedAction
+          }
+        });
+
+      } catch (error) {
+        fastify.log.error('Failed to get automation limits:', error);
+        reply.code(500).send({
+          success: false,
+          error: error instanceof Error ? error.message : 'Internal server error'
+        });
+      }
+    }
+  });
+
+  /**
+   * Get proxy status and statistics
+   */
+  fastify.get('/automation/proxy-stats', {
+    schema: {
+      description: 'Get proxy rotation statistics',
+      tags: ['automation', 'admin'],
+      response: {
+        200: z.object({
+          success: z.boolean(),
+          data: z.object({
+            totalProxies: z.number(),
+            activeProxies: z.number(),
+            averageSuccessRate: z.number(),
+            totalRequests: z.number(),
+            failedRequests: z.number(),
+            averageResponseTime: z.number(),
+            costToday: z.number()
+          })
+        })
+      }
+    },
+    preHandler: [fastify.auth, fastify.requireRole('admin')],
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const stats = fastify.proxyRotator.getUsageStats();
+        
+        reply.send({
+          success: true,
+          data: stats
+        });
+
+      } catch (error) {
+        fastify.log.error('Failed to get proxy stats:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'

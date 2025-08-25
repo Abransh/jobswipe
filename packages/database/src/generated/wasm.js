@@ -196,6 +196,9 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   profileVisibility: 'profileVisibility',
   showEmail: 'showEmail',
   showPhone: 'showPhone',
+  workAuthorization: 'workAuthorization',
+  coverLetterTemplate: 'coverLetterTemplate',
+  automationPreferences: 'automationPreferences',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -329,6 +332,35 @@ exports.Prisma.AutomationLogScalarFieldEnum = {
   browserInfo: 'browserInfo',
   pageUrl: 'pageUrl',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.AutomationProxyScalarFieldEnum = {
+  id: 'id',
+  host: 'host',
+  port: 'port',
+  username: 'username',
+  password: 'password',
+  proxyType: 'proxyType',
+  provider: 'provider',
+  country: 'country',
+  region: 'region',
+  isActive: 'isActive',
+  failureCount: 'failureCount',
+  successRate: 'successRate',
+  lastUsedAt: 'lastUsedAt',
+  lastCheckedAt: 'lastCheckedAt',
+  requestsPerHour: 'requestsPerHour',
+  dailyLimit: 'dailyLimit',
+  currentHourlyUsage: 'currentHourlyUsage',
+  currentDailyUsage: 'currentDailyUsage',
+  avgResponseTime: 'avgResponseTime',
+  uptime: 'uptime',
+  costPerRequest: 'costPerRequest',
+  monthlyLimit: 'monthlyLimit',
+  notes: 'notes',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AuditLogScalarFieldEnum = {
@@ -720,6 +752,10 @@ exports.Prisma.JobApplicationScalarFieldEnum = {
   automationAttempts: 'automationAttempts',
   automationData: 'automationData',
   lastAutomationAt: 'lastAutomationAt',
+  executionMode: 'executionMode',
+  serverIpAddress: 'serverIpAddress',
+  proxyUsed: 'proxyUsed',
+  automationLogs: 'automationLogs',
   lastContactAt: 'lastContactAt',
   contactMethod: 'contactMethod',
   recruiterName: 'recruiterName',
@@ -911,7 +947,9 @@ exports.Prisma.UserProfileOrderByRelevanceFieldEnum = {
   experienceLevel: 'experienceLevel',
   skills: 'skills',
   desiredJobTypes: 'desiredJobTypes',
-  preferredCurrency: 'preferredCurrency'
+  preferredCurrency: 'preferredCurrency',
+  workAuthorization: 'workAuthorization',
+  coverLetterTemplate: 'coverLetterTemplate'
 };
 
 exports.Prisma.UserPreferencesOrderByRelevanceFieldEnum = {
@@ -988,6 +1026,18 @@ exports.Prisma.AutomationLogOrderByRelevanceFieldEnum = {
   stackTrace: 'stackTrace',
   screenshot: 'screenshot',
   pageUrl: 'pageUrl'
+};
+
+exports.Prisma.AutomationProxyOrderByRelevanceFieldEnum = {
+  id: 'id',
+  host: 'host',
+  username: 'username',
+  password: 'password',
+  provider: 'provider',
+  country: 'country',
+  region: 'region',
+  notes: 'notes',
+  tags: 'tags'
 };
 
 exports.Prisma.AuditLogOrderByRelevanceFieldEnum = {
@@ -1207,6 +1257,8 @@ exports.Prisma.JobApplicationOrderByRelevanceFieldEnum = {
   externalId: 'externalId',
   atsUrl: 'atsUrl',
   confirmationNumber: 'confirmationNumber',
+  serverIpAddress: 'serverIpAddress',
+  proxyUsed: 'proxyUsed',
   contactMethod: 'contactMethod',
   recruiterName: 'recruiterName',
   recruiterEmail: 'recruiterEmail',
@@ -1332,6 +1384,14 @@ exports.LogLevel = exports.$Enums.LogLevel = {
   WARN: 'WARN',
   ERROR: 'ERROR',
   CRITICAL: 'CRITICAL'
+};
+
+exports.ProxyType = exports.$Enums.ProxyType = {
+  RESIDENTIAL: 'RESIDENTIAL',
+  DATACENTER: 'DATACENTER',
+  MOBILE: 'MOBILE',
+  STATIC: 'STATIC',
+  ROTATING: 'ROTATING'
 };
 
 exports.ActorType = exports.$Enums.ActorType = {
@@ -1633,6 +1693,11 @@ exports.AutomationStatus = exports.$Enums.AutomationStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.ExecutionMode = exports.$Enums.ExecutionMode = {
+  SERVER: 'SERVER',
+  DESKTOP: 'DESKTOP'
+};
+
 exports.InteractionType = exports.$Enums.InteractionType = {
   APPLICATION_SUBMITTED: 'APPLICATION_SUBMITTED',
   EMAIL_RECEIVED: 'EMAIL_RECEIVED',
@@ -1750,6 +1815,7 @@ exports.Prisma.ModelName = {
   UserJobSwipe: 'UserJobSwipe',
   ApplicationQueue: 'ApplicationQueue',
   AutomationLog: 'AutomationLog',
+  AutomationProxy: 'AutomationProxy',
   AuditLog: 'AuditLog',
   AnalyticsEvent: 'AnalyticsEvent',
   UserNotification: 'UserNotification',

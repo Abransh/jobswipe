@@ -147,6 +147,11 @@ model UserProfile {
   showEmail         Boolean           @default(false)
   showPhone         Boolean           @default(false)
 
+  // Automation Fields
+  workAuthorization     String? // citizen, visa, etc.
+  coverLetterTemplate   String? // Default cover letter template
+  automationPreferences Json? // Automation settings and preferences
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -385,6 +390,57 @@ model AutomationLog {
   @@index([createdAt])
   @@index([level, createdAt])
   @@map("automation_logs")
+}
+
+model AutomationProxy {
+  id String @id @default(uuid())
+
+  // Proxy Configuration
+  host     String
+  port     Int
+  username String?
+  password String?
+
+  // Proxy Details
+  proxyType ProxyType @default(RESIDENTIAL)
+  provider  String? // Bright Data, Oxylabs, etc.
+  country   String? // Proxy country
+  region    String? // Proxy region/city
+
+  // Status & Health
+  isActive      Boolean   @default(true)
+  failureCount  Int       @default(0)
+  successRate   Float     @default(100.0)
+  lastUsedAt    DateTime?
+  lastCheckedAt DateTime?
+
+  // Rate Limiting
+  requestsPerHour    Int? @default(100)
+  dailyLimit         Int? @default(1000)
+  currentHourlyUsage Int  @default(0)
+  currentDailyUsage  Int  @default(0)
+
+  // Performance Metrics
+  avgResponseTime Int? // Average response time in ms
+  uptime          Float? // Uptime percentage
+
+  // Cost Management
+  costPerRequest Decimal? // Cost per request if applicable
+  monthlyLimit   Decimal? // Monthly cost limit
+
+  // Metadata
+  notes String? // Admin notes
+  tags  String[] // Organization tags
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, proxyType])
+  @@index([provider, isActive])
+  @@index([successRate])
+  @@index([lastUsedAt])
+  @@index([failureCount])
+  @@map("automation_proxies")
 }
 
 // =============================================================================
@@ -1128,6 +1184,12 @@ model JobApplication {
   automationData     Json? // Data from automation process
   lastAutomationAt   DateTime?
 
+  // Execution Tracking
+  executionMode   ExecutionMode? @default(DESKTOP) // server or desktop
+  serverIpAddress String? // IP address if executed on server
+  proxyUsed       String? // Proxy configuration used
+  automationLogs  Json? // Step-by-step automation logs
+
   // Communication Tracking
   lastContactAt  DateTime?
   contactMethod  String? // Email, phone, LinkedIn, etc.
@@ -1587,6 +1649,19 @@ enum AutomationStatus {
   FAILED
   REQUIRES_MANUAL
   CANCELLED
+}
+
+enum ExecutionMode {
+  SERVER
+  DESKTOP
+}
+
+enum ProxyType {
+  RESIDENTIAL
+  DATACENTER
+  MOBILE
+  STATIC
+  ROTATING
 }
 
 enum QueueStatus {

@@ -59,6 +59,11 @@ export type ApplicationQueue = $Result.DefaultSelection<Prisma.$ApplicationQueue
  */
 export type AutomationLog = $Result.DefaultSelection<Prisma.$AutomationLogPayload>
 /**
+ * Model AutomationProxy
+ * 
+ */
+export type AutomationProxy = $Result.DefaultSelection<Prisma.$AutomationProxyPayload>
+/**
  * Model AuditLog
  * 
  */
@@ -239,6 +244,17 @@ export const LogLevel: {
 };
 
 export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel]
+
+
+export const ProxyType: {
+  RESIDENTIAL: 'RESIDENTIAL',
+  DATACENTER: 'DATACENTER',
+  MOBILE: 'MOBILE',
+  STATIC: 'STATIC',
+  ROTATING: 'ROTATING'
+};
+
+export type ProxyType = (typeof ProxyType)[keyof typeof ProxyType]
 
 
 export const ActorType: {
@@ -612,6 +628,14 @@ export const AutomationStatus: {
 export type AutomationStatus = (typeof AutomationStatus)[keyof typeof AutomationStatus]
 
 
+export const ExecutionMode: {
+  SERVER: 'SERVER',
+  DESKTOP: 'DESKTOP'
+};
+
+export type ExecutionMode = (typeof ExecutionMode)[keyof typeof ExecutionMode]
+
+
 export const InteractionType: {
   APPLICATION_SUBMITTED: 'APPLICATION_SUBMITTED',
   EMAIL_RECEIVED: 'EMAIL_RECEIVED',
@@ -773,6 +797,10 @@ export type LogLevel = $Enums.LogLevel
 
 export const LogLevel: typeof $Enums.LogLevel
 
+export type ProxyType = $Enums.ProxyType
+
+export const ProxyType: typeof $Enums.ProxyType
+
 export type ActorType = $Enums.ActorType
 
 export const ActorType: typeof $Enums.ActorType
@@ -868,6 +896,10 @@ export const ApplicationSource: typeof $Enums.ApplicationSource
 export type AutomationStatus = $Enums.AutomationStatus
 
 export const AutomationStatus: typeof $Enums.AutomationStatus
+
+export type ExecutionMode = $Enums.ExecutionMode
+
+export const ExecutionMode: typeof $Enums.ExecutionMode
 
 export type InteractionType = $Enums.InteractionType
 
@@ -1109,6 +1141,16 @@ export class PrismaClient<
     * ```
     */
   get automationLog(): Prisma.AutomationLogDelegate<ExtArgs>;
+
+  /**
+   * `prisma.automationProxy`: Exposes CRUD operations for the **AutomationProxy** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AutomationProxies
+    * const automationProxies = await prisma.automationProxy.findMany()
+    * ```
+    */
+  get automationProxy(): Prisma.AutomationProxyDelegate<ExtArgs>;
 
   /**
    * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
@@ -1739,6 +1781,7 @@ export namespace Prisma {
     UserJobSwipe: 'UserJobSwipe',
     ApplicationQueue: 'ApplicationQueue',
     AutomationLog: 'AutomationLog',
+    AutomationProxy: 'AutomationProxy',
     AuditLog: 'AuditLog',
     AnalyticsEvent: 'AnalyticsEvent',
     UserNotification: 'UserNotification',
@@ -1772,7 +1815,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "userJobSwipe" | "applicationQueue" | "automationLog" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "jobSnapshot" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
+      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "userJobSwipe" | "applicationQueue" | "automationLog" | "automationProxy" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "jobSnapshot" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2403,6 +2446,76 @@ export namespace Prisma {
           count: {
             args: Prisma.AutomationLogCountArgs<ExtArgs>
             result: $Utils.Optional<AutomationLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      AutomationProxy: {
+        payload: Prisma.$AutomationProxyPayload<ExtArgs>
+        fields: Prisma.AutomationProxyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AutomationProxyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AutomationProxyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          findFirst: {
+            args: Prisma.AutomationProxyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AutomationProxyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          findMany: {
+            args: Prisma.AutomationProxyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>[]
+          }
+          create: {
+            args: Prisma.AutomationProxyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          createMany: {
+            args: Prisma.AutomationProxyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AutomationProxyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>[]
+          }
+          delete: {
+            args: Prisma.AutomationProxyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          update: {
+            args: Prisma.AutomationProxyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          deleteMany: {
+            args: Prisma.AutomationProxyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AutomationProxyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AutomationProxyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AutomationProxyPayload>
+          }
+          aggregate: {
+            args: Prisma.AutomationProxyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAutomationProxy>
+          }
+          groupBy: {
+            args: Prisma.AutomationProxyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AutomationProxyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AutomationProxyCountArgs<ExtArgs>
+            result: $Utils.Optional<AutomationProxyCountAggregateOutputType> | number
           }
         }
       }
@@ -5905,6 +6018,8 @@ export namespace Prisma {
     profileVisibility: $Enums.ProfileVisibility | null
     showEmail: boolean | null
     showPhone: boolean | null
+    workAuthorization: string | null
+    coverLetterTemplate: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5943,6 +6058,8 @@ export namespace Prisma {
     profileVisibility: $Enums.ProfileVisibility | null
     showEmail: boolean | null
     showPhone: boolean | null
+    workAuthorization: string | null
+    coverLetterTemplate: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5986,6 +6103,9 @@ export namespace Prisma {
     profileVisibility: number
     showEmail: number
     showPhone: number
+    workAuthorization: number
+    coverLetterTemplate: number
+    automationPreferences: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -6038,6 +6158,8 @@ export namespace Prisma {
     profileVisibility?: true
     showEmail?: true
     showPhone?: true
+    workAuthorization?: true
+    coverLetterTemplate?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6076,6 +6198,8 @@ export namespace Prisma {
     profileVisibility?: true
     showEmail?: true
     showPhone?: true
+    workAuthorization?: true
+    coverLetterTemplate?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6119,6 +6243,9 @@ export namespace Prisma {
     profileVisibility?: true
     showEmail?: true
     showPhone?: true
+    workAuthorization?: true
+    coverLetterTemplate?: true
+    automationPreferences?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -6249,6 +6376,9 @@ export namespace Prisma {
     profileVisibility: $Enums.ProfileVisibility
     showEmail: boolean
     showPhone: boolean
+    workAuthorization: string | null
+    coverLetterTemplate: string | null
+    automationPreferences: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: UserProfileCountAggregateOutputType | null
@@ -6311,6 +6441,9 @@ export namespace Prisma {
     profileVisibility?: boolean
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: boolean
+    coverLetterTemplate?: boolean
+    automationPreferences?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6355,6 +6488,9 @@ export namespace Prisma {
     profileVisibility?: boolean
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: boolean
+    coverLetterTemplate?: boolean
+    automationPreferences?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6399,6 +6535,9 @@ export namespace Prisma {
     profileVisibility?: boolean
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: boolean
+    coverLetterTemplate?: boolean
+    automationPreferences?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -6454,6 +6593,9 @@ export namespace Prisma {
       profileVisibility: $Enums.ProfileVisibility
       showEmail: boolean
       showPhone: boolean
+      workAuthorization: string | null
+      coverLetterTemplate: string | null
+      automationPreferences: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["userProfile"]>
@@ -6888,6 +7030,9 @@ export namespace Prisma {
     readonly profileVisibility: FieldRef<"UserProfile", 'ProfileVisibility'>
     readonly showEmail: FieldRef<"UserProfile", 'Boolean'>
     readonly showPhone: FieldRef<"UserProfile", 'Boolean'>
+    readonly workAuthorization: FieldRef<"UserProfile", 'String'>
+    readonly coverLetterTemplate: FieldRef<"UserProfile", 'String'>
+    readonly automationPreferences: FieldRef<"UserProfile", 'Json'>
     readonly createdAt: FieldRef<"UserProfile", 'DateTime'>
     readonly updatedAt: FieldRef<"UserProfile", 'DateTime'>
   }
@@ -14895,6 +15040,1215 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: AutomationLogInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AutomationProxy
+   */
+
+  export type AggregateAutomationProxy = {
+    _count: AutomationProxyCountAggregateOutputType | null
+    _avg: AutomationProxyAvgAggregateOutputType | null
+    _sum: AutomationProxySumAggregateOutputType | null
+    _min: AutomationProxyMinAggregateOutputType | null
+    _max: AutomationProxyMaxAggregateOutputType | null
+  }
+
+  export type AutomationProxyAvgAggregateOutputType = {
+    port: number | null
+    failureCount: number | null
+    successRate: number | null
+    requestsPerHour: number | null
+    dailyLimit: number | null
+    currentHourlyUsage: number | null
+    currentDailyUsage: number | null
+    avgResponseTime: number | null
+    uptime: number | null
+    costPerRequest: Decimal | null
+    monthlyLimit: Decimal | null
+  }
+
+  export type AutomationProxySumAggregateOutputType = {
+    port: number | null
+    failureCount: number | null
+    successRate: number | null
+    requestsPerHour: number | null
+    dailyLimit: number | null
+    currentHourlyUsage: number | null
+    currentDailyUsage: number | null
+    avgResponseTime: number | null
+    uptime: number | null
+    costPerRequest: Decimal | null
+    monthlyLimit: Decimal | null
+  }
+
+  export type AutomationProxyMinAggregateOutputType = {
+    id: string | null
+    host: string | null
+    port: number | null
+    username: string | null
+    password: string | null
+    proxyType: $Enums.ProxyType | null
+    provider: string | null
+    country: string | null
+    region: string | null
+    isActive: boolean | null
+    failureCount: number | null
+    successRate: number | null
+    lastUsedAt: Date | null
+    lastCheckedAt: Date | null
+    requestsPerHour: number | null
+    dailyLimit: number | null
+    currentHourlyUsage: number | null
+    currentDailyUsage: number | null
+    avgResponseTime: number | null
+    uptime: number | null
+    costPerRequest: Decimal | null
+    monthlyLimit: Decimal | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AutomationProxyMaxAggregateOutputType = {
+    id: string | null
+    host: string | null
+    port: number | null
+    username: string | null
+    password: string | null
+    proxyType: $Enums.ProxyType | null
+    provider: string | null
+    country: string | null
+    region: string | null
+    isActive: boolean | null
+    failureCount: number | null
+    successRate: number | null
+    lastUsedAt: Date | null
+    lastCheckedAt: Date | null
+    requestsPerHour: number | null
+    dailyLimit: number | null
+    currentHourlyUsage: number | null
+    currentDailyUsage: number | null
+    avgResponseTime: number | null
+    uptime: number | null
+    costPerRequest: Decimal | null
+    monthlyLimit: Decimal | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AutomationProxyCountAggregateOutputType = {
+    id: number
+    host: number
+    port: number
+    username: number
+    password: number
+    proxyType: number
+    provider: number
+    country: number
+    region: number
+    isActive: number
+    failureCount: number
+    successRate: number
+    lastUsedAt: number
+    lastCheckedAt: number
+    requestsPerHour: number
+    dailyLimit: number
+    currentHourlyUsage: number
+    currentDailyUsage: number
+    avgResponseTime: number
+    uptime: number
+    costPerRequest: number
+    monthlyLimit: number
+    notes: number
+    tags: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AutomationProxyAvgAggregateInputType = {
+    port?: true
+    failureCount?: true
+    successRate?: true
+    requestsPerHour?: true
+    dailyLimit?: true
+    currentHourlyUsage?: true
+    currentDailyUsage?: true
+    avgResponseTime?: true
+    uptime?: true
+    costPerRequest?: true
+    monthlyLimit?: true
+  }
+
+  export type AutomationProxySumAggregateInputType = {
+    port?: true
+    failureCount?: true
+    successRate?: true
+    requestsPerHour?: true
+    dailyLimit?: true
+    currentHourlyUsage?: true
+    currentDailyUsage?: true
+    avgResponseTime?: true
+    uptime?: true
+    costPerRequest?: true
+    monthlyLimit?: true
+  }
+
+  export type AutomationProxyMinAggregateInputType = {
+    id?: true
+    host?: true
+    port?: true
+    username?: true
+    password?: true
+    proxyType?: true
+    provider?: true
+    country?: true
+    region?: true
+    isActive?: true
+    failureCount?: true
+    successRate?: true
+    lastUsedAt?: true
+    lastCheckedAt?: true
+    requestsPerHour?: true
+    dailyLimit?: true
+    currentHourlyUsage?: true
+    currentDailyUsage?: true
+    avgResponseTime?: true
+    uptime?: true
+    costPerRequest?: true
+    monthlyLimit?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AutomationProxyMaxAggregateInputType = {
+    id?: true
+    host?: true
+    port?: true
+    username?: true
+    password?: true
+    proxyType?: true
+    provider?: true
+    country?: true
+    region?: true
+    isActive?: true
+    failureCount?: true
+    successRate?: true
+    lastUsedAt?: true
+    lastCheckedAt?: true
+    requestsPerHour?: true
+    dailyLimit?: true
+    currentHourlyUsage?: true
+    currentDailyUsage?: true
+    avgResponseTime?: true
+    uptime?: true
+    costPerRequest?: true
+    monthlyLimit?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AutomationProxyCountAggregateInputType = {
+    id?: true
+    host?: true
+    port?: true
+    username?: true
+    password?: true
+    proxyType?: true
+    provider?: true
+    country?: true
+    region?: true
+    isActive?: true
+    failureCount?: true
+    successRate?: true
+    lastUsedAt?: true
+    lastCheckedAt?: true
+    requestsPerHour?: true
+    dailyLimit?: true
+    currentHourlyUsage?: true
+    currentDailyUsage?: true
+    avgResponseTime?: true
+    uptime?: true
+    costPerRequest?: true
+    monthlyLimit?: true
+    notes?: true
+    tags?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AutomationProxyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AutomationProxy to aggregate.
+     */
+    where?: AutomationProxyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AutomationProxies to fetch.
+     */
+    orderBy?: AutomationProxyOrderByWithRelationInput | AutomationProxyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AutomationProxyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AutomationProxies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AutomationProxies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AutomationProxies
+    **/
+    _count?: true | AutomationProxyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AutomationProxyAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AutomationProxySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AutomationProxyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AutomationProxyMaxAggregateInputType
+  }
+
+  export type GetAutomationProxyAggregateType<T extends AutomationProxyAggregateArgs> = {
+        [P in keyof T & keyof AggregateAutomationProxy]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAutomationProxy[P]>
+      : GetScalarType<T[P], AggregateAutomationProxy[P]>
+  }
+
+
+
+
+  export type AutomationProxyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AutomationProxyWhereInput
+    orderBy?: AutomationProxyOrderByWithAggregationInput | AutomationProxyOrderByWithAggregationInput[]
+    by: AutomationProxyScalarFieldEnum[] | AutomationProxyScalarFieldEnum
+    having?: AutomationProxyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AutomationProxyCountAggregateInputType | true
+    _avg?: AutomationProxyAvgAggregateInputType
+    _sum?: AutomationProxySumAggregateInputType
+    _min?: AutomationProxyMinAggregateInputType
+    _max?: AutomationProxyMaxAggregateInputType
+  }
+
+  export type AutomationProxyGroupByOutputType = {
+    id: string
+    host: string
+    port: number
+    username: string | null
+    password: string | null
+    proxyType: $Enums.ProxyType
+    provider: string | null
+    country: string | null
+    region: string | null
+    isActive: boolean
+    failureCount: number
+    successRate: number
+    lastUsedAt: Date | null
+    lastCheckedAt: Date | null
+    requestsPerHour: number | null
+    dailyLimit: number | null
+    currentHourlyUsage: number
+    currentDailyUsage: number
+    avgResponseTime: number | null
+    uptime: number | null
+    costPerRequest: Decimal | null
+    monthlyLimit: Decimal | null
+    notes: string | null
+    tags: string[]
+    createdAt: Date
+    updatedAt: Date
+    _count: AutomationProxyCountAggregateOutputType | null
+    _avg: AutomationProxyAvgAggregateOutputType | null
+    _sum: AutomationProxySumAggregateOutputType | null
+    _min: AutomationProxyMinAggregateOutputType | null
+    _max: AutomationProxyMaxAggregateOutputType | null
+  }
+
+  type GetAutomationProxyGroupByPayload<T extends AutomationProxyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AutomationProxyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AutomationProxyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AutomationProxyGroupByOutputType[P]>
+            : GetScalarType<T[P], AutomationProxyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AutomationProxySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    host?: boolean
+    port?: boolean
+    username?: boolean
+    password?: boolean
+    proxyType?: boolean
+    provider?: boolean
+    country?: boolean
+    region?: boolean
+    isActive?: boolean
+    failureCount?: boolean
+    successRate?: boolean
+    lastUsedAt?: boolean
+    lastCheckedAt?: boolean
+    requestsPerHour?: boolean
+    dailyLimit?: boolean
+    currentHourlyUsage?: boolean
+    currentDailyUsage?: boolean
+    avgResponseTime?: boolean
+    uptime?: boolean
+    costPerRequest?: boolean
+    monthlyLimit?: boolean
+    notes?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["automationProxy"]>
+
+  export type AutomationProxySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    host?: boolean
+    port?: boolean
+    username?: boolean
+    password?: boolean
+    proxyType?: boolean
+    provider?: boolean
+    country?: boolean
+    region?: boolean
+    isActive?: boolean
+    failureCount?: boolean
+    successRate?: boolean
+    lastUsedAt?: boolean
+    lastCheckedAt?: boolean
+    requestsPerHour?: boolean
+    dailyLimit?: boolean
+    currentHourlyUsage?: boolean
+    currentDailyUsage?: boolean
+    avgResponseTime?: boolean
+    uptime?: boolean
+    costPerRequest?: boolean
+    monthlyLimit?: boolean
+    notes?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["automationProxy"]>
+
+  export type AutomationProxySelectScalar = {
+    id?: boolean
+    host?: boolean
+    port?: boolean
+    username?: boolean
+    password?: boolean
+    proxyType?: boolean
+    provider?: boolean
+    country?: boolean
+    region?: boolean
+    isActive?: boolean
+    failureCount?: boolean
+    successRate?: boolean
+    lastUsedAt?: boolean
+    lastCheckedAt?: boolean
+    requestsPerHour?: boolean
+    dailyLimit?: boolean
+    currentHourlyUsage?: boolean
+    currentDailyUsage?: boolean
+    avgResponseTime?: boolean
+    uptime?: boolean
+    costPerRequest?: boolean
+    monthlyLimit?: boolean
+    notes?: boolean
+    tags?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+
+  export type $AutomationProxyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AutomationProxy"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      host: string
+      port: number
+      username: string | null
+      password: string | null
+      proxyType: $Enums.ProxyType
+      provider: string | null
+      country: string | null
+      region: string | null
+      isActive: boolean
+      failureCount: number
+      successRate: number
+      lastUsedAt: Date | null
+      lastCheckedAt: Date | null
+      requestsPerHour: number | null
+      dailyLimit: number | null
+      currentHourlyUsage: number
+      currentDailyUsage: number
+      avgResponseTime: number | null
+      uptime: number | null
+      costPerRequest: Prisma.Decimal | null
+      monthlyLimit: Prisma.Decimal | null
+      notes: string | null
+      tags: string[]
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["automationProxy"]>
+    composites: {}
+  }
+
+  type AutomationProxyGetPayload<S extends boolean | null | undefined | AutomationProxyDefaultArgs> = $Result.GetResult<Prisma.$AutomationProxyPayload, S>
+
+  type AutomationProxyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AutomationProxyFindManyArgs, 'select' | 'include' | 'distinct' | 'relationLoadStrategy'> & {
+      select?: AutomationProxyCountAggregateInputType | true
+    }
+
+  export interface AutomationProxyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AutomationProxy'], meta: { name: 'AutomationProxy' } }
+    /**
+     * Find zero or one AutomationProxy that matches the filter.
+     * @param {AutomationProxyFindUniqueArgs} args - Arguments to find a AutomationProxy
+     * @example
+     * // Get one AutomationProxy
+     * const automationProxy = await prisma.automationProxy.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AutomationProxyFindUniqueArgs>(args: SelectSubset<T, AutomationProxyFindUniqueArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AutomationProxy that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AutomationProxyFindUniqueOrThrowArgs} args - Arguments to find a AutomationProxy
+     * @example
+     * // Get one AutomationProxy
+     * const automationProxy = await prisma.automationProxy.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AutomationProxyFindUniqueOrThrowArgs>(args: SelectSubset<T, AutomationProxyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AutomationProxy that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyFindFirstArgs} args - Arguments to find a AutomationProxy
+     * @example
+     * // Get one AutomationProxy
+     * const automationProxy = await prisma.automationProxy.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AutomationProxyFindFirstArgs>(args?: SelectSubset<T, AutomationProxyFindFirstArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AutomationProxy that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyFindFirstOrThrowArgs} args - Arguments to find a AutomationProxy
+     * @example
+     * // Get one AutomationProxy
+     * const automationProxy = await prisma.automationProxy.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AutomationProxyFindFirstOrThrowArgs>(args?: SelectSubset<T, AutomationProxyFindFirstOrThrowArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AutomationProxies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AutomationProxies
+     * const automationProxies = await prisma.automationProxy.findMany()
+     * 
+     * // Get first 10 AutomationProxies
+     * const automationProxies = await prisma.automationProxy.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const automationProxyWithIdOnly = await prisma.automationProxy.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AutomationProxyFindManyArgs>(args?: SelectSubset<T, AutomationProxyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AutomationProxy.
+     * @param {AutomationProxyCreateArgs} args - Arguments to create a AutomationProxy.
+     * @example
+     * // Create one AutomationProxy
+     * const AutomationProxy = await prisma.automationProxy.create({
+     *   data: {
+     *     // ... data to create a AutomationProxy
+     *   }
+     * })
+     * 
+     */
+    create<T extends AutomationProxyCreateArgs>(args: SelectSubset<T, AutomationProxyCreateArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AutomationProxies.
+     * @param {AutomationProxyCreateManyArgs} args - Arguments to create many AutomationProxies.
+     * @example
+     * // Create many AutomationProxies
+     * const automationProxy = await prisma.automationProxy.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AutomationProxyCreateManyArgs>(args?: SelectSubset<T, AutomationProxyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AutomationProxies and returns the data saved in the database.
+     * @param {AutomationProxyCreateManyAndReturnArgs} args - Arguments to create many AutomationProxies.
+     * @example
+     * // Create many AutomationProxies
+     * const automationProxy = await prisma.automationProxy.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AutomationProxies and only return the `id`
+     * const automationProxyWithIdOnly = await prisma.automationProxy.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AutomationProxyCreateManyAndReturnArgs>(args?: SelectSubset<T, AutomationProxyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AutomationProxy.
+     * @param {AutomationProxyDeleteArgs} args - Arguments to delete one AutomationProxy.
+     * @example
+     * // Delete one AutomationProxy
+     * const AutomationProxy = await prisma.automationProxy.delete({
+     *   where: {
+     *     // ... filter to delete one AutomationProxy
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AutomationProxyDeleteArgs>(args: SelectSubset<T, AutomationProxyDeleteArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AutomationProxy.
+     * @param {AutomationProxyUpdateArgs} args - Arguments to update one AutomationProxy.
+     * @example
+     * // Update one AutomationProxy
+     * const automationProxy = await prisma.automationProxy.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AutomationProxyUpdateArgs>(args: SelectSubset<T, AutomationProxyUpdateArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AutomationProxies.
+     * @param {AutomationProxyDeleteManyArgs} args - Arguments to filter AutomationProxies to delete.
+     * @example
+     * // Delete a few AutomationProxies
+     * const { count } = await prisma.automationProxy.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AutomationProxyDeleteManyArgs>(args?: SelectSubset<T, AutomationProxyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AutomationProxies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AutomationProxies
+     * const automationProxy = await prisma.automationProxy.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AutomationProxyUpdateManyArgs>(args: SelectSubset<T, AutomationProxyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AutomationProxy.
+     * @param {AutomationProxyUpsertArgs} args - Arguments to update or create a AutomationProxy.
+     * @example
+     * // Update or create a AutomationProxy
+     * const automationProxy = await prisma.automationProxy.upsert({
+     *   create: {
+     *     // ... data to create a AutomationProxy
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AutomationProxy we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AutomationProxyUpsertArgs>(args: SelectSubset<T, AutomationProxyUpsertArgs<ExtArgs>>): Prisma__AutomationProxyClient<$Result.GetResult<Prisma.$AutomationProxyPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AutomationProxies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyCountArgs} args - Arguments to filter AutomationProxies to count.
+     * @example
+     * // Count the number of AutomationProxies
+     * const count = await prisma.automationProxy.count({
+     *   where: {
+     *     // ... the filter for the AutomationProxies we want to count
+     *   }
+     * })
+    **/
+    count<T extends AutomationProxyCountArgs>(
+      args?: Subset<T, AutomationProxyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AutomationProxyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AutomationProxy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AutomationProxyAggregateArgs>(args: Subset<T, AutomationProxyAggregateArgs>): Prisma.PrismaPromise<GetAutomationProxyAggregateType<T>>
+
+    /**
+     * Group by AutomationProxy.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AutomationProxyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AutomationProxyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AutomationProxyGroupByArgs['orderBy'] }
+        : { orderBy?: AutomationProxyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AutomationProxyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAutomationProxyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AutomationProxy model
+   */
+  readonly fields: AutomationProxyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AutomationProxy.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AutomationProxyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AutomationProxy model
+   */ 
+  interface AutomationProxyFieldRefs {
+    readonly id: FieldRef<"AutomationProxy", 'String'>
+    readonly host: FieldRef<"AutomationProxy", 'String'>
+    readonly port: FieldRef<"AutomationProxy", 'Int'>
+    readonly username: FieldRef<"AutomationProxy", 'String'>
+    readonly password: FieldRef<"AutomationProxy", 'String'>
+    readonly proxyType: FieldRef<"AutomationProxy", 'ProxyType'>
+    readonly provider: FieldRef<"AutomationProxy", 'String'>
+    readonly country: FieldRef<"AutomationProxy", 'String'>
+    readonly region: FieldRef<"AutomationProxy", 'String'>
+    readonly isActive: FieldRef<"AutomationProxy", 'Boolean'>
+    readonly failureCount: FieldRef<"AutomationProxy", 'Int'>
+    readonly successRate: FieldRef<"AutomationProxy", 'Float'>
+    readonly lastUsedAt: FieldRef<"AutomationProxy", 'DateTime'>
+    readonly lastCheckedAt: FieldRef<"AutomationProxy", 'DateTime'>
+    readonly requestsPerHour: FieldRef<"AutomationProxy", 'Int'>
+    readonly dailyLimit: FieldRef<"AutomationProxy", 'Int'>
+    readonly currentHourlyUsage: FieldRef<"AutomationProxy", 'Int'>
+    readonly currentDailyUsage: FieldRef<"AutomationProxy", 'Int'>
+    readonly avgResponseTime: FieldRef<"AutomationProxy", 'Int'>
+    readonly uptime: FieldRef<"AutomationProxy", 'Float'>
+    readonly costPerRequest: FieldRef<"AutomationProxy", 'Decimal'>
+    readonly monthlyLimit: FieldRef<"AutomationProxy", 'Decimal'>
+    readonly notes: FieldRef<"AutomationProxy", 'String'>
+    readonly tags: FieldRef<"AutomationProxy", 'String[]'>
+    readonly createdAt: FieldRef<"AutomationProxy", 'DateTime'>
+    readonly updatedAt: FieldRef<"AutomationProxy", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AutomationProxy findUnique
+   */
+  export type AutomationProxyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter, which AutomationProxy to fetch.
+     */
+    where: AutomationProxyWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy findUniqueOrThrow
+   */
+  export type AutomationProxyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter, which AutomationProxy to fetch.
+     */
+    where: AutomationProxyWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy findFirst
+   */
+  export type AutomationProxyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter, which AutomationProxy to fetch.
+     */
+    where?: AutomationProxyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AutomationProxies to fetch.
+     */
+    orderBy?: AutomationProxyOrderByWithRelationInput | AutomationProxyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AutomationProxies.
+     */
+    cursor?: AutomationProxyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AutomationProxies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AutomationProxies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AutomationProxies.
+     */
+    distinct?: AutomationProxyScalarFieldEnum | AutomationProxyScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy findFirstOrThrow
+   */
+  export type AutomationProxyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter, which AutomationProxy to fetch.
+     */
+    where?: AutomationProxyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AutomationProxies to fetch.
+     */
+    orderBy?: AutomationProxyOrderByWithRelationInput | AutomationProxyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AutomationProxies.
+     */
+    cursor?: AutomationProxyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AutomationProxies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AutomationProxies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AutomationProxies.
+     */
+    distinct?: AutomationProxyScalarFieldEnum | AutomationProxyScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy findMany
+   */
+  export type AutomationProxyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter, which AutomationProxies to fetch.
+     */
+    where?: AutomationProxyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AutomationProxies to fetch.
+     */
+    orderBy?: AutomationProxyOrderByWithRelationInput | AutomationProxyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AutomationProxies.
+     */
+    cursor?: AutomationProxyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AutomationProxies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AutomationProxies.
+     */
+    skip?: number
+    distinct?: AutomationProxyScalarFieldEnum | AutomationProxyScalarFieldEnum[]
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy create
+   */
+  export type AutomationProxyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * The data needed to create a AutomationProxy.
+     */
+    data: XOR<AutomationProxyCreateInput, AutomationProxyUncheckedCreateInput>
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy createMany
+   */
+  export type AutomationProxyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AutomationProxies.
+     */
+    data: AutomationProxyCreateManyInput | AutomationProxyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AutomationProxy createManyAndReturn
+   */
+  export type AutomationProxyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AutomationProxies.
+     */
+    data: AutomationProxyCreateManyInput | AutomationProxyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AutomationProxy update
+   */
+  export type AutomationProxyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * The data needed to update a AutomationProxy.
+     */
+    data: XOR<AutomationProxyUpdateInput, AutomationProxyUncheckedUpdateInput>
+    /**
+     * Choose, which AutomationProxy to update.
+     */
+    where: AutomationProxyWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy updateMany
+   */
+  export type AutomationProxyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AutomationProxies.
+     */
+    data: XOR<AutomationProxyUpdateManyMutationInput, AutomationProxyUncheckedUpdateManyInput>
+    /**
+     * Filter which AutomationProxies to update
+     */
+    where?: AutomationProxyWhereInput
+  }
+
+  /**
+   * AutomationProxy upsert
+   */
+  export type AutomationProxyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * The filter to search for the AutomationProxy to update in case it exists.
+     */
+    where: AutomationProxyWhereUniqueInput
+    /**
+     * In case the AutomationProxy found by the `where` argument doesn't exist, create a new AutomationProxy with this data.
+     */
+    create: XOR<AutomationProxyCreateInput, AutomationProxyUncheckedCreateInput>
+    /**
+     * In case the AutomationProxy was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AutomationProxyUpdateInput, AutomationProxyUncheckedUpdateInput>
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy delete
+   */
+  export type AutomationProxyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
+    /**
+     * Filter which AutomationProxy to delete.
+     */
+    where: AutomationProxyWhereUniqueInput
+    relationLoadStrategy?: RelationLoadStrategy
+  }
+
+  /**
+   * AutomationProxy deleteMany
+   */
+  export type AutomationProxyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AutomationProxies to delete
+     */
+    where?: AutomationProxyWhereInput
+  }
+
+  /**
+   * AutomationProxy without action
+   */
+  export type AutomationProxyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AutomationProxy
+     */
+    select?: AutomationProxySelect<ExtArgs> | null
   }
 
 
@@ -30034,6 +31388,9 @@ export namespace Prisma {
     automationStatus: $Enums.AutomationStatus | null
     automationAttempts: number | null
     lastAutomationAt: Date | null
+    executionMode: $Enums.ExecutionMode | null
+    serverIpAddress: string | null
+    proxyUsed: string | null
     lastContactAt: Date | null
     contactMethod: string | null
     recruiterName: string | null
@@ -30071,6 +31428,9 @@ export namespace Prisma {
     automationStatus: $Enums.AutomationStatus | null
     automationAttempts: number | null
     lastAutomationAt: Date | null
+    executionMode: $Enums.ExecutionMode | null
+    serverIpAddress: string | null
+    proxyUsed: string | null
     lastContactAt: Date | null
     contactMethod: string | null
     recruiterName: string | null
@@ -30111,6 +31471,10 @@ export namespace Prisma {
     automationAttempts: number
     automationData: number
     lastAutomationAt: number
+    executionMode: number
+    serverIpAddress: number
+    proxyUsed: number
+    automationLogs: number
     lastContactAt: number
     contactMethod: number
     recruiterName: number
@@ -30164,6 +31528,9 @@ export namespace Prisma {
     automationStatus?: true
     automationAttempts?: true
     lastAutomationAt?: true
+    executionMode?: true
+    serverIpAddress?: true
+    proxyUsed?: true
     lastContactAt?: true
     contactMethod?: true
     recruiterName?: true
@@ -30201,6 +31568,9 @@ export namespace Prisma {
     automationStatus?: true
     automationAttempts?: true
     lastAutomationAt?: true
+    executionMode?: true
+    serverIpAddress?: true
+    proxyUsed?: true
     lastContactAt?: true
     contactMethod?: true
     recruiterName?: true
@@ -30241,6 +31611,10 @@ export namespace Prisma {
     automationAttempts?: true
     automationData?: true
     lastAutomationAt?: true
+    executionMode?: true
+    serverIpAddress?: true
+    proxyUsed?: true
+    automationLogs?: true
     lastContactAt?: true
     contactMethod?: true
     recruiterName?: true
@@ -30368,6 +31742,10 @@ export namespace Prisma {
     automationAttempts: number
     automationData: JsonValue | null
     lastAutomationAt: Date | null
+    executionMode: $Enums.ExecutionMode | null
+    serverIpAddress: string | null
+    proxyUsed: string | null
+    automationLogs: JsonValue | null
     lastContactAt: Date | null
     contactMethod: string | null
     recruiterName: string | null
@@ -30427,6 +31805,10 @@ export namespace Prisma {
     automationAttempts?: boolean
     automationData?: boolean
     lastAutomationAt?: boolean
+    executionMode?: boolean
+    serverIpAddress?: boolean
+    proxyUsed?: boolean
+    automationLogs?: boolean
     lastContactAt?: boolean
     contactMethod?: boolean
     recruiterName?: boolean
@@ -30473,6 +31855,10 @@ export namespace Prisma {
     automationAttempts?: boolean
     automationData?: boolean
     lastAutomationAt?: boolean
+    executionMode?: boolean
+    serverIpAddress?: boolean
+    proxyUsed?: boolean
+    automationLogs?: boolean
     lastContactAt?: boolean
     contactMethod?: boolean
     recruiterName?: boolean
@@ -30516,6 +31902,10 @@ export namespace Prisma {
     automationAttempts?: boolean
     automationData?: boolean
     lastAutomationAt?: boolean
+    executionMode?: boolean
+    serverIpAddress?: boolean
+    proxyUsed?: boolean
+    automationLogs?: boolean
     lastContactAt?: boolean
     contactMethod?: boolean
     recruiterName?: boolean
@@ -30579,6 +31969,10 @@ export namespace Prisma {
       automationAttempts: number
       automationData: Prisma.JsonValue | null
       lastAutomationAt: Date | null
+      executionMode: $Enums.ExecutionMode | null
+      serverIpAddress: string | null
+      proxyUsed: string | null
+      automationLogs: Prisma.JsonValue | null
       lastContactAt: Date | null
       contactMethod: string | null
       recruiterName: string | null
@@ -31014,6 +32408,10 @@ export namespace Prisma {
     readonly automationAttempts: FieldRef<"JobApplication", 'Int'>
     readonly automationData: FieldRef<"JobApplication", 'Json'>
     readonly lastAutomationAt: FieldRef<"JobApplication", 'DateTime'>
+    readonly executionMode: FieldRef<"JobApplication", 'ExecutionMode'>
+    readonly serverIpAddress: FieldRef<"JobApplication", 'String'>
+    readonly proxyUsed: FieldRef<"JobApplication", 'String'>
+    readonly automationLogs: FieldRef<"JobApplication", 'Json'>
     readonly lastContactAt: FieldRef<"JobApplication", 'DateTime'>
     readonly contactMethod: FieldRef<"JobApplication", 'String'>
     readonly recruiterName: FieldRef<"JobApplication", 'String'>
@@ -37262,6 +38660,9 @@ export namespace Prisma {
     profileVisibility: 'profileVisibility',
     showEmail: 'showEmail',
     showPhone: 'showPhone',
+    workAuthorization: 'workAuthorization',
+    coverLetterTemplate: 'coverLetterTemplate',
+    automationPreferences: 'automationPreferences',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -37419,6 +38820,38 @@ export namespace Prisma {
   };
 
   export type AutomationLogScalarFieldEnum = (typeof AutomationLogScalarFieldEnum)[keyof typeof AutomationLogScalarFieldEnum]
+
+
+  export const AutomationProxyScalarFieldEnum: {
+    id: 'id',
+    host: 'host',
+    port: 'port',
+    username: 'username',
+    password: 'password',
+    proxyType: 'proxyType',
+    provider: 'provider',
+    country: 'country',
+    region: 'region',
+    isActive: 'isActive',
+    failureCount: 'failureCount',
+    successRate: 'successRate',
+    lastUsedAt: 'lastUsedAt',
+    lastCheckedAt: 'lastCheckedAt',
+    requestsPerHour: 'requestsPerHour',
+    dailyLimit: 'dailyLimit',
+    currentHourlyUsage: 'currentHourlyUsage',
+    currentDailyUsage: 'currentDailyUsage',
+    avgResponseTime: 'avgResponseTime',
+    uptime: 'uptime',
+    costPerRequest: 'costPerRequest',
+    monthlyLimit: 'monthlyLimit',
+    notes: 'notes',
+    tags: 'tags',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AutomationProxyScalarFieldEnum = (typeof AutomationProxyScalarFieldEnum)[keyof typeof AutomationProxyScalarFieldEnum]
 
 
   export const AuditLogScalarFieldEnum: {
@@ -37846,6 +39279,10 @@ export namespace Prisma {
     automationAttempts: 'automationAttempts',
     automationData: 'automationData',
     lastAutomationAt: 'lastAutomationAt',
+    executionMode: 'executionMode',
+    serverIpAddress: 'serverIpAddress',
+    proxyUsed: 'proxyUsed',
+    automationLogs: 'automationLogs',
     lastContactAt: 'lastContactAt',
     contactMethod: 'contactMethod',
     recruiterName: 'recruiterName',
@@ -38076,7 +39513,9 @@ export namespace Prisma {
     experienceLevel: 'experienceLevel',
     skills: 'skills',
     desiredJobTypes: 'desiredJobTypes',
-    preferredCurrency: 'preferredCurrency'
+    preferredCurrency: 'preferredCurrency',
+    workAuthorization: 'workAuthorization',
+    coverLetterTemplate: 'coverLetterTemplate'
   };
 
   export type UserProfileOrderByRelevanceFieldEnum = (typeof UserProfileOrderByRelevanceFieldEnum)[keyof typeof UserProfileOrderByRelevanceFieldEnum]
@@ -38177,6 +39616,21 @@ export namespace Prisma {
   };
 
   export type AutomationLogOrderByRelevanceFieldEnum = (typeof AutomationLogOrderByRelevanceFieldEnum)[keyof typeof AutomationLogOrderByRelevanceFieldEnum]
+
+
+  export const AutomationProxyOrderByRelevanceFieldEnum: {
+    id: 'id',
+    host: 'host',
+    username: 'username',
+    password: 'password',
+    provider: 'provider',
+    country: 'country',
+    region: 'region',
+    notes: 'notes',
+    tags: 'tags'
+  };
+
+  export type AutomationProxyOrderByRelevanceFieldEnum = (typeof AutomationProxyOrderByRelevanceFieldEnum)[keyof typeof AutomationProxyOrderByRelevanceFieldEnum]
 
 
   export const AuditLogOrderByRelevanceFieldEnum: {
@@ -38432,6 +39886,8 @@ export namespace Prisma {
     externalId: 'externalId',
     atsUrl: 'atsUrl',
     confirmationNumber: 'confirmationNumber',
+    serverIpAddress: 'serverIpAddress',
+    proxyUsed: 'proxyUsed',
     contactMethod: 'contactMethod',
     recruiterName: 'recruiterName',
     recruiterEmail: 'recruiterEmail',
@@ -38702,6 +40158,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'ProxyType'
+   */
+  export type EnumProxyTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProxyType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProxyType[]'
+   */
+  export type ListEnumProxyTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProxyType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ActorType'
    */
   export type EnumActorTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActorType'>
@@ -38726,20 +40210,6 @@ export namespace Prisma {
    * Reference to a field of type 'RiskLevel[]'
    */
   export type ListEnumRiskLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RiskLevel[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Decimal'
-   */
-  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-  /**
-   * Reference to a field of type 'Decimal[]'
-   */
-  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -39048,6 +40518,20 @@ export namespace Prisma {
    * Reference to a field of type 'AutomationStatus[]'
    */
   export type ListEnumAutomationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AutomationStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExecutionMode'
+   */
+  export type EnumExecutionModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExecutionMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'ExecutionMode[]'
+   */
+  export type ListEnumExecutionModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExecutionMode[]'>
     
 
 
@@ -39404,6 +40888,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFilter<"UserProfile"> | $Enums.ProfileVisibility
     showEmail?: BoolFilter<"UserProfile"> | boolean
     showPhone?: BoolFilter<"UserProfile"> | boolean
+    workAuthorization?: StringNullableFilter<"UserProfile"> | string | null
+    coverLetterTemplate?: StringNullableFilter<"UserProfile"> | string | null
+    automationPreferences?: JsonNullableFilter<"UserProfile">
     createdAt?: DateTimeFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeFilter<"UserProfile"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -39448,6 +40935,9 @@ export namespace Prisma {
     profileVisibility?: SortOrder
     showEmail?: SortOrder
     showPhone?: SortOrder
+    workAuthorization?: SortOrderInput | SortOrder
+    coverLetterTemplate?: SortOrderInput | SortOrder
+    automationPreferences?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -39496,6 +40986,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFilter<"UserProfile"> | $Enums.ProfileVisibility
     showEmail?: BoolFilter<"UserProfile"> | boolean
     showPhone?: BoolFilter<"UserProfile"> | boolean
+    workAuthorization?: StringNullableFilter<"UserProfile"> | string | null
+    coverLetterTemplate?: StringNullableFilter<"UserProfile"> | string | null
+    automationPreferences?: JsonNullableFilter<"UserProfile">
     createdAt?: DateTimeFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeFilter<"UserProfile"> | Date | string
     user?: XOR<UserRelationFilter, UserWhereInput>
@@ -39540,6 +41033,9 @@ export namespace Prisma {
     profileVisibility?: SortOrder
     showEmail?: SortOrder
     showPhone?: SortOrder
+    workAuthorization?: SortOrderInput | SortOrder
+    coverLetterTemplate?: SortOrderInput | SortOrder
+    automationPreferences?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserProfileCountOrderByAggregateInput
@@ -39591,6 +41087,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityWithAggregatesFilter<"UserProfile"> | $Enums.ProfileVisibility
     showEmail?: BoolWithAggregatesFilter<"UserProfile"> | boolean
     showPhone?: BoolWithAggregatesFilter<"UserProfile"> | boolean
+    workAuthorization?: StringNullableWithAggregatesFilter<"UserProfile"> | string | null
+    coverLetterTemplate?: StringNullableWithAggregatesFilter<"UserProfile"> | string | null
+    automationPreferences?: JsonNullableWithAggregatesFilter<"UserProfile">
     createdAt?: DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"UserProfile"> | Date | string
   }
@@ -40385,6 +41884,166 @@ export namespace Prisma {
     browserInfo?: JsonNullableWithAggregatesFilter<"AutomationLog">
     pageUrl?: StringNullableWithAggregatesFilter<"AutomationLog"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"AutomationLog"> | Date | string
+  }
+
+  export type AutomationProxyWhereInput = {
+    AND?: AutomationProxyWhereInput | AutomationProxyWhereInput[]
+    OR?: AutomationProxyWhereInput[]
+    NOT?: AutomationProxyWhereInput | AutomationProxyWhereInput[]
+    id?: StringFilter<"AutomationProxy"> | string
+    host?: StringFilter<"AutomationProxy"> | string
+    port?: IntFilter<"AutomationProxy"> | number
+    username?: StringNullableFilter<"AutomationProxy"> | string | null
+    password?: StringNullableFilter<"AutomationProxy"> | string | null
+    proxyType?: EnumProxyTypeFilter<"AutomationProxy"> | $Enums.ProxyType
+    provider?: StringNullableFilter<"AutomationProxy"> | string | null
+    country?: StringNullableFilter<"AutomationProxy"> | string | null
+    region?: StringNullableFilter<"AutomationProxy"> | string | null
+    isActive?: BoolFilter<"AutomationProxy"> | boolean
+    failureCount?: IntFilter<"AutomationProxy"> | number
+    successRate?: FloatFilter<"AutomationProxy"> | number
+    lastUsedAt?: DateTimeNullableFilter<"AutomationProxy"> | Date | string | null
+    lastCheckedAt?: DateTimeNullableFilter<"AutomationProxy"> | Date | string | null
+    requestsPerHour?: IntNullableFilter<"AutomationProxy"> | number | null
+    dailyLimit?: IntNullableFilter<"AutomationProxy"> | number | null
+    currentHourlyUsage?: IntFilter<"AutomationProxy"> | number
+    currentDailyUsage?: IntFilter<"AutomationProxy"> | number
+    avgResponseTime?: IntNullableFilter<"AutomationProxy"> | number | null
+    uptime?: FloatNullableFilter<"AutomationProxy"> | number | null
+    costPerRequest?: DecimalNullableFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: DecimalNullableFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    notes?: StringNullableFilter<"AutomationProxy"> | string | null
+    tags?: StringNullableListFilter<"AutomationProxy">
+    createdAt?: DateTimeFilter<"AutomationProxy"> | Date | string
+    updatedAt?: DateTimeFilter<"AutomationProxy"> | Date | string
+  }
+
+  export type AutomationProxyOrderByWithRelationInput = {
+    id?: SortOrder
+    host?: SortOrder
+    port?: SortOrder
+    username?: SortOrderInput | SortOrder
+    password?: SortOrderInput | SortOrder
+    proxyType?: SortOrder
+    provider?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    lastCheckedAt?: SortOrderInput | SortOrder
+    requestsPerHour?: SortOrderInput | SortOrder
+    dailyLimit?: SortOrderInput | SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrderInput | SortOrder
+    uptime?: SortOrderInput | SortOrder
+    costPerRequest?: SortOrderInput | SortOrder
+    monthlyLimit?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _relevance?: AutomationProxyOrderByRelevanceInput
+  }
+
+  export type AutomationProxyWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: AutomationProxyWhereInput | AutomationProxyWhereInput[]
+    OR?: AutomationProxyWhereInput[]
+    NOT?: AutomationProxyWhereInput | AutomationProxyWhereInput[]
+    host?: StringFilter<"AutomationProxy"> | string
+    port?: IntFilter<"AutomationProxy"> | number
+    username?: StringNullableFilter<"AutomationProxy"> | string | null
+    password?: StringNullableFilter<"AutomationProxy"> | string | null
+    proxyType?: EnumProxyTypeFilter<"AutomationProxy"> | $Enums.ProxyType
+    provider?: StringNullableFilter<"AutomationProxy"> | string | null
+    country?: StringNullableFilter<"AutomationProxy"> | string | null
+    region?: StringNullableFilter<"AutomationProxy"> | string | null
+    isActive?: BoolFilter<"AutomationProxy"> | boolean
+    failureCount?: IntFilter<"AutomationProxy"> | number
+    successRate?: FloatFilter<"AutomationProxy"> | number
+    lastUsedAt?: DateTimeNullableFilter<"AutomationProxy"> | Date | string | null
+    lastCheckedAt?: DateTimeNullableFilter<"AutomationProxy"> | Date | string | null
+    requestsPerHour?: IntNullableFilter<"AutomationProxy"> | number | null
+    dailyLimit?: IntNullableFilter<"AutomationProxy"> | number | null
+    currentHourlyUsage?: IntFilter<"AutomationProxy"> | number
+    currentDailyUsage?: IntFilter<"AutomationProxy"> | number
+    avgResponseTime?: IntNullableFilter<"AutomationProxy"> | number | null
+    uptime?: FloatNullableFilter<"AutomationProxy"> | number | null
+    costPerRequest?: DecimalNullableFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: DecimalNullableFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    notes?: StringNullableFilter<"AutomationProxy"> | string | null
+    tags?: StringNullableListFilter<"AutomationProxy">
+    createdAt?: DateTimeFilter<"AutomationProxy"> | Date | string
+    updatedAt?: DateTimeFilter<"AutomationProxy"> | Date | string
+  }, "id">
+
+  export type AutomationProxyOrderByWithAggregationInput = {
+    id?: SortOrder
+    host?: SortOrder
+    port?: SortOrder
+    username?: SortOrderInput | SortOrder
+    password?: SortOrderInput | SortOrder
+    proxyType?: SortOrder
+    provider?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    isActive?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    lastUsedAt?: SortOrderInput | SortOrder
+    lastCheckedAt?: SortOrderInput | SortOrder
+    requestsPerHour?: SortOrderInput | SortOrder
+    dailyLimit?: SortOrderInput | SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrderInput | SortOrder
+    uptime?: SortOrderInput | SortOrder
+    costPerRequest?: SortOrderInput | SortOrder
+    monthlyLimit?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AutomationProxyCountOrderByAggregateInput
+    _avg?: AutomationProxyAvgOrderByAggregateInput
+    _max?: AutomationProxyMaxOrderByAggregateInput
+    _min?: AutomationProxyMinOrderByAggregateInput
+    _sum?: AutomationProxySumOrderByAggregateInput
+  }
+
+  export type AutomationProxyScalarWhereWithAggregatesInput = {
+    AND?: AutomationProxyScalarWhereWithAggregatesInput | AutomationProxyScalarWhereWithAggregatesInput[]
+    OR?: AutomationProxyScalarWhereWithAggregatesInput[]
+    NOT?: AutomationProxyScalarWhereWithAggregatesInput | AutomationProxyScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AutomationProxy"> | string
+    host?: StringWithAggregatesFilter<"AutomationProxy"> | string
+    port?: IntWithAggregatesFilter<"AutomationProxy"> | number
+    username?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    password?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    proxyType?: EnumProxyTypeWithAggregatesFilter<"AutomationProxy"> | $Enums.ProxyType
+    provider?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    country?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    region?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    isActive?: BoolWithAggregatesFilter<"AutomationProxy"> | boolean
+    failureCount?: IntWithAggregatesFilter<"AutomationProxy"> | number
+    successRate?: FloatWithAggregatesFilter<"AutomationProxy"> | number
+    lastUsedAt?: DateTimeNullableWithAggregatesFilter<"AutomationProxy"> | Date | string | null
+    lastCheckedAt?: DateTimeNullableWithAggregatesFilter<"AutomationProxy"> | Date | string | null
+    requestsPerHour?: IntNullableWithAggregatesFilter<"AutomationProxy"> | number | null
+    dailyLimit?: IntNullableWithAggregatesFilter<"AutomationProxy"> | number | null
+    currentHourlyUsage?: IntWithAggregatesFilter<"AutomationProxy"> | number
+    currentDailyUsage?: IntWithAggregatesFilter<"AutomationProxy"> | number
+    avgResponseTime?: IntNullableWithAggregatesFilter<"AutomationProxy"> | number | null
+    uptime?: FloatNullableWithAggregatesFilter<"AutomationProxy"> | number | null
+    costPerRequest?: DecimalNullableWithAggregatesFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: DecimalNullableWithAggregatesFilter<"AutomationProxy"> | Decimal | DecimalJsLike | number | string | null
+    notes?: StringNullableWithAggregatesFilter<"AutomationProxy"> | string | null
+    tags?: StringNullableListFilter<"AutomationProxy">
+    createdAt?: DateTimeWithAggregatesFilter<"AutomationProxy"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AutomationProxy"> | Date | string
   }
 
   export type AuditLogWhereInput = {
@@ -42476,6 +44135,10 @@ export namespace Prisma {
     automationAttempts?: IntFilter<"JobApplication"> | number
     automationData?: JsonNullableFilter<"JobApplication">
     lastAutomationAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
+    executionMode?: EnumExecutionModeNullableFilter<"JobApplication"> | $Enums.ExecutionMode | null
+    serverIpAddress?: StringNullableFilter<"JobApplication"> | string | null
+    proxyUsed?: StringNullableFilter<"JobApplication"> | string | null
+    automationLogs?: JsonNullableFilter<"JobApplication">
     lastContactAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
     contactMethod?: StringNullableFilter<"JobApplication"> | string | null
     recruiterName?: StringNullableFilter<"JobApplication"> | string | null
@@ -42521,6 +44184,10 @@ export namespace Prisma {
     automationAttempts?: SortOrder
     automationData?: SortOrderInput | SortOrder
     lastAutomationAt?: SortOrderInput | SortOrder
+    executionMode?: SortOrderInput | SortOrder
+    serverIpAddress?: SortOrderInput | SortOrder
+    proxyUsed?: SortOrderInput | SortOrder
+    automationLogs?: SortOrderInput | SortOrder
     lastContactAt?: SortOrderInput | SortOrder
     contactMethod?: SortOrderInput | SortOrder
     recruiterName?: SortOrderInput | SortOrder
@@ -42571,6 +44238,10 @@ export namespace Prisma {
     automationAttempts?: IntFilter<"JobApplication"> | number
     automationData?: JsonNullableFilter<"JobApplication">
     lastAutomationAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
+    executionMode?: EnumExecutionModeNullableFilter<"JobApplication"> | $Enums.ExecutionMode | null
+    serverIpAddress?: StringNullableFilter<"JobApplication"> | string | null
+    proxyUsed?: StringNullableFilter<"JobApplication"> | string | null
+    automationLogs?: JsonNullableFilter<"JobApplication">
     lastContactAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
     contactMethod?: StringNullableFilter<"JobApplication"> | string | null
     recruiterName?: StringNullableFilter<"JobApplication"> | string | null
@@ -42616,6 +44287,10 @@ export namespace Prisma {
     automationAttempts?: SortOrder
     automationData?: SortOrderInput | SortOrder
     lastAutomationAt?: SortOrderInput | SortOrder
+    executionMode?: SortOrderInput | SortOrder
+    serverIpAddress?: SortOrderInput | SortOrder
+    proxyUsed?: SortOrderInput | SortOrder
+    automationLogs?: SortOrderInput | SortOrder
     lastContactAt?: SortOrderInput | SortOrder
     contactMethod?: SortOrderInput | SortOrder
     recruiterName?: SortOrderInput | SortOrder
@@ -42664,6 +44339,10 @@ export namespace Prisma {
     automationAttempts?: IntWithAggregatesFilter<"JobApplication"> | number
     automationData?: JsonNullableWithAggregatesFilter<"JobApplication">
     lastAutomationAt?: DateTimeNullableWithAggregatesFilter<"JobApplication"> | Date | string | null
+    executionMode?: EnumExecutionModeNullableWithAggregatesFilter<"JobApplication"> | $Enums.ExecutionMode | null
+    serverIpAddress?: StringNullableWithAggregatesFilter<"JobApplication"> | string | null
+    proxyUsed?: StringNullableWithAggregatesFilter<"JobApplication"> | string | null
+    automationLogs?: JsonNullableWithAggregatesFilter<"JobApplication">
     lastContactAt?: DateTimeNullableWithAggregatesFilter<"JobApplication"> | Date | string | null
     contactMethod?: StringNullableWithAggregatesFilter<"JobApplication"> | string | null
     recruiterName?: StringNullableWithAggregatesFilter<"JobApplication"> | string | null
@@ -43632,6 +45311,9 @@ export namespace Prisma {
     profileVisibility?: $Enums.ProfileVisibility
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: string | null
+    coverLetterTemplate?: string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutProfileInput
@@ -43676,6 +45358,9 @@ export namespace Prisma {
     profileVisibility?: $Enums.ProfileVisibility
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: string | null
+    coverLetterTemplate?: string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -43718,6 +45403,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
@@ -43762,6 +45450,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -43805,6 +45496,9 @@ export namespace Prisma {
     profileVisibility?: $Enums.ProfileVisibility
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: string | null
+    coverLetterTemplate?: string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -43847,6 +45541,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -43890,6 +45587,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -44808,6 +46508,209 @@ export namespace Prisma {
     browserInfo?: NullableJsonNullValueInput | InputJsonValue
     pageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AutomationProxyCreateInput = {
+    id?: string
+    host: string
+    port: number
+    username?: string | null
+    password?: string | null
+    proxyType?: $Enums.ProxyType
+    provider?: string | null
+    country?: string | null
+    region?: string | null
+    isActive?: boolean
+    failureCount?: number
+    successRate?: number
+    lastUsedAt?: Date | string | null
+    lastCheckedAt?: Date | string | null
+    requestsPerHour?: number | null
+    dailyLimit?: number | null
+    currentHourlyUsage?: number
+    currentDailyUsage?: number
+    avgResponseTime?: number | null
+    uptime?: number | null
+    costPerRequest?: Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: Decimal | DecimalJsLike | number | string | null
+    notes?: string | null
+    tags?: AutomationProxyCreatetagsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AutomationProxyUncheckedCreateInput = {
+    id?: string
+    host: string
+    port: number
+    username?: string | null
+    password?: string | null
+    proxyType?: $Enums.ProxyType
+    provider?: string | null
+    country?: string | null
+    region?: string | null
+    isActive?: boolean
+    failureCount?: number
+    successRate?: number
+    lastUsedAt?: Date | string | null
+    lastCheckedAt?: Date | string | null
+    requestsPerHour?: number | null
+    dailyLimit?: number | null
+    currentHourlyUsage?: number
+    currentDailyUsage?: number
+    avgResponseTime?: number | null
+    uptime?: number | null
+    costPerRequest?: Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: Decimal | DecimalJsLike | number | string | null
+    notes?: string | null
+    tags?: AutomationProxyCreatetagsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AutomationProxyUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    host?: StringFieldUpdateOperationsInput | string
+    port?: IntFieldUpdateOperationsInput | number
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyType?: EnumProxyTypeFieldUpdateOperationsInput | $Enums.ProxyType
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    failureCount?: IntFieldUpdateOperationsInput | number
+    successRate?: FloatFieldUpdateOperationsInput | number
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastCheckedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requestsPerHour?: NullableIntFieldUpdateOperationsInput | number | null
+    dailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    currentHourlyUsage?: IntFieldUpdateOperationsInput | number
+    currentDailyUsage?: IntFieldUpdateOperationsInput | number
+    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    uptime?: NullableFloatFieldUpdateOperationsInput | number | null
+    costPerRequest?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: AutomationProxyUpdatetagsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AutomationProxyUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    host?: StringFieldUpdateOperationsInput | string
+    port?: IntFieldUpdateOperationsInput | number
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyType?: EnumProxyTypeFieldUpdateOperationsInput | $Enums.ProxyType
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    failureCount?: IntFieldUpdateOperationsInput | number
+    successRate?: FloatFieldUpdateOperationsInput | number
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastCheckedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requestsPerHour?: NullableIntFieldUpdateOperationsInput | number | null
+    dailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    currentHourlyUsage?: IntFieldUpdateOperationsInput | number
+    currentDailyUsage?: IntFieldUpdateOperationsInput | number
+    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    uptime?: NullableFloatFieldUpdateOperationsInput | number | null
+    costPerRequest?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: AutomationProxyUpdatetagsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AutomationProxyCreateManyInput = {
+    id?: string
+    host: string
+    port: number
+    username?: string | null
+    password?: string | null
+    proxyType?: $Enums.ProxyType
+    provider?: string | null
+    country?: string | null
+    region?: string | null
+    isActive?: boolean
+    failureCount?: number
+    successRate?: number
+    lastUsedAt?: Date | string | null
+    lastCheckedAt?: Date | string | null
+    requestsPerHour?: number | null
+    dailyLimit?: number | null
+    currentHourlyUsage?: number
+    currentDailyUsage?: number
+    avgResponseTime?: number | null
+    uptime?: number | null
+    costPerRequest?: Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: Decimal | DecimalJsLike | number | string | null
+    notes?: string | null
+    tags?: AutomationProxyCreatetagsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AutomationProxyUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    host?: StringFieldUpdateOperationsInput | string
+    port?: IntFieldUpdateOperationsInput | number
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyType?: EnumProxyTypeFieldUpdateOperationsInput | $Enums.ProxyType
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    failureCount?: IntFieldUpdateOperationsInput | number
+    successRate?: FloatFieldUpdateOperationsInput | number
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastCheckedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requestsPerHour?: NullableIntFieldUpdateOperationsInput | number | null
+    dailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    currentHourlyUsage?: IntFieldUpdateOperationsInput | number
+    currentDailyUsage?: IntFieldUpdateOperationsInput | number
+    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    uptime?: NullableFloatFieldUpdateOperationsInput | number | null
+    costPerRequest?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: AutomationProxyUpdatetagsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AutomationProxyUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    host?: StringFieldUpdateOperationsInput | string
+    port?: IntFieldUpdateOperationsInput | number
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyType?: EnumProxyTypeFieldUpdateOperationsInput | $Enums.ProxyType
+    provider?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    failureCount?: IntFieldUpdateOperationsInput | number
+    successRate?: FloatFieldUpdateOperationsInput | number
+    lastUsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    lastCheckedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requestsPerHour?: NullableIntFieldUpdateOperationsInput | number | null
+    dailyLimit?: NullableIntFieldUpdateOperationsInput | number | null
+    currentHourlyUsage?: IntFieldUpdateOperationsInput | number
+    currentDailyUsage?: IntFieldUpdateOperationsInput | number
+    avgResponseTime?: NullableIntFieldUpdateOperationsInput | number | null
+    uptime?: NullableFloatFieldUpdateOperationsInput | number | null
+    costPerRequest?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    monthlyLimit?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    tags?: AutomationProxyUpdatetagsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogCreateInput = {
@@ -47403,6 +49306,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -47448,6 +49355,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -47487,6 +49398,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47532,6 +49447,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47574,6 +49493,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -47611,6 +49534,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -47651,6 +49578,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -48973,6 +50904,9 @@ export namespace Prisma {
     profileVisibility?: SortOrder
     showEmail?: SortOrder
     showPhone?: SortOrder
+    workAuthorization?: SortOrder
+    coverLetterTemplate?: SortOrder
+    automationPreferences?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -49017,6 +50951,8 @@ export namespace Prisma {
     profileVisibility?: SortOrder
     showEmail?: SortOrder
     showPhone?: SortOrder
+    workAuthorization?: SortOrder
+    coverLetterTemplate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -49055,6 +50991,8 @@ export namespace Prisma {
     profileVisibility?: SortOrder
     showEmail?: SortOrder
     showPhone?: SortOrder
+    workAuthorization?: SortOrder
+    coverLetterTemplate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -49746,6 +51684,196 @@ export namespace Prisma {
     _max?: NestedEnumLogLevelFilter<$PrismaModel>
   }
 
+  export type EnumProxyTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProxyType | EnumProxyTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProxyTypeFilter<$PrismaModel> | $Enums.ProxyType
+  }
+
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type AutomationProxyOrderByRelevanceInput = {
+    fields: AutomationProxyOrderByRelevanceFieldEnum | AutomationProxyOrderByRelevanceFieldEnum[]
+    sort: SortOrder
+    search: string
+  }
+
+  export type AutomationProxyCountOrderByAggregateInput = {
+    id?: SortOrder
+    host?: SortOrder
+    port?: SortOrder
+    username?: SortOrder
+    password?: SortOrder
+    proxyType?: SortOrder
+    provider?: SortOrder
+    country?: SortOrder
+    region?: SortOrder
+    isActive?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    lastUsedAt?: SortOrder
+    lastCheckedAt?: SortOrder
+    requestsPerHour?: SortOrder
+    dailyLimit?: SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrder
+    uptime?: SortOrder
+    costPerRequest?: SortOrder
+    monthlyLimit?: SortOrder
+    notes?: SortOrder
+    tags?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AutomationProxyAvgOrderByAggregateInput = {
+    port?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    requestsPerHour?: SortOrder
+    dailyLimit?: SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrder
+    uptime?: SortOrder
+    costPerRequest?: SortOrder
+    monthlyLimit?: SortOrder
+  }
+
+  export type AutomationProxyMaxOrderByAggregateInput = {
+    id?: SortOrder
+    host?: SortOrder
+    port?: SortOrder
+    username?: SortOrder
+    password?: SortOrder
+    proxyType?: SortOrder
+    provider?: SortOrder
+    country?: SortOrder
+    region?: SortOrder
+    isActive?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    lastUsedAt?: SortOrder
+    lastCheckedAt?: SortOrder
+    requestsPerHour?: SortOrder
+    dailyLimit?: SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrder
+    uptime?: SortOrder
+    costPerRequest?: SortOrder
+    monthlyLimit?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AutomationProxyMinOrderByAggregateInput = {
+    id?: SortOrder
+    host?: SortOrder
+    port?: SortOrder
+    username?: SortOrder
+    password?: SortOrder
+    proxyType?: SortOrder
+    provider?: SortOrder
+    country?: SortOrder
+    region?: SortOrder
+    isActive?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    lastUsedAt?: SortOrder
+    lastCheckedAt?: SortOrder
+    requestsPerHour?: SortOrder
+    dailyLimit?: SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrder
+    uptime?: SortOrder
+    costPerRequest?: SortOrder
+    monthlyLimit?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AutomationProxySumOrderByAggregateInput = {
+    port?: SortOrder
+    failureCount?: SortOrder
+    successRate?: SortOrder
+    requestsPerHour?: SortOrder
+    dailyLimit?: SortOrder
+    currentHourlyUsage?: SortOrder
+    currentDailyUsage?: SortOrder
+    avgResponseTime?: SortOrder
+    uptime?: SortOrder
+    costPerRequest?: SortOrder
+    monthlyLimit?: SortOrder
+  }
+
+  export type EnumProxyTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProxyType | EnumProxyTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProxyTypeWithAggregatesFilter<$PrismaModel> | $Enums.ProxyType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProxyTypeFilter<$PrismaModel>
+    _max?: NestedEnumProxyTypeFilter<$PrismaModel>
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
   export type EnumActorTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.ActorType | EnumActorTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ActorType[] | ListEnumActorTypeFieldRefInput<$PrismaModel>
@@ -49864,17 +51992,6 @@ export namespace Prisma {
     _max?: NestedEnumRiskLevelFilter<$PrismaModel>
   }
 
-  export type DecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-  }
-
   export type AnalyticsEventOrderByRelevanceInput = {
     fields: AnalyticsEventOrderByRelevanceFieldEnum | AnalyticsEventOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -49960,22 +52077,6 @@ export namespace Prisma {
   export type AnalyticsEventSumOrderByAggregateInput = {
     revenue?: SortOrder
     processingTime?: SortOrder
-  }
-
-  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type EnumNotificationTypeFilter<$PrismaModel = never> = {
@@ -50408,17 +52509,6 @@ export namespace Prisma {
     _max?: NestedEnumCompanyStatusFilter<$PrismaModel>
   }
 
-  export type FloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
   export type EnumEmploymentTypeNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.EmploymentType | EnumEmploymentTypeFieldRefInput<$PrismaModel> | null
     in?: $Enums.EmploymentType[] | ListEnumEmploymentTypeFieldRefInput<$PrismaModel> | null
@@ -50532,22 +52622,6 @@ export namespace Prisma {
     careerGrowth?: SortOrder
     helpfulVotes?: SortOrder
     reportCount?: SortOrder
-  }
-
-  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type EnumEmploymentTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -51500,6 +53574,13 @@ export namespace Prisma {
     not?: NestedEnumAutomationStatusNullableFilter<$PrismaModel> | $Enums.AutomationStatus | null
   }
 
+  export type EnumExecutionModeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExecutionMode | EnumExecutionModeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExecutionModeNullableFilter<$PrismaModel> | $Enums.ExecutionMode | null
+  }
+
   export type ResumeNullableRelationFilter = {
     is?: ResumeWhereInput | null
     isNot?: ResumeWhereInput | null
@@ -51553,6 +53634,10 @@ export namespace Prisma {
     automationAttempts?: SortOrder
     automationData?: SortOrder
     lastAutomationAt?: SortOrder
+    executionMode?: SortOrder
+    serverIpAddress?: SortOrder
+    proxyUsed?: SortOrder
+    automationLogs?: SortOrder
     lastContactAt?: SortOrder
     contactMethod?: SortOrder
     recruiterName?: SortOrder
@@ -51597,6 +53682,9 @@ export namespace Prisma {
     automationStatus?: SortOrder
     automationAttempts?: SortOrder
     lastAutomationAt?: SortOrder
+    executionMode?: SortOrder
+    serverIpAddress?: SortOrder
+    proxyUsed?: SortOrder
     lastContactAt?: SortOrder
     contactMethod?: SortOrder
     recruiterName?: SortOrder
@@ -51634,6 +53722,9 @@ export namespace Prisma {
     automationStatus?: SortOrder
     automationAttempts?: SortOrder
     lastAutomationAt?: SortOrder
+    executionMode?: SortOrder
+    serverIpAddress?: SortOrder
+    proxyUsed?: SortOrder
     lastContactAt?: SortOrder
     contactMethod?: SortOrder
     recruiterName?: SortOrder
@@ -51692,6 +53783,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumAutomationStatusNullableFilter<$PrismaModel>
     _max?: NestedEnumAutomationStatusNullableFilter<$PrismaModel>
+  }
+
+  export type EnumExecutionModeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExecutionMode | EnumExecutionModeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExecutionModeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExecutionMode | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumExecutionModeNullableFilter<$PrismaModel>
+    _max?: NestedEnumExecutionModeNullableFilter<$PrismaModel>
   }
 
   export type EnumInteractionTypeFilter<$PrismaModel = never> = {
@@ -53217,6 +55318,35 @@ export namespace Prisma {
     update?: XOR<XOR<ApplicationQueueUpdateToOneWithWhereWithoutAutomationLogsInput, ApplicationQueueUpdateWithoutAutomationLogsInput>, ApplicationQueueUncheckedUpdateWithoutAutomationLogsInput>
   }
 
+  export type AutomationProxyCreatetagsInput = {
+    set: string[]
+  }
+
+  export type EnumProxyTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ProxyType
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type AutomationProxyUpdatetagsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
   export type AuditLogCreateriskFactorsInput = {
     set: string[]
   }
@@ -53263,14 +55393,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAnalyticsEventsInput, UserUncheckedCreateWithoutAnalyticsEventsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAnalyticsEventsInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type NullableDecimalFieldUpdateOperationsInput = {
-    set?: Decimal | DecimalJsLike | number | string | null
-    increment?: Decimal | DecimalJsLike | number | string
-    decrement?: Decimal | DecimalJsLike | number | string
-    multiply?: Decimal | DecimalJsLike | number | string
-    divide?: Decimal | DecimalJsLike | number | string
   }
 
   export type UserUpdateOneWithoutAnalyticsEventsNestedInput = {
@@ -53455,14 +55577,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutCompanyReviewsInput, UserUncheckedCreateWithoutCompanyReviewsInput>
     connectOrCreate?: UserCreateOrConnectWithoutCompanyReviewsInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type FloatFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type NullableEnumEmploymentTypeFieldUpdateOperationsInput = {
@@ -54208,6 +56322,10 @@ export namespace Prisma {
     set?: $Enums.AutomationStatus | null
   }
 
+  export type NullableEnumExecutionModeFieldUpdateOperationsInput = {
+    set?: $Enums.ExecutionMode | null
+  }
+
   export type UserUpdateOneRequiredWithoutApplicationsNestedInput = {
     create?: XOR<UserCreateWithoutApplicationsInput, UserUncheckedCreateWithoutApplicationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutApplicationsInput
@@ -54911,6 +57029,66 @@ export namespace Prisma {
     _max?: NestedEnumLogLevelFilter<$PrismaModel>
   }
 
+  export type NestedEnumProxyTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProxyType | EnumProxyTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProxyTypeFilter<$PrismaModel> | $Enums.ProxyType
+  }
+
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type NestedEnumProxyTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProxyType | EnumProxyTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProxyType[] | ListEnumProxyTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumProxyTypeWithAggregatesFilter<$PrismaModel> | $Enums.ProxyType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProxyTypeFilter<$PrismaModel>
+    _max?: NestedEnumProxyTypeFilter<$PrismaModel>
+  }
+
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumActorTypeFilter<$PrismaModel = never> = {
     equals?: $Enums.ActorType | EnumActorTypeFieldRefInput<$PrismaModel>
     in?: $Enums.ActorType[] | ListEnumActorTypeFieldRefInput<$PrismaModel>
@@ -54943,33 +57121,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRiskLevelFilter<$PrismaModel>
     _max?: NestedEnumRiskLevelFilter<$PrismaModel>
-  }
-
-  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-  }
-
-  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
-    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
-    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
-    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedDecimalNullableFilter<$PrismaModel>
-    _sum?: NestedDecimalNullableFilter<$PrismaModel>
-    _min?: NestedDecimalNullableFilter<$PrismaModel>
-    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumNotificationTypeFilter<$PrismaModel = never> = {
@@ -55096,22 +57247,6 @@ export namespace Prisma {
     in?: $Enums.EmploymentType[] | ListEnumEmploymentTypeFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.EmploymentType[] | ListEnumEmploymentTypeFieldRefInput<$PrismaModel> | null
     not?: NestedEnumEmploymentTypeNullableFilter<$PrismaModel> | $Enums.EmploymentType | null
-  }
-
-  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedFloatFilter<$PrismaModel>
-    _min?: NestedFloatFilter<$PrismaModel>
-    _max?: NestedFloatFilter<$PrismaModel>
   }
 
   export type NestedEnumEmploymentTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -55344,6 +57479,13 @@ export namespace Prisma {
     not?: NestedEnumAutomationStatusNullableFilter<$PrismaModel> | $Enums.AutomationStatus | null
   }
 
+  export type NestedEnumExecutionModeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExecutionMode | EnumExecutionModeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExecutionModeNullableFilter<$PrismaModel> | $Enums.ExecutionMode | null
+  }
+
   export type NestedEnumApplicationStatusWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.ApplicationStatus | EnumApplicationStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ApplicationStatus[] | ListEnumApplicationStatusFieldRefInput<$PrismaModel>
@@ -55382,6 +57524,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumAutomationStatusNullableFilter<$PrismaModel>
     _max?: NestedEnumAutomationStatusNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumExecutionModeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExecutionMode | EnumExecutionModeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExecutionMode[] | ListEnumExecutionModeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExecutionModeNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExecutionMode | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumExecutionModeNullableFilter<$PrismaModel>
+    _max?: NestedEnumExecutionModeNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumInteractionTypeFilter<$PrismaModel = never> = {
@@ -55568,6 +57720,9 @@ export namespace Prisma {
     profileVisibility?: $Enums.ProfileVisibility
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: string | null
+    coverLetterTemplate?: string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -55610,6 +57765,9 @@ export namespace Prisma {
     profileVisibility?: $Enums.ProfileVisibility
     showEmail?: boolean
     showPhone?: boolean
+    workAuthorization?: string | null
+    coverLetterTemplate?: string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -55848,6 +58006,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -55891,6 +58053,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -56462,6 +58628,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -56504,6 +58673,9 @@ export namespace Prisma {
     profileVisibility?: EnumProfileVisibilityFieldUpdateOperationsInput | $Enums.ProfileVisibility
     showEmail?: BoolFieldUpdateOperationsInput | boolean
     showPhone?: BoolFieldUpdateOperationsInput | boolean
+    workAuthorization?: NullableStringFieldUpdateOperationsInput | string | null
+    coverLetterTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    automationPreferences?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -56740,6 +58912,10 @@ export namespace Prisma {
     automationAttempts?: IntFilter<"JobApplication"> | number
     automationData?: JsonNullableFilter<"JobApplication">
     lastAutomationAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
+    executionMode?: EnumExecutionModeNullableFilter<"JobApplication"> | $Enums.ExecutionMode | null
+    serverIpAddress?: StringNullableFilter<"JobApplication"> | string | null
+    proxyUsed?: StringNullableFilter<"JobApplication"> | string | null
+    automationLogs?: JsonNullableFilter<"JobApplication">
     lastContactAt?: DateTimeNullableFilter<"JobApplication"> | Date | string | null
     contactMethod?: StringNullableFilter<"JobApplication"> | string | null
     recruiterName?: StringNullableFilter<"JobApplication"> | string | null
@@ -58605,6 +60781,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -58649,6 +60829,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -59092,6 +61276,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -59136,6 +61324,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -60764,6 +62956,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -60807,6 +63003,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -62161,6 +64361,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -62204,6 +64408,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -63833,6 +66041,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -63877,6 +66089,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -63931,6 +66147,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -63975,6 +66195,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65302,6 +67526,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -65669,6 +67897,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65712,6 +67944,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -65753,6 +67989,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66703,6 +68943,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -66880,6 +69124,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66923,6 +69171,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -66964,6 +69216,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67635,6 +69891,10 @@ export namespace Prisma {
     automationAttempts?: number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: Date | string | null
+    executionMode?: $Enums.ExecutionMode | null
+    serverIpAddress?: string | null
+    proxyUsed?: string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: Date | string | null
     contactMethod?: string | null
     recruiterName?: string | null
@@ -67692,6 +69952,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67735,6 +69999,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -67776,6 +70044,10 @@ export namespace Prisma {
     automationAttempts?: IntFieldUpdateOperationsInput | number
     automationData?: NullableJsonNullValueInput | InputJsonValue
     lastAutomationAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    executionMode?: NullableEnumExecutionModeFieldUpdateOperationsInput | $Enums.ExecutionMode | null
+    serverIpAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    proxyUsed?: NullableStringFieldUpdateOperationsInput | string | null
+    automationLogs?: NullableJsonNullValueInput | InputJsonValue
     lastContactAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contactMethod?: NullableStringFieldUpdateOperationsInput | string | null
     recruiterName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -68282,6 +70554,10 @@ export namespace Prisma {
      * @deprecated Use AutomationLogDefaultArgs instead
      */
     export type AutomationLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AutomationLogDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AutomationProxyDefaultArgs instead
+     */
+    export type AutomationProxyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AutomationProxyDefaultArgs<ExtArgs>
     /**
      * @deprecated Use AuditLogDefaultArgs instead
      */

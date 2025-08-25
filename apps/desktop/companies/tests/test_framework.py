@@ -22,6 +22,16 @@ from result_handler import ApplicationResult, ApplicationStatus, ResultProcessor
 from base_automation import BaseJobAutomation
 
 
+class MockBrowserProfile:
+    """Mock browser profile for testing"""
+    def __init__(self):
+        self.downloads_path = None
+        self.id = "mock_profile_id"
+        self.headless = True
+        self.viewport = {'width': 1280, 'height': 720}
+        self.user_agent = None
+
+
 class MockBrowserSession:
     """Mock browser session for testing"""
     
@@ -29,6 +39,11 @@ class MockBrowserSession:
         self.mock_responses = mock_responses or {}
         self.actions_performed = []
         self.current_url = ""
+        # Add the attributes that browser-use Agent expects
+        self._owns_browser_resources = True
+        self.browser_profile = MockBrowserProfile()
+        self.id = "mock_session_1234"
+        self.agent_current_page = MockPage(self.mock_responses, self.actions_performed)
         
     async def start(self):
         self.actions_performed.append("browser_started")
@@ -38,6 +53,15 @@ class MockBrowserSession:
     
     async def get_current_page(self):
         return MockPage(self.mock_responses, self.actions_performed)
+    
+    def model_copy(self, **kwargs):
+        """Create a copy of this mock browser session"""
+        copy = MockBrowserSession(self.mock_responses.copy())
+        copy.actions_performed = self.actions_performed.copy()
+        copy.current_url = self.current_url
+        copy._owns_browser_resources = False  # Copies don't own resources
+        copy.browser_profile = self.browser_profile  # Share the same profile
+        return copy
 
 
 class MockPage:
