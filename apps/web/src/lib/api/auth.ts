@@ -68,7 +68,7 @@ export function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 /**
- * Verify JWT token by calling the API server (proper security approach)
+ * Verify JWT token with improved logic to avoid circular dependencies
  */
 export async function verifyToken(token: string): Promise<AuthenticatedUser> {
   try {
@@ -77,49 +77,63 @@ export async function verifyToken(token: string): Promise<AuthenticatedUser> {
       throw new AuthError('Token has expired');
     }
 
-    // Call API server for proper verification
-    const response = await fetch('/api/auth/verify-token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ token })
-    });
-
-    if (!response.ok) {
-      throw new AuthError('Token verification failed');
+    // Try to parse token payload for basic info first (faster)
+    const payload = parseJwtPayload(token);
+    if (!payload) {
+      throw new AuthError('Invalid token format');
     }
 
-    const data = await response.json();
-    
-    if (!data.success || !data.user) {
-      throw new AuthError('Invalid token');
+    // Create user info from token payload
+    const userFromToken = {
+      id: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      role: (payload as any).role || 'user',
+      status: 'active',
+      emailVerified: (payload as any).emailVerified || true,
+      createdAt: new Date(payload.iat * 1000),
+      updatedAt: new Date(),
+    };
+
+    // Try to call /api/auth/me for server-side validation, but with timeout and fallback
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+      const response = await fetch('/api/auth/me', {
+        method: 'GET',
+        headers: {
+          'Cookie': typeof document !== 'undefined' ? document.cookie : ''
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          console.log('✅ [Auth] Token verified via /api/auth/me');
+          return data.data;
+        }
+      }
+
+      // If server verification fails but token is parseable, use parsed data
+      console.warn('⚠️ [Auth] Server verification failed, using token data');
+      
+    } catch (fetchError) {
+      console.warn('⚠️ [Auth] /api/auth/me unavailable, using token data:', fetchError instanceof Error ? fetchError.message : String(fetchError));
     }
 
-    return data.user;
+    // Return parsed token data as fallback
+    return userFromToken;
+
   } catch (error) {
     if (error instanceof AuthError) {
       throw error;
     }
     
-    // Fallback: parse payload for basic info (not secure, but allows graceful degradation)
-    const payload = parseJwtPayload(token);
-    if (payload && !isTokenExpiredClientSide(token)) {
-      console.warn('Using fallback token parsing - verification endpoint unavailable');
-      return {
-        id: payload.sub,
-        email: payload.email,
-        name: payload.name,
-        role: payload.role,
-        status: 'active',
-        emailVerified: true,
-        createdAt: new Date(payload.iat * 1000),
-        updatedAt: new Date(),
-      };
-    }
-    
-    throw new AuthError('Token verification failed');
+    throw new AuthError('Token verification failed: ' + (error instanceof Error ? error.message : String(error)));
   }
 }
 

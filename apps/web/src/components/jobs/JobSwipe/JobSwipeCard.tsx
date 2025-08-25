@@ -453,8 +453,8 @@ export const JobSwipeCard = forwardRef<HTMLDivElement, JobSwipeCardPropsExtended
         trigger={state.expansionTrigger}
         onCollapse={onCollapse}
         onApply={swipeRight}
-        onSave={handleSave}
-        onShare={handleShare}
+        onSave={() => onSave?.()}
+        onShare={() => onShare?.()}
         config={config}
         deviceType={deviceType}
       />

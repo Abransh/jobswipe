@@ -10,6 +10,7 @@ import React, { useState, useCallback, Suspense, useEffect, useRef } from 'react
 import { useSearchParams } from 'next/navigation';
 // Import icons will be replaced with inline SVGs to avoid type conflicts
 import { useJobs } from '@/hooks/useJobs';
+import { useAuth } from '@/hooks/useAuth';
 
 // Job Components
 import { JobSwipeInterface } from '@/components/jobs/JobDiscovery/JobSwipeInterface';
@@ -28,6 +29,36 @@ type ViewMode = 'swipe' | 'list' | 'grid';
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  // Stabilize auth loading state to prevent infinite loops
+  const [stableAuthLoading, setStableAuthLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // useEffect(() => {
+  //   // Only update loading state if it's been stable for a short period
+  //   const timer = setTimeout(() => {
+  //     setStableAuthLoading(authLoading);
+  //     if (!authLoading && !initialLoadComplete) {
+  //       setInitialLoadComplete(true);
+  //     }
+  //   }, 100);
+    
+  //   return () => clearTimeout(timer);
+  // }, [authLoading, initialLoadComplete]);
+  
+  // // Simple loading state without infinite loops (with stability check)
+  // if (stableAuthLoading && !initialLoadComplete) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+  //         <p className="text-gray-600">Loading JobSwipe...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  
   const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || 'swipe');
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -509,6 +540,14 @@ function JobsPageContent() {
                 searchQuery={searchQuery}
                 filters={filters}
                 onApplicationUpdate={(stats) => setApplicationStats(stats)}
+                fetchMoreJobs={async (offset: number, limit: number) => {
+                  console.log('🔄 Fetching more jobs from parent, offset:', offset, 'limit:', limit);
+                  if (hasMore && !loading) {
+                    await fetchMore();
+                    return jobs.slice(offset, offset + limit);
+                  }
+                  return [];
+                }}
               />
             )}
             

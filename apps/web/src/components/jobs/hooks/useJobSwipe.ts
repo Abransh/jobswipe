@@ -5,9 +5,8 @@
  * Core hook managing job queue, card states, and swipe interactions
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import type { 
-  JobData, 
   JobQueueItem, 
   SwipeAnalytics, 
   JobSwipeConfig,
@@ -17,6 +16,7 @@ import type {
   DeviceType,
   CardInteractionState
 } from '../types/jobSwipe';
+import type { JobData } from '../types/job';
 import { DEFAULT_JOBSWIPE_CONFIG } from '../types/jobSwipe';
 
 interface UseJobSwipeProps {
@@ -105,14 +105,27 @@ export function useJobSwipe({
     }
   }, [jobs]);
 
-  // Get current job
-  const currentJob = jobQueue[currentIndex] || null;
-  const hasNextJob = currentIndex + 1 < jobQueue.length;
-  const queueLength = jobQueue.length - currentIndex;
+  // Get current job with better bounds checking
+  const currentJob = currentIndex < jobQueue.length ? jobQueue[currentIndex] : null;
+  const hasNextJob = (currentIndex + 1) < jobQueue.length;
+  const queueLength = Math.max(0, jobQueue.length - currentIndex);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('📊 Job queue state:', {
+      currentIndex,
+      jobQueueLength: jobQueue.length,
+      currentJob: currentJob?.job?.title || 'None',
+      hasNextJob,
+      queueLength
+    });
+  }, [currentIndex, jobQueue.length, currentJob, hasNextJob, queueLength]);
 
-  // Preload next jobs
-  const preloadNext = useCallback(async () => {
+  // Preload next jobs with retry mechanism
+  const preloadNext = useCallback(async (retryCount = 0) => {
     if (!fetchJobs || isLoading) return;
+    
+    const maxRetries = 3;
     
     try {
       setIsLoading(true);
@@ -131,13 +144,31 @@ export function useJobSwipe({
         
         setJobQueue(prev => [...prev, ...newQueueItems]);
         fetchOffsetRef.current += newJobs.length;
+        console.log(`✅ Successfully loaded ${newJobs.length} jobs`);
+      } else {
+        console.log('ℹ️ No more jobs available');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load jobs');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load jobs';
+      console.error(`❌ Failed to preload jobs (attempt ${retryCount + 1}):`, errorMessage);
+      
+      if (retryCount < maxRetries) {
+        // Exponential backoff: wait 1s, 2s, 4s
+        const delay = Math.pow(2, retryCount) * 1000;
+        console.log(`🔄 Retrying in ${delay}ms...`);
+        setTimeout(() => {
+          preloadNext(retryCount + 1);
+        }, delay);
+        return;
+      }
+      
+      setError(`${errorMessage} (tried ${maxRetries + 1} times)`);
     } finally {
-      setIsLoading(false);
+      if (retryCount >= maxRetries || error === null) {
+        setIsLoading(false);
+      }
     }
-  }, [fetchJobs, isLoading, config.preloadCount]);
+  }, [fetchJobs, isLoading, config.preloadCount, error]);
 
   // Refill queue when running low
   const refillQueue = useCallback(async () => {
@@ -171,7 +202,12 @@ export function useJobSwipe({
 
   // Handle swipe left
   const swipeLeft = useCallback(() => {
-    if (!currentJob) return;
+    if (!currentJob || currentIndex >= jobQueue.length) {
+      console.log('👈 swipeLeft: No current job available or index out of bounds');
+      return;
+    }
+    
+    console.log('👈 swipeLeft: Processing job', currentJob.job.title, 'currentIndex:', currentIndex, 'queueLength:', jobQueue.length);
     
     const analyticsData = createAnalytics(
       currentJob.job,
@@ -187,32 +223,50 @@ export function useJobSwipe({
     // Call user handler
     onSwipeLeft?.(currentJob.job, analyticsData);
     
-    // Move to next job
-    setCurrentIndex(prev => prev + 1);
+    // Move to next job with bounds check
+    const nextIndex = currentIndex + 1;
+    console.log('👈 swipeLeft: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
     
-    // Reset card state
-    setCardState(prev => ({
-      ...prev,
-      state: 'idle',
-      isExpanded: false,
-      swipeDirection: null,
-      swipeProgress: 0,
-      dragOffset: { x: 0, y: 0 },
-      velocity: { x: 0, y: 0 }
-    }));
+    // Update index immediately and force a re-render
+    setCurrentIndex(nextIndex);
     
-    // Check if queue needs refill
-    refillQueue();
+    // Use React 18 startTransition for better state updates
+    React.startTransition(() => {
+      // Reset card state immediately
+      setCardState(prev => ({
+        ...prev,
+        state: 'idle',
+        isExpanded: false,
+        swipeDirection: null,
+        swipeProgress: 0,
+        dragOffset: { x: 0, y: 0 },
+        velocity: { x: 0, y: 0 },
+        interactionStart: 0,
+        lastUpdate: Date.now()
+      }));
+      
+      // Reset interaction timer
+      interactionStartTimeRef.current = null;
+    });
+    
+    // Check if queue needs refill (do this after state update)
+    setTimeout(() => refillQueue(), 0);
     
     // Check if queue is empty
-    if (currentIndex + 1 >= jobQueue.length && !fetchJobs) {
-      onEmptyQueue?.();
+    if (nextIndex >= jobQueue.length && !fetchJobs) {
+      console.log('👈 swipeLeft: Queue empty, calling onEmptyQueue');
+      setTimeout(() => onEmptyQueue?.(), 100);
     }
   }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeLeft, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
 
   // Handle swipe right
   const swipeRight = useCallback(() => {
-    if (!currentJob) return;
+    if (!currentJob || currentIndex >= jobQueue.length) {
+      console.log('👉 swipeRight: No current job available or index out of bounds');
+      return;
+    }
+    
+    console.log('👉 swipeRight: Processing job', currentJob.job.title, 'currentIndex:', currentIndex, 'queueLength:', jobQueue.length);
     
     const analyticsData = createAnalytics(
       currentJob.job,
@@ -228,26 +282,39 @@ export function useJobSwipe({
     // Call user handler
     onSwipeRight?.(currentJob.job, analyticsData);
     
-    // Move to next job
-    setCurrentIndex(prev => prev + 1);
+    // Move to next job with bounds check
+    const nextIndex = currentIndex + 1;
+    console.log('👉 swipeRight: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
     
-    // Reset card state
-    setCardState(prev => ({
-      ...prev,
-      state: 'idle',
-      isExpanded: false,
-      swipeDirection: null,
-      swipeProgress: 0,
-      dragOffset: { x: 0, y: 0 },
-      velocity: { x: 0, y: 0 }
-    }));
+    // Update index immediately and force a re-render
+    setCurrentIndex(nextIndex);
     
-    // Check if queue needs refill
-    refillQueue();
+    // Use React 18 startTransition for better state updates
+    React.startTransition(() => {
+      // Reset card state immediately
+      setCardState(prev => ({
+        ...prev,
+        state: 'idle',
+        isExpanded: false,
+        swipeDirection: null,
+        swipeProgress: 0,
+        dragOffset: { x: 0, y: 0 },
+        velocity: { x: 0, y: 0 },
+        interactionStart: 0,
+        lastUpdate: Date.now()
+      }));
+      
+      // Reset interaction timer
+      interactionStartTimeRef.current = null;
+    });
+    
+    // Check if queue needs refill (do this after state update)
+    setTimeout(() => refillQueue(), 0);
     
     // Check if queue is empty
-    if (currentIndex + 1 >= jobQueue.length && !fetchJobs) {
-      onEmptyQueue?.();
+    if (nextIndex >= jobQueue.length && !fetchJobs) {
+      console.log('👉 swipeRight: Queue empty, calling onEmptyQueue');
+      setTimeout(() => onEmptyQueue?.(), 100);
     }
   }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeRight, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
 
@@ -429,13 +496,49 @@ export function useJobSwipe({
     };
   }, [analytics]);
 
-  // Auto-refill queue when running low
+  // Auto-refill queue when running low with error recovery
   useEffect(() => {
     const remainingJobs = jobQueue.length - currentIndex;
+    
+    // Recovery mechanism: if current index is beyond queue length, reset
+    if (currentIndex > 0 && currentIndex >= jobQueue.length && jobQueue.length > 0) {
+      console.warn('⚠️ Current index beyond queue length, resetting to last valid position');
+      setCurrentIndex(Math.max(0, jobQueue.length - 1));
+      return;
+    }
+    
+    // Auto-refill when running low
     if (remainingJobs <= 2 && fetchJobs && !isLoading) {
       preloadNext();
     }
   }, [currentIndex, jobQueue.length, fetchJobs, isLoading, preloadNext]);
+
+  // Recovery function for critical errors
+  const recoverQueue = useCallback(() => {
+    console.log('🚑 Recovering job queue...');
+    setCurrentIndex(0);
+    setError(null);
+    setIsLoading(false);
+    fetchOffsetRef.current = 0;
+    
+    // Reset card state
+    setCardState(prev => ({
+      ...prev,
+      state: 'idle',
+      isExpanded: false,
+      swipeDirection: null,
+      swipeProgress: 0,
+      dragOffset: { x: 0, y: 0 },
+      velocity: { x: 0, y: 0 },
+      interactionStart: 0,
+      lastUpdate: Date.now()
+    }));
+    
+    // Try to reload jobs
+    if (fetchJobs) {
+      preloadNext();
+    }
+  }, [fetchJobs, preloadNext]);
 
   return {
     // Current state
@@ -456,6 +559,7 @@ export function useJobSwipe({
     // Queue management
     preloadNext,
     refillQueue,
+    recoverQueue,
     
     // Event handlers
     onGestureStart,

@@ -92,27 +92,103 @@ class QueueApiService {
   private apiVersion: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    this.apiVersion = 'v1';
+    // Use Next.js API routes instead of direct backend calls
+    this.baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    this.apiVersion = 'api'; // Use Next.js API route structure
   }
 
   /**
-   * Get authorization header
+   * Get authorization header using same logic as auth service
    */
   private getAuthHeaders(): Record<string, string> {
-    // Get token from localStorage or cookies
-    const token = typeof window !== 'undefined' 
-      ? localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken')
-      : null;
-
-    if (!token) {
-      throw new Error('User not authenticated');
+    const token = this.getAuthToken();
+    
+    if (token) {
+      console.log('🔐 [Queue API] Using auth token, first 20 chars:', token.substring(0, 20) + '...');
+      return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
     }
 
+    console.warn('⚠️ [Queue API] No auth token found - request will be unauthorized');
     return {
-      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
+  }
+
+  /**
+   * Get auth token using same logic as FrontendAuthService
+   */
+  private getAuthToken(): string | null {
+    try {
+      // Method 1: Try to get from auth service directly (if available)
+      try {
+        const authService = (globalThis as any).__authService;
+        if (authService && typeof authService.getAccessToken === 'function') {
+          const serviceToken = authService.getAccessToken();
+          if (serviceToken) {
+            console.log('🎯 [Queue API] Using token from auth service');
+            return serviceToken;
+          }
+        }
+      } catch (serviceError) {
+        console.log('ℹ️ [Queue API] Auth service not available, trying storage');
+      }
+
+      // Method 2: HTTP-only cookies (production)
+      const cookieToken = this.getCookieToken();
+      if (cookieToken) {
+        console.log('🍪 [Queue API] Using token from cookie');
+        return cookieToken;
+      }
+
+      // Method 3: sessionStorage (development) - matches auth service exactly
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        const sessionToken = window.sessionStorage.getItem('accessToken');
+        if (sessionToken) {
+          console.log('💾 [Queue API] Using token from sessionStorage');
+          return sessionToken;
+        }
+      }
+
+      console.log('❌ [Queue API] No token found in any location');
+      return null;
+    } catch (error) {
+      console.error('❌ [Queue API] Error getting auth token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get token from HTTP-only cookies (improved parsing)
+   */
+  private getCookieToken(): string | null {
+    if (typeof document === 'undefined') return null;
+    
+    try {
+      const cookies = document.cookie.split(';');
+      console.log('🍪 [Queue API] All cookies:', document.cookie);
+      
+      for (const cookie of cookies) {
+        const [name, ...valueParts] = cookie.trim().split('=');
+        const value = valueParts.join('='); // Handle tokens with = signs
+        
+        console.log('🔍 [Queue API] Checking cookie:', name, 'has value:', !!value);
+        
+        if (name === 'accessToken' && value) {
+          const decodedValue = decodeURIComponent(value);
+          console.log('✅ [Queue API] Found accessToken cookie, length:', decodedValue.length);
+          return decodedValue;
+        }
+      }
+      
+      console.log('❌ [Queue API] accessToken cookie not found');
+      return null;
+    } catch (error) {
+      console.error('❌ [Queue API] Error parsing cookies:', error);
+      return null;
+    }
   }
 
   /**
@@ -129,18 +205,33 @@ class QueueApiService {
         ...options.headers,
       };
 
+      console.log('🔗 [Queue API] Making request to:', url);
+      console.log('📋 [Queue API] Headers:', headers);
+      console.log('📦 [Queue API] Options:', options);
+
       const response = await fetch(url, {
         ...options,
         headers,
       });
 
+      console.log('📡 [Queue API] Response status:', response.status, response.statusText);
+
       const data = await response.json();
 
       if (!response.ok) {
+        let errorMessage = data.error || 'Request failed';
+        
+        // Handle authentication errors
+        if (response.status === 401) {
+          errorMessage = 'User not authenticated. Please log in to continue.';
+        } else if (response.status === 403) {
+          errorMessage = 'Access denied. Please check your permissions.';
+        }
+        
         return {
           success: false,
-          error: data.error || 'Request failed',
-          errorCode: data.errorCode,
+          error: errorMessage,
+          errorCode: data.errorCode || `HTTP_${response.status}`,
           details: data.details,
         };
       }
@@ -347,13 +438,6 @@ export const queueApi = new QueueApiService();
 // =============================================================================
 // EXPORTS
 // =============================================================================
-
-export type {
-  SwipeRightRequest,
-  ApplicationStatus,
-  QueueStats,
-  ApiResponse,
-};
 
 export {
   QueueApiService,

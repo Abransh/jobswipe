@@ -17,6 +17,7 @@ interface JobSwipeInterfaceProps {
   searchQuery?: string;
   filters?: JobFilters;
   onApplicationUpdate?: (stats: { totalApplications: number; todayApplications: number; successRate: number }) => void;
+  fetchMoreJobs?: (offset: number, limit: number) => Promise<JobData[]>;
 }
 
 export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpdate }: JobSwipeInterfaceProps) {
@@ -32,21 +33,30 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
 
   // Handle swipe events
   const handleSwipeLeft = useCallback((job: JobData, analytics: SwipeAnalytics) => {
-    console.log('👈 Passed on job:', job.title, 'Analytics:', analytics);
-    setSwipeStats(prev => ({
-      ...prev,
-      totalSwipes: prev.totalSwipes + 1,
-      leftSwipes: prev.leftSwipes + 1
-    }));
-  }, []);
+    console.log('👈 [JobSwipeInterface] Passed on job:', job.title, 'Analytics:', analytics);
+    console.log('📊 [JobSwipeInterface] Swipe stats before update:', swipeStats);
+    
+    setSwipeStats(prev => {
+      const newStats = {
+        ...prev,
+        totalSwipes: prev.totalSwipes + 1,
+        leftSwipes: prev.leftSwipes + 1
+      };
+      console.log('📊 [JobSwipeInterface] Updated swipe stats:', newStats);
+      return newStats;
+    });
+  }, [swipeStats]);
 
   const handleSwipeRight = useCallback(async (job: JobData, analytics: SwipeAnalytics) => {
-    console.log('👉 Applying to job:', job.title, 'Analytics:', analytics);
+    console.log('👉 [JobSwipeInterface] Applying to job:', job.title, 'Analytics:', analytics);
+    console.log('📊 [JobSwipeInterface] Current swipe stats:', swipeStats);
     
+    // Update stats immediately for UI feedback
+    const newRightSwipes = swipeStats.rightSwipes + 1;
     setSwipeStats(prev => ({
       ...prev,
       totalSwipes: prev.totalSwipes + 1,
-      rightSwipes: prev.rightSwipes + 1
+      rightSwipes: newRightSwipes
     }));
     
     setFeedback(null);
@@ -76,8 +86,8 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         
         // Update parent component with application stats
         const newStats = {
-          totalApplications: swipeStats.rightSwipes + 1,
-          todayApplications: swipeStats.rightSwipes + 1, // TODO: Calculate actual today count
+          totalApplications: newRightSwipes,
+          todayApplications: newRightSwipes, // TODO: Calculate actual today count
           successRate: 95 // TODO: Calculate actual success rate
         };
         onApplicationUpdate?.(newStats);
@@ -91,10 +101,16 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       let errorMessage = 'Failed to apply to job. Please try again.';
       
       if (error instanceof Error) {
-        if (error.message.includes('User not authenticated')) {
+        // Handle specific error cases
+        const message = error.message.toLowerCase();
+        if (message.includes('not authenticated') || message.includes('401')) {
           errorMessage = 'Please log in to apply to jobs.';
-        } else if (error.message.includes('Already applied')) {
+        } else if (message.includes('already applied') || message.includes('409')) {
           errorMessage = 'You have already applied to this job.';
+        } else if (message.includes('rate limit') || message.includes('429')) {
+          errorMessage = 'Too many applications. Please wait a moment.';
+        } else if (message.includes('network') || message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection.';
         }
       }
       
@@ -102,6 +118,13 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         type: 'error',
         message: errorMessage
       });
+      
+      // Revert stats on error
+      setSwipeStats(prev => ({
+        ...prev,
+        totalSwipes: prev.totalSwipes - 1,
+        rightSwipes: prev.rightSwipes - 1
+      }));
     } finally {
       setIsApplying(null);
       setTimeout(() => setFeedback(null), 5000);
@@ -139,9 +162,17 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   }, []);
 
   const fetchMoreJobs = useCallback(async (offset: number, limit: number): Promise<JobData[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return [];
+    console.log('🔄 JobSwipeInterface: fetchMoreJobs called with offset:', offset, 'limit:', limit);
+    
+    try {
+      // Return empty array for now - this should be replaced with actual API call
+      // In a real implementation, this would fetch more jobs from the API
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return [];
+    } catch (error) {
+      console.error('❌ Failed to fetch more jobs:', error);
+      return [];
+    }
   }, []);
 
   // Show empty state if no jobs match filters

@@ -143,6 +143,7 @@ export interface UseJobSwipeReturn {
   // Queue management
   preloadNext: () => Promise<void>;
   refillQueue: () => Promise<void>;
+  recoverQueue: () => void;
   
   // Event handlers
   onGestureStart: (event: GestureEvent) => void;

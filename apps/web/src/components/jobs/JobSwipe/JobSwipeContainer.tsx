@@ -215,8 +215,8 @@ export function JobSwipeContainer({
 
       {/* Main card area */}
       <div className={styles.cardArea}>
-        <AnimatePresence mode="wait" initial={false}>
-          {currentJob && (
+        <AnimatePresence mode="popLayout" initial={false}>
+          {currentJob ? (
             <JobSwipeCard
               key={currentJob.job.id}
               job={currentJob.job}
@@ -224,9 +224,6 @@ export function JobSwipeContainer({
               state={cardState}
               isActive={true}
               zIndex={20}
-              onGestureStart={() => {}}
-              onGestureMove={() => {}}
-              onGestureEnd={() => {}}
               onExpand={(trigger) => {
                 expandCard(trigger);
                 onJobExpand?.(currentJob.job, trigger);
@@ -240,6 +237,22 @@ export function JobSwipeContainer({
               swipeLeft={swipeLeft}
               swipeRight={swipeRight}
             />
+          ) : (
+            /* Fallback loading card during transition */
+            <motion.div
+              key="loading-transition"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className={cn(styles.card, styles.loadingCard)}
+              style={{ width: dimensions.width, height: dimensions.height.collapsed }}
+            >
+              <div className={styles.loadingContent}>
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto mb-2"></div>
+                <p className="text-gray-600 text-sm">Loading next job...</p>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
