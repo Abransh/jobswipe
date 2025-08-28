@@ -7,12 +7,13 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 
 // =============================================================================
 // VALIDATION SCHEMAS
 // =============================================================================
 
-const SwipeRightRequestSchema = z.object({
+const JobApplicationRequestSchema = z.object({
   jobId: z.string().uuid('Invalid job ID format'),
   resumeId: z.string().uuid('Invalid resume ID format').optional(),
   coverLetter: z.string().max(2000, 'Cover letter too long').optional(),
@@ -41,7 +42,7 @@ const ApplicationActionRequestSchema = z.object({
 // TYPES
 // =============================================================================
 
-interface SwipeRightRequest {
+interface JobApplicationRequest {
   jobId: string;
   resumeId?: string;
   coverLetter?: string;
@@ -170,6 +171,24 @@ async function createJobSnapshot(fastify: FastifyInstance, jobPosting: any, appl
 }
 
 // =============================================================================
+// QUEUE UTILITIES
+// =============================================================================
+
+/**
+ * Get the position of an application in the queue
+ */
+async function getQueuePosition(snapshotId: string): Promise<number> {
+  try {
+    // Mock implementation - in real scenario, this would query the database
+    // to find the position based on priority and creation time
+    return Math.floor(Math.random() * 50) + 1; // Random position 1-50 for development
+  } catch (error) {
+    console.warn('Failed to get queue position:', error);
+    return 0;
+  }
+}
+
+// =============================================================================
 // AUTHENTICATION MIDDLEWARE
 // =============================================================================
 
@@ -236,13 +255,41 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
 // =============================================================================
 
 /**
- * POST /api/v1/queue/swipe-right
- * Queue a job application when user swipes right
+ * POST /api/v1/queue/apply
+ * Queue a job application when user applies to a job
  */
-async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyReply) {
+async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) {
+  // Generate correlation ID for request tracing
+  const correlationId = randomUUID();
+  const startTime = Date.now();
+  
+  // Enhanced structured logging context
+  const logContext = {
+    correlationId,
+    requestId: (request as any).id || randomUUID(),
+    endpoint: '/v1/queue/apply',
+    userAgent: request.headers['user-agent'],
+    ip: request.ip
+  };
+
   try {
-    const data = SwipeRightRequestSchema.parse(request.body);
+    request.server.log.info({
+      ...logContext,
+      event: 'request_started',
+      message: 'Job application request started'
+    });
+
+    const data = JobApplicationRequestSchema.parse(request.body);
     const user = getAuthenticatedUser(request);
+    
+    // Add user context to logging
+    const enhancedLogContext = {
+      ...logContext,
+      userId: user.id,
+      userEmail: user.email,
+      jobId: data.jobId,
+      source: data.metadata.source
+    };
     
     // Check if user has already swiped right on this job
     const existingSwipe = await request.server.db.userJobSwipe.findUnique({
@@ -255,10 +302,18 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
     });
     
     if (existingSwipe && existingSwipe.direction === 'RIGHT') {
+      request.server.log.warn({
+        ...enhancedLogContext,
+        event: 'duplicate_application',
+        message: 'User already applied to this job',
+        existingSwipeId: existingSwipe.id
+      });
+      
       return reply.code(409).send({
         success: false,
         error: 'Already applied to this job',
         errorCode: 'DUPLICATE_APPLICATION',
+        correlationId
       });
     }
     
@@ -269,20 +324,45 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
     });
     
     if (!jobPosting) {
+      request.server.log.warn({
+        ...enhancedLogContext,
+        event: 'job_not_found',
+        message: 'Job posting not found in database'
+      });
+      
       return reply.code(404).send({
         success: false,
         error: 'Job not found',
         errorCode: 'JOB_NOT_FOUND',
+        correlationId
       });
     }
     
     if (!jobPosting.isActive) {
+      request.server.log.warn({
+        ...enhancedLogContext,
+        event: 'job_inactive',
+        message: 'Job posting is no longer active',
+        jobTitle: jobPosting.title,
+        company: jobPosting.company.name
+      });
+      
       return reply.code(410).send({
         success: false,
         error: 'Job is no longer active',
         errorCode: 'JOB_INACTIVE',
+        correlationId
       });
     }
+
+    request.server.log.info({
+      ...enhancedLogContext,
+      event: 'job_validated',
+      message: 'Job posting found and validated',
+      jobTitle: jobPosting.title,
+      company: jobPosting.company.name,
+      jobLocation: jobPosting.location
+    });
     
     // Get user's profile data
     const userProfile = await request.server.db.userProfile.findUnique({
@@ -290,6 +370,12 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
     });
     
     // Start database transaction
+    request.server.log.info({
+      ...enhancedLogContext,
+      event: 'database_transaction_started',
+      message: 'Starting database transaction for job application'
+    });
+    
     const result = await request.server.db.$transaction(async (tx) => {
       // Create or update swipe record
       await tx.userJobSwipe.upsert({
@@ -460,7 +546,26 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
         // Queue the application for automation
         try {
           const applicationId = await request.server.automationService.queueApplication(automationData);
-          request.server.log.info(`Application queued for automation: ${applicationId}`);
+          request.server.log.info({
+            ...enhancedLogContext,
+            event: 'automation_queued',
+            message: 'Application queued for automation service',
+            automationApplicationId: applicationId,
+            executionMode: 'server'
+          });
+
+          // Emit WebSocket event for real-time updates
+          if (request.server.websocket) {
+            request.server.websocket.emitToUser(userId, 'automation-queued', {
+              applicationId: queueEntry.id,
+              status: 'queued',
+              jobTitle: body.jobData.title,
+              company: body.jobData.company,
+              queuedAt: new Date().toISOString(),
+              executionMode: 'server',
+              message: 'Job application has been queued for automation'
+            });
+          }
           
           // Update the database entry with automation application ID
           await tx.applicationQueue.update({
@@ -488,27 +593,60 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
       };
     });
     
+    const processingTime = Date.now() - startTime;
+    
+    request.server.log.info({
+      ...enhancedLogContext,
+      event: 'request_completed_success',
+      message: 'Job application request completed successfully',
+      processingTimeMs: processingTime,
+      applicationId: result.applicationId,
+      queuePosition: await getQueuePosition(result.snapshotId)
+    });
+
     return reply.code(201).send({
       success: true,
       data: result,
       message: 'Job application queued successfully',
+      correlationId,
+      processingTime: processingTime
     });
     
   } catch (error) {
+    const processingTime = Date.now() - startTime;
+    
     if (error instanceof z.ZodError) {
+      request.server.log.warn({
+        ...logContext,
+        event: 'request_validation_failed',
+        message: 'Job application request validation failed',
+        processingTimeMs: processingTime,
+        validationErrors: error.errors
+      });
+      
       return reply.code(400).send({
         success: false,
         error: 'Validation failed',
         details: error.errors,
         errorCode: 'VALIDATION_ERROR',
+        correlationId
       });
     }
     
-    request.server.log.error('Swipe right error:', error);
+    request.server.log.error({
+      ...logContext,
+      event: 'request_failed_error',
+      message: 'Job application request failed with error',
+      processingTimeMs: processingTime,
+      error: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
+    
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
       errorCode: 'INTERNAL_ERROR',
+      correlationId
     });
   }
 }
@@ -915,10 +1053,10 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   fastify.addHook('preHandler', authenticateUser);
   
   // Queue job application
-  fastify.post('/swipe-right', {
+  fastify.post('/apply', {
     schema: {
-      summary: 'Queue job application when user swipes right',
-      description: 'Creates a job application queue entry when user swipes right on a job',
+      summary: 'Queue job application when user applies to a job',
+      description: 'Creates a job application queue entry when user applies to a job',
       tags: ['Queue'],
       body: {
         type: 'object',
@@ -960,7 +1098,38 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
         },
       },
     },
-  }, swipeRightHandler);
+  }, applyHandler);
+
+  // Backward compatibility alias - TODO: Remove after client migration
+  fastify.post('/swipe-right', {
+    schema: {
+      summary: '[DEPRECATED] Use /apply instead',
+      description: 'Legacy endpoint - use /apply instead',
+      tags: ['Queue', 'Deprecated'],
+      deprecated: true,
+      body: {
+        type: 'object',
+        properties: {
+          jobId: { type: 'string', format: 'uuid' },
+          resumeId: { type: 'string', format: 'uuid' },
+          coverLetter: { type: 'string', maxLength: 2000 },
+          priority: { type: 'integer', minimum: 1, maximum: 10, default: 5 },
+          customFields: { type: 'object', additionalProperties: { type: 'string' } },
+          metadata: {
+            type: 'object',
+            properties: {
+              source: { type: 'string', enum: ['web', 'mobile', 'desktop'] },
+              deviceId: { type: 'string' },
+              userAgent: { type: 'string' },
+              ipAddress: { type: 'string' }
+            },
+            required: ['source']
+          }
+        },
+        required: ['jobId', 'metadata']
+      }
+    }
+  }, applyHandler);
   
   // Get user applications
   fastify.get('/applications', {

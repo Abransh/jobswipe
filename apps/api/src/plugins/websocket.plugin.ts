@@ -57,10 +57,10 @@ interface WebSocketPluginOptions {
 // WEBSOCKET PLUGIN
 // =============================================================================
 
-async function websocketPlugin(
-  fastify: FastifyInstance,
+const websocketPlugin = async (
+  fastify: any,
   options: WebSocketPluginOptions = {}
-): Promise<void> {
+): Promise<void> => {
   const log = fastify.log;
 
   try {

@@ -17,8 +17,7 @@ from typing import Dict, List, Optional, Any, Union
 sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent / "browser-use"))
 
 from browser_use import Agent, Controller, ActionResult
-from browser_use.browser.profile import BrowserProfile
-from browser_use.browser.session import BrowserSession
+from browser_use.browser import BrowserConfig, BrowserSession
 from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI
 
 from user_profile import UserProfile, JobData, AutomationConfig
@@ -255,13 +254,13 @@ class BaseJobAutomation(ABC):
     
     def _create_browser_session(self) -> BrowserSession:
         """Create and return a browser session"""
-        browser_profile = BrowserProfile(
+        browser_config = BrowserConfig(
             headless=self.config.headless,
             disable_security=True,
             window_size={'width': 1920, 'height': 1080}
         )
         
-        return BrowserSession(browser_profile=browser_profile)
+        return BrowserSession(browser_config=browser_config)
     
     @abstractmethod
     def get_company_specific_task(self, user_profile: UserProfile, job_data: JobData) -> str:

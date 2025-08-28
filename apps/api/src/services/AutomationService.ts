@@ -391,16 +391,31 @@ export class AutomationService extends EventEmitter {
     }
   }
 
-  private async processApplication(application: QueuedApplication): Promise<void> {
+  private async processApplication(application: QueuedApplication, correlationId?: string): Promise<void> {
     const { applicationId, userId } = application;
+    const logContext = {
+      correlationId: correlationId || `queue_${applicationId}`,
+      applicationId,
+      userId,
+      jobId: application.jobData.id,
+      jobTitle: application.jobData.title,
+      company: application.jobData.company
+    };
     
     try {
       this.processing.add(applicationId);
       application.status = 'processing';
       application.startedAt = new Date();
       
-      this.fastify.log.info(`Processing application: ${applicationId}`);
-      this.emit('application-processing', application);
+      this.fastify.log.info({
+        ...logContext,
+        event: 'application_processing_started',
+        message: 'Starting application processing',
+        queuedAt: application.queuedAt,
+        priority: application.priority
+      });
+      
+      this.emit('application-processing', { ...application, correlationId: logContext.correlationId });
 
       // Determine execution mode based on user limits
       const executionMode = await this.determineExecutionMode(userId);
@@ -409,7 +424,13 @@ export class AutomationService extends EventEmitter {
       
       if (executionMode === 'server') {
         // Execute on server
-        result = await this.executeOnServer(application);
+        this.fastify.log.info({
+          ...logContext,
+          event: 'automation_mode_server',
+          message: 'Executing automation on server'
+        });
+        
+        result = await this.executeOnServer(application, logContext.correlationId);
         
         // Record server usage
         await this.automationLimits.recordServerApplication(userId);
@@ -417,8 +438,13 @@ export class AutomationService extends EventEmitter {
       } else {
         // Queue for desktop app
         application.status = 'queued';
-        this.fastify.log.info(`Application queued for desktop: ${applicationId}`);
-        this.emit('application-queued-desktop', application);
+        this.fastify.log.info({
+          ...logContext,
+          event: 'automation_mode_desktop',
+          message: 'Application queued for desktop execution (server limit exceeded)'
+        });
+        
+        this.emit('application-queued-desktop', { ...application, correlationId: logContext.correlationId });
         return; // Don't complete processing yet
       }
       
@@ -435,11 +461,27 @@ export class AutomationService extends EventEmitter {
 
       await this.updateApplicationInDatabase(application);
 
-      this.fastify.log.info(`Application completed: ${applicationId} (${result.success ? 'success' : 'failed'})`);
-      this.emit('application-completed', application);
+      this.fastify.log.info({
+        ...logContext,
+        event: 'application_processing_completed',
+        message: 'Application processing completed',
+        success: result.success,
+        executionTimeMs: result.executionTime,
+        confirmationNumber: result.confirmationNumber,
+        processingDurationMs: Date.now() - (application.startedAt?.getTime() || 0)
+      });
+      
+      this.emit('application-completed', { ...application, correlationId: logContext.correlationId });
 
     } catch (error) {
-      this.fastify.log.error(`Application processing failed: ${applicationId}`, error);
+      this.fastify.log.error({
+        ...logContext,
+        event: 'application_processing_failed',
+        message: 'Application processing failed with error',
+        error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        processingDurationMs: Date.now() - (application.startedAt?.getTime() || 0)
+      });
       
       application.status = 'failed';
       application.completedAt = new Date();
@@ -477,7 +519,7 @@ export class AutomationService extends EventEmitter {
   /**
    * Execute automation on server
    */
-  private async executeOnServer(application: QueuedApplication): Promise<AutomationResult> {
+  private async executeOnServer(application: QueuedApplication, correlationId?: string): Promise<AutomationResult> {
     const companyAutomation = this.detectCompanyAutomation(application.jobData.applyUrl);
     
     if (!companyAutomation) {
@@ -510,7 +552,7 @@ export class AutomationService extends EventEmitter {
     };
 
     // Execute server automation
-    const serverResult = await this.serverAutomationService.executeAutomation(request);
+    const serverResult = await this.serverAutomationService.executeAutomation(request, correlationId);
 
     // Convert server result to AutomationResult format
     return {

@@ -167,7 +167,7 @@ class AutomationConfig(BaseModel):
     """Configuration for automation execution"""
     
     # Browser settings
-    headless: bool = False
+    headless: bool = True
     timeout: int = 300000  # 5 minutes in milliseconds
     screenshot_enabled: bool = True
     

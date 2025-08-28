@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs/promises';
 import { ProxyRotator, ProxyConfig } from './ProxyRotator';
+import { PythonBridge, PythonExecutionRequest, PythonExecutionResult } from './PythonBridge';
 
 // =============================================================================
 // INTERFACES & TYPES
@@ -101,6 +102,7 @@ export class ServerAutomationService extends EventEmitter {
   private activeProcesses = new Map<string, ChildProcess>();
   private config: ExecutionConfig;
   private serverId: string;
+  private pythonBridge: PythonBridge;
 
   constructor(
     private fastify: any,
@@ -111,16 +113,63 @@ export class ServerAutomationService extends EventEmitter {
     this.serverId = `server_${randomUUID().substring(0, 8)}`;
     
     this.config = {
-      pythonPath: process.env.PYTHON_PATH || 'python3',
-      companiesPath: path.join(__dirname, '../../desktop/companies'),
+      pythonPath: process.env.PYTHON_PATH || path.join(__dirname, '../../../../venv/bin/python'),
+      companiesPath: process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../desktop/companies'),
       timeout: parseInt(process.env.SERVER_AUTOMATION_TIMEOUT || '120000'), // 2 minutes
       screenshotEnabled: process.env.SCREENSHOT_ENABLED !== 'false',
       screenshotPath: process.env.SCREENSHOT_PATH || '/tmp/jobswipe/screenshots',
       maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS || '5')
     };
 
+    // Initialize Python Bridge
+    this.pythonBridge = new PythonBridge(this.fastify, {
+      pythonPath: this.config.pythonPath,
+      companiesPath: this.config.companiesPath,
+      timeout: this.config.timeout,
+      screenshotEnabled: this.config.screenshotEnabled,
+      screenshotPath: this.config.screenshotPath,
+      maxRetries: 3
+    });
+
     this.fastify.log.info(`ServerAutomationService initialized (${this.serverId})`);
+    this.fastify.log.info(`Companies path: ${this.config.companiesPath}`);
+    
     this.setupCleanup();
+    this.validateCompaniesPath();
+  }
+
+  // =============================================================================
+  // VALIDATION & SETUP
+  // =============================================================================
+
+  /**
+   * Validate that companies path exists and log available automations
+   */
+  private async validateCompaniesPath(): Promise<void> {
+    try {
+      await fs.access(this.config.companiesPath);
+      this.fastify.log.info(`✅ Companies directory found: ${this.config.companiesPath}`);
+      
+      const companies = await fs.readdir(this.config.companiesPath, { withFileTypes: true });
+      const availableCompanies = companies
+        .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.'))
+        .map(dirent => dirent.name);
+      
+      this.fastify.log.info(`📁 Available company automations: ${availableCompanies.join(', ')}`);
+      
+      for (const company of availableCompanies) {
+        const scriptPath = path.join(this.config.companiesPath, company, 'run_automation.py');
+        try {
+          await fs.access(scriptPath);
+          this.fastify.log.info(`✅ ${company} automation script found`);
+        } catch {
+          this.fastify.log.warn(`⚠️ ${company} automation script missing: ${scriptPath}`);
+        }
+      }
+    } catch (error) {
+      this.fastify.log.error(`❌ Companies directory not found: ${this.config.companiesPath}`);
+      this.fastify.log.error(`Path resolution error: ${error instanceof Error ? error.message : error}`);
+    }
   }
 
   // =============================================================================
@@ -130,11 +179,25 @@ export class ServerAutomationService extends EventEmitter {
   /**
    * Execute automation for a job application
    */
-  async executeAutomation(request: ServerAutomationRequest): Promise<ServerAutomationResult> {
+  async executeAutomation(request: ServerAutomationRequest, correlationId?: string): Promise<ServerAutomationResult> {
     const startTime = Date.now();
     const { applicationId, companyAutomation } = request;
+    const logContext = {
+      correlationId: correlationId || `auto_${applicationId}`,
+      applicationId,
+      companyAutomation,
+      userId: request.userId,
+      jobId: request.jobId,
+      serverId: this.serverId
+    };
 
-    this.fastify.log.info(`Starting server automation: ${applicationId} (${companyAutomation})`);
+    this.fastify.log.info({
+      ...logContext,
+      event: 'server_automation_started',
+      message: `Starting server automation for ${companyAutomation}`,
+      jobTitle: request.jobData.title,
+      company: request.jobData.company
+    });
 
     // Check concurrency limits
     if (this.activeProcesses.size >= this.config.maxConcurrentJobs) {
@@ -150,8 +213,8 @@ export class ServerAutomationService extends EventEmitter {
       // Get proxy for this automation
       const proxy = await this.proxyRotator.getNextProxy();
       
-      // Execute the automation
-      const result = await this.runPythonAutomation(request, proxy);
+      // Execute the automation using Python Bridge
+      const result = await this.executeWithPythonBridge(request, proxy, logContext.correlationId);
       
       // Report proxy success
       if (proxy && result.success) {
@@ -171,8 +234,44 @@ export class ServerAutomationService extends EventEmitter {
         result.proxyUsed = `${proxy.host}:${proxy.port}`;
       }
 
-      this.fastify.log.info(`Server automation completed: ${applicationId} (${result.success ? 'SUCCESS' : 'FAILURE'})`);
-      this.emit('automation-completed', result);
+      this.fastify.log.info({
+        ...logContext,
+        event: 'server_automation_completed',
+        message: 'Server automation completed',
+        success: result.success,
+        executionTimeMs: result.executionTime,
+        confirmationNumber: result.confirmationNumber,
+        stepsCompleted: result.steps.length,
+        screenshotsTaken: result.screenshots.length,
+        captchaEvents: result.captchaEvents.length
+      });
+      
+      // Emit automation events for WebSocket integration
+      this.emit('automation-completed', { 
+        ...result, 
+        correlationId: logContext.correlationId,
+        userId: request.userId,
+        applicationId: request.applicationId,
+        jobData: request.jobData,
+        completedAt: new Date().toISOString()
+      });
+
+      // Emit to WebSocket service if available
+      if (this.fastify.websocket) {
+        this.fastify.websocket.emitToUser(request.userId, 'automation-completed', {
+          applicationId: request.applicationId,
+          status: 'completed',
+          success: result.success,
+          jobTitle: request.jobData.title,
+          company: request.jobData.company,
+          completedAt: new Date().toISOString(),
+          confirmationNumber: result.confirmationNumber,
+          executionTime: result.executionTime,
+          message: result.success 
+            ? 'Job application completed successfully!' 
+            : 'Job application automation failed'
+        });
+      }
 
       return result;
 
@@ -180,7 +279,14 @@ export class ServerAutomationService extends EventEmitter {
       const executionTime = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
-      this.fastify.log.error(`Server automation failed: ${applicationId} - ${errorMessage}`);
+      this.fastify.log.error({
+        ...logContext,
+        event: 'server_automation_failed',
+        message: 'Server automation failed with error',
+        error: errorMessage,
+        executionTimeMs: executionTime,
+        errorStack: error instanceof Error ? error.stack : undefined
+      });
 
       const failureResult: ServerAutomationResult = {
         success: false,
@@ -199,19 +305,112 @@ export class ServerAutomationService extends EventEmitter {
         }
       };
 
-      this.emit('automation-failed', failureResult);
+      // Emit automation events for WebSocket integration
+      this.emit('automation-failed', {
+        ...failureResult,
+        userId: request.userId,
+        applicationId: request.applicationId,
+        jobData: request.jobData,
+        failedAt: new Date().toISOString(),
+        correlationId: logContext.correlationId
+      });
+
+      // Emit to WebSocket service if available
+      if (this.fastify.websocket) {
+        this.fastify.websocket.emitToUser(request.userId, 'automation-failed', {
+          applicationId: request.applicationId,
+          status: 'failed',
+          jobTitle: request.jobData.title,
+          company: request.jobData.company,
+          failedAt: new Date().toISOString(),
+          error: errorMessage,
+          executionTime,
+          retryAvailable: true,
+          message: 'Job application automation failed'
+        });
+      }
+
       return failureResult;
     }
   }
 
   /**
-   * Execute Python automation script
+   * Execute automation using Python Bridge
+   */
+  private async executeWithPythonBridge(
+    request: ServerAutomationRequest, 
+    proxy: ProxyConfig | null,
+    correlationId: string
+  ): Promise<ServerAutomationResult> {
+    // Transform ServerAutomationRequest to PythonExecutionRequest
+    const pythonRequest: PythonExecutionRequest = {
+      applicationId: request.applicationId,
+      correlationId,
+      userId: request.userId,
+      jobData: request.jobData,
+      userProfile: request.userProfile,
+      automationConfig: {
+        headless: request.options?.headless !== false,
+        timeout: request.options?.timeout || this.config.timeout,
+        maxRetries: request.options?.maxRetries || 3,
+        screenshotEnabled: this.config.screenshotEnabled,
+        screenshotPath: this.config.screenshotPath
+      },
+      proxyConfig: proxy ? {
+        host: proxy.host,
+        port: proxy.port,
+        username: proxy.username,
+        password: proxy.password,
+        type: proxy.proxyType
+      } : undefined
+    };
+
+    // Execute using Python Bridge
+    const pythonResult = await this.pythonBridge.executePythonAutomation(
+      request.companyAutomation, 
+      pythonRequest
+    );
+
+    // Convert PythonExecutionResult to ServerAutomationResult
+    return {
+      success: pythonResult.success,
+      applicationId: pythonResult.applicationId,
+      confirmationNumber: pythonResult.confirmationNumber,
+      executionTime: pythonResult.executionTimeMs,
+      companyAutomation: request.companyAutomation,
+      status: pythonResult.success ? 'success' : 'failed',
+      error: pythonResult.error,
+      steps: pythonResult.steps,
+      screenshots: pythonResult.screenshots,
+      captchaEvents: pythonResult.captchaEvents,
+      proxyUsed: proxy ? `${proxy.host}:${proxy.port}` : undefined,
+      serverInfo: {
+        serverId: this.serverId,
+        executionMode: 'server',
+        pythonVersion: pythonResult.metadata.pythonVersion,
+        processingTime: pythonResult.executionTimeMs
+      }
+    };
+  }
+
+  /**
+   * Execute Python automation script (LEGACY - Kept for compatibility)
    */
   private async runPythonAutomation(
     request: ServerAutomationRequest, 
     proxy: ProxyConfig | null
   ): Promise<ServerAutomationResult> {
     const { applicationId, companyAutomation } = request;
+    
+    // Create log context for legacy method
+    const logContext = {
+      correlationId: `legacy_${applicationId}`,
+      applicationId,
+      companyAutomation,
+      userId: request.userId,
+      jobId: request.jobId,
+      serverId: this.serverId
+    };
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -245,16 +444,36 @@ export class ServerAutomationService extends EventEmitter {
         pythonProcess.stdout?.on('data', (data) => {
           const output = data.toString();
           stdout += output;
-          this.fastify.log.debug(`[${applicationId}] STDOUT: ${output.trim()}`);
-          this.emit('process-output', { applicationId, type: 'stdout', data: output });
+          this.fastify.log.debug({
+            ...logContext,
+            event: 'python_process_stdout',
+            message: 'Python process output',
+            output: output.trim()
+          });
+          this.emit('process-output', { 
+            applicationId, 
+            type: 'stdout', 
+            data: output, 
+            correlationId: logContext.correlationId 
+          });
         });
 
         // Collect stderr
         pythonProcess.stderr?.on('data', (data) => {
           const output = data.toString();
           stderr += output;
-          this.fastify.log.debug(`[${applicationId}] STDERR: ${output.trim()}`);
-          this.emit('process-output', { applicationId, type: 'stderr', data: output });
+          this.fastify.log.debug({
+            ...logContext,
+            event: 'python_process_stderr',
+            message: 'Python process error output',
+            output: output.trim()
+          });
+          this.emit('process-output', { 
+            applicationId, 
+            type: 'stderr', 
+            data: output, 
+            correlationId: logContext.correlationId 
+          });
         });
 
         // Handle process completion

@@ -9,7 +9,7 @@
 // TYPES
 // =============================================================================
 
-export interface SwipeRightRequest {
+export interface JobApplicationRequest {
   jobId: string;
   resumeId?: string;
   coverLetter?: string;
@@ -157,16 +157,16 @@ class QueueApiService {
   }
 
   /**
-   * Queue job application when user swipes right
+   * Queue job application when user applies to a job
    */
-  async swipeRight(request: SwipeRightRequest): Promise<ApiResponse<{
+  async apply(request: JobApplicationRequest): Promise<ApiResponse<{
     applicationId: string;
     snapshotId: string;
     status: string;
     priority: string;
   }>> {
     // Add browser metadata
-    const requestWithMetadata: SwipeRightRequest = {
+    const requestWithMetadata: JobApplicationRequest = {
       ...request,
       metadata: {
         ...request.metadata,
@@ -175,7 +175,7 @@ class QueueApiService {
       },
     };
 
-    return this.apiRequest('/queue/swipe-right', {
+    return this.apiRequest('/queue/apply', {
       method: 'POST',
       body: JSON.stringify(requestWithMetadata),
     });
@@ -349,7 +349,7 @@ export const queueApi = new QueueApiService();
 // =============================================================================
 
 export type {
-  SwipeRightRequest,
+  JobApplicationRequest,
   ApplicationStatus,
   QueueStats,
   ApiResponse,

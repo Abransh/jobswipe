@@ -24,19 +24,13 @@ from greenhouse import GreenhouseAutomation
 async def main():
     """Main execution function"""
     try:
-        print("🚀 Starting automation main function...")
-        
         # Detect execution mode
-        data_source = os.getenv('DATA_SOURCE', 'file')  # database | file | bridge
-        print(f"📊 Data source detected: {data_source}")
+        data_source = os.getenv('DATA_SOURCE', 'file')  # database | file
         
         # Create automation instance
-        print("🏗️ Creating GreenhouseAutomation instance...")
         automation = GreenhouseAutomation()
-        print("✅ GreenhouseAutomation instance created successfully")
         
         if data_source == 'database':
-            print("💾 Using database mode...")
             # Database mode - get user and job data from database
             user_profile, job_data = await automation.get_automation_data()
             
@@ -44,20 +38,16 @@ async def main():
                 raise ValueError("Failed to load user profile or job data from database")
                 
         else:
-            print(f"📁 Using file mode (data_source: {data_source})...")
-            # File mode - existing behavior and bridge mode (from PythonBridge)
-            data_file_path = os.getenv('JOB_DATA_FILE') or os.getenv('JOBSWIPE_DATA_FILE')
-            print(f"📂 Data file path: {data_file_path}")
+            # File mode - existing behavior
+            data_file_path = os.getenv('JOBSWIPE_DATA_FILE')
             
             if not data_file_path or not Path(data_file_path).exists():
                 raise FileNotFoundError(f"Data file not found: {data_file_path}")
             
-            print("📖 Loading automation data from file...")
             # Load automation data
             with open(data_file_path, 'r') as f:
                 data = json.load(f)
             
-            print("🔍 Validating and creating data objects...")
             # Validate and create data objects
             user_profile, job_data = validate_automation_data(
                 data['user_profile'], 
