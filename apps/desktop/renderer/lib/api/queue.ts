@@ -277,7 +277,7 @@ class QueueApiService {
 // =============================================================================
 
 /**
- * Generate device ID for browser
+ * Generate device ID for desktop app
  */
 export function generateDeviceId(): string {
   if (typeof window === 'undefined') return 'server';
@@ -286,8 +286,8 @@ export function generateDeviceId(): string {
   let deviceId = localStorage.getItem('jobswipe_device_id');
   
   if (!deviceId) {
-    // Generate new device ID
-    deviceId = `web_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate new device ID with desktop prefix
+    deviceId = `desktop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem('jobswipe_device_id', deviceId);
   }
   

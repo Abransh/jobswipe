@@ -336,8 +336,85 @@ async function swipeRightHandler(request: AuthenticatedRequest, reply: FastifyRe
         },
       });
       
-      // Create job snapshot
-      const snapshot = await createJobSnapshot(request.server, jobPosting, queueEntry.id);
+      // Create job snapshot within transaction
+      const snapshot = await tx.jobSnapshot.create({
+        data: {
+          applicationQueueId: queueEntry.id,
+          originalJobId: jobPosting.id,
+          
+          // Job data snapshot
+          title: jobPosting.title,
+          description: jobPosting.description,
+          requirements: jobPosting.requirements,
+          benefits: jobPosting.benefits,
+          
+          // Classification
+          type: jobPosting.type.toString(),
+          level: jobPosting.level.toString(),
+          department: jobPosting.department,
+          category: jobPosting.category.toString(),
+          
+          // Work arrangement
+          remote: jobPosting.remote,
+          remoteType: jobPosting.remoteType.toString(),
+          location: jobPosting.location,
+          timeZone: jobPosting.timeZone,
+          
+          // Location details
+          city: jobPosting.city,
+          state: jobPosting.state,
+          country: jobPosting.country,
+          coordinates: jobPosting.coordinates,
+          
+          // Compensation
+          salaryMin: jobPosting.salaryMin,
+          salaryMax: jobPosting.salaryMax,
+          currency: jobPosting.currency,
+          salaryType: jobPosting.salaryType?.toString(),
+          equity: jobPosting.equity,
+          bonus: jobPosting.bonus,
+          
+          // Requirements
+          experienceYears: jobPosting.experienceYears,
+          skills: jobPosting.skills,
+          education: jobPosting.education,
+          languages: jobPosting.languages,
+          
+          // Company data snapshot
+          companyName: jobPosting.company.name,
+          companyLogo: jobPosting.company.logo,
+          companyWebsite: jobPosting.company.website,
+          companyIndustry: jobPosting.company.industry,
+          companySize: jobPosting.company.size?.toString(),
+          companyDescription: jobPosting.company.description,
+          
+          // External integration
+          externalId: jobPosting.externalId,
+          source: jobPosting.source.toString(),
+          sourceUrl: jobPosting.sourceUrl,
+          applyUrl: jobPosting.applyUrl,
+          
+          // Metadata
+          qualityScore: jobPosting.qualityScore,
+          isVerified: jobPosting.isVerified,
+          
+          // Original status
+          originalStatus: jobPosting.status.toString(),
+          isActive: jobPosting.isActive,
+          isFeatured: jobPosting.isFeatured,
+          isUrgent: jobPosting.isUrgent,
+          
+          // Original dates
+          originalPostedAt: jobPosting.postedAt,
+          originalExpiresAt: jobPosting.expiresAt,
+          
+          // Analytics snapshot
+          viewCount: jobPosting.viewCount,
+          applicationCount: jobPosting.applicationCount,
+          rightSwipeCount: jobPosting.rightSwipeCount,
+          leftSwipeCount: jobPosting.leftSwipeCount,
+        },
+      });
       
       // Queue job application with AutomationService
       if (request.server.automationService) {

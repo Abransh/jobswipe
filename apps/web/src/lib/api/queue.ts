@@ -92,16 +92,16 @@ class QueueApiService {
   private apiVersion: string;
 
   constructor() {
-    // Use Next.js API routes instead of direct backend calls
-    this.baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    this.apiVersion = 'api'; // Use Next.js API route structure
+    // Use Fastify API backend directly for better performance and consistency
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    this.apiVersion = 'v1'; // Use Fastify API route structure
   }
 
   /**
-   * Get authorization header using same logic as auth service
+   * Get authorization header using server-side token bridge
    */
-  private getAuthHeaders(): Record<string, string> {
-    const token = this.getAuthToken();
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await this.getAuthToken();
     
     if (token) {
       console.log('🔐 [Queue API] Using auth token, first 20 chars:', token.substring(0, 20) + '...');
@@ -118,9 +118,9 @@ class QueueApiService {
   }
 
   /**
-   * Get auth token using same logic as FrontendAuthService
+   * Get auth token using server-side token bridge to access HTTPOnly cookies
    */
-  private getAuthToken(): string | null {
+  private async getAuthToken(): Promise<string | null> {
     try {
       // Method 1: Try to get from auth service directly (if available)
       try {
@@ -133,17 +133,52 @@ class QueueApiService {
           }
         }
       } catch (serviceError) {
-        console.log('ℹ️ [Queue API] Auth service not available, trying storage');
+        console.log('ℹ️ [Queue API] Auth service not available, trying server bridge');
       }
 
-      // Method 2: HTTP-only cookies (production)
-      const cookieToken = this.getCookieToken();
-      if (cookieToken) {
-        console.log('🍪 [Queue API] Using token from cookie');
-        return cookieToken;
+      // Method 2: Server-side token bridge (solves HTTPOnly cookie access)
+      try {
+        const response = await fetch('/api/auth/token', {
+          method: 'GET',
+          credentials: 'include', // Include cookies in request
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const tokenData = await response.json();
+        
+        if (tokenData.success && tokenData.token) {
+          console.log('🌉 [Queue API] Using token from server bridge');
+          console.log('🔍 [Queue API] Token source:', tokenData.source);
+          return tokenData.token;
+        } else if (tokenData.shouldRefresh && tokenData.hasRefreshToken) {
+          console.log('🔄 [Queue API] Token expired, attempting refresh before getting token');
+          
+          // Try to refresh the token first
+          const refreshed = await this.refreshAuthToken();
+          if (refreshed) {
+            // Try to get the token again after refresh
+            const retryResponse = await fetch('/api/auth/token', {
+              method: 'GET',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const retryTokenData = await retryResponse.json();
+            if (retryTokenData.success && retryTokenData.token) {
+              console.log('✅ [Queue API] Token obtained after refresh');
+              return retryTokenData.token;
+            }
+          }
+        } else {
+          console.log('⚠️ [Queue API] Server bridge failed:', tokenData.error);
+        }
+      } catch (bridgeError) {
+        console.warn('❌ [Queue API] Server bridge error:', bridgeError);
       }
 
-      // Method 3: sessionStorage (development) - matches auth service exactly
+      // Method 3: sessionStorage fallback (development)
       if (typeof window !== 'undefined' && window.sessionStorage) {
         const sessionToken = window.sessionStorage.getItem('accessToken');
         if (sessionToken) {
@@ -160,52 +195,59 @@ class QueueApiService {
     }
   }
 
+
   /**
-   * Get token from HTTP-only cookies (improved parsing)
+   * Refresh authentication token
    */
-  private getCookieToken(): string | null {
-    if (typeof document === 'undefined') return null;
-    
+  private async refreshAuthToken(): Promise<boolean> {
     try {
-      const cookies = document.cookie.split(';');
-      console.log('🍪 [Queue API] All cookies:', document.cookie);
+      console.log('🔄 [Queue API] Attempting token refresh...');
       
-      for (const cookie of cookies) {
-        const [name, ...valueParts] = cookie.trim().split('=');
-        const value = valueParts.join('='); // Handle tokens with = signs
-        
-        console.log('🔍 [Queue API] Checking cookie:', name, 'has value:', !!value);
-        
-        if (name === 'accessToken' && value) {
-          const decodedValue = decodeURIComponent(value);
-          console.log('✅ [Queue API] Found accessToken cookie, length:', decodedValue.length);
-          return decodedValue;
+      const refreshResponse = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      }
+      });
       
-      console.log('❌ [Queue API] accessToken cookie not found');
-      return null;
+      if (refreshResponse.ok) {
+        console.log('✅ [Queue API] Token refresh successful');
+        return true;
+      } else {
+        const refreshData = await refreshResponse.json();
+        console.log('❌ [Queue API] Token refresh failed:', refreshData.error);
+        
+        // If refresh requires login, we need to redirect
+        if (refreshData.requiresLogin) {
+          console.log('🔐 [Queue API] Refresh token expired, login required');
+          // Could emit event or redirect to login here
+        }
+        
+        return false;
+      }
     } catch (error) {
-      console.error('❌ [Queue API] Error parsing cookies:', error);
-      return null;
+      console.error('❌ [Queue API] Token refresh error:', error);
+      return false;
     }
   }
 
   /**
-   * Generic API request method
+   * Generic API request method with automatic token refresh on 401
    */
   private async apiRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retryCount: number = 0
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseUrl}/${this.apiVersion}${endpoint}`;
       const headers = {
-        ...this.getAuthHeaders(),
+        ...(await this.getAuthHeaders()),
         ...options.headers,
       };
 
-      console.log('🔗 [Queue API] Making request to:', url);
+      console.log('🔗 [Queue API] Making request to:', url, retryCount > 0 ? `(retry ${retryCount})` : '');
       console.log('📋 [Queue API] Headers:', headers);
       console.log('📦 [Queue API] Options:', options);
 
@@ -219,11 +261,34 @@ class QueueApiService {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle 401 authentication errors with automatic retry
+        if (response.status === 401 && retryCount === 0) {
+          console.log('🔄 [Queue API] 401 error, attempting token refresh and retry...');
+          
+          const refreshSuccess = await this.refreshAuthToken();
+          if (refreshSuccess) {
+            // Retry the request once with refreshed token
+            return this.apiRequest<T>(endpoint, options, 1);
+          } else {
+            // Refresh failed, return auth error
+            return {
+              success: false,
+              error: 'Authentication failed. Please log in again.',
+              errorCode: 'AUTH_REFRESH_FAILED',
+              details: { 
+                originalError: data.error,
+                refreshFailed: true,
+                requiresLogin: true
+              },
+            };
+          }
+        }
+        
         let errorMessage = data.error || 'Request failed';
         
-        // Handle authentication errors
+        // Handle other error types
         if (response.status === 401) {
-          errorMessage = 'User not authenticated. Please log in to continue.';
+          errorMessage = 'Authentication failed. Please log in again.';
         } else if (response.status === 403) {
           errorMessage = 'Access denied. Please check your permissions.';
         }
@@ -238,7 +303,7 @@ class QueueApiService {
 
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('❌ [Queue API] Request failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Network error',

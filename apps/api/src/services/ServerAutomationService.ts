@@ -432,6 +432,25 @@ export class ServerAutomationService extends EventEmitter {
   }
 
   /**
+   * Detect company automation type from job URL
+   */
+  public detectCompanyType(applyUrl: string): string {
+    const url = applyUrl.toLowerCase();
+    
+    if (url.includes('greenhouse.io') || url.includes('grnh.se')) {
+      return 'greenhouse';
+    }
+    
+    if (url.includes('linkedin.com')) {
+      return 'linkedin';
+    }
+    
+    // Add more company detection logic as needed
+    // For now, default to greenhouse as it's the most complete automation
+    return 'greenhouse';
+  }
+
+  /**
    * Get current status
    */
   public getStatus(): {

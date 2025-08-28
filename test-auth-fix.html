@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobSwipe Authentication Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 4px; white-space: pre-wrap; font-family: monospace; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔧 JobSwipe Authentication Fix Test</h1>
+    <p>This test simulates the user's authentication issue and verifies our fix.</p>
+    
+    <h2>Test Steps:</h2>
+    <button onclick="simulateUserState()">1. Simulate User State (refreshToken only)</button>
+    <button onclick="testTokenBridge()">2. Test Token Bridge Auto-Refresh</button>
+    <button onclick="testSwipeRightWithRefresh()">3. Test Swipe Right with Auto-Refresh</button>
+    <button onclick="clearCookies()">4. Clear All Cookies</button>
+    
+    <div id="log" class="log">Ready to test authentication fix...</div>
+    
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            log.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            log.scrollTop = log.scrollBottom;
+        }
+        
+        // Simulate the user's current state: has refreshToken but no accessToken
+        function simulateUserState() {
+            addLog('🔄 Simulating user state: Setting refreshToken, clearing accessToken');
+            
+            // Set refresh token (simulate what user has)
+            document.cookie = 'refreshToken=simulated_refresh_token_12345; path=/; max-age=86400; SameSite=Lax';
+            
+            // Clear access token (simulate expired state)
+            document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            
+            addLog('✅ User state simulated: refreshToken present, accessToken missing', 'success');
+            addLog('📋 Current cookies: ' + document.cookie);
+        }
+        
+        // Test the token bridge auto-refresh functionality
+        async function testTokenBridge() {
+            addLog('🌉 Testing token bridge auto-refresh...');
+            
+            try {
+                const response = await fetch('/api/auth/token', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                addLog('📡 Token bridge response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success && data.refreshed) {
+                    addLog('✅ Auto-refresh successful! New token provided', 'success');
+                } else if (data.success && data.token) {
+                    addLog('✅ Token provided (already valid)', 'success');
+                } else {
+                    addLog('❌ Token bridge failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                addLog('❌ Token bridge error: ' + error.message, 'error');
+            }
+        }
+        
+        // Test the full swipe right flow with automatic refresh
+        async function testSwipeRightWithRefresh() {
+            addLog('💫 Testing swipe right with automatic token refresh...');
+            
+            const testPayload = {
+                jobId: 'test-job-12345',
+                resumeId: 'test-resume-67890',
+                priority: 5,
+                metadata: {
+                    source: 'web',
+                    deviceId: 'test-device',
+                    userAgent: navigator.userAgent
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/queue/swipe-right', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+                
+                const data = await response.json();
+                
+                addLog('📡 Swipe right response status: ' + response.status);
+                addLog('📋 Swipe right response: ' + JSON.stringify(data, null, 2));
+                
+                if (response.status === 200 && data.success) {
+                    addLog('✅ Swipe right successful! Authentication working', 'success');
+                    if (data.automationId) {
+                        addLog('🤖 Automation triggered: ' + data.automationId, 'success');
+                    }
+                } else if (response.status === 401) {
+                    addLog('🔄 Got 401, checking if retry logic triggered...', 'info');
+                    if (data.details && data.details.refreshFailed) {
+                        addLog('❌ Token refresh failed, login required', 'error');
+                    } else {
+                        addLog('❌ Authentication failed without retry', 'error');
+                    }
+                } else {
+                    addLog('❌ Swipe right failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                addLog('❌ Swipe right error: ' + error.message, 'error');
+            }
+        }
+        
+        // Clear all cookies for clean test
+        function clearCookies() {
+            document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            addLog('🧹 All cookies cleared', 'info');
+        }
+        
+        // Log initial state
+        addLog('🏁 Test page loaded. Current cookies: ' + document.cookie);
+    </script>
+</body>
+</html>

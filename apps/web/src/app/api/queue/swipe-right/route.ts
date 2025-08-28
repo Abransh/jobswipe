@@ -129,6 +129,86 @@ export async function POST(request: NextRequest) {
       company: jobPosting.company.name
     });
 
+    // Get user profile for automation
+    const userProfile = await prisma.userProfile.findUnique({
+      where: { userId: authenticatedUser.id },
+      include: { user: true }
+    });
+
+    // Trigger automation after successful database save
+    try {
+      console.log('🤖 [Queue API] Triggering automation for application:', application.id);
+      
+      const automationPayload = {
+        applicationId: application.id,
+        userId: authenticatedUser.id,
+        jobId: jobPosting.id,
+        jobData: {
+          id: jobPosting.id,
+          title: jobPosting.title,
+          company: jobPosting.company.name,
+          applyUrl: jobPosting.applicationUrl || jobPosting.jobUrl || jobPosting.url,
+          location: jobPosting.location,
+          description: jobPosting.description
+        },
+        userProfile: {
+          id: authenticatedUser.id,
+          firstName: userProfile?.firstName || authenticatedUser.name?.split(' ')[0] || '',
+          lastName: userProfile?.lastName || authenticatedUser.name?.split(' ')[1] || '',
+          email: authenticatedUser.email,
+          phone: userProfile?.phone || '',
+          resumeUrl: finalResumeId ? await getResumeUrl(finalResumeId) : null,
+          currentTitle: userProfile?.currentTitle,
+          yearsExperience: userProfile?.yearsOfExperience,
+          skills: userProfile?.skills || [],
+          location: userProfile?.location,
+          workAuthorization: userProfile?.workAuthorization,
+          linkedinUrl: userProfile?.linkedin
+        },
+        executionMode: (userProfile?.applicationCount || 0) <= 10 ? 'server' : 'desktop',
+        priority: mapPriority(priority)
+      };
+
+      const fastifyApiUrl = process.env.FASTIFY_API_URL || process.env.API_BASE_URL || 'http://localhost:3001';
+      
+      console.log('🌐 [Queue API] Calling Fastify automation service:', `${fastifyApiUrl}/api/v1/automation/trigger`);
+      
+      const automationResponse = await fetch(`${fastifyApiUrl}/api/v1/automation/trigger`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'User-Agent': 'NextJS-API/1.0',
+          'X-Request-Source': 'swipe-right'
+        },
+        body: JSON.stringify(automationPayload),
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(10000)
+      });
+
+      if (automationResponse.ok) {
+        const automationResult = await automationResponse.json();
+        console.log('✅ [Queue API] Automation triggered successfully:', automationResult);
+        
+        // Update application with automation ID if provided
+        if (automationResult.automationId) {
+          await prisma.jobApplication.update({
+            where: { id: application.id },
+            data: {
+              notes: `${application.notes || ''} | AutomationID: ${automationResult.automationId}`
+            }
+          });
+        }
+      } else {
+        const errorData = await automationResponse.text();
+        console.warn('⚠️ [Queue API] Automation trigger failed:', automationResponse.status, errorData);
+        // Don't fail the main request - automation failure shouldn't break job saving
+      }
+      
+    } catch (automationError) {
+      console.warn('⚠️ [Queue API] Automation trigger error:', automationError);
+      // Don't fail the main request - automation failure shouldn't break job saving
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -181,6 +261,20 @@ function mapQueuePriority(priority?: number): QueuePriority {
   if (priority < 7) return QueuePriority.NORMAL;
   if (priority < 9) return QueuePriority.HIGH;
   return QueuePriority.URGENT;
+}
+
+// Helper function to get resume URL
+async function getResumeUrl(resumeId: string): Promise<string | null> {
+  try {
+    const resume = await prisma.resume.findUnique({
+      where: { id: resumeId },
+      select: { pdfUrl: true }
+    });
+    return resume?.pdfUrl || null;
+  } catch (error) {
+    console.warn('⚠️ Failed to get resume URL:', error);
+    return null;
+  }
 }
 
 // Helper function to get queue position

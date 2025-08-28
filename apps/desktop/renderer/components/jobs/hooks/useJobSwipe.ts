@@ -22,8 +22,8 @@ import { DEFAULT_JOBSWIPE_CONFIG } from '../types/jobSwipe';
 interface UseJobSwipeProps {
   jobs?: JobData[];
   fetchJobs?: (offset: number, limit: number) => Promise<JobData[]>;
-  onSwipeLeft?: (job: JobData, analytics: SwipeAnalytics) => void;
-  onSwipeRight?: (job: JobData, analytics: SwipeAnalytics) => void;
+  onSwipeLeft?: (job: JobData, analytics: SwipeAnalytics) => void | Promise<void>;
+  onSwipeRight?: (job: JobData, analytics: SwipeAnalytics) => void | Promise<void>;
   onEmptyQueue?: () => void;
   config?: Partial<JobSwipeConfig>;
 }
@@ -181,7 +181,7 @@ export function useJobSwipe({
   }, [cardState.isExpanded, deviceType]);
 
   // Handle swipe left
-  const swipeLeft = useCallback(() => {
+  const swipeLeft = useCallback(async () => {
     if (!currentJob) {
       console.log('swipeLeft: No current job available');
       return;
@@ -200,15 +200,24 @@ export function useJobSwipe({
       setAnalytics(prev => [...prev, analyticsData]);
     }
     
-    // Call user handler
-    onSwipeLeft?.(currentJob.job, analyticsData);
+    // Call user handler - await if it returns a promise
+    try {
+      const result = onSwipeLeft?.(currentJob.job, analyticsData);
+      if (result && typeof result.then === 'function') {
+        await result;
+        console.log('swipeLeft: API call completed successfully');
+      }
+    } catch (error) {
+      console.error('swipeLeft: API call failed:', error);
+      // Continue with UI update even if API fails
+    }
     
-    // Move to next job
+    // Move to next job immediately to show next card
     const nextIndex = currentIndex + 1;
     console.log('swipeLeft: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
     setCurrentIndex(nextIndex);
     
-    // Reset card state
+    // Reset card state immediately for smooth transition
     setCardState(prev => ({
       ...prev,
       state: 'idle',
@@ -219,18 +228,26 @@ export function useJobSwipe({
       velocity: { x: 0, y: 0 }
     }));
     
-    // Check if queue needs refill
-    refillQueue();
+    // Aggressively refill queue to ensure next job is always available
+    const remainingJobs = jobQueue.length - nextIndex;
+    if (remainingJobs <= 3 && fetchJobs && !isLoading) {
+      console.log('swipeLeft: Proactively refilling queue, remaining:', remainingJobs);
+      try {
+        await preloadNext();
+      } catch (error) {
+        console.error('swipeLeft: Queue refill failed:', error);
+      }
+    }
     
     // Check if queue is empty
     if (nextIndex >= jobQueue.length && !fetchJobs) {
       console.log('swipeLeft: Queue empty, calling onEmptyQueue');
       onEmptyQueue?.();
     }
-  }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeLeft, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
+  }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeLeft, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, preloadNext, isLoading]);
 
   // Handle swipe right
-  const swipeRight = useCallback(() => {
+  const swipeRight = useCallback(async () => {
     if (!currentJob) {
       console.log('swipeRight: No current job available');
       return;
@@ -249,15 +266,24 @@ export function useJobSwipe({
       setAnalytics(prev => [...prev, analyticsData]);
     }
     
-    // Call user handler
-    onSwipeRight?.(currentJob.job, analyticsData);
+    // Call user handler - await if it returns a promise
+    try {
+      const result = onSwipeRight?.(currentJob.job, analyticsData);
+      if (result && typeof result.then === 'function') {
+        await result;
+        console.log('swipeRight: API call completed successfully');
+      }
+    } catch (error) {
+      console.error('swipeRight: API call failed:', error);
+      // Continue with UI update even if API fails
+    }
     
-    // Move to next job
+    // Move to next job immediately to show next card
     const nextIndex = currentIndex + 1;
     console.log('swipeRight: Moving to next index:', nextIndex, 'available jobs:', jobQueue.length);
     setCurrentIndex(nextIndex);
     
-    // Reset card state
+    // Reset card state immediately for smooth transition
     setCardState(prev => ({
       ...prev,
       state: 'idle',
@@ -268,15 +294,23 @@ export function useJobSwipe({
       velocity: { x: 0, y: 0 }
     }));
     
-    // Check if queue needs refill
-    refillQueue();
+    // Aggressively refill queue to ensure next job is always available
+    const remainingJobs = jobQueue.length - nextIndex;
+    if (remainingJobs <= 3 && fetchJobs && !isLoading) {
+      console.log('swipeRight: Proactively refilling queue, remaining:', remainingJobs);
+      try {
+        await preloadNext();
+      } catch (error) {
+        console.error('swipeRight: Queue refill failed:', error);
+      }
+    }
     
     // Check if queue is empty
     if (nextIndex >= jobQueue.length && !fetchJobs) {
       console.log('swipeRight: Queue empty, calling onEmptyQueue');
       onEmptyQueue?.();
     }
-  }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeRight, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, refillQueue]);
+  }, [currentJob, createAnalytics, cardState.velocity, config.trackAnalytics, onSwipeRight, currentIndex, jobQueue.length, fetchJobs, onEmptyQueue, preloadNext, isLoading]);
 
   // Handle card expansion
   const expandCard = useCallback((trigger: ExpansionTrigger = 'programmatic') => {

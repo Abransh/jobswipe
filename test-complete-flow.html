@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete JobSwipe Auth Flow Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .log { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin: 10px 0; border-radius: 4px; white-space: pre-wrap; font-family: monospace; max-height: 400px; overflow-y: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        .step { margin: 20px 0; padding: 15px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        .cookies { background: #fff3cd; padding: 10px; border-radius: 4px; font-family: monospace; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Complete JobSwipe Authentication Flow Test</h1>
+    
+    <div class="step">
+        <h3>Step 1: Simulate User's Current State</h3>
+        <p>Set refreshToken (like user has) and clear accessToken (like expired token)</p>
+        <button onclick="simulateUserState()">Setup User State</button>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Test Complete Swipe Flow</h3>
+        <p>This will test: Swipe Right → 401 Error → Auto Refresh → Retry → Success</p>
+        <button onclick="testCompleteFlow()">Test Complete Flow</button>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Verify Fix</h3>
+        <p>Try another swipe right to confirm tokens are working</p>
+        <button onclick="testSecondSwipe()">Test Second Swipe</button>
+    </div>
+
+    <div class="cookies" id="cookieDisplay">
+        Current cookies: (will update automatically)
+    </div>
+
+    <div id="log" class="log">Ready to test complete authentication flow...\n</div>
+
+    <script>
+        const log = document.getElementById('log');
+        const cookieDisplay = document.getElementById('cookieDisplay');
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            log.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+            updateCookieDisplay();
+        }
+
+        function updateCookieDisplay() {
+            cookieDisplay.textContent = 'Current cookies: ' + (document.cookie || 'None');
+        }
+
+        // Update cookie display every second
+        setInterval(updateCookieDisplay, 1000);
+
+        // Simulate user's exact state: refreshToken present, accessToken missing
+        function simulateUserState() {
+            addLog('🔄 Setting up user state simulation...');
+            
+            // Clear any existing access token
+            document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            
+            // Set a refresh token (simulating what user has)
+            document.cookie = 'refreshToken=user_refresh_token_12345; path=/; max-age=86400; SameSite=Lax';
+            
+            addLog('✅ User state set: refreshToken present, accessToken cleared', 'success');
+            addLog('📋 This simulates the exact issue: user has refresh token but access token expired');
+        }
+
+        // Test the complete authentication flow
+        async function testCompleteFlow() {
+            addLog('🚀 Starting complete authentication flow test...');
+            addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+            const testPayload = {
+                jobId: 'test-job-flow-123',
+                resumeId: 'test-resume-flow-456',
+                priority: 7,
+                metadata: {
+                    source: 'web',
+                    deviceId: 'test-flow-device',
+                    userAgent: navigator.userAgent
+                }
+            };
+
+            try {
+                addLog('🎯 Making swipe-right request (expecting auto-refresh)...');
+                
+                const response = await fetch('/api/queue/swipe-right', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+
+                const data = await response.json();
+
+                addLog(`📡 Response Status: ${response.status}`);
+                addLog(`📋 Response Data: ${JSON.stringify(data, null, 2)}`);
+
+                if (response.status === 200 && data.success) {
+                    addLog('🎉 SUCCESS! Complete flow working perfectly!', 'success');
+                    addLog('✅ The authentication issue has been RESOLVED', 'success');
+                    
+                    if (data.automationId) {
+                        addLog(`🤖 Automation triggered: ${data.automationId}`, 'success');
+                    }
+                    
+                    if (data.applicationId) {
+                        addLog(`📝 Application created: ${data.applicationId}`, 'success');
+                    }
+
+                } else if (response.status === 401) {
+                    if (data.details && data.details.refreshFailed) {
+                        addLog('❌ ISSUE: Token refresh failed during retry', 'error');
+                        addLog('💡 This might indicate the refresh token is also expired/invalid', 'info');
+                    } else if (data.details && data.details.requiresLogin) {
+                        addLog('❌ ISSUE: User needs to log in again', 'error');
+                        addLog('💡 Both access and refresh tokens are invalid', 'info');
+                    } else {
+                        addLog('❌ ISSUE: Authentication failed without proper error handling', 'error');
+                    }
+                } else {
+                    addLog(`❌ ISSUE: Unexpected response (${response.status})`, 'error');
+                    addLog(`💡 Error: ${data.error || 'Unknown error'}`, 'info');
+                }
+
+            } catch (error) {
+                addLog(`❌ NETWORK ERROR: ${error.message}`, 'error');
+            }
+
+            addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            addLog('🏁 Complete flow test finished');
+        }
+
+        // Test a second swipe to verify tokens are working
+        async function testSecondSwipe() {
+            addLog('🔄 Testing second swipe to verify auth is working...');
+
+            const testPayload = {
+                jobId: 'test-job-second-789',
+                resumeId: 'test-resume-second-101',
+                priority: 5,
+                metadata: {
+                    source: 'web',
+                    deviceId: 'test-second-device',
+                    userAgent: navigator.userAgent
+                }
+            };
+
+            try {
+                const response = await fetch('/api/queue/swipe-right', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testPayload)
+                });
+
+                const data = await response.json();
+
+                addLog(`📡 Second swipe status: ${response.status}`);
+
+                if (response.status === 200 && data.success) {
+                    addLog('✅ PERFECT! Second swipe worked immediately - auth fully fixed!', 'success');
+                } else if (response.status === 401) {
+                    addLog('⚠️ Second swipe still getting 401 - there may be a persistent issue', 'error');
+                } else {
+                    addLog(`📋 Second swipe response: ${JSON.stringify(data, null, 2)}`);
+                }
+
+            } catch (error) {
+                addLog(`❌ Second swipe error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        updateCookieDisplay();
+        addLog('🏁 Test page loaded and ready');
+        addLog('💡 Start with Step 1 to simulate the user\'s authentication issue');
+    </script>
+</body>
+</html>

@@ -134,8 +134,8 @@ export interface UseJobSwipeReturn {
   cardState: CardInteractionState;
   
   // Actions
-  swipeLeft: () => void;
-  swipeRight: () => void;
+  swipeLeft: () => Promise<void>;
+  swipeRight: () => Promise<void>;
   expandCard: (trigger?: ExpansionTrigger) => void;
   collapseCard: () => void;
   toggleExpansion: () => void;
@@ -167,8 +167,8 @@ export interface JobSwipeContainerProps {
   fetchJobs?: (offset: number, limit: number) => Promise<JobData[]>;
   
   // Event handlers
-  onSwipeLeft?: (job: JobData, analytics: SwipeAnalytics) => void;
-  onSwipeRight?: (job: JobData, analytics: SwipeAnalytics) => void;
+  onSwipeLeft?: (job: JobData, analytics: SwipeAnalytics) => void | Promise<void>;
+  onSwipeRight?: (job: JobData, analytics: SwipeAnalytics) => void | Promise<void>;
   onJobSave?: (job: JobData) => void;
   onJobShare?: (job: JobData) => void;
   onJobExpand?: (job: JobData, trigger: ExpansionTrigger) => void;

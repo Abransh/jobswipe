@@ -28,11 +28,15 @@ async function loadRoutes() {
     const jobsRoutes = await import('./routes/jobs.routes');
     console.log('Jobs routes loaded successfully');
     
+    const automationRoutes = await import('./routes/automation-simple.routes');
+    console.log('Automation routes loaded successfully');
+    
     return { 
       registerAuthRoutes, 
       tokenExchangeRoutes: tokenExchangeRoutes.default,
       registerQueueRoutes,
-      jobsRoutes: jobsRoutes.default
+      jobsRoutes: jobsRoutes.default,
+      automationRoutes: automationRoutes.automationRoutes
     };
   } catch (error) {
     console.error('❌ Failed to load enterprise routes:', error);
@@ -115,7 +119,15 @@ const config = {
   port: parseInt(process.env.API_PORT || '3001'),
   host: process.env.API_HOST || 'localhost',
   cors: {
-    origin: process.env.API_CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
+    origin: process.env.API_CORS_ORIGIN?.split(',') || [
+      'http://localhost:3000',      // Next.js web app
+      'http://localhost:3001',      // Fastify API (self)
+      'capacitor://localhost',      // Capacitor iOS/Android
+      'ionic://localhost',          // Ionic apps
+      'tauri://localhost',          // Tauri desktop
+      'file://',                    // Electron file:// protocol
+      'null'                        // Electron null origin
+    ],
     credentials: true,
   },
   rateLimit: {
@@ -334,18 +346,28 @@ async function createServer(): Promise<FastifyInstance> {
     }
   } else {
     server.log.warn('Enterprise plugins not available, using basic security headers');
-    // Add basic security middleware as fallback
-    server.addHook('onRequest', async (request, reply) => {
-      reply.header('X-Content-Type-Options', 'nosniff');
-      reply.header('X-Frame-Options', 'DENY');
-      reply.header('X-XSS-Protection', '1; mode=block');
-      reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
-      
-      if (process.env.NODE_ENV === 'production') {
-        reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-      }
-    });
   }
+
+  // Add comprehensive security headers fallback for all requests
+  server.addHook('onRequest', async (request, reply) => {
+    // Security headers
+    reply.header('X-Content-Type-Options', 'nosniff');
+    reply.header('X-Frame-Options', 'DENY');
+    reply.header('X-XSS-Protection', '1; mode=block');
+    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // CORS debugging headers
+    reply.header('X-API-Version', '1.0.0');
+    reply.header('X-Request-ID', `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+    
+    if (process.env.NODE_ENV === 'production') {
+      reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    } else {
+      // Development debugging headers
+      reply.header('X-Development-Mode', 'true');
+      reply.header('X-Request-Time', new Date().toISOString());
+    }
+  });
 
   // Security headers (additional to security plugin)
   await server.register(helmet as any, {
@@ -365,11 +387,35 @@ async function createServer(): Promise<FastifyInstance> {
     crossOriginEmbedderPolicy: false,
   });
 
-  // CORS configuration
+  // CORS configuration with enhanced support for desktop apps
   await server.register(cors as any, {
-    origin: config.cors.origin,
+    origin: (origin, callback) => {
+      const allowedOrigins = config.cors.origin;
+      server.log.debug(`CORS request from origin: ${origin}`);
+      
+      // Allow requests with no origin (mobile apps, Electron, Postman)
+      if (!origin) {
+        server.log.debug('CORS: Allowing request with no origin (mobile/desktop app)');
+        return callback(null, true);
+      }
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        server.log.debug(`CORS: Allowing origin: ${origin}`);
+        return callback(null, true);
+      }
+      
+      // Allow localhost with any port for development
+      if (isDevelopment && origin.startsWith('http://localhost')) {
+        server.log.debug(`CORS: Allowing localhost origin in development: ${origin}`);
+        return callback(null, true);
+      }
+      
+      server.log.warn(`CORS: Blocking origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'), false);
+    },
     credentials: config.cors.credentials,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
       'Origin',
       'X-Requested-With',
@@ -378,7 +424,21 @@ async function createServer(): Promise<FastifyInstance> {
       'Authorization',
       'X-CSRF-Token',
       'X-API-Key',
+      'User-Agent',
+      'X-Request-Source',
+      'X-Device-Type',
+      'X-App-Version',
+      'Cache-Control',
+      'Pragma',
+      'Expires'
     ],
+    exposedHeaders: [
+      'X-Request-ID',
+      'X-Response-Time',
+      'X-Rate-Limit-Remaining',
+      'X-Rate-Limit-Reset'
+    ],
+    maxAge: isDevelopment ? 86400 : 3600, // 24h in dev, 1h in prod
   });
 
   // Rate limiting
@@ -640,6 +700,10 @@ async function createServer(): Promise<FastifyInstance> {
       // Enterprise jobs routes
       server.log.info('Registering enterprise jobs routes...');
       await server.register(routes.jobsRoutes, { prefix: apiPrefix });
+
+      // Enterprise automation routes
+      server.log.info('Registering enterprise automation routes...');
+      await server.register(routes.automationRoutes, { prefix: apiPrefix });
       
       server.log.info('✅ Enterprise routes registered successfully');
     } catch (error) {
