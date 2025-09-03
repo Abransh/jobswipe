@@ -556,11 +556,11 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
 
           // Emit WebSocket event for real-time updates
           if (request.server.websocket) {
-            request.server.websocket.emitToUser(userId, 'automation-queued', {
+            request.server.websocket.emitToUser(user.id, 'automation-queued', {
               applicationId: queueEntry.id,
               status: 'queued',
-              jobTitle: body.jobData.title,
-              company: body.jobData.company,
+              jobTitle: automationData.jobData.title,
+              company: automationData.jobData.company,
               queuedAt: new Date().toISOString(),
               executionMode: 'server',
               message: 'Job application has been queued for automation'
@@ -579,7 +579,29 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
             }
           });
         } catch (automationError) {
-          request.server.log.error('Failed to queue automation:', automationError);
+          request.server.log.error({
+            ...enhancedLogContext,
+            event: 'automation_queue_failed',
+            message: 'Failed to queue automation - job saved for manual processing',
+            error: automationError instanceof Error ? automationError.message : String(automationError),
+            errorStack: automationError instanceof Error ? automationError.stack : undefined,
+            automationServiceAvailable: !!request.server.automationService,
+            websocketAvailable: !!request.server.websocket
+          });
+          
+          // Emit WebSocket event about automation queuing failure
+          if (request.server.websocket) {
+            request.server.websocket.emitToUser(user.id, 'automation-queue-failed', {
+              applicationId: queueEntry.id,
+              status: 'pending',
+              jobTitle: jobPosting.title,
+              company: jobPosting.company.name,
+              failedAt: new Date().toISOString(),
+              error: 'Failed to queue automation - will be processed manually',
+              message: 'Job application saved but automation queuing failed'
+            });
+          }
+          
           // Don't fail the entire request, just log the error
           // The job is still saved in the database for manual processing
         }

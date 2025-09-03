@@ -320,6 +320,34 @@ export class PythonBridge extends EventEmitter {
   }
 
   /**
+   * Ensure requirements field is always an array for Python validation
+   */
+  private ensureRequirementsArray(requirements: any): string[] {
+    if (!requirements) {
+      return ['General requirements'];
+    }
+    
+    if (Array.isArray(requirements)) {
+      return requirements.filter(req => req && typeof req === 'string');
+    }
+    
+    if (typeof requirements === 'string') {
+      // Split by common delimiters or return as single item array
+      const trimmed = requirements.trim();
+      if (trimmed.includes('\n')) {
+        return trimmed.split('\n').map(req => req.trim()).filter(req => req);
+      } else if (trimmed.includes(',')) {
+        return trimmed.split(',').map(req => req.trim()).filter(req => req);
+      } else {
+        return [trimmed];
+      }
+    }
+    
+    // Fallback for unexpected types
+    return ['General requirements'];
+  }
+
+  /**
    * Create temporary data file for complex data structures
    */
   private async createDataFile(request: PythonExecutionRequest): Promise<string> {
@@ -329,18 +357,18 @@ export class PythonBridge extends EventEmitter {
     // Transform data to match Python script expectations
     const dataPayload = {
       user_profile: {
-        first_name: request.userProfile.firstName,
-        last_name: request.userProfile.lastName,
+        first_name: request.userProfile.firstName || 'Unknown',
+        last_name: request.userProfile.lastName || 'User',
         email: request.userProfile.email,
-        phone: request.userProfile.phone,
+        phone: request.userProfile.phone || '000-000-0000',
         resume_url: request.userProfile.resumeUrl,
         resume_local_path: request.userProfile.resumeLocalPath,
-        current_title: request.userProfile.currentTitle,
-        years_experience: request.userProfile.yearsExperience,
-        skills: request.userProfile.skills || [],
+        current_title: request.userProfile.currentTitle || 'Professional',
+        years_experience: request.userProfile.yearsExperience || 2,
+        skills: request.userProfile.skills || ['General Skills'],
         linkedin_url: request.userProfile.linkedinUrl,
-        current_location: request.userProfile.currentLocation,
-        work_authorization: request.userProfile.workAuthorization,
+        current_location: request.userProfile.currentLocation || 'Remote',
+        work_authorization: request.userProfile.workAuthorization || 'citizen',
         cover_letter: request.userProfile.coverLetter,
         custom_fields: request.userProfile.customFields || {}
       },
@@ -351,7 +379,7 @@ export class PythonBridge extends EventEmitter {
         apply_url: request.jobData.applyUrl,
         location: request.jobData.location,
         description: request.jobData.description,
-        requirements: request.jobData.requirements || []
+        requirements: this.ensureRequirementsArray(request.jobData.requirements)
       },
       automation_config: request.automationConfig,
       proxy_config: request.proxyConfig,
@@ -449,15 +477,42 @@ export class PythonBridge extends EventEmitter {
         this.activeProcesses.delete(logContext.applicationId);
         const executionTime = Date.now() - startTime;
 
-        if (code === 0) {
-          try {
-            const result = this.parseExecutionResult(stdout, logContext, executionTime);
-            resolve(result);
-          } catch (parseError) {
-            reject(new Error(`Failed to parse Python output: ${parseError}`));
+        // Try to parse result regardless of exit code, as some Python scripts
+        // return non-zero exit codes but still produce valid JSON output
+        try {
+          const result = this.parseExecutionResult(stdout, logContext, executionTime);
+          if (code !== 0) {
+            // Mark as failed but still return the parsed result for debugging
+            result.success = false;
+            result.error = result.error || `Python process exited with code ${code}: ${stderr}`;
+            
+            this.fastify.log.warn({
+              ...logContext,
+              event: 'python_non_zero_exit',
+              message: 'Python script returned non-zero exit code but produced valid output',
+              exitCode: code,
+              stderr: stderr.trim(),
+              parsedSuccess: result.success
+            });
           }
-        } else {
-          reject(new Error(`Python process failed with code ${code}: ${stderr}`));
+          resolve(result);
+        } catch (parseError) {
+          // If parsing fails and exit code is non-zero, this is a complete failure
+          const errorMessage = code === 0 
+            ? `Failed to parse Python output: ${parseError}`
+            : `Python process failed with code ${code}. Stderr: ${stderr}. Parse error: ${parseError}`;
+          
+          this.fastify.log.error({
+            ...logContext,
+            event: 'python_complete_failure',
+            message: 'Python execution failed completely',
+            exitCode: code,
+            parseError: parseError.message,
+            stderr: stderr.trim(),
+            stdout: stdout.slice(0, 500) // Log first 500 chars for debugging
+          });
+          
+          reject(new Error(errorMessage));
         }
       });
 

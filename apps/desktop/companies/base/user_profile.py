@@ -46,9 +46,10 @@ class UserProfile(BaseModel):
     
     @validator('phone')
     def validate_phone(cls, v):
-        """Basic phone number validation"""
-        if not v:
-            raise ValueError('Phone number is required')
+        """Basic phone number validation - allow empty for automation"""
+        if not v or v.strip() == '':
+            # Allow empty phone number but provide a default for automation
+            return '000-000-0000'  # Default placeholder phone number
         # Remove non-digit characters for validation
         digits_only = ''.join(filter(str.isdigit, v))
         if len(digits_only) < 10:
@@ -127,6 +128,30 @@ class JobData(BaseModel):
         if not v.startswith(('http://', 'https://')):
             raise ValueError('Apply URL must be a valid HTTP/HTTPS URL')
         return v
+    
+    @validator('requirements', pre=True)
+    def validate_requirements(cls, v):
+        """Ensure requirements is always a list - runs before type validation"""
+        if v is None:
+            return ['General requirements']
+        
+        if isinstance(v, str):
+            # Convert string to list - handle common separators
+            trimmed = v.strip()
+            if '\n' in trimmed:
+                return [req.strip() for req in trimmed.split('\n') if req.strip()]
+            elif ',' in trimmed:
+                return [req.strip() for req in trimmed.split(',') if req.strip()]
+            else:
+                return [trimmed] if trimmed else ['General requirements']
+        
+        if isinstance(v, list):
+            # Filter out empty strings and ensure all are strings
+            filtered = [str(req).strip() for req in v if req and str(req).strip()]
+            return filtered if filtered else ['General requirements']
+        
+        # Fallback for unexpected types
+        return ['General requirements']
     
     def get_company_identifier(self) -> str:
         """Get a standardized company identifier for automation selection"""

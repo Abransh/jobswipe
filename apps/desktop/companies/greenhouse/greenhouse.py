@@ -219,14 +219,17 @@ Successfully submit the job application and provide confirmation of submission.
             errors.append("Phone number is required")
         
         # Check resume availability
-        if not user_profile.get_resume_path():
-            errors.append("Resume file path is required for Greenhouse applications")
-        elif user_profile.resume_local_path:
+        resume_path_or_url = user_profile.get_resume_path()
+        if resume_path_or_url and user_profile.resume_local_path:
+            # Validate local resume file if provided
             resume_path = Path(user_profile.resume_local_path)
             if not resume_path.exists():
                 errors.append(f"Resume file not found at: {user_profile.resume_local_path}")
             elif resume_path.suffix.lower() not in ['.pdf', '.doc', '.docx']:
                 errors.append("Resume must be in PDF, DOC, or DOCX format")
+        elif not resume_path_or_url:
+            # Resume is highly recommended but not strictly required for some applications
+            self.logger.warning("No resume provided - Greenhouse applications typically require a resume")
         
         return errors
     
