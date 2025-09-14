@@ -426,7 +426,25 @@ class QueueApiService {
   async prioritizeApplication(id: string, reason?: string): Promise<ApiResponse<any>> {
     return this.applicationAction(id, 'prioritize', reason);
   }
+
+  /**
+   * Swipe right on job (alias for apply method for backward compatibility)
+   */
+  async swipeRight(request: SwipeRightRequest): Promise<ApiResponse<{
+    applicationId: string;
+    snapshotId: string;
+    status: string;
+    priority: string;
+  }>> {
+    return this.apply(request);
+  }
 }
+
+// =============================================================================
+// ADDITIONAL TYPES
+// =============================================================================
+
+export type SwipeRightRequest = JobApplicationRequest;
 
 // =============================================================================
 // UTILITY FUNCTIONS

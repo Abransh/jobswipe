@@ -224,7 +224,7 @@ export class JobApplicationWorker {
   }
 
   /**
-   * Initialize the worker and desktop communication
+   * Initialize the worker with Python automation service
    */
   async initialize(): Promise<void> {
     try {
@@ -232,16 +232,32 @@ export class JobApplicationWorker {
       await this.redisConnection.ping();
       console.log('✅ Redis connection established for worker');
 
-      // Setup desktop WebSocket server
-      await this.setupDesktopWebSocketServer();
-
-      // Start monitoring desktop clients
-      this.startDesktopMonitoring();
+      // Initialize Python automation service
+      await this.initializePythonAutomationService();
 
       this.isRunning = true;
       console.log('✅ Job Application Worker initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize Job Application Worker:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Initialize Python automation service
+   */
+  private async initializePythonAutomationService(): Promise<void> {
+    try {
+      const { PythonAutomationService } = await import('../services/PythonAutomationService');
+      const automationService = new PythonAutomationService();
+      await automationService.initialize();
+      
+      // Make it globally available for workers
+      (globalThis as any).__pythonAutomationService = automationService;
+      
+      console.log('✅ Python Automation Service initialized for worker');
+    } catch (error) {
+      console.error('❌ Failed to initialize Python Automation Service:', error);
       throw error;
     }
   }
@@ -415,52 +431,20 @@ export class JobApplicationWorker {
       // Update job progress
       await job.updateProgress(10);
 
-      // Find available desktop client
-      const availableClient = this.findAvailableDesktopClient();
-      if (!availableClient) {
-        throw new Error('No available desktop clients for job processing');
+      // Check if we have Python automation service
+      const automationService = (globalThis as any).__pythonAutomationService;
+      if (!automationService) {
+        throw new Error('Python automation service not available');
       }
-
-      // Mark client as busy and track the job
-      availableClient.status = 'busy';
-      availableClient.currentJobs.add(job.id!);
-      this.processingJobs.set(job.id!, {
-        jobId: job.id!,
-        clientId: availableClient.id,
-        startTime,
-      });
 
       await job.updateProgress(25);
 
-      // Send job to desktop client
-      const jobMessage = {
-        type: 'process_job',
-        jobId: job.id,
-        jobData: {
-          title: jobData.jobData.title,
-          company: jobData.jobData.company,
-          url: jobData.jobData.url,
-          description: jobData.jobData.description,
-          requirements: jobData.jobData.requirements,
-        },
-        userProfile: {
-          resumeUrl: jobData.userProfile.resumeUrl,
-          coverLetter: jobData.userProfile.coverLetter,
-        },
-        config: {
-          timeout: this.config.desktop.jobTimeout,
-          retries: this.config.desktop.maxRetries,
-          headless: true, // Start headless, switch to headful for captcha
-        },
-        timestamp: new Date().toISOString(),
-      };
+      // Process the job using Python automation
+      console.log(`🎯 Processing job with Python automation: ${jobData.jobData.title} at ${jobData.jobData.company}`);
+      
+      const automationResult = await automationService.processJobApplication(jobData);
 
-      availableClient.websocket.send(JSON.stringify(jobMessage));
-
-      await job.updateProgress(50);
-
-      // Wait for job completion with timeout
-      const result = await this.waitForJobCompletion(job.id!, this.config.desktop.jobTimeout);
+      await job.updateProgress(75);
 
       // Calculate processing time
       const processingTime = Date.now() - startTime.getTime();
@@ -469,20 +453,23 @@ export class JobApplicationWorker {
 
       // Log success
       if (this.db) {
-        await this.logJobExecution(job.id!, 'SUCCESS', result, processingTime);
+        await this.logJobExecution(job.id!, 'SUCCESS', automationResult, processingTime);
       }
 
       return {
-        success: true,
-        processingTime,
-        ...result,
-        logs: [{
-          timestamp: new Date(),
-          level: 'INFO',
-          message: `Job processed successfully by desktop client ${availableClient.id}`,
-          step: 'completion',
-          data: result,
-        }],
+        success: automationResult.success,
+        applicationId: automationResult.applicationId,
+        confirmationId: automationResult.confirmationNumber,
+        screenshots: automationResult.screenshots,
+        errorMessage: automationResult.error,
+        processingTime: automationResult.executionTime,
+        logs: automationResult.steps.map(step => ({
+          timestamp: new Date(step.timestamp),
+          level: step.success ? 'INFO' : 'ERROR' as 'INFO' | 'WARN' | 'ERROR',
+          message: step.action,
+          step: step.stepName,
+          data: step,
+        })),
       };
 
     } catch (error) {
@@ -507,6 +494,8 @@ export class JobApplicationWorker {
         errorType = 'NETWORK';
       } else if (errorMessage.includes('form') || errorMessage.includes('field')) {
         errorType = 'FORM_ERROR';
+      } else if (errorMessage.includes('site') || errorMessage.includes('change')) {
+        errorType = 'SITE_CHANGE';
       }
 
       return {
@@ -692,6 +681,12 @@ export class JobApplicationWorker {
     this.isRunning = false;
 
     try {
+      // Shutdown Python automation service
+      const automationService = (globalThis as any).__pythonAutomationService;
+      if (automationService) {
+        await automationService.cleanup();
+      }
+
       // Close workers
       await Promise.all([
         this.applicationWorker.close(),
@@ -700,11 +695,6 @@ export class JobApplicationWorker {
 
       // Close queue events
       await this.queueEvents.close();
-
-      // Close WebSocket server
-      if (this.websocketServer) {
-        this.websocketServer.close();
-      }
 
       // Close Redis connection
       await this.redisConnection.disconnect();

@@ -10,6 +10,7 @@ import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Redis } from 'ioredis';
+import { QueueStatus } from '@jobswipe/database';
 import type { WebSocketService } from './websocket.plugin';
 
 // =============================================================================
@@ -98,7 +99,7 @@ interface ApplicationStatus {
   id: string;
   jobId: string;
   userId: string;
-  status: 'pending' | 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  status: QueueStatus;
   progress?: number;
   message?: string;
   result?: {
@@ -475,19 +476,19 @@ class QueueService {
   /**
    * Map BullMQ job state to application status
    */
-  private mapJobState(state: string): ApplicationStatus['status'] {
+  private mapJobState(state: string): QueueStatus {
     switch (state) {
       case 'waiting':
       case 'delayed':
-        return 'queued';
+        return QueueStatus.QUEUED;
       case 'active':
-        return 'processing';
+        return QueueStatus.PROCESSING;
       case 'completed':
-        return 'completed';
+        return QueueStatus.COMPLETED;
       case 'failed':
-        return 'failed';
+        return QueueStatus.FAILED;
       default:
-        return 'pending';
+        return QueueStatus.PENDING;
     }
   }
 

@@ -7,6 +7,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { QueueStatus } from '@jobswipe/database';
 
 // =============================================================================
 // SCHEMAS & VALIDATION
@@ -601,7 +602,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           success: z.boolean(),
           data: z.object({
             applicationId: z.string(),
-            status: z.enum(['queued', 'processing', 'completed', 'failed']),
+            status: z.nativeEnum(QueueStatus),
             progress: z.number(),
             result: AutomationResultSchema.optional(),
             queuePosition: z.number().optional(),
@@ -692,7 +693,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
       querystring: z.object({
         limit: z.number().optional().default(50),
         offset: z.number().optional().default(0),
-        status: z.enum(['all', 'completed', 'failed']).optional().default('all')
+        status: z.enum(['all', 'PENDING', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED', 'RETRYING', 'PAUSED', 'REQUIRES_CAPTCHA']).optional().default('all')
       }),
       // response: {
         200: z.object({

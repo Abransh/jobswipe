@@ -212,7 +212,8 @@ export type SwipeDirection = (typeof SwipeDirection)[keyof typeof SwipeDirection
 
 export const QueueStatus: {
   PENDING: 'PENDING',
-  RUNNING: 'RUNNING',
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED',
   CANCELLED: 'CANCELLED',

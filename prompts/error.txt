@@ -1,0 +1,41 @@
+can you tell me what my terminal logs say 
+
+
+{"level":30,"time":1757860084494,"pid":7276,"hostname":"192.168.1.9","reqId":"req-4","req":{"method":"POST","url":"/v1/queue/apply","hostname":"localhost:3001","remoteAddress":"::1","remotePort":52856},"msg":"incoming request"}
+2025-09-14T14:28:04.494Z INFO [9lQMbBHy] Request started: POST /v1/queue/apply
+{"level":30,"time":1757860084511,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","event":"request_started","message":"Job application request started"}
+{"level":30,"time":1757860085741,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"job_validated","message":"Job posting found and validated","jobTitle":"sexydeveloper","company":"Jobswipe","jobLocation":null}
+{"level":30,"time":1757860086236,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"database_transaction_started","message":"Starting database transaction for job application"}
+Job application queued: 2 for user a627f660-d0e8-4cad-a363-06eadcccfd75
+{"level":30,"time":1757860088008,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"bullmq_job_queued","message":"Application queued in BullMQ for processing","queueJobId":"2","queueName":"priority","executionMode":"worker"}
+prisma:error 
+Invalid `tx.applicationQueue.update()` invocation in
+/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37
+
+  578 }
+  579 
+  580 // Update the database entry with queue job ID
+→ 581 await tx.applicationQueue.update({
+        where: {
+          id: "ee0408e8-9874-463a-b776-1080408bbb88"
+        },
+        data: {
+          status: "QUEUED",
+                  ~~~~~~~~
+          automationConfig: {
+            source: "web",
+            deviceId: "web_1755960555682_r4kskpk9g",
+            timestamp: "2025-09-14T14:28:06.984Z",
+            queueJobId: "2",
+            queuedAt: "2025-09-14T14:28:08.014Z",
+            isPriority: true
+          }
+        }
+      })
+
+Invalid value for argument `status`. Expected QueueStatus.
+{"level":50,"time":1757860088024,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"bullmq_queue_failed","message":"Failed to queue job in BullMQ - job saved for manual processing","error":"\nInvalid `tx.applicationQueue.update()` invocation in\n/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37\n\n  578 }\n  579 \n  580 // Update the database entry with queue job ID\n→ 581 await tx.applicationQueue.update({\n        where: {\n          id: \"ee0408e8-9874-463a-b776-1080408bbb88\"\n        },\n        data: {\n          status: \"QUEUED\",\n                  ~~~~~~~~\n          automationConfig: {\n            source: \"web\",\n            deviceId: \"web_1755960555682_r4kskpk9g\",\n            timestamp: \"2025-09-14T14:28:06.984Z\",\n            queueJobId: \"2\",\n            queuedAt: \"2025-09-14T14:28:08.014Z\",\n            isPriority: true\n          }\n        }\n      })\n\nInvalid value for argument `status`. Expected QueueStatus.","errorStack":"PrismaClientValidationError: \nInvalid `tx.applicationQueue.update()` invocation in\n/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37\n\n  578 }\n  579 \n  580 // Update the database entry with queue job ID\n→ 581 await tx.applicationQueue.update({\n        where: {\n          id: \"ee0408e8-9874-463a-b776-1080408bbb88\"\n        },\n        data: {\n          status: \"QUEUED\",\n                  ~~~~~~~~\n          automationConfig: {\n            source: \"web\",\n            deviceId: \"web_1755960555682_r4kskpk9g\",\n            timestamp: \"2025-09-14T14:28:06.984Z\",\n            queueJobId: \"2\",\n            queuedAt: \"2025-09-14T14:28:08.014Z\",\n            isPriority: true\n          }\n        }\n      })\n\nInvalid value for argument `status`. Expected QueueStatus.\n    at wn (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:29:1363)\n    at $n.handleRequestError (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6958)\n    at $n.handleAndLogRequestError (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6623)\n    at $n.request (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6307)\n    at async l (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:130:9633)\n    at async <anonymous> (/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:11)\n    at async Proxy._transactionWithCallback (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:130:8000)\n    at async Object.applyHandler (/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:379:20)","queueServiceAvailable":true,"websocketAvailable":true}
+{"level":30,"time":1757860088299,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"request_completed_success","message":"Job application request completed successfully","processingTimeMs":3788,"applicationId":"ee0408e8-9874-463a-b776-1080408bbb88","queuePosition":22}
+2025-09-14T14:28:04.494Z WARN [9lQMbBHy] Request completed in 3807ms
+2025-09-14T14:28:04.494Z INFO [9lQMbBHy] Request completed: 201
+{"level":30,"time":1757860088310,"pid":7276,"hostname":"192.168.1.9","reqId":"req-4","res":{"statusCode":201},"responseTime":3807.5534589998424,"msg":"request completed"}

@@ -8,6 +8,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { QueueStatus } from '@jobswipe/database';
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -30,7 +31,7 @@ const JobApplicationRequestSchema = z.object({
 const GetApplicationsRequestSchema = z.object({
   limit: z.number().int().min(1).max(100).default(50),
   offset: z.number().int().min(0).default(0),
-  status: z.enum(['pending', 'queued', 'processing', 'completed', 'failed', 'cancelled']).optional(),
+  status: z.nativeEnum(QueueStatus).optional(),
 });
 
 const ApplicationActionRequestSchema = z.object({
@@ -406,7 +407,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         data: {
           userId: user.id,
           jobPostingId: data.jobId,
-          status: 'PENDING',
+          status: QueueStatus.PENDING,
           priority: data.priority === 10 ? 'IMMEDIATE' : 
                    data.priority >= 8 ? 'URGENT' :
                    data.priority >= 6 ? 'HIGH' : 'NORMAL',
@@ -502,109 +503,127 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         },
       });
       
-      // Queue job application with AutomationService
-      if (request.server.automationService) {
-        // Transform data to match AutomationService expected format
-        const automationData = {
+      // Queue job application using BullMQ
+      if (request.server.queueService) {
+        // Transform data to match BullMQ JobData format
+        const queueJobData = {
+          jobId: data.jobId,
           userId: user.id,
           jobData: {
-            id: data.jobId,
             title: jobPosting.title,
             company: jobPosting.company.name,
-            applyUrl: jobPosting.applyUrl || jobPosting.sourceUrl || '',
-            location: jobPosting.location || `${jobPosting.city}, ${jobPosting.state}`,
+            url: jobPosting.applyUrl || jobPosting.sourceUrl || '',
             description: jobPosting.description,
-            requirements: jobPosting.requirements || []
+            requirements: jobPosting.requirements || '',
+            salary: jobPosting.salaryMin && jobPosting.salaryMax ? {
+              min: jobPosting.salaryMin,
+              max: jobPosting.salaryMax,
+              currency: jobPosting.currency || 'USD'
+            } : undefined,
+            location: jobPosting.location || `${jobPosting.city}, ${jobPosting.state}`,
+            remote: jobPosting.remote,
+            type: jobPosting.type.toString(),
+            level: jobPosting.level.toString(),
           },
           userProfile: {
-            firstName: userProfile?.firstName || user.email.split('@')[0], // Fallback to email username
-            lastName: userProfile?.lastName || 'User',
-            email: user.email,
-            phone: userProfile?.phone || '',
             resumeUrl: userProfile?.resumeUrl,
-            currentTitle: userProfile?.currentTitle,
-            yearsExperience: userProfile?.yearsExperience,
-            skills: userProfile?.skills || [],
-            currentLocation: userProfile?.currentLocation || jobPosting.location,
-            linkedinUrl: userProfile?.linkedinUrl,
-            workAuthorization: userProfile?.workAuthorization,
             coverLetter: data.coverLetter,
-            customFields: {
+            preferences: {
+              firstName: userProfile?.firstName || user.email.split('@')[0],
+              lastName: userProfile?.lastName || 'User',
+              email: user.email,
+              phone: userProfile?.phone || '',
+              currentTitle: userProfile?.currentTitle,
+              yearsExperience: userProfile?.yearsExperience,
+              skills: userProfile?.skills || [],
+              currentLocation: userProfile?.currentLocation || jobPosting.location,
+              linkedinUrl: userProfile?.linkedinUrl,
+              workAuthorization: userProfile?.workAuthorization,
               applicationId: queueEntry.id,
-              source: data.metadata.source,
-              deviceId: data.metadata.deviceId,
-              priority: data.priority
             }
           },
-          options: {
-            headless: true,
-            timeout: 120000, // 2 minutes
-            maxRetries: 3
+          priority: data.priority,
+          metadata: {
+            source: data.metadata.source,
+            deviceId: data.metadata.deviceId,
+            timestamp: new Date().toISOString(),
           }
         };
         
-        // Queue the application for automation
+        // Add job to BullMQ queue
         try {
-          const applicationId = await request.server.automationService.queueApplication(automationData);
+          const isPriority = data.priority >= 8;
+          const queueJobId = await request.server.queueService.addJobApplication(queueJobData, isPriority);
+          
           request.server.log.info({
             ...enhancedLogContext,
-            event: 'automation_queued',
-            message: 'Application queued for automation service',
-            automationApplicationId: applicationId,
-            executionMode: 'server'
+            event: 'bullmq_job_queued',
+            message: 'Application queued in BullMQ for processing',
+            queueJobId,
+            queueName: isPriority ? 'priority' : 'applications',
+            executionMode: 'worker'
           });
 
           // Emit WebSocket event for real-time updates
           if (request.server.websocket) {
-            request.server.websocket.emitToUser(user.id, 'automation-queued', {
+            request.server.websocket.emitToUser(user.id, 'job-queued', {
               applicationId: queueEntry.id,
+              queueJobId,
               status: 'queued',
-              jobTitle: automationData.jobData.title,
-              company: automationData.jobData.company,
+              jobTitle: queueJobData.jobData.title,
+              company: queueJobData.jobData.company,
               queuedAt: new Date().toISOString(),
-              executionMode: 'server',
+              isPriority,
               message: 'Job application has been queued for automation'
             });
           }
           
-          // Update the database entry with automation application ID
+          // Update the database entry with queue job ID
           await tx.applicationQueue.update({
             where: { id: queueEntry.id },
             data: {
+              status: 'QUEUED',
               automationConfig: {
                 ...queueEntry.automationConfig,
-                automationApplicationId: applicationId,
-                queuedAt: new Date().toISOString()
+                queueJobId,
+                queuedAt: new Date().toISOString(),
+                isPriority
               }
             }
           });
-        } catch (automationError) {
+        } catch (queueError) {
           request.server.log.error({
             ...enhancedLogContext,
-            event: 'automation_queue_failed',
-            message: 'Failed to queue automation - job saved for manual processing',
-            error: automationError instanceof Error ? automationError.message : String(automationError),
-            errorStack: automationError instanceof Error ? automationError.stack : undefined,
-            automationServiceAvailable: !!request.server.automationService,
+            event: 'bullmq_queue_failed',
+            message: 'Failed to queue job in BullMQ - job saved for manual processing',
+            error: queueError instanceof Error ? queueError.message : String(queueError),
+            errorStack: queueError instanceof Error ? queueError.stack : undefined,
+            queueServiceAvailable: !!request.server.queueService,
             websocketAvailable: !!request.server.websocket
           });
           
-          // Emit WebSocket event about automation queuing failure
+          // Emit WebSocket event about queue failure
           if (request.server.websocket) {
-            request.server.websocket.emitToUser(user.id, 'automation-queue-failed', {
+            request.server.websocket.emitToUser(user.id, 'queue-failed', {
               applicationId: queueEntry.id,
               status: 'pending',
               jobTitle: jobPosting.title,
               company: jobPosting.company.name,
               failedAt: new Date().toISOString(),
-              error: 'Failed to queue automation - will be processed manually',
-              message: 'Job application saved but automation queuing failed'
+              error: 'Failed to queue job - will be processed manually',
+              message: 'Job application saved but queuing failed'
             });
           }
           
           // Don't fail the entire request, just log the error
           // The job is still saved in the database for manual processing
         }
+      } else {
+        request.server.log.warn({
+          ...enhancedLogContext,
+          event: 'queue_service_unavailable',
+          message: 'Queue service not available - job saved for manual processing'
+        });
       }
       
       return {
@@ -896,7 +915,7 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
     
     switch (data.action) {
       case 'cancel':
-        updateData = { status: 'CANCELLED' };
+        updateData = { status: QueueStatus.CANCELLED };
         if (request.server.automationService) {
           try {
             // Extract automation application ID from config
@@ -926,7 +945,7 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
           });
         }
         updateData = {
-          status: 'PENDING',
+          status: QueueStatus.PENDING,
           nextRetryAt: new Date(Date.now() + 30000), // Retry in 30 seconds
           errorMessage: null,
           errorType: null,

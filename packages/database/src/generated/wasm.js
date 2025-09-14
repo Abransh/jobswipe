@@ -1361,7 +1361,8 @@ exports.SwipeDirection = exports.$Enums.SwipeDirection = {
 
 exports.QueueStatus = exports.$Enums.QueueStatus = {
   PENDING: 'PENDING',
-  RUNNING: 'RUNNING',
+  QUEUED: 'QUEUED',
+  PROCESSING: 'PROCESSING',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED',
   CANCELLED: 'CANCELLED',

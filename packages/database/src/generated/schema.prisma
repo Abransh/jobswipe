@@ -1666,7 +1666,8 @@ enum ProxyType {
 
 enum QueueStatus {
   PENDING
-  RUNNING
+  QUEUED
+  PROCESSING
   COMPLETED
   FAILED
   CANCELLED
