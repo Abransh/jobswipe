@@ -51,6 +51,7 @@ class JobSwipeApp {
 
     app.on('before-quit', () => {
       this.isQuitting = true;
+      this.cleanupServices();
     });
   }
 
@@ -270,14 +271,23 @@ class JobSwipeApp {
   }
 
   private setupJobSwipeIPC(): void {
-    // Import and setup simplified IPC handlers for job functionality
+    // Import and setup automation IPC handlers
     try {
-      require('./main/ipcHandlers-simple');
-      console.log('✅ JobSwipe IPC handlers loaded successfully');
+      const { initializeAutomationServices } = require('./main/ipcHandlers-automation');
+      const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3001';
+
+      initializeAutomationServices(apiBaseUrl);
+      console.log('✅ JobSwipe automation services initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to load JobSwipe IPC handlers:', error);
-      // Set up minimal fallback handlers
-      this.setupFallbackIPC();
+      console.error('❌ Failed to load JobSwipe automation services:', error);
+      // Try to load simplified handlers as fallback
+      try {
+        require('./main/ipcHandlers-simple');
+        console.log('✅ Fallback to simplified IPC handlers');
+      } catch (fallbackError) {
+        console.error('❌ Failed to load fallback handlers:', fallbackError);
+        this.setupFallbackIPC();
+      }
     }
   }
 
@@ -312,6 +322,17 @@ class JobSwipeApp {
       detail: `Version: ${app.getVersion()}\nElectron: ${process.versions.electron}\nNode: ${process.versions.node}`,
       buttons: ['OK'],
     });
+  }
+
+  private cleanupServices(): void {
+    // Cleanup automation services
+    try {
+      const { cleanupAutomationServices } = require('./main/ipcHandlers-automation');
+      cleanupAutomationServices();
+      console.log('✅ Automation services cleaned up');
+    } catch (error) {
+      console.error('❌ Failed to cleanup automation services:', error);
+    }
   }
 }
 

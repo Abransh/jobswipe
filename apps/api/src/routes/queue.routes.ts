@@ -11,6 +11,43 @@ import { randomUUID } from 'crypto';
 import { QueueStatus } from '@jobswipe/database';
 
 // =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Detect company automation type based on URL patterns
+ */
+function detectCompanyAutomation(url: string): string {
+  const urlLower = url.toLowerCase();
+  
+  // Common job site patterns
+  const patterns = {
+    'linkedin': ['linkedin.com/jobs', 'linkedin.com/in/'],
+    'indeed': ['indeed.com'],
+    'glassdoor': ['glassdoor.com'],
+    'monster': ['monster.com'],
+    'ziprecruiter': ['ziprecruiter.com'],
+    'dice': ['dice.com'],
+    'stackoverflow': ['stackoverflow.com/jobs'],
+    'angellist': ['angel.co', 'wellfound.com'],
+    'greenhouse': ['greenhouse.io'],
+    'lever': ['lever.co'],
+    'workday': ['myworkdayjobs.com', 'workday.com'],
+    'bamboohr': ['bamboohr.com'],
+    'jobvite': ['jobvite.com'],
+    'smartrecruiters': ['smartrecruiters.com']
+  };
+  
+  for (const [company, urls] of Object.entries(patterns)) {
+    if (urls.some(pattern => urlLower.includes(pattern))) {
+      return company;
+    }
+  }
+  
+  return 'generic';
+}
+
+// =============================================================================
 // VALIDATION SCHEMAS
 // =============================================================================
 
@@ -186,6 +223,32 @@ async function getQueuePosition(snapshotId: string): Promise<number> {
   } catch (error) {
     console.warn('Failed to get queue position:', error);
     return 0;
+  }
+}
+
+/**
+ * Calculate estimated processing time based on queue position
+ */
+function calculateEstimatedTime(position: number, isPriority: boolean): string {
+  try {
+    // Base processing time per application (in minutes)
+    const baseTimePerApp = isPriority ? 3 : 5;
+
+    // Calculate estimated minutes
+    const estimatedMinutes = position * baseTimePerApp;
+
+    if (estimatedMinutes < 1) return 'Starting soon';
+    if (estimatedMinutes < 60) return `~${estimatedMinutes} minutes`;
+
+    const hours = Math.floor(estimatedMinutes / 60);
+    const minutes = estimatedMinutes % 60;
+
+    if (hours === 1) return minutes > 0 ? `~1 hour ${minutes} minutes` : '~1 hour';
+    return minutes > 0 ? `~${hours} hours ${minutes} minutes` : `~${hours} hours`;
+
+  } catch (error) {
+    console.warn('Failed to calculate estimated time:', error);
+    return 'Unknown';
   }
 }
 
@@ -368,6 +431,115 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
     // Get user's profile data
     const userProfile = await request.server.db.userProfile.findUnique({
       where: { userId: user.id },
+    });
+    
+    // Check server automation eligibility
+    const serverEligibility = await request.server.automationLimits.checkServerEligibility(user.id);
+    
+    request.server.log.info({
+      ...enhancedLogContext,
+      event: 'server_eligibility_checked',
+      message: 'Server automation eligibility checked',
+      eligible: serverEligibility.allowed,
+      reason: serverEligibility.reason,
+      remainingApplications: serverEligibility.remainingServerApplications
+    });
+    
+    // If eligible for server automation, execute immediately
+    if (serverEligibility.allowed && request.server.serverAutomationService) {
+      try {
+        request.server.log.info({
+          ...enhancedLogContext,
+          event: 'server_automation_started',
+          message: 'Starting immediate server automation'
+        });
+        
+        // Detect company automation type based on URL patterns
+        const companyAutomation = detectCompanyAutomation(jobPosting.externalUrl);
+        
+        // Prepare server automation request
+        const serverRequest = {
+          userId: user.id,
+          jobId: data.jobId,
+          applicationId: randomUUID(),
+          companyAutomation,
+          userProfile: {
+            firstName: userProfile?.firstName || '',
+            lastName: userProfile?.lastName || '',
+            email: user.email,
+            phone: userProfile?.phone || '',
+            resumeUrl: userProfile?.website || '',
+            currentTitle: userProfile?.currentTitle || '',
+            yearsExperience: userProfile?.yearsOfExperience || 0,
+            skills: userProfile?.skills || [],
+            currentLocation: userProfile?.location || '',
+            linkedinUrl: userProfile?.linkedin || '',
+            workAuthorization: userProfile?.workAuthorization || '',
+            coverLetter: data.coverLetter,
+            customFields: data.customFields || {}
+          },
+          jobData: {
+            id: data.jobId,
+            title: jobPosting.title,
+            company: jobPosting.company.name,
+            applyUrl: jobPosting.externalUrl,
+            location: jobPosting.location,
+            description: jobPosting.description,
+            requirements: Array.isArray(jobPosting.requirements) ? jobPosting.requirements : []
+          },
+          options: {
+            headless: true,
+            timeout: 300000 // 5 minutes
+          }
+        };
+        
+        // Execute server automation
+        const automationResult = await request.server.serverAutomationService.executeAutomation(serverRequest, correlationId);
+        
+        // Record server application usage
+        await request.server.automationLimits.recordServerApplication(user.id);
+        
+        request.server.log.info({
+          ...enhancedLogContext,
+          event: 'server_automation_completed',
+          message: 'Server automation completed successfully',
+          success: automationResult.success,
+          processingTime: Date.now() - startTime
+        });
+        
+        // Return immediate server automation result
+        return reply.send({
+          success: true,
+          message: 'Job application processed immediately via server automation',
+          data: {
+            applicationId: serverRequest.applicationId,
+            jobId: data.jobId,
+            userId: user.id,
+            status: automationResult.success ? QueueStatus.COMPLETED : QueueStatus.FAILED,
+            executionMode: 'server',
+            result: automationResult,
+            processingTime: Date.now() - startTime
+          }
+        });
+        
+      } catch (serverError) {
+        request.server.log.error({
+          ...enhancedLogContext,
+          event: 'server_automation_failed',
+          message: 'Server automation failed, falling back to desktop queue',
+          error: serverError instanceof Error ? serverError.message : 'Unknown error'
+        });
+        
+        // Fall through to desktop queue logic below
+      }
+    }
+    
+    // Log desktop queue routing
+    request.server.log.info({
+      ...enhancedLogContext,
+      event: 'desktop_queue_routing',
+      message: 'Routing application to desktop queue',
+      reason: serverEligibility.allowed ? 'server_automation_failed' : serverEligibility.reason
     });
     
     // Start database transaction
@@ -566,6 +738,10 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
 
           // Emit WebSocket event for real-time updates
           if (request.server.websocket) {
+            // Queue position update
+            const queuePosition = await getQueuePosition(snapshot.id);
+            const estimatedTime = calculateEstimatedTime(queuePosition, isPriority);
+
             request.server.websocket.emitToUser(user.id, 'job-queued', {
               applicationId: queueEntry.id,
               queueJobId,
@@ -574,7 +750,21 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
               company: queueJobData.jobData.company,
               queuedAt: new Date().toISOString(),
               isPriority,
+              queuePosition,
+              estimatedTime,
               message: 'Job application has been queued for automation'
+            });
+
+            // Application status update
+            request.server.websocket.emitApplicationStatusUpdate(user.id, {
+              applicationId: queueEntry.id,
+              jobId: data.jobId,
+              jobTitle: queueJobData.jobData.title,
+              company: queueJobData.jobData.company,
+              status: 'queued',
+              queuePosition,
+              estimatedTime,
+              timestamp: new Date().toISOString()
             });
           }
           
@@ -647,8 +837,20 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
 
     return reply.code(201).send({
       success: true,
-      data: result,
-      message: 'Job application queued successfully',
+      data: {
+        ...result,
+        executionMode: 'desktop',
+        serverAutomation: {
+          eligible: serverEligibility.allowed,
+          reason: serverEligibility.reason,
+          remainingServerApplications: serverEligibility.remainingServerApplications,
+          upgradeRequired: serverEligibility.upgradeRequired,
+          suggestedAction: serverEligibility.suggestedAction
+        }
+      },
+      message: serverEligibility.allowed 
+        ? 'Server automation not available - job queued for desktop processing'
+        : `Server automation limit reached - ${serverEligibility.reason}. Download desktop app for unlimited applications.`,
       correlationId,
       processingTime: processingTime
     });
@@ -1005,6 +1207,279 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
 }
 
 /**
+ * GET /api/v1/queue/applications/:id/position
+ * Get queue position for application
+ */
+async function queuePositionHandler(request: AuthenticatedRequest, reply: FastifyReply) {
+  try {
+    const { id } = request.params as { id: string };
+    const user = getAuthenticatedUser(request);
+
+    // Verify the application belongs to the user
+    const application = await request.server.db.applicationQueue.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+    });
+
+    if (!application) {
+      return reply.code(404).send({
+        success: false,
+        error: 'Application not found',
+        errorCode: 'APPLICATION_NOT_FOUND',
+      });
+    }
+
+    // Calculate queue position based on priority and creation time
+    const position = await request.server.db.applicationQueue.count({
+      where: {
+        status: { in: ['PENDING', 'QUEUED'] },
+        OR: [
+          { priority: { in: ['IMMEDIATE', 'URGENT'] } },
+          {
+            priority: application.priority,
+            createdAt: { lt: application.createdAt },
+          },
+        ],
+      },
+    });
+
+    const estimatedTime = calculateEstimatedTime(position + 1, ['IMMEDIATE', 'URGENT'].includes(application.priority));
+
+    return reply.send({
+      success: true,
+      data: {
+        position: position + 1,
+        estimatedTime,
+        isPriority: ['IMMEDIATE', 'URGENT'].includes(application.priority),
+        status: application.status.toLowerCase(),
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+  } catch (error) {
+    request.server.log.error('Queue position error:', error);
+    return reply.code(500).send({
+      success: false,
+      error: 'Internal server error',
+      errorCode: 'INTERNAL_ERROR',
+    });
+  }
+}
+
+/**
+ * POST /api/v1/queue/applications/:id/queue-position
+ * Update queue position from desktop app
+ */
+async function queuePositionUpdateHandler(request: AuthenticatedRequest, reply: FastifyReply) {
+  try {
+    const { id } = request.params as { id: string };
+    const data = request.body as any;
+    const user = getAuthenticatedUser(request);
+
+    // Verify the application belongs to the user
+    const application = await request.server.db.applicationQueue.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+      include: {
+        jobSnapshot: { select: { title: true, companyName: true } },
+      },
+    });
+
+    if (!application) {
+      return reply.code(404).send({
+        success: false,
+        error: 'Application not found',
+        errorCode: 'APPLICATION_NOT_FOUND',
+      });
+    }
+
+    // Emit WebSocket event for queue position update
+    if (request.server.websocket) {
+      request.server.websocket.emitQueuePositionUpdate(user.id, {
+        applicationId: id,
+        status: 'queued',
+        queuePosition: data.position,
+        estimatedWaitTime: data.estimatedTime,
+        isPriority: ['IMMEDIATE', 'URGENT'].includes(application.priority),
+        message: `You are #${data.position} in the queue`,
+        timestamp: data.timestamp,
+      });
+    }
+
+    return reply.send({
+      success: true,
+      message: 'Queue position update received and broadcasted',
+      data: {
+        applicationId: id,
+        position: data.position,
+        estimatedTime: data.estimatedTime,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+  } catch (error) {
+    request.server.log.error('Queue position update error:', error);
+    return reply.code(500).send({
+      success: false,
+      error: 'Internal server error',
+      errorCode: 'INTERNAL_ERROR',
+    });
+  }
+}
+
+/**
+ * POST /api/v1/queue/applications/:id/progress
+ * Update application progress from desktop automation
+ */
+async function progressUpdateHandler(request: AuthenticatedRequest, reply: FastifyReply) {
+  try {
+    const { id } = request.params as { id: string };
+    const data = request.body as any;
+    const user = getAuthenticatedUser(request);
+
+    // Verify the application belongs to the user
+    const application = await request.server.db.applicationQueue.findFirst({
+      where: {
+        id,
+        userId: user.id,
+      },
+      include: {
+        jobSnapshot: { select: { title: true, companyName: true } },
+      },
+    });
+
+    if (!application) {
+      return reply.code(404).send({
+        success: false,
+        error: 'Application not found',
+        errorCode: 'APPLICATION_NOT_FOUND',
+      });
+    }
+
+    // Update application status in database
+    await request.server.db.applicationQueue.update({
+      where: { id },
+      data: {
+        status: data.status.toUpperCase(),
+        lastProgressUpdate: new Date(),
+        automationConfig: {
+          ...application.automationConfig,
+          lastProgress: {
+            step: data.progress.step,
+            percentage: data.progress.percentage,
+            message: data.progress.message,
+            timestamp: data.progress.timestamp,
+            executionId: data.executionId,
+          },
+        },
+      },
+    });
+
+    // Emit WebSocket events for real-time updates
+    if (request.server.websocket) {
+      // Automation progress update
+      request.server.websocket.emitAutomationProgress(user.id, {
+        applicationId: id,
+        jobId: application.jobPostingId,
+        jobTitle: application.jobSnapshot?.title || 'Unknown Job',
+        company: application.jobSnapshot?.companyName || 'Unknown Company',
+        progress: {
+          step: data.progress.step,
+          percentage: data.progress.percentage,
+          message: data.progress.message,
+          timestamp: data.progress.timestamp,
+        },
+        status: data.status,
+        executionId: data.executionId,
+      });
+
+      // Application status update
+      request.server.websocket.emitApplicationStatusUpdate(user.id, {
+        applicationId: id,
+        jobId: application.jobPostingId,
+        jobTitle: application.jobSnapshot?.title || 'Unknown Job',
+        company: application.jobSnapshot?.companyName || 'Unknown Company',
+        status: data.status,
+        progress: {
+          step: data.progress.step,
+          percentage: data.progress.percentage,
+          message: data.progress.message,
+          timestamp: data.progress.timestamp,
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      // Send notification for significant progress milestones
+      if (data.progress.percentage === 100 || data.status === 'completed') {
+        request.server.websocket.emitNotification(user.id, {
+          id: randomUUID(),
+          type: 'success',
+          title: 'Application Completed',
+          message: `Successfully applied to ${application.jobSnapshot?.title} at ${application.jobSnapshot?.companyName}`,
+          applicationId: id,
+          jobId: application.jobPostingId,
+          timestamp: new Date().toISOString(),
+          duration: 8000,
+          actions: [
+            {
+              label: 'View Details',
+              action: `navigate:/applications/${id}`,
+              variant: 'primary'
+            }
+          ]
+        });
+      } else if (data.status === 'failed') {
+        request.server.websocket.emitNotification(user.id, {
+          id: randomUUID(),
+          type: 'error',
+          title: 'Application Failed',
+          message: `Failed to apply to ${application.jobSnapshot?.title}: ${data.progress.message}`,
+          applicationId: id,
+          jobId: application.jobPostingId,
+          timestamp: new Date().toISOString(),
+          duration: 10000,
+          actions: [
+            {
+              label: 'Retry',
+              action: `retry:${id}`,
+              variant: 'primary'
+            },
+            {
+              label: 'View Details',
+              action: `navigate:/applications/${id}`,
+              variant: 'secondary'
+            }
+          ]
+        });
+      }
+    }
+
+    return reply.send({
+      success: true,
+      message: 'Progress update received and broadcasted',
+      data: {
+        applicationId: id,
+        status: data.status,
+        progress: data.progress.percentage,
+        timestamp: new Date().toISOString(),
+      },
+    });
+
+  } catch (error) {
+    request.server.log.error('Progress update error:', error);
+    return reply.code(500).send({
+      success: false,
+      error: 'Internal server error',
+      errorCode: 'INTERNAL_ERROR',
+    });
+  }
+}
+
+/**
  * GET /api/v1/queue/stats
  * Get queue statistics for user
  */
@@ -1264,6 +1739,85 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
       },
     },
   }, getQueueStatsHandler);
+
+  // Progress updates from desktop app
+  fastify.post('/applications/:id/progress', {
+    schema: {
+      summary: 'Update application progress from desktop automation',
+      description: 'Receives progress updates from desktop app and broadcasts via WebSocket',
+      tags: ['Queue'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          applicationId: { type: 'string', format: 'uuid' },
+          progress: {
+            type: 'object',
+            properties: {
+              step: { type: 'string' },
+              percentage: { type: 'number', minimum: 0, maximum: 100 },
+              message: { type: 'string' },
+              timestamp: { type: 'string', format: 'date-time' },
+            },
+            required: ['step', 'percentage', 'message', 'timestamp'],
+          },
+          status: {
+            type: 'string',
+            enum: ['starting', 'processing', 'completed', 'failed', 'cancelled']
+          },
+          executionId: { type: 'string' },
+        },
+        required: ['applicationId', 'progress', 'status'],
+      },
+    },
+  }, progressUpdateHandler);
+
+  // Queue position endpoint
+  fastify.get('/applications/:id/position', {
+    schema: {
+      summary: 'Get queue position for application',
+      description: 'Returns the current position and estimated time for an application in the queue',
+      tags: ['Queue'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+    },
+  }, queuePositionHandler);
+
+  // Queue position updates from desktop app
+  fastify.post('/applications/:id/queue-position', {
+    schema: {
+      summary: 'Update queue position from desktop app',
+      description: 'Receives queue position updates from desktop app and broadcasts via WebSocket',
+      tags: ['Queue'],
+      params: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+        required: ['id'],
+      },
+      body: {
+        type: 'object',
+        properties: {
+          position: { type: 'number', minimum: 0 },
+          estimatedTime: { type: 'string' },
+          timestamp: { type: 'string', format: 'date-time' },
+        },
+        required: ['position', 'estimatedTime', 'timestamp'],
+      },
+    },
+  }, queuePositionUpdateHandler);
 }
 
 export default registerQueueRoutes;
