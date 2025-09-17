@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "module": "CommonJS",
-    "target": "ES2020",
-    "lib": ["ES2020"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": false,
@@ -18,15 +18,20 @@
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "baseUrl": ".",
+    "downlevelIteration": true,
     "noImplicitReturns": false,
     "noImplicitAny": false,
     "noImplicitThis": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@jobswipe/*": ["../../packages/*/src"],
+      "@jobswipe/shared": ["../../packages/shared/dist/index"],
       "@jobswipe/shared/server": ["../../packages/shared/dist/server"],
-      "@jobswipe/shared/browser": ["../../packages/shared/dist/browser"]
+      "@jobswipe/shared/browser": ["../../packages/shared/dist/browser"],
+      "@jobswipe/database": ["../../packages/database/dist/index"],
+      "@jobswipe/types": ["../../packages/types/dist/index"],
+      "@jobswipe/utils": ["../../packages/utils/dist/index"],
+      "@jobswipe/config": ["../../packages/config/dist/index"]
     }
   },
   "include": [
@@ -34,7 +39,6 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "../../packages/**/*"
+    "dist"
   ]
 }

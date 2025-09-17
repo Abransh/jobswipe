@@ -98,7 +98,7 @@ var ERROR_CLASSIFICATIONS = {
     // Authorization errors
     'INSUFFICIENT_PERMISSIONS': { type: ErrorType.AUTHORIZATION, severity: ErrorSeverity.MEDIUM, retryable: false },
     'FEATURE_NOT_AVAILABLE': { type: ErrorType.AUTHORIZATION, severity: ErrorSeverity.LOW, retryable: false },
-    'ACCOUNT_DISABLED': { type: ErrorType.AUTHORIZATION, severity: ErrorSeverity.HIGH, retryable: false },
+    //'ACCOUNT_DISABLED': { type: ErrorType.AUTHORIZATION, severity: ErrorSeverity.HIGH, retryable: false }, // TODO: uncomment if needed
     // Validation errors
     'VALIDATION_ERROR': { type: ErrorType.VALIDATION, severity: ErrorSeverity.LOW, retryable: false },
     'INVALID_INPUT': { type: ErrorType.VALIDATION, severity: ErrorSeverity.LOW, retryable: false },

@@ -246,18 +246,138 @@ class QueueService {
     try {
       // Test Redis connection
       await this.redisConnection.ping();
-      
+
       // Wait for queues to be ready
       await Promise.all([
         this.applicationQueue.waitUntilReady(),
         this.priorityQueue.waitUntilReady(),
       ]);
 
+      // Initialize workers
+      await this.initializeWorkers();
+
       this.isInitialized = true;
       console.log('✅ Queue service initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize queue service:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Initialize BullMQ workers for processing job applications
+   */
+  private async initializeWorkers(): Promise<void> {
+    try {
+      // Create worker for processing job applications
+      this.worker = new Worker(
+        this.config.queues.applications.name,
+        async (job) => {
+          return await this.processJobApplication(job);
+        },
+        {
+          connection: this.redisConnection,
+          concurrency: this.config.workers.concurrency,
+          maxStalledCount: this.config.workers.maxStalledCount,
+          stalledInterval: this.config.workers.stalledInterval,
+          removeOnComplete: this.config.workers.removeOnComplete,
+          removeOnFail: this.config.workers.removeOnFail,
+        }
+      );
+
+      // Setup worker event listeners
+      this.setupWorkerEventListeners();
+
+      console.log('✅ BullMQ workers initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize workers:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Setup worker event listeners for monitoring and logging
+   */
+  private setupWorkerEventListeners(): void {
+    if (!this.worker) return;
+
+    this.worker.on('ready', () => {
+      console.log('🔄 Worker is ready and waiting for jobs');
+    });
+
+    this.worker.on('active', (job) => {
+      console.log(`🏃 Worker started processing job ${job.id}`);
+    });
+
+    this.worker.on('completed', (job, result) => {
+      console.log(`✅ Worker completed job ${job.id}:`, result);
+    });
+
+    this.worker.on('failed', (job, err) => {
+      console.error(`❌ Worker failed job ${job?.id}:`, err);
+    });
+
+    this.worker.on('stalled', (jobId) => {
+      console.warn(`⚠️ Worker job ${jobId} stalled`);
+    });
+
+    this.worker.on('error', (err) => {
+      console.error('❌ Worker error:', err);
+    });
+  }
+
+  /**
+   * Process job application - main worker logic
+   */
+  private async processJobApplication(job: Job): Promise<any> {
+    const { userId, jobId, applicationId, companyAutomation, userProfile, jobData, options } = job.data;
+
+    try {
+      // Update progress
+      await job.updateProgress(10);
+
+      console.log(`🤖 Processing job application ${applicationId} for user ${userId}`);
+
+      // Simulate automation processing (replace with actual automation service calls)
+      await job.updateProgress(30);
+
+      // Here you would call the actual automation service
+      // For now, we'll simulate processing time and success/failure
+      const processingTime = Math.random() * 10000 + 5000; // 5-15 seconds
+
+      await new Promise(resolve => setTimeout(resolve, processingTime));
+      await job.updateProgress(80);
+
+      // Simulate success/failure (90% success rate)
+      const success = Math.random() > 0.1;
+
+      await job.updateProgress(100);
+
+      if (success) {
+        return {
+          success: true,
+          applicationId,
+          status: 'COMPLETED',
+          message: 'Job application submitted successfully',
+          submittedAt: new Date().toISOString(),
+          executionMode: 'desktop',
+          processingTime: Math.round(processingTime)
+        };
+      } else {
+        throw new Error('Automation failed: Unable to submit application');
+      }
+
+    } catch (error) {
+      console.error(`❌ Job application processing failed for ${applicationId}:`, error);
+
+      return {
+        success: false,
+        applicationId,
+        status: 'FAILED',
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        failedAt: new Date().toISOString(),
+        executionMode: 'desktop'
+      };
     }
   }
 

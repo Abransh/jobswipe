@@ -70,23 +70,49 @@ var swagger_ui_1 = require("@fastify/swagger-ui");
 // Import route handlers (ensure they exist first)
 function loadRoutes() {
     return __awaiter(this, void 0, void 0, function () {
-        var registerAuthRoutes, tokenExchangeRoutes, error_1;
+        var registerAuthRoutes, tokenExchangeRoutes, registerQueueRoutes, jobsRoutes, automationRoutes, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 6, , 7]);
+                    console.log('Loading enterprise authentication routes...');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./routes/auth.routes'); })];
                 case 1:
                     registerAuthRoutes = (_a.sent()).registerAuthRoutes;
+                    console.log('Auth routes loaded successfully');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./routes/token-exchange.routes'); })];
                 case 2:
                     tokenExchangeRoutes = _a.sent();
-                    return [2 /*return*/, { registerAuthRoutes: registerAuthRoutes, tokenExchangeRoutes: tokenExchangeRoutes.default }];
+                    console.log('Token exchange routes loaded successfully');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./routes/queue.routes'); })];
                 case 3:
+                    registerQueueRoutes = (_a.sent()).registerQueueRoutes;
+                    console.log('Queue routes loaded successfully');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./routes/jobs.routes'); })];
+                case 4:
+                    jobsRoutes = _a.sent();
+                    console.log('Jobs routes loaded successfully');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./routes/automation-simple.routes'); })];
+                case 5:
+                    automationRoutes = _a.sent();
+                    console.log('Automation routes loaded successfully');
+                    return [2 /*return*/, {
+                            registerAuthRoutes: registerAuthRoutes,
+                            tokenExchangeRoutes: tokenExchangeRoutes.default,
+                            registerQueueRoutes: registerQueueRoutes,
+                            jobsRoutes: jobsRoutes.default,
+                            automationRoutes: automationRoutes.automationRoutes
+                        }];
+                case 6:
                     error_1 = _a.sent();
-                    console.warn('Advanced routes not available, using basic routes');
+                    console.error('❌ Failed to load enterprise routes:', error_1);
+                    console.error('Error details:', {
+                        message: error_1 instanceof Error ? error_1.message : 'Unknown error',
+                        stack: error_1 instanceof Error ? error_1.stack : undefined,
+                    });
+                    console.warn('Falling back to basic routes');
                     return [2 /*return*/, null];
-                case 4: return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
@@ -115,38 +141,60 @@ function loadDatabase() {
 // Import plugins conditionally
 function loadPlugins() {
     return __awaiter(this, void 0, void 0, function () {
-        var securityPlugin, servicesPlugin, advancedSecurityPlugin, loggingPlugin, monitoringPlugin, error_3;
+        var securityPlugin, servicesPlugin, advancedSecurityPlugin, loggingPlugin, monitoringPlugin, queuePlugin, websocketPlugin, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
+                    _a.trys.push([0, 8, , 9]);
+                    console.log('Loading enterprise plugins...');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/security.plugin'); })];
                 case 1:
                     securityPlugin = _a.sent();
+                    console.log('Security plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/services.plugin'); })];
                 case 2:
                     servicesPlugin = _a.sent();
+                    console.log('Services plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/advanced-security.plugin'); })];
                 case 3:
                     advancedSecurityPlugin = _a.sent();
+                    console.log('Advanced security plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/logging.plugin'); })];
                 case 4:
                     loggingPlugin = _a.sent();
+                    console.log('Logging plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/monitoring.plugin'); })];
                 case 5:
                     monitoringPlugin = _a.sent();
+                    console.log('Monitoring plugin loaded');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/queue.plugin'); })];
+                case 6:
+                    queuePlugin = _a.sent();
+                    console.log('Queue plugin loaded');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/websocket.plugin'); })];
+                case 7:
+                    websocketPlugin = _a.sent();
+                    console.log('WebSocket plugin loaded');
+                    console.log('✅ All enterprise plugins loaded successfully');
                     return [2 /*return*/, {
                             securityPlugin: securityPlugin.default,
                             servicesPlugin: servicesPlugin.default,
                             advancedSecurityPlugin: advancedSecurityPlugin.default,
                             loggingPlugin: loggingPlugin.default,
                             monitoringPlugin: monitoringPlugin.default,
+                            queuePlugin: queuePlugin.default,
+                            websocketPlugin: websocketPlugin.default,
                         }];
-                case 6:
+                case 8:
                     error_3 = _a.sent();
-                    console.warn('Enterprise plugins not available, using basic security');
+                    console.error('❌ Failed to load enterprise plugins:', error_3);
+                    console.error('Error details:', {
+                        message: error_3 instanceof Error ? error_3.message : 'Unknown error',
+                        stack: error_3 instanceof Error ? error_3.stack : undefined,
+                    });
+                    console.warn('Falling back to basic security');
                     return [2 /*return*/, null];
-                case 7: return [2 /*return*/];
+                case 9: return [2 /*return*/];
             }
         });
     });
@@ -160,7 +208,15 @@ var config = {
     port: parseInt(process.env.API_PORT || '3001'),
     host: process.env.API_HOST || 'localhost',
     cors: {
-        origin: ((_a = process.env.API_CORS_ORIGIN) === null || _a === void 0 ? void 0 : _a.split(',')) || ['http://localhost:3000'],
+        origin: ((_a = process.env.API_CORS_ORIGIN) === null || _a === void 0 ? void 0 : _a.split(',')) || [
+            'http://localhost:3000', // Next.js web app
+            'http://localhost:3001', // Fastify API (self)
+            'capacitor://localhost', // Capacitor iOS/Android
+            'ionic://localhost', // Ionic apps
+            'tauri://localhost', // Tauri desktop
+            'file://', // Electron file:// protocol
+            'null' // Electron null origin
+        ],
         credentials: true,
     },
     rateLimit: {
@@ -349,10 +405,10 @@ function createServer() {
                     return [4 /*yield*/, loadPlugins()];
                 case 1:
                     plugins = _a.sent();
-                    if (!plugins) return [3 /*break*/, 10];
+                    if (!plugins) return [3 /*break*/, 12];
                     _a.label = 2;
                 case 2:
-                    _a.trys.push([2, 8, , 9]);
+                    _a.trys.push([2, 10, , 11]);
                     // Register services first (JWT, Redis, Security)
                     server.log.info('Registering enterprise services plugin...');
                     return [4 /*yield*/, server.register(plugins.servicesPlugin)];
@@ -368,66 +424,105 @@ function createServer() {
                     return [4 /*yield*/, server.register(plugins.monitoringPlugin)];
                 case 5:
                     _a.sent();
+                    // Register queue management plugin
+                    server.log.info('Registering queue management plugin...');
+                    return [4 /*yield*/, server.register(plugins.queuePlugin)];
+                case 6:
+                    _a.sent();
+                    // Register WebSocket plugin
+                    server.log.info('Registering WebSocket plugin...');
+                    return [4 /*yield*/, server.register(plugins.websocketPlugin)];
+                case 7:
+                    _a.sent();
                     // Register advanced security plugin
                     server.log.info('Registering advanced security plugin...');
                     return [4 /*yield*/, server.register(plugins.advancedSecurityPlugin)];
-                case 6:
+                case 8:
                     _a.sent();
                     // Register basic security plugin (for backwards compatibility)
                     server.log.info('Registering basic security plugin...');
                     return [4 /*yield*/, server.register(plugins.securityPlugin)];
-                case 7:
+                case 9:
                     _a.sent();
                     server.log.info('✅ All enterprise plugins registered successfully');
-                    return [3 /*break*/, 9];
-                case 8:
+                    return [3 /*break*/, 11];
+                case 10:
                     error_4 = _a.sent();
                     server.log.warn('Some enterprise plugins failed to load, continuing with basic functionality');
                     server.log.error(error_4);
-                    return [3 /*break*/, 9];
-                case 9: return [3 /*break*/, 11];
-                case 10:
+                    return [3 /*break*/, 11];
+                case 11: return [3 /*break*/, 13];
+                case 12:
                     server.log.warn('Enterprise plugins not available, using basic security headers');
-                    // Add basic security middleware as fallback
+                    _a.label = 13;
+                case 13:
+                    // Add comprehensive security headers fallback for all requests
                     server.addHook('onRequest', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
+                            // Security headers
                             reply.header('X-Content-Type-Options', 'nosniff');
                             reply.header('X-Frame-Options', 'DENY');
                             reply.header('X-XSS-Protection', '1; mode=block');
                             reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+                            // CORS debugging headers
+                            reply.header('X-API-Version', '1.0.0');
+                            reply.header('X-Request-ID', "req_".concat(Date.now(), "_").concat(Math.random().toString(36).substr(2, 9)));
                             if (process.env.NODE_ENV === 'production') {
                                 reply.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+                            }
+                            else {
+                                // Development debugging headers
+                                reply.header('X-Development-Mode', 'true');
+                                reply.header('X-Request-Time', new Date().toISOString());
                             }
                             return [2 /*return*/];
                         });
                     }); });
-                    _a.label = 11;
-                case 11: 
-                // Security headers (additional to security plugin)
-                return [4 /*yield*/, server.register(helmet_1.default, {
-                        contentSecurityPolicy: {
-                            directives: {
-                                defaultSrc: ["'self'"],
-                                styleSrc: ["'self'", "'unsafe-inline'"],
-                                scriptSrc: ["'self'"],
-                                imgSrc: ["'self'", "data:", "https:"],
-                                connectSrc: ["'self'"],
-                                fontSrc: ["'self'"],
-                                objectSrc: ["'none'"],
-                                mediaSrc: ["'self'"],
-                                frameSrc: ["'none'"],
+                    // Security headers (additional to security plugin)
+                    return [4 /*yield*/, server.register(helmet_1.default, {
+                            contentSecurityPolicy: {
+                                directives: {
+                                    defaultSrc: ["'self'"],
+                                    styleSrc: ["'self'", "'unsafe-inline'"],
+                                    scriptSrc: ["'self'"],
+                                    imgSrc: ["'self'", "data:", "https:"],
+                                    connectSrc: ["'self'"],
+                                    fontSrc: ["'self'"],
+                                    objectSrc: ["'none'"],
+                                    mediaSrc: ["'self'"],
+                                    frameSrc: ["'none'"],
+                                },
                             },
-                        },
-                        crossOriginEmbedderPolicy: false,
-                    })];
-                case 12:
+                            crossOriginEmbedderPolicy: false,
+                        })];
+                case 14:
                     // Security headers (additional to security plugin)
                     _a.sent();
-                    // CORS configuration
+                    // CORS configuration with enhanced support for desktop apps
                     return [4 /*yield*/, server.register(cors_1.default, {
-                            origin: config.cors.origin,
+                            origin: function (origin, callback) {
+                                var allowedOrigins = config.cors.origin;
+                                server.log.debug("CORS request from origin: ".concat(origin));
+                                // Allow requests with no origin (mobile apps, Electron, Postman)
+                                if (!origin) {
+                                    server.log.debug('CORS: Allowing request with no origin (mobile/desktop app)');
+                                    return callback(null, true);
+                                }
+                                // Check if origin is in allowed list
+                                if (allowedOrigins.includes(origin)) {
+                                    server.log.debug("CORS: Allowing origin: ".concat(origin));
+                                    return callback(null, true);
+                                }
+                                // Allow localhost with any port for development
+                                if (isDevelopment && origin.startsWith('http://localhost')) {
+                                    server.log.debug("CORS: Allowing localhost origin in development: ".concat(origin));
+                                    return callback(null, true);
+                                }
+                                server.log.warn("CORS: Blocking origin: ".concat(origin));
+                                callback(new Error('Not allowed by CORS'), false);
+                            },
                             credentials: config.cors.credentials,
-                            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+                            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
                             allowedHeaders: [
                                 'Origin',
                                 'X-Requested-With',
@@ -436,10 +531,24 @@ function createServer() {
                                 'Authorization',
                                 'X-CSRF-Token',
                                 'X-API-Key',
+                                'User-Agent',
+                                'X-Request-Source',
+                                'X-Device-Type',
+                                'X-App-Version',
+                                'Cache-Control',
+                                'Pragma',
+                                'Expires'
                             ],
+                            exposedHeaders: [
+                                'X-Request-ID',
+                                'X-Response-Time',
+                                'X-Rate-Limit-Remaining',
+                                'X-Rate-Limit-Reset'
+                            ],
+                            maxAge: isDevelopment ? 86400 : 3600, // 24h in dev, 1h in prod
                         })];
-                case 13:
-                    // CORS configuration
+                case 15:
+                    // CORS configuration with enhanced support for desktop apps
                     _a.sent();
                     // Rate limiting
                     return [4 /*yield*/, server.register(rate_limit_1.default, {
@@ -464,7 +573,7 @@ function createServer() {
                                 };
                             },
                         })];
-                case 14:
+                case 16:
                     // Rate limiting
                     _a.sent();
                     // File upload support
@@ -476,10 +585,10 @@ function createServer() {
                             },
                             attachFieldsToBody: true,
                         })];
-                case 15:
+                case 17:
                     // File upload support
                     _a.sent();
-                    if (!isDevelopment) return [3 /*break*/, 18];
+                    if (!isDevelopment) return [3 /*break*/, 20];
                     return [4 /*yield*/, server.register(swagger_1.default, {
                             swagger: {
                                 info: {
@@ -516,7 +625,7 @@ function createServer() {
                                 },
                             },
                         })];
-                case 16:
+                case 18:
                     _a.sent();
                     return [4 /*yield*/, server.register(swagger_ui_1.default, {
                             routePrefix: '/docs',
@@ -527,11 +636,11 @@ function createServer() {
                             staticCSP: true,
                             transformStaticCSP: function (header) { return header; },
                         })];
-                case 17:
-                    _a.sent();
-                    _a.label = 18;
-                case 18: return [4 /*yield*/, loadDatabase()];
                 case 19:
+                    _a.sent();
+                    _a.label = 20;
+                case 20: return [4 /*yield*/, loadDatabase()];
+                case 21:
                     database = _a.sent();
                     // Basic health check
                     server.get('/health', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
@@ -697,14 +806,14 @@ function createServer() {
                             return [2 /*return*/];
                         });
                     }); });
-                    apiPrefix = process.env.API_PREFIX || '/api/v1';
+                    apiPrefix = process.env.API_PREFIX || '/v1';
                     return [4 /*yield*/, loadRoutes()];
-                case 20:
+                case 22:
                     routes = _a.sent();
-                    if (!routes) return [3 /*break*/, 27];
-                    _a.label = 21;
-                case 21:
-                    _a.trys.push([21, 24, , 26]);
+                    if (!routes) return [3 /*break*/, 32];
+                    _a.label = 23;
+                case 23:
+                    _a.trys.push([23, 29, , 31]);
                     // Enterprise authentication routes
                     server.log.info('Registering enterprise authentication routes...');
                     return [4 /*yield*/, server.register(function (fastify) {
@@ -719,31 +828,57 @@ function createServer() {
                                 });
                             });
                         }, { prefix: "".concat(apiPrefix, "/auth") })];
-                case 22:
+                case 24:
                     _a.sent();
                     // Enterprise token exchange routes
                     server.log.info('Registering enterprise token exchange routes...');
                     return [4 /*yield*/, server.register(routes.tokenExchangeRoutes, { prefix: '/token-exchange' })];
-                case 23:
+                case 25:
+                    _a.sent();
+                    // Enterprise queue management routes
+                    server.log.info('Registering enterprise queue management routes...');
+                    return [4 /*yield*/, server.register(function (fastify) {
+                            return __awaiter(this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, routes.registerQueueRoutes(fastify)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            });
+                        }, { prefix: "".concat(apiPrefix, "/queue") })];
+                case 26:
+                    _a.sent();
+                    // Enterprise jobs routes
+                    server.log.info('Registering enterprise jobs routes...');
+                    return [4 /*yield*/, server.register(routes.jobsRoutes, { prefix: apiPrefix })];
+                case 27:
+                    _a.sent();
+                    // Enterprise automation routes
+                    server.log.info('Registering enterprise automation routes...');
+                    return [4 /*yield*/, server.register(routes.automationRoutes, { prefix: apiPrefix })];
+                case 28:
                     _a.sent();
                     server.log.info('✅ Enterprise routes registered successfully');
-                    return [3 /*break*/, 26];
-                case 24:
+                    return [3 /*break*/, 31];
+                case 29:
                     error_5 = _a.sent();
                     server.log.warn('Enterprise routes failed to load, registering basic routes');
                     server.log.error(error_5);
                     return [4 /*yield*/, registerBasicRoutes(server, apiPrefix)];
-                case 25:
+                case 30:
                     _a.sent();
-                    return [3 /*break*/, 26];
-                case 26: return [3 /*break*/, 29];
-                case 27:
+                    return [3 /*break*/, 31];
+                case 31: return [3 /*break*/, 34];
+                case 32:
                     server.log.warn('Enterprise routes not available, using basic authentication');
                     return [4 /*yield*/, registerBasicRoutes(server, apiPrefix)];
-                case 28:
+                case 33:
                     _a.sent();
-                    _a.label = 29;
-                case 29:
+                    _a.label = 34;
+                case 34:
                     // =============================================================================
                     // ERROR HANDLING
                     // =============================================================================

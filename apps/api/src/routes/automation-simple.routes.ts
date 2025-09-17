@@ -1,182 +1,347 @@
 /**
- * Simple Automation Routes for Testing
- * Minimal implementation to test automation trigger functionality
+ * @fileoverview Simplified Automation Routes for JobSwipe API
+ * @description Essential automation endpoints with proper error handling
+ * @version 1.0.0
+ * @author JobSwipe Team
  */
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { z } from 'zod';
 
-export async function automationRoutes(fastify: FastifyInstance) {
-  
-  /**
-   * Trigger automation from Next.js swipe-right action
-   */
-  fastify.post('/automation/trigger', {
-    schema: {
-      description: 'Trigger job application automation from web interface',
-      tags: ['automation'],
-      body: {
-        type: 'object',
-        required: ['applicationId', 'userId', 'jobData', 'userProfile', 'executionMode'],
-        properties: {
-          applicationId: { type: 'string' },
-          userId: { type: 'string' },
-          jobId: { type: 'string' },
-          jobData: {
-            type: 'object',
-            required: ['id', 'title', 'company', 'applyUrl'],
-            properties: {
-              id: { type: 'string' },
-              title: { type: 'string' },
-              company: { type: 'string' },
-              applyUrl: { type: 'string', format: 'uri' }
-            }
-          },
-          userProfile: {
-            type: 'object',
-            required: ['firstName', 'lastName', 'email'],
-            properties: {
-              id: { type: 'string' },
-              firstName: { type: 'string' },
-              lastName: { type: 'string' },
-              email: { type: 'string', format: 'email' },
-              phone: { type: 'string' }
-            }
-          },
-          executionMode: { type: 'string', enum: ['server', 'desktop'] },
-          priority: { type: 'number' }
-        }
-      }
-    },
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = request.body as any;
-        
-        fastify.log.info('🤖 Automation trigger received:', {
-          applicationId,
-          userId,
-          jobId,
-          jobTitle: jobData.title,
-          company: jobData.company,
-          executionMode
-        });
+// =============================================================================
+// SCHEMAS & VALIDATION
+// =============================================================================
 
-        // Transform data for AutomationService
-        const automationData = {
-          userId,
-          jobData: {
-            job_id: jobData.id,
-            title: jobData.title,
-            company: jobData.company,
-            apply_url: jobData.applyUrl,
-            location: jobData.location,
-            description: jobData.description
-          },
-          userProfile: {
-            first_name: userProfile.firstName,
-            last_name: userProfile.lastName,
-            email: userProfile.email,
-            phone: userProfile.phone || '',
-            resume_url: userProfile.resumeUrl,
-            current_title: userProfile.currentTitle,
-            years_experience: userProfile.yearsExperience,
-            skills: userProfile.skills || [],
-            current_location: userProfile.location,
-            work_authorization: userProfile.workAuthorization,
-            linkedin_url: userProfile.linkedinUrl
-          },
-          options: {
-            execution_mode: executionMode,
-            priority: priority || 5,
-            application_id: applicationId
-          }
-        };
+const TriggerAutomationSchema = z.object({
+  applicationId: z.string().uuid(),
+  userId: z.string().uuid(),
+  jobId: z.string().uuid(),
+  jobData: z.object({
+    id: z.string(),
+    title: z.string(),
+    company: z.string(),
+    applyUrl: z.string().url(),
+    location: z.string().optional(),
+    description: z.string().optional(),
+  }),
+  userProfile: z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string().email(),
+    phone: z.string().optional(),
+    resume: z.object({
+      url: z.string().url(),
+      content: z.string().optional(),
+    }).optional(),
+  }),
+  executionMode: z.enum(['server', 'desktop']).default('server'),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT', 'IMMEDIATE']).default('NORMAL'),
+});
 
-        // Check if AutomationService is available
-        if (!fastify.automationService) {
-          fastify.log.error('❌ AutomationService not available');
-          return reply.code(503).send({
-            success: false,
-            error: 'Automation service not available',
-            details: { serviceStatus: 'unavailable' }
-          });
-        }
+const AutomationStatusSchema = z.object({
+  applicationId: z.string().uuid(),
+  status: z.enum(['PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED']),
+  progress: z.number().min(0).max(100).optional(),
+  message: z.string().optional(),
+  executionMode: z.enum(['server', 'desktop']).optional(),
+});
 
-        // Check if ServerAutomationService is available for server execution
-        if (executionMode === 'server' && !fastify.serverAutomationService) {
-          fastify.log.warn('⚠️ ServerAutomationService not available, queuing for desktop');
-          automationData.options.execution_mode = 'desktop';
-        }
+// =============================================================================
+// ROUTE HANDLERS
+// =============================================================================
 
-        // Queue the automation
-        const result = await fastify.automationService.queueApplication(automationData);
-        
-        fastify.log.info('✅ Automation queued successfully:', {
-          automationId: result.id,
-          status: result.status,
-          executionMode: automationData.options.execution_mode
-        });
+/**
+ * Trigger job application automation
+ */
+async function triggerAutomation(
+  request: FastifyRequest<{ Body: z.infer<typeof TriggerAutomationSchema> }>,
+  reply: FastifyReply
+) {
+  try {
+    const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = request.body;
 
-        // Emit WebSocket event for real-time updates
-        if (fastify.websocket) {
-          fastify.websocket.emit('automation-queued', {
-            userId,
-            applicationId,
-            automationId: result.id,
-            status: 'queued',
-            executionMode: automationData.options.execution_mode,
-            jobTitle: jobData.title,
-            company: jobData.company,
-            timestamp: new Date().toISOString()
-          });
-        }
+    request.log.info('🤖 Automation trigger received:', {
+      applicationId,
+      userId,
+      jobId,
+      jobTitle: jobData.title,
+      company: jobData.company,
+      executionMode
+    });
 
-        reply.send({
-          success: true,
-          automationId: result.id,
-          status: result.status,
-          executionMode: automationData.options.execution_mode,
-          message: `Automation queued for ${executionMode} execution`
-        });
-
-      } catch (error) {
-        fastify.log.error('❌ Automation trigger failed:', error);
-        
-        // Determine error type for better client handling
-        let errorCode = 'AUTOMATION_ERROR';
-        let statusCode = 500;
-        
-        if (error.message?.includes('not available')) {
-          errorCode = 'SERVICE_UNAVAILABLE';
-          statusCode = 503;
-        }
-        
-        reply.code(statusCode).send({
-          success: false,
-          error: error instanceof Error ? error.message : 'Failed to trigger automation',
-          details: {
-            errorCode,
-            applicationId: (request.body as any)?.applicationId,
-            timestamp: new Date().toISOString()
-          }
-        });
-      }
-    }
-  });
-
-  /**
-   * Get automation health
-   */
-  fastify.get('/automation/health', {
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      reply.send({
-        success: true,
-        status: 'healthy',
-        servicesAvailable: {
-          automationService: !!fastify.automationService,
-          serverAutomationService: !!fastify.serverAutomationService,
-          websocket: !!fastify.websocket
-        }
+    // Check if automation service is available
+    if (!request.server.automationService) {
+      request.log.error('❌ Automation service not available');
+      return reply.code(503).send({
+        success: false,
+        error: 'Automation service not available',
+        details: { serviceStatus: 'unavailable' }
       });
     }
-  });
+
+    // Transform data for AutomationService
+    const automationData = {
+      userId,
+      jobData: {
+        job_id: jobData.id,
+        title: jobData.title,
+        company: jobData.company,
+        apply_url: jobData.applyUrl,
+        location: jobData.location,
+        description: jobData.description
+      },
+      userProfile: {
+        firstName: userProfile.firstName,
+        lastName: userProfile.lastName,
+        email: userProfile.email,
+        phone: userProfile.phone,
+        resume: userProfile.resume
+      },
+      options: {
+        execution_mode: executionMode,
+        priority: priority.toLowerCase(),
+        application_id: applicationId
+      }
+    };
+
+    // Execute automation
+    const result = await request.server.automationService.executeJobApplication(
+      automationData.jobData,
+      automationData.userProfile,
+      automationData.options
+    );
+
+    request.log.info('✅ Automation executed successfully:', {
+      applicationId,
+      status: result.status,
+      executionMode: result.executionMode
+    });
+
+    return reply.send({
+      success: true,
+      data: {
+        applicationId,
+        status: result.status,
+        executionMode: result.executionMode,
+        message: result.message,
+        progress: result.progress || 0
+      }
+    });
+
+  } catch (error) {
+    request.log.error('❌ Automation execution failed:', error);
+
+    return reply.code(500).send({
+      success: false,
+      error: 'Automation execution failed',
+      details: {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
+  }
 }
+
+/**
+ * Get automation status
+ */
+async function getAutomationStatus(
+  request: FastifyRequest<{ Params: { applicationId: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const { applicationId } = request.params;
+
+    // Check if application queue service is available
+    if (!request.server.applicationQueue) {
+      return reply.code(503).send({
+        success: false,
+        error: 'Queue service not available'
+      });
+    }
+
+    // Get application status from queue
+    const job = await request.server.applicationQueue.getJob(applicationId);
+
+    if (!job) {
+      return reply.code(404).send({
+        success: false,
+        error: 'Application not found',
+        details: { applicationId }
+      });
+    }
+
+    const status = {
+      applicationId,
+      status: job.finishedOn ? 'COMPLETED' : job.failedReason ? 'FAILED' : job.processedOn ? 'RUNNING' : 'PENDING',
+      progress: job.progress || 0,
+      executionMode: job.data?.options?.execution_mode || 'server',
+      message: job.failedReason || 'Processing...',
+      createdAt: new Date(job.timestamp),
+      updatedAt: new Date(job.processedOn || job.timestamp)
+    };
+
+    return reply.send({
+      success: true,
+      data: status
+    });
+
+  } catch (error) {
+    request.log.error('❌ Failed to get automation status:', error);
+
+    return reply.code(500).send({
+      success: false,
+      error: 'Failed to get automation status',
+      details: {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
+  }
+}
+
+/**
+ * Cancel automation
+ */
+async function cancelAutomation(
+  request: FastifyRequest<{ Params: { applicationId: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const { applicationId } = request.params;
+
+    // Check if application queue service is available
+    if (!request.server.applicationQueue) {
+      return reply.code(503).send({
+        success: false,
+        error: 'Queue service not available'
+      });
+    }
+
+    // Cancel job in queue
+    const job = await request.server.applicationQueue.getJob(applicationId);
+
+    if (!job) {
+      return reply.code(404).send({
+        success: false,
+        error: 'Application not found',
+        details: { applicationId }
+      });
+    }
+
+    // Cancel the job
+    await job.remove();
+
+    request.log.info('🚫 Automation cancelled:', { applicationId });
+
+    return reply.send({
+      success: true,
+      data: {
+        applicationId,
+        status: 'CANCELLED',
+        message: 'Automation cancelled successfully'
+      }
+    });
+
+  } catch (error) {
+    request.log.error('❌ Failed to cancel automation:', error);
+
+    return reply.code(500).send({
+      success: false,
+      error: 'Failed to cancel automation',
+      details: {
+        message: error instanceof Error ? error.message : 'Unknown error'
+      }
+    });
+  }
+}
+
+// =============================================================================
+// ROUTES REGISTRATION
+// =============================================================================
+
+export async function automationRoutes(fastify: FastifyInstance) {
+  // Trigger automation
+  fastify.post('/api/v1/automation/trigger', {
+    schema: {
+      description: 'Trigger job application automation',
+      tags: ['Automation'],
+      body: TriggerAutomationSchema,
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                applicationId: { type: 'string' },
+                status: { type: 'string' },
+                executionMode: { type: 'string' },
+                message: { type: 'string' },
+                progress: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, triggerAutomation);
+
+  // Get automation status
+  fastify.get('/api/v1/automation/status/:applicationId', {
+    schema: {
+      description: 'Get automation status',
+      tags: ['Automation'],
+      params: {
+        type: 'object',
+        properties: {
+          applicationId: { type: 'string', format: 'uuid' }
+        },
+        required: ['applicationId']
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: AutomationStatusSchema
+          }
+        }
+      }
+    }
+  }, getAutomationStatus);
+
+  // Cancel automation
+  fastify.delete('/api/v1/automation/:applicationId', {
+    schema: {
+      description: 'Cancel automation',
+      tags: ['Automation'],
+      params: {
+        type: 'object',
+        properties: {
+          applicationId: { type: 'string', format: 'uuid' }
+        },
+        required: ['applicationId']
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: {
+              type: 'object',
+              properties: {
+                applicationId: { type: 'string' },
+                status: { type: 'string' },
+                message: { type: 'string' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, cancelAutomation);
+
+  fastify.log.info('✅ Automation routes registered');
+}
+
+export default automationRoutes;

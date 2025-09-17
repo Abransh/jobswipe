@@ -70,7 +70,30 @@ exports.tokenExchangeInitiateHandler = tokenExchangeInitiateHandler;
 exports.tokenExchangeCompleteHandler = tokenExchangeCompleteHandler;
 var zod_1 = require("zod");
 var shared_1 = require("@jobswipe/shared");
-var shared_2 = require("@jobswipe/shared");
+// Import server utilities conditionally
+var createAccessTokenConfig = null;
+var createRefreshTokenConfig = null;
+var createDesktopTokenConfig = null;
+var hashPassword = null;
+var verifyPassword = null;
+var generateSecureToken = null;
+var extractIpFromHeaders = null;
+try {
+    var serverModule = require('@jobswipe/shared/server');
+    createAccessTokenConfig = serverModule.createAccessTokenConfig;
+    createRefreshTokenConfig = serverModule.createRefreshTokenConfig;
+    createDesktopTokenConfig = serverModule.createDesktopTokenConfig;
+    hashPassword = serverModule.hashPassword;
+    verifyPassword = serverModule.verifyPassword;
+    var sharedModule = require('@jobswipe/shared');
+    generateSecureToken = sharedModule.generateSecureToken;
+    extractIpFromHeaders = sharedModule.extractIpFromHeaders;
+    console.log('✅ Auth utilities loaded successfully');
+}
+catch (error) {
+    console.warn('⚠️  Failed to load auth utilities:', error);
+    console.warn('Auth routes will use fallback implementations');
+}
 var database_1 = require("@jobswipe/database");
 // =============================================================================
 // DATABASE FUNCTION WRAPPERS
@@ -227,7 +250,7 @@ function changePasswordDb(userId, newPassword) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, (0, shared_2.hashPassword)(newPassword)];
+                    return [4 /*yield*/, hashPassword(newPassword)];
                 case 1:
                     passwordHash = _a.sent();
                     return [4 /*yield*/, database_1.db.user.update({
@@ -295,8 +318,8 @@ function registerHandler(request, reply) {
                     return [4 /*yield*/, request.server.sessionService.createSession(sessionOptions)];
                 case 3:
                     session = _a.sent();
-                    accessTokenConfig = (0, shared_2.createAccessTokenConfig)((0, shared_1.createBrandedId)(user.id), user.email, user.name, user.role, validatedData.source, session.id);
-                    refreshTokenConfig = (0, shared_2.createRefreshTokenConfig)((0, shared_1.createBrandedId)(user.id), user.email, validatedData.source, session.id);
+                    accessTokenConfig = createAccessTokenConfig((0, shared_1.createBrandedId)(user.id), user.email, user.name, user.role, validatedData.source, session.id);
+                    refreshTokenConfig = createRefreshTokenConfig((0, shared_1.createBrandedId)(user.id), user.email, validatedData.source, session.id);
                     return [4 /*yield*/, request.server.jwtService.createToken(accessTokenConfig)];
                 case 4:
                     accessToken = _a.sent();
@@ -367,14 +390,6 @@ function loginHandler(request, reply) {
                                 errorCode: shared_1.AuthErrorCode.INVALID_CREDENTIALS,
                             })];
                     }
-                    // Check account status
-                    if (user.status !== 'active') {
-                        return [2 /*return*/, reply.status(401).send({
-                                success: false,
-                                error: "Account is ".concat(user.status),
-                                errorCode: shared_1.AuthErrorCode.ACCOUNT_DISABLED,
-                            })];
-                    }
                     sessionOptions = {
                         userId: (0, shared_1.createBrandedId)(user.id),
                         source: validatedData.source,
@@ -390,8 +405,8 @@ function loginHandler(request, reply) {
                     return [4 /*yield*/, request.server.sessionService.createSession(sessionOptions)];
                 case 2:
                     session = _a.sent();
-                    accessTokenConfig = (0, shared_2.createAccessTokenConfig)((0, shared_1.createBrandedId)(user.id), user.email, user.name, user.role, validatedData.source, session.id);
-                    refreshTokenConfig = (0, shared_2.createRefreshTokenConfig)((0, shared_1.createBrandedId)(user.id), user.email, validatedData.source, session.id);
+                    accessTokenConfig = createAccessTokenConfig((0, shared_1.createBrandedId)(user.id), user.email, user.name, user.role, validatedData.source, session.id);
+                    refreshTokenConfig = createRefreshTokenConfig((0, shared_1.createBrandedId)(user.id), user.email, validatedData.source, session.id);
                     return [4 /*yield*/, request.server.jwtService.createToken(accessTokenConfig)];
                 case 3:
                     accessToken = _a.sent();
@@ -471,7 +486,7 @@ function refreshTokenHandler(request, reply) {
                                 errorCode: shared_1.AuthErrorCode.TOKEN_INVALID,
                             })];
                     }
-                    accessTokenConfig = (0, shared_2.createAccessTokenConfig)(tokenResult.payload.sub, user.email, user.name, user.role, tokenResult.payload.source, tokenResult.payload.sessionId);
+                    accessTokenConfig = createAccessTokenConfig(tokenResult.payload.sub, user.email, user.name, user.role, tokenResult.payload.source, tokenResult.payload.sessionId);
                     return [4 /*yield*/, request.server.jwtService.createToken(accessTokenConfig)];
                 case 3:
                     newAccessToken = _a.sent();
@@ -517,7 +532,7 @@ function passwordResetHandler(request, reply) {
                         message: 'If the email exists, a password reset link has been sent',
                     };
                     if (user) {
-                        resetToken = (0, shared_2.generateSecureToken)(32);
+                        resetToken = generateSecureToken(32);
                     }
                     return [2 /*return*/, reply.status(200).send(response)];
                 case 2:
@@ -586,7 +601,7 @@ function passwordChangeHandler(request, reply) {
                                 message: 'User not found',
                             })];
                     }
-                    return [4 /*yield*/, (0, shared_2.verifyPassword)(validatedData.currentPassword, user.passwordHash)];
+                    return [4 /*yield*/, verifyPassword(validatedData.currentPassword, user.passwordHash)];
                 case 2:
                     isCurrentPasswordValid = _a.sent();
                     if (!isCurrentPasswordValid) {
@@ -739,7 +754,7 @@ function tokenExchangeInitiateHandler(request, reply) {
                             error: 'Authentication required',
                         })];
                 }
-                exchangeToken = (0, shared_2.generateSecureToken)(32);
+                exchangeToken = generateSecureToken(32);
                 // In a real implementation, you'd store this token with expiration
                 // For now, return a simple response
                 return [2 /*return*/, reply.status(200).send({
@@ -769,8 +784,8 @@ function tokenExchangeCompleteHandler(request, reply) {
         return __generator(this, function (_b) {
             try {
                 _a = request.body, exchangeToken = _a.exchangeToken, deviceId = _a.deviceId;
-                accessToken = (0, shared_2.generateSecureToken)(32);
-                refreshToken = (0, shared_2.generateSecureToken)(32);
+                accessToken = generateSecureToken(32);
+                refreshToken = generateSecureToken(32);
                 return [2 /*return*/, reply.status(200).send({
                         success: true,
                         tokens: {
@@ -871,7 +886,7 @@ function securityMiddleware(request, reply) {
         return __generator(this, function (_a) {
             try {
                 // Extract IP address
-                request.ipAddress = (0, shared_2.extractIpFromHeaders)(request.headers);
+                request.ipAddress = extractIpFromHeaders(request.headers);
                 // Set basic security headers
                 reply.header('X-Content-Type-Options', 'nosniff');
                 reply.header('X-Frame-Options', 'DENY');

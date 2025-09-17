@@ -1,12 +1,41 @@
 /**
  * @fileoverview Proxy Rotation Service
- * @description Smart proxy management for server-side automation
- * @version 1.0.0
+ * @description Enterprise-grade proxy management for server-side automation
+ * @version 2.0.0
  * @author JobSwipe Team
+ * @security Production-ready proxy validation and rotation
  */
 
 import { EventEmitter } from 'events';
 import { randomBytes } from 'crypto';
+import axios, { AxiosRequestConfig } from 'axios';
+import { z } from 'zod';
+import https from 'https';
+
+// =============================================================================
+// VALIDATION SCHEMAS
+// =============================================================================
+
+const ProxyConfigSchema = z.object({
+  id: z.string().optional(),
+  host: z.string().min(1, 'Host is required'),
+  port: z.number().min(1).max(65535, 'Port must be between 1 and 65535'),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  proxyType: z.enum(['residential', 'datacenter', 'mobile', 'static', 'rotating']),
+  provider: z.string().optional(),
+  country: z.string().length(2, 'Country must be 2-letter ISO code').optional(),
+  region: z.string().optional(),
+  isActive: z.boolean().default(true),
+  requestsPerHour: z.number().positive().default(100),
+  dailyLimit: z.number().positive().default(1000),
+  costPerRequest: z.number().positive().optional(),
+  monthlyLimit: z.number().positive().optional(),
+  notes: z.string().optional(),
+  tags: z.array(z.string()).default([])
+});
+
+const ProxyListSchema = z.array(ProxyConfigSchema);
 
 // =============================================================================
 // INTERFACES & TYPES
@@ -39,6 +68,27 @@ export interface ProxyConfig {
   tags: string[];
 }
 
+export interface ProxyProvider {
+  name: string;
+  apiUrl?: string;
+  apiKey?: string;
+  getProxies(): Promise<Partial<ProxyConfig>[]>;
+  validateProxy(proxy: ProxyConfig): Promise<boolean>;
+}
+
+export interface ProxyValidationResult {
+  isValid: boolean;
+  responseTime?: number;
+  error?: string;
+  ipAddress?: string;
+  location?: {
+    country: string;
+    region: string;
+    city: string;
+  };
+  anonymityLevel?: 'transparent' | 'anonymous' | 'elite';
+}
+
 export interface ProxyHealthCheck {
   proxyId: string;
   success: boolean;
@@ -60,6 +110,171 @@ export interface ProxyUsageStats {
 }
 
 // =============================================================================
+// PROXY PROVIDERS
+// =============================================================================
+
+/**
+ * BrightData (Luminati) Proxy Provider
+ */
+class BrightDataProvider implements ProxyProvider {
+  name = 'brightdata';
+
+  constructor(
+    public apiUrl: string = 'https://brightdata.com/api/v2',
+    public apiKey?: string
+  ) {}
+
+  async getProxies(): Promise<Partial<ProxyConfig>[]> {
+    // In a real implementation, this would fetch from BrightData API
+    const proxies: Partial<ProxyConfig>[] = [];
+
+    if (process.env.BRIGHTDATA_ENDPOINT) {
+      const [host, port] = process.env.BRIGHTDATA_ENDPOINT.split(':');
+      proxies.push({
+        host: host,
+        port: parseInt(port),
+        username: process.env.BRIGHTDATA_USERNAME,
+        password: process.env.BRIGHTDATA_PASSWORD,
+        proxyType: 'residential',
+        provider: 'brightdata',
+        country: process.env.BRIGHTDATA_COUNTRY || 'US',
+        requestsPerHour: 1000,
+        dailyLimit: 10000,
+        costPerRequest: 0.001,
+        tags: ['residential', 'premium']
+      });
+    }
+
+    return proxies;
+  }
+
+  async validateProxy(proxy: ProxyConfig): Promise<boolean> {
+    // Real validation would test connection through BrightData
+    return true;
+  }
+}
+
+/**
+ * SmartProxy Provider
+ */
+class SmartProxyProvider implements ProxyProvider {
+  name = 'smartproxy';
+
+  constructor(
+    public apiUrl: string = 'https://api.smartproxy.com/v1',
+    public apiKey?: string
+  ) {}
+
+  async getProxies(): Promise<Partial<ProxyConfig>[]> {
+    const proxies: Partial<ProxyConfig>[] = [];
+
+    if (process.env.SMARTPROXY_ENDPOINT) {
+      const [host, port] = process.env.SMARTPROXY_ENDPOINT.split(':');
+      proxies.push({
+        host: host,
+        port: parseInt(port),
+        username: process.env.SMARTPROXY_USERNAME,
+        password: process.env.SMARTPROXY_PASSWORD,
+        proxyType: 'residential',
+        provider: 'smartproxy',
+        country: process.env.SMARTPROXY_COUNTRY || 'US',
+        requestsPerHour: 800,
+        dailyLimit: 8000,
+        costPerRequest: 0.0015,
+        tags: ['residential', 'fast']
+      });
+    }
+
+    return proxies;
+  }
+
+  async validateProxy(proxy: ProxyConfig): Promise<boolean> {
+    return true;
+  }
+}
+
+/**
+ * ProxyMesh Provider
+ */
+class ProxyMeshProvider implements ProxyProvider {
+  name = 'proxymesh';
+
+  constructor(
+    public apiUrl: string = 'https://proxymesh.com/api',
+    public apiKey?: string
+  ) {}
+
+  async getProxies(): Promise<Partial<ProxyConfig>[]> {
+    const proxies: Partial<ProxyConfig>[] = [];
+
+    // ProxyMesh provides multiple endpoints
+    const endpoints = [
+      process.env.PROXYMESH_US_ENDPOINT,
+      process.env.PROXYMESH_UK_ENDPOINT,
+      process.env.PROXYMESH_DE_ENDPOINT
+    ].filter(Boolean);
+
+    endpoints.forEach((endpoint, index) => {
+      if (endpoint) {
+        const [host, port] = endpoint.split(':');
+        proxies.push({
+          host: host,
+          port: parseInt(port),
+          username: process.env.PROXYMESH_USERNAME,
+          password: process.env.PROXYMESH_PASSWORD,
+          proxyType: 'datacenter',
+          provider: 'proxymesh',
+          country: ['US', 'UK', 'DE'][index] || 'US',
+          requestsPerHour: 600,
+          dailyLimit: 6000,
+          costPerRequest: 0.0008,
+          tags: ['datacenter', 'reliable']
+        });
+      }
+    });
+
+    return proxies;
+  }
+
+  async validateProxy(proxy: ProxyConfig): Promise<boolean> {
+    return true;
+  }
+}
+
+/**
+ * Custom/Self-hosted Provider
+ */
+class CustomProxyProvider implements ProxyProvider {
+  name = 'custom';
+
+  async getProxies(): Promise<Partial<ProxyConfig>[]> {
+    const proxies: Partial<ProxyConfig>[] = [];
+
+    // Load custom proxies from environment variable
+    if (process.env.CUSTOM_PROXY_LIST) {
+      try {
+        const proxyList = JSON.parse(process.env.CUSTOM_PROXY_LIST);
+        const validatedProxies = ProxyListSchema.parse(proxyList);
+
+        return validatedProxies.map(proxy => ({
+          ...proxy,
+          provider: 'custom',
+          tags: [...(proxy.tags || []), 'custom']
+        }));
+      } catch (error) {
+        console.error('Failed to parse custom proxy list:', error);
+      }
+    }
+
+    return proxies;
+  }
+
+  async validateProxy(proxy: ProxyConfig): Promise<boolean> {
+    return true;
+  }
+}
+
+// =============================================================================
 // PROXY ROTATOR SERVICE
 // =============================================================================
 
@@ -67,6 +282,7 @@ export class ProxyRotator extends EventEmitter {
   private proxies: Map<string, ProxyConfig> = new Map();
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private usageResetInterval: NodeJS.Timeout | null = null;
+  private providers: Map<string, ProxyProvider> = new Map();
   private stats = {
     totalRequests: 0,
     failedRequests: 0,
@@ -75,9 +291,29 @@ export class ProxyRotator extends EventEmitter {
 
   constructor(private fastify: any) {
     super();
+
+    // Initialize proxy providers
+    this.initializeProviders();
+
+    // Start background tasks
     this.startHealthChecking();
     this.startUsageReset();
     this.loadProxiesFromDatabase();
+
+    this.fastify.log.info('🔄 ProxyRotator initialized with enhanced validation and providers');
+  }
+
+  /**
+   * Initialize proxy providers
+   */
+  private initializeProviders(): void {
+    // Initialize all available providers
+    this.providers.set('brightdata', new BrightDataProvider());
+    this.providers.set('smartproxy', new SmartProxyProvider());
+    this.providers.set('proxymesh', new ProxyMeshProvider());
+    this.providers.set('custom', new CustomProxyProvider());
+
+    this.fastify.log.info(`📡 Initialized ${this.providers.size} proxy providers: ${Array.from(this.providers.keys()).join(', ')}`);
   }
 
   // =============================================================================
@@ -85,38 +321,62 @@ export class ProxyRotator extends EventEmitter {
   // =============================================================================
 
   /**
-   * Load proxies from database
+   * Load proxies from all providers and validate them
    */
   private async loadProxiesFromDatabase(): Promise<void> {
     try {
-      // In a real implementation, this would use Prisma or database connection
-      // For now, we'll simulate with environment variables and default configs
-      
-      this.fastify.log.info('Loading proxies from database...');
+      this.fastify.log.info('🔍 Loading proxies from all providers...');
 
-      // Load from environment if available
-      const proxyList = process.env.PROXY_LIST;
-      if (proxyList) {
+      let totalLoaded = 0;
+      let totalValidated = 0;
+
+      // Load proxies from each provider
+      for (const [providerName, provider] of this.providers.entries()) {
         try {
-          const proxies = JSON.parse(proxyList);
-          for (const proxy of proxies) {
-            this.addProxy(proxy);
+          const providerProxies = await provider.getProxies();
+          let providerValidated = 0;
+
+          for (const proxyData of providerProxies) {
+            try {
+              // Validate proxy configuration with schema
+              const validatedConfig = ProxyConfigSchema.parse(proxyData);
+
+              // Add proxy to the pool
+              const proxyId = await this.addProxy(validatedConfig);
+
+              // Run health check validation in background
+              this.validateProxyAsync(proxyId);
+
+              totalLoaded++;
+              providerValidated++;
+            } catch (error) {
+              this.fastify.log.warn(`❌ Invalid proxy config from ${providerName}:`, error);
+            }
           }
+
+          this.fastify.log.info(`✅ ${providerName}: loaded ${providerValidated} proxies`);
+          totalValidated += providerValidated;
+
         } catch (error) {
-          this.fastify.log.warn('Failed to parse PROXY_LIST from environment');
+          this.fastify.log.error(`❌ Failed to load proxies from ${providerName}:`, error);
         }
       }
 
-      // Add default development proxy if none configured
+      // Add default development proxies if none loaded
       if (this.proxies.size === 0) {
+        this.fastify.log.warn('⚠️  No proxies loaded from providers, adding default development proxies');
         this.addDefaultProxies();
       }
 
-      this.fastify.log.info(`Loaded ${this.proxies.size} proxies`);
-      this.emit('proxies-loaded', this.proxies.size);
+      this.fastify.log.info(`🎯 Proxy loading complete: ${totalValidated} proxies loaded and ${this.proxies.size} total in pool`);
+      this.emit('proxies-loaded', {
+        total: this.proxies.size,
+        validated: totalValidated,
+        providers: Array.from(this.providers.keys())
+      });
 
     } catch (error) {
-      this.fastify.log.error('Failed to load proxies from database:', error);
+      this.fastify.log.error('❌ Critical error loading proxies:', error);
       this.addDefaultProxies();
     }
   }
@@ -140,6 +400,134 @@ export class ProxyRotator extends EventEmitter {
 
     for (const proxyData of defaultProxies) {
       this.addProxy(proxyData);
+    }
+  }
+
+  /**
+   * Add real proxy validation method
+   */
+  private async validateProxyAsync(proxyId: string): Promise<void> {
+    const proxy = this.proxies.get(proxyId);
+    if (!proxy) return;
+
+    try {
+      const validationResult = await this.validateProxy(proxy);
+
+      if (validationResult.isValid) {
+        proxy.successRate = Math.min(100, (proxy.successRate + 95) / 2); // Boost success rate
+        proxy.avgResponseTime = validationResult.responseTime;
+        proxy.lastCheckedAt = new Date();
+
+        this.fastify.log.debug(`✅ Proxy ${proxyId} validation passed: ${validationResult.responseTime}ms`);
+      } else {
+        proxy.failureCount++;
+        proxy.successRate = Math.max(0, proxy.successRate - 10);
+
+        if (proxy.failureCount >= 5) {
+          proxy.isActive = false;
+          this.fastify.log.warn(`❌ Proxy ${proxyId} marked inactive after ${proxy.failureCount} failures`);
+        }
+
+        this.fastify.log.debug(`⚠️  Proxy ${proxyId} validation failed: ${validationResult.error}`);
+      }
+
+      this.proxies.set(proxyId, proxy);
+    } catch (error) {
+      this.fastify.log.error(`❌ Error validating proxy ${proxyId}:`, error);
+    }
+  }
+
+  /**
+   * Validate proxy with real connection test
+   */
+  private async validateProxy(proxy: ProxyConfig): Promise<ProxyValidationResult> {
+    const startTime = Date.now();
+    const timeoutMs = 10000; // 10 seconds timeout
+
+    try {
+      // Create proxy agent configuration
+      const proxyUrl = proxy.username && proxy.password
+        ? `http://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`
+        : `http://${proxy.host}:${proxy.port}`;
+
+      // Test proxy with a quick HTTP request
+      const testUrls = [
+        'http://httpbin.org/ip',        // Returns public IP
+        'http://httpbin.org/user-agent', // Returns user agent
+        'https://api.ipify.org?format=json' // Simple IP service
+      ];
+
+      const testUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
+
+      const axiosConfig: AxiosRequestConfig = {
+        url: testUrl,
+        method: 'GET',
+        timeout: timeoutMs,
+        proxy: {
+          protocol: 'http',
+          host: proxy.host,
+          port: proxy.port,
+          auth: proxy.username && proxy.password ? {
+            username: proxy.username,
+            password: proxy.password
+          } : undefined
+        },
+        headers: {
+          'User-Agent': 'JobSwipe-ProxyValidator/1.0'
+        },
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false // Allow self-signed certs for testing
+        })
+      };
+
+      const response = await axios(axiosConfig);
+      const responseTime = Date.now() - startTime;
+
+      // Extract IP address from response
+      let ipAddress: string | undefined;
+      try {
+        const data = response.data;
+        ipAddress = typeof data === 'object' ? (data.origin || data.ip) : data.trim();
+      } catch {
+        // Ignore parsing errors
+      }
+
+      return {
+        isValid: response.status >= 200 && response.status < 300,
+        responseTime,
+        ipAddress,
+        anonymityLevel: this.detectAnonymityLevel(response.data)
+      };
+
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+
+      return {
+        isValid: false,
+        responseTime: responseTime > timeoutMs ? timeoutMs : responseTime,
+        error: error instanceof Error ? error.message : 'Unknown validation error'
+      };
+    }
+  }
+
+  /**
+   * Detect proxy anonymity level from response
+   */
+  private detectAnonymityLevel(responseData: any): 'transparent' | 'anonymous' | 'elite' {
+    // This is a simplified detection - real implementation would be more sophisticated
+    try {
+      const dataStr = JSON.stringify(responseData).toLowerCase();
+
+      // Look for headers that indicate transparency
+      if (dataStr.includes('x-forwarded-for') || dataStr.includes('x-real-ip')) {
+        return 'transparent';
+      } else if (dataStr.includes('proxy') || dataStr.includes('forwarded')) {
+        return 'anonymous';
+      } else {
+        return 'elite';
+      }
+    } catch {
+      return 'anonymous'; // Default fallback
     }
   }
 

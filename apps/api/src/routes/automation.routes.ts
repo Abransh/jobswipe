@@ -155,7 +155,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           jobTitle: jobData.title,
           company: jobData.company,
           executionMode
-        */};
+        });
 
         // Transform data for AutomationService
         const automationData = {

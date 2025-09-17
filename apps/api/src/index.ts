@@ -64,31 +64,35 @@ async function loadDatabase() {
 async function loadPlugins() {
   try {
     console.log('Loading enterprise plugins...');
-    
+
+    const databasePlugin = await import('./plugins/database.plugin');
+    console.log('Database plugin loaded');
+
     const securityPlugin = await import('./plugins/security.plugin');
     console.log('Security plugin loaded');
-    
+
     const servicesPlugin = await import('./plugins/services.plugin');
     console.log('Services plugin loaded');
-    
+
     const advancedSecurityPlugin = await import('./plugins/advanced-security.plugin');
     console.log('Advanced security plugin loaded');
-    
+
     const loggingPlugin = await import('./plugins/logging.plugin');
     console.log('Logging plugin loaded');
-    
+
     const monitoringPlugin = await import('./plugins/monitoring.plugin');
     console.log('Monitoring plugin loaded');
-    
+
     const queuePlugin = await import('./plugins/queue.plugin');
     console.log('Queue plugin loaded');
-    
+
     const websocketPlugin = await import('./plugins/websocket.plugin');
     console.log('WebSocket plugin loaded');
-    
+
     console.log('✅ All enterprise plugins loaded successfully');
-    
+
     return {
+      databasePlugin: databasePlugin.default,
       securityPlugin: securityPlugin.default,
       servicesPlugin: servicesPlugin.default,
       advancedSecurityPlugin: advancedSecurityPlugin.default,
@@ -311,6 +315,10 @@ async function createServer(): Promise<FastifyInstance> {
   
   if (plugins) {
     try {
+      // Register database connection first
+      server.log.info('Registering database plugin...');
+      await server.register(plugins.databasePlugin as any);
+
       // Register services first (JWT, Redis, Security)
       server.log.info('Registering enterprise services plugin...');
       await server.register(plugins.servicesPlugin as any);

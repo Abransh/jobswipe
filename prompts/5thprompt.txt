@@ -1,0 +1,15 @@
+now we will complete the other necessary things, so the overview of the project is like I will fill database with jobs and
+  descrtiption with stuff related to job, we will have job cards on /jobs if a user swipes right then we will initiate the
+  python scripts we have which are essentially @apps/api/src/companies/ , so the plan is we have
+  @apps/api/src/services/ProxyRotator.ts  , so when user is on web and swipes right, we will run the python scripts on server,
+  using proxy rotator, why? because if a job application is recieveing too many requests from one IP it will block our
+  requests, so we will use this proxyrotator to apply to jobs using the python scripts, but we will limit this number to 10-15
+  application after that we will ask user to download the desktop app which is essentially electron app, so the python scripts
+  will run locally and then the proxy rotation wont be there since the job application will be applied to unique user's ip so
+  it will be different, now understanding the project and understanding the part where we have build all the essential stuff
+  check out @apps/api/ and @apps/desktop/ , while desktop folder, the electron folder is not yet perfect, we have to look into
+  it.  invoke @agent-jobswipe-tech-lead and @agent-fastify-backend-specialist @agent-ai-browser-automation-specialist  , use
+  these agents to understand together what all has to be done. Also the reason desktop app and redis and bullmq exists is , if
+  user downloaded the desktop app, and if user is on web and swipes right, we will queue the application and as soon as user
+  opens desktop the app retrives all the info and job id's user applied and then executes the python job applying scripts
+  locally, you have to ultrathink and plan the next steps and find what all is missing
