@@ -591,7 +591,7 @@ class MonitoringService {
   }
 
   private findTraceIdBySpan(spanId: string): string | undefined {
-    for (const [traceId, spans] of this.traces.entries()) {
+    for (const [traceId, spans] of Array.from(this.traces.entries())) {
       if (spans.some(s => s.spanId === spanId)) {
         return traceId;
       }
@@ -622,7 +622,7 @@ class MonitoringService {
     this.businessMetrics = this.businessMetrics.filter(m => m.timestamp > cutoff);
     
     // Clean up old traces
-    for (const [traceId, spans] of this.traces.entries()) {
+    for (const [traceId, spans] of Array.from(this.traces.entries())) {
       const filteredSpans = spans.filter(s => s.startTime > cutoff);
       if (filteredSpans.length === 0) {
         this.traces.delete(traceId);

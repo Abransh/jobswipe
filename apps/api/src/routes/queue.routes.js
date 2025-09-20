@@ -351,7 +351,7 @@ function applyHandler(request, reply) {
                     logContext = {
                         correlationId: correlationId,
                         requestId: request.id || (0, crypto_1.randomUUID)(),
-                        endpoint: '/v1/queue/apply',
+                        endpoint: '/api/v1/queue/apply',
                         userAgent: request.headers['user-agent'],
                         ip: request.ip
                     };

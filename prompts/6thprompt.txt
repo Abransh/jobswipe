@@ -1,0 +1,16 @@
+
+
+First the issue is confusion between queue/apply and /jobs/{id}/swipe, the /jobs/{id}/swipe is giving 500 error, anyways this what i want to 
+  be done so i am giving you the prompt once again, to rethink recheck and re plan and see if all the required taks are done , you will avoid 
+  uncessary things to do, focus on main taks, 
+  so you were assigned with a task earlier on plan mode with prompt @prompts/5thprompt.txt , so then with the plan you created few files to fix 
+  the issues and integrate stuff .
+  \
+  \
+  so now you will read @prompts/5thprompt.txt  and understand it, and then you will make a plan to complete taks assigned in 5thprompt.txt , this
+   is a very core file tells you how things works and those api files tlls api routes, endpoints and everything. now i want you to read those 
+  files very properly, check the endpoints, check if the structure has been implemented properly, because its too many files at this moment and 
+  we have to resolve into working system as mentioned in the 5thprompt.txt , if not everything lets do one by one. i want you ultrathink like a 
+  30+ years experienced developer who is experienced in coding and also is CTO to this project. so you will perform the best. make a plan, do not
+   do things which are not required at this moment, dont do extra things, unnecessary plan, mark the high impact stuff, i wanna make sure all the
+   requirments met and app is ready to be deployed.

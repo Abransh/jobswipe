@@ -60,6 +60,19 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createServer = createServer;
 exports.start = start;
+// Load environment variables first
+var dotenv_1 = require("dotenv");
+var path_1 = require("path");
+// Load .env.local file
+var envPath = (0, path_1.resolve)(__dirname, '../.env.local');
+(0, dotenv_1.config)({ path: envPath });
+// Fallback to .env if .env.local doesn't exist
+(0, dotenv_1.config)({ path: (0, path_1.resolve)(__dirname, '../.env') });
+console.log('🔧 Environment variables loaded from:', envPath);
+console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+console.log('🔧 Database URL:', process.env.DATABASE_URL ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 Redis URL:', process.env.REDIS_URL ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 JWT Secret:', process.env.JWT_SECRET ? '[CONFIGURED]' : '[MISSING]');
 var fastify_1 = require("fastify");
 var cors_1 = require("@fastify/cors");
 var helmet_1 = require("@fastify/helmet");
@@ -141,42 +154,47 @@ function loadDatabase() {
 // Import plugins conditionally
 function loadPlugins() {
     return __awaiter(this, void 0, void 0, function () {
-        var securityPlugin, servicesPlugin, advancedSecurityPlugin, loggingPlugin, monitoringPlugin, queuePlugin, websocketPlugin, error_3;
+        var databasePlugin, securityPlugin, servicesPlugin, advancedSecurityPlugin, loggingPlugin, monitoringPlugin, queuePlugin, websocketPlugin, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 8, , 9]);
+                    _a.trys.push([0, 9, , 10]);
                     console.log('Loading enterprise plugins...');
-                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/security.plugin'); })];
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/database.plugin'); })];
                 case 1:
+                    databasePlugin = _a.sent();
+                    console.log('Database plugin loaded');
+                    return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/security.plugin'); })];
+                case 2:
                     securityPlugin = _a.sent();
                     console.log('Security plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/services.plugin'); })];
-                case 2:
+                case 3:
                     servicesPlugin = _a.sent();
                     console.log('Services plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/advanced-security.plugin'); })];
-                case 3:
+                case 4:
                     advancedSecurityPlugin = _a.sent();
                     console.log('Advanced security plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/logging.plugin'); })];
-                case 4:
+                case 5:
                     loggingPlugin = _a.sent();
                     console.log('Logging plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/monitoring.plugin'); })];
-                case 5:
+                case 6:
                     monitoringPlugin = _a.sent();
                     console.log('Monitoring plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/queue.plugin'); })];
-                case 6:
+                case 7:
                     queuePlugin = _a.sent();
                     console.log('Queue plugin loaded');
                     return [4 /*yield*/, Promise.resolve().then(function () { return require('./plugins/websocket.plugin'); })];
-                case 7:
+                case 8:
                     websocketPlugin = _a.sent();
                     console.log('WebSocket plugin loaded');
                     console.log('✅ All enterprise plugins loaded successfully');
                     return [2 /*return*/, {
+                            databasePlugin: databasePlugin.default,
                             securityPlugin: securityPlugin.default,
                             servicesPlugin: servicesPlugin.default,
                             advancedSecurityPlugin: advancedSecurityPlugin.default,
@@ -185,7 +203,7 @@ function loadPlugins() {
                             queuePlugin: queuePlugin.default,
                             websocketPlugin: websocketPlugin.default,
                         }];
-                case 8:
+                case 9:
                     error_3 = _a.sent();
                     console.error('❌ Failed to load enterprise plugins:', error_3);
                     console.error('Error details:', {
@@ -194,7 +212,7 @@ function loadPlugins() {
                     });
                     console.warn('Falling back to basic security');
                     return [2 /*return*/, null];
-                case 9: return [2 /*return*/];
+                case 10: return [2 /*return*/];
             }
         });
     });
@@ -352,7 +370,7 @@ function registerBasicRoutes(server, apiPrefix) {
                 });
             }); });
             // Basic token exchange routes
-            server.post('/token-exchange/initiate', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+            server.post("".concat(apiPrefix, "/token-exchange/initiate"), function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     return [2 /*return*/, reply.send({
                             success: true,
@@ -366,7 +384,7 @@ function registerBasicRoutes(server, apiPrefix) {
                         })];
                 });
             }); });
-            server.post('/token-exchange/complete', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
+            server.post("".concat(apiPrefix, "/token-exchange/complete"), function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
                     return [2 /*return*/, reply.send({
                             success: true,
@@ -405,57 +423,62 @@ function createServer() {
                     return [4 /*yield*/, loadPlugins()];
                 case 1:
                     plugins = _a.sent();
-                    if (!plugins) return [3 /*break*/, 12];
+                    if (!plugins) return [3 /*break*/, 13];
                     _a.label = 2;
                 case 2:
-                    _a.trys.push([2, 10, , 11]);
+                    _a.trys.push([2, 11, , 12]);
+                    // Register database connection first
+                    server.log.info('Registering database plugin...');
+                    return [4 /*yield*/, server.register(plugins.databasePlugin)];
+                case 3:
+                    _a.sent();
                     // Register services first (JWT, Redis, Security)
                     server.log.info('Registering enterprise services plugin...');
                     return [4 /*yield*/, server.register(plugins.servicesPlugin)];
-                case 3:
+                case 4:
                     _a.sent();
                     // Register enterprise logging plugin
                     server.log.info('Registering enterprise logging plugin...');
                     return [4 /*yield*/, server.register(plugins.loggingPlugin)];
-                case 4:
+                case 5:
                     _a.sent();
                     // Register monitoring and observability plugin
                     server.log.info('Registering enterprise monitoring plugin...');
                     return [4 /*yield*/, server.register(plugins.monitoringPlugin)];
-                case 5:
+                case 6:
                     _a.sent();
                     // Register queue management plugin
                     server.log.info('Registering queue management plugin...');
                     return [4 /*yield*/, server.register(plugins.queuePlugin)];
-                case 6:
+                case 7:
                     _a.sent();
                     // Register WebSocket plugin
                     server.log.info('Registering WebSocket plugin...');
                     return [4 /*yield*/, server.register(plugins.websocketPlugin)];
-                case 7:
+                case 8:
                     _a.sent();
                     // Register advanced security plugin
                     server.log.info('Registering advanced security plugin...');
                     return [4 /*yield*/, server.register(plugins.advancedSecurityPlugin)];
-                case 8:
+                case 9:
                     _a.sent();
                     // Register basic security plugin (for backwards compatibility)
                     server.log.info('Registering basic security plugin...');
                     return [4 /*yield*/, server.register(plugins.securityPlugin)];
-                case 9:
+                case 10:
                     _a.sent();
                     server.log.info('✅ All enterprise plugins registered successfully');
-                    return [3 /*break*/, 11];
-                case 10:
+                    return [3 /*break*/, 12];
+                case 11:
                     error_4 = _a.sent();
                     server.log.warn('Some enterprise plugins failed to load, continuing with basic functionality');
                     server.log.error(error_4);
-                    return [3 /*break*/, 11];
-                case 11: return [3 /*break*/, 13];
-                case 12:
-                    server.log.warn('Enterprise plugins not available, using basic security headers');
-                    _a.label = 13;
+                    return [3 /*break*/, 12];
+                case 12: return [3 /*break*/, 14];
                 case 13:
+                    server.log.warn('Enterprise plugins not available, using basic security headers');
+                    _a.label = 14;
+                case 14:
                     // Add comprehensive security headers fallback for all requests
                     server.addHook('onRequest', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -495,7 +518,7 @@ function createServer() {
                             },
                             crossOriginEmbedderPolicy: false,
                         })];
-                case 14:
+                case 15:
                     // Security headers (additional to security plugin)
                     _a.sent();
                     // CORS configuration with enhanced support for desktop apps
@@ -547,7 +570,7 @@ function createServer() {
                             ],
                             maxAge: isDevelopment ? 86400 : 3600, // 24h in dev, 1h in prod
                         })];
-                case 15:
+                case 16:
                     // CORS configuration with enhanced support for desktop apps
                     _a.sent();
                     // Rate limiting
@@ -555,9 +578,10 @@ function createServer() {
                             max: config.rateLimit.max,
                             timeWindow: config.rateLimit.timeWindow,
                             allowList: ['127.0.0.1'],
-                            redis: process.env.REDIS_URL ? {
-                                url: process.env.REDIS_URL,
-                            } : undefined,
+                            // Disable Redis for rate limiting to fix pipeline issue
+                            // redis: process.env.REDIS_URL ? {
+                            //   url: process.env.REDIS_URL,
+                            // } : undefined,
                             keyGenerator: function (request) {
                                 return request.headers['x-forwarded-for'] ||
                                     request.headers['x-real-ip'] ||
@@ -573,7 +597,7 @@ function createServer() {
                                 };
                             },
                         })];
-                case 16:
+                case 17:
                     // Rate limiting
                     _a.sent();
                     // File upload support
@@ -585,10 +609,10 @@ function createServer() {
                             },
                             attachFieldsToBody: true,
                         })];
-                case 17:
+                case 18:
                     // File upload support
                     _a.sent();
-                    if (!isDevelopment) return [3 /*break*/, 20];
+                    if (!isDevelopment) return [3 /*break*/, 21];
                     return [4 /*yield*/, server.register(swagger_1.default, {
                             swagger: {
                                 info: {
@@ -625,7 +649,7 @@ function createServer() {
                                 },
                             },
                         })];
-                case 18:
+                case 19:
                     _a.sent();
                     return [4 /*yield*/, server.register(swagger_ui_1.default, {
                             routePrefix: '/docs',
@@ -636,11 +660,11 @@ function createServer() {
                             staticCSP: true,
                             transformStaticCSP: function (header) { return header; },
                         })];
-                case 19:
+                case 20:
                     _a.sent();
-                    _a.label = 20;
-                case 20: return [4 /*yield*/, loadDatabase()];
-                case 21:
+                    _a.label = 21;
+                case 21: return [4 /*yield*/, loadDatabase()];
+                case 22:
                     database = _a.sent();
                     // Basic health check
                     server.get('/health', function (request, reply) { return __awaiter(_this, void 0, void 0, function () {
@@ -806,14 +830,14 @@ function createServer() {
                             return [2 /*return*/];
                         });
                     }); });
-                    apiPrefix = process.env.API_PREFIX || '/v1';
+                    apiPrefix = process.env.API_PREFIX || '/api/v1';
                     return [4 /*yield*/, loadRoutes()];
-                case 22:
-                    routes = _a.sent();
-                    if (!routes) return [3 /*break*/, 32];
-                    _a.label = 23;
                 case 23:
-                    _a.trys.push([23, 29, , 31]);
+                    routes = _a.sent();
+                    if (!routes) return [3 /*break*/, 33];
+                    _a.label = 24;
+                case 24:
+                    _a.trys.push([24, 30, , 32]);
                     // Enterprise authentication routes
                     server.log.info('Registering enterprise authentication routes...');
                     return [4 /*yield*/, server.register(function (fastify) {
@@ -828,12 +852,12 @@ function createServer() {
                                 });
                             });
                         }, { prefix: "".concat(apiPrefix, "/auth") })];
-                case 24:
+                case 25:
                     _a.sent();
                     // Enterprise token exchange routes
                     server.log.info('Registering enterprise token exchange routes...');
-                    return [4 /*yield*/, server.register(routes.tokenExchangeRoutes, { prefix: '/token-exchange' })];
-                case 25:
+                    return [4 /*yield*/, server.register(routes.tokenExchangeRoutes, { prefix: "".concat(apiPrefix, "/token-exchange") })];
+                case 26:
                     _a.sent();
                     // Enterprise queue management routes
                     server.log.info('Registering enterprise queue management routes...');
@@ -849,36 +873,36 @@ function createServer() {
                                 });
                             });
                         }, { prefix: "".concat(apiPrefix, "/queue") })];
-                case 26:
+                case 27:
                     _a.sent();
                     // Enterprise jobs routes
                     server.log.info('Registering enterprise jobs routes...');
                     return [4 /*yield*/, server.register(routes.jobsRoutes, { prefix: apiPrefix })];
-                case 27:
+                case 28:
                     _a.sent();
                     // Enterprise automation routes
                     server.log.info('Registering enterprise automation routes...');
                     return [4 /*yield*/, server.register(routes.automationRoutes, { prefix: apiPrefix })];
-                case 28:
+                case 29:
                     _a.sent();
                     server.log.info('✅ Enterprise routes registered successfully');
-                    return [3 /*break*/, 31];
-                case 29:
+                    return [3 /*break*/, 32];
+                case 30:
                     error_5 = _a.sent();
                     server.log.warn('Enterprise routes failed to load, registering basic routes');
                     server.log.error(error_5);
                     return [4 /*yield*/, registerBasicRoutes(server, apiPrefix)];
-                case 30:
+                case 31:
                     _a.sent();
-                    return [3 /*break*/, 31];
-                case 31: return [3 /*break*/, 34];
-                case 32:
+                    return [3 /*break*/, 32];
+                case 32: return [3 /*break*/, 35];
+                case 33:
                     server.log.warn('Enterprise routes not available, using basic authentication');
                     return [4 /*yield*/, registerBasicRoutes(server, apiPrefix)];
-                case 33:
-                    _a.sent();
-                    _a.label = 34;
                 case 34:
+                    _a.sent();
+                    _a.label = 35;
+                case 35:
                     // =============================================================================
                     // ERROR HANDLING
                     // =============================================================================

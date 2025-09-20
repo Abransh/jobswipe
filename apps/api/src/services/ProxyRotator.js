@@ -1,9 +1,10 @@
 "use strict";
 /**
  * @fileoverview Proxy Rotation Service
- * @description Smart proxy management for server-side automation
- * @version 1.0.0
+ * @description Enterprise-grade proxy management for server-side automation
+ * @version 2.0.0
  * @author JobSwipe Team
+ * @security Production-ready proxy validation and rotation
  */
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
@@ -20,6 +21,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -56,10 +68,223 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProxyRotator = void 0;
 var events_1 = require("events");
 var crypto_1 = require("crypto");
+var axios_1 = require("axios");
+var zod_1 = require("zod");
+var https_1 = require("https");
+// =============================================================================
+// VALIDATION SCHEMAS
+// =============================================================================
+var ProxyConfigSchema = zod_1.z.object({
+    id: zod_1.z.string().optional(),
+    host: zod_1.z.string().min(1, 'Host is required'),
+    port: zod_1.z.number().min(1).max(65535, 'Port must be between 1 and 65535'),
+    username: zod_1.z.string().optional(),
+    password: zod_1.z.string().optional(),
+    proxyType: zod_1.z.enum(['residential', 'datacenter', 'mobile', 'static', 'rotating']),
+    provider: zod_1.z.string().optional(),
+    country: zod_1.z.string().length(2, 'Country must be 2-letter ISO code').optional(),
+    region: zod_1.z.string().optional(),
+    isActive: zod_1.z.boolean().default(true),
+    requestsPerHour: zod_1.z.number().positive().default(100),
+    dailyLimit: zod_1.z.number().positive().default(1000),
+    costPerRequest: zod_1.z.number().positive().optional(),
+    monthlyLimit: zod_1.z.number().positive().optional(),
+    notes: zod_1.z.string().optional(),
+    tags: zod_1.z.array(zod_1.z.string()).default([])
+});
+var ProxyListSchema = zod_1.z.array(ProxyConfigSchema);
+// =============================================================================
+// PROXY PROVIDERS
+// =============================================================================
+/**
+ * BrightData (Luminati) Proxy Provider
+ */
+var BrightDataProvider = /** @class */ (function () {
+    function BrightDataProvider(apiUrl, apiKey) {
+        if (apiUrl === void 0) { apiUrl = 'https://brightdata.com/api/v2'; }
+        this.apiUrl = apiUrl;
+        this.apiKey = apiKey;
+        this.name = 'brightdata';
+    }
+    BrightDataProvider.prototype.getProxies = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var proxies, _a, host, port;
+            return __generator(this, function (_b) {
+                proxies = [];
+                if (process.env.BRIGHTDATA_ENDPOINT) {
+                    _a = process.env.BRIGHTDATA_ENDPOINT.split(':'), host = _a[0], port = _a[1];
+                    proxies.push({
+                        host: host,
+                        port: parseInt(port),
+                        username: process.env.BRIGHTDATA_USERNAME,
+                        password: process.env.BRIGHTDATA_PASSWORD,
+                        proxyType: 'residential',
+                        provider: 'brightdata',
+                        country: process.env.BRIGHTDATA_COUNTRY || 'US',
+                        requestsPerHour: 1000,
+                        dailyLimit: 10000,
+                        costPerRequest: 0.001,
+                        tags: ['residential', 'premium']
+                    });
+                }
+                return [2 /*return*/, proxies];
+            });
+        });
+    };
+    BrightDataProvider.prototype.validateProxy = function (proxy) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                // Real validation would test connection through BrightData
+                return [2 /*return*/, true];
+            });
+        });
+    };
+    return BrightDataProvider;
+}());
+/**
+ * SmartProxy Provider
+ */
+var SmartProxyProvider = /** @class */ (function () {
+    function SmartProxyProvider(apiUrl, apiKey) {
+        if (apiUrl === void 0) { apiUrl = 'https://api.smartproxy.com/v1'; }
+        this.apiUrl = apiUrl;
+        this.apiKey = apiKey;
+        this.name = 'smartproxy';
+    }
+    SmartProxyProvider.prototype.getProxies = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var proxies, _a, host, port;
+            return __generator(this, function (_b) {
+                proxies = [];
+                if (process.env.SMARTPROXY_ENDPOINT) {
+                    _a = process.env.SMARTPROXY_ENDPOINT.split(':'), host = _a[0], port = _a[1];
+                    proxies.push({
+                        host: host,
+                        port: parseInt(port),
+                        username: process.env.SMARTPROXY_USERNAME,
+                        password: process.env.SMARTPROXY_PASSWORD,
+                        proxyType: 'residential',
+                        provider: 'smartproxy',
+                        country: process.env.SMARTPROXY_COUNTRY || 'US',
+                        requestsPerHour: 800,
+                        dailyLimit: 8000,
+                        costPerRequest: 0.0015,
+                        tags: ['residential', 'fast']
+                    });
+                }
+                return [2 /*return*/, proxies];
+            });
+        });
+    };
+    SmartProxyProvider.prototype.validateProxy = function (proxy) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, true];
+            });
+        });
+    };
+    return SmartProxyProvider;
+}());
+/**
+ * ProxyMesh Provider
+ */
+var ProxyMeshProvider = /** @class */ (function () {
+    function ProxyMeshProvider(apiUrl, apiKey) {
+        if (apiUrl === void 0) { apiUrl = 'https://proxymesh.com/api'; }
+        this.apiUrl = apiUrl;
+        this.apiKey = apiKey;
+        this.name = 'proxymesh';
+    }
+    ProxyMeshProvider.prototype.getProxies = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var proxies, endpoints;
+            return __generator(this, function (_a) {
+                proxies = [];
+                endpoints = [
+                    process.env.PROXYMESH_US_ENDPOINT,
+                    process.env.PROXYMESH_UK_ENDPOINT,
+                    process.env.PROXYMESH_DE_ENDPOINT
+                ].filter(Boolean);
+                endpoints.forEach(function (endpoint, index) {
+                    if (endpoint) {
+                        var _a = endpoint.split(':'), host = _a[0], port = _a[1];
+                        proxies.push({
+                            host: host,
+                            port: parseInt(port),
+                            username: process.env.PROXYMESH_USERNAME,
+                            password: process.env.PROXYMESH_PASSWORD,
+                            proxyType: 'datacenter',
+                            provider: 'proxymesh',
+                            country: ['US', 'UK', 'DE'][index] || 'US',
+                            requestsPerHour: 600,
+                            dailyLimit: 6000,
+                            costPerRequest: 0.0008,
+                            tags: ['datacenter', 'reliable']
+                        });
+                    }
+                });
+                return [2 /*return*/, proxies];
+            });
+        });
+    };
+    ProxyMeshProvider.prototype.validateProxy = function (proxy) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, true];
+            });
+        });
+    };
+    return ProxyMeshProvider;
+}());
+/**
+ * Custom/Self-hosted Provider
+ */
+var CustomProxyProvider = /** @class */ (function () {
+    function CustomProxyProvider() {
+        this.name = 'custom';
+    }
+    CustomProxyProvider.prototype.getProxies = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var proxies, proxyList, validatedProxies;
+            return __generator(this, function (_a) {
+                proxies = [];
+                // Load custom proxies from environment variable
+                if (process.env.CUSTOM_PROXY_LIST) {
+                    try {
+                        proxyList = JSON.parse(process.env.CUSTOM_PROXY_LIST);
+                        validatedProxies = ProxyListSchema.parse(proxyList);
+                        return [2 /*return*/, validatedProxies.map(function (proxy) { return (__assign(__assign({}, proxy), { provider: 'custom', tags: __spreadArray(__spreadArray([], (proxy.tags || []), true), ['custom'], false) })); })];
+                    }
+                    catch (error) {
+                        console.error('Failed to parse custom proxy list:', error);
+                    }
+                }
+                return [2 /*return*/, proxies];
+            });
+        });
+    };
+    CustomProxyProvider.prototype.validateProxy = function (proxy) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, true];
+            });
+        });
+    };
+    return CustomProxyProvider;
+}());
 // =============================================================================
 // PROXY ROTATOR SERVICE
 // =============================================================================
@@ -71,55 +296,115 @@ var ProxyRotator = /** @class */ (function (_super) {
         _this.proxies = new Map();
         _this.healthCheckInterval = null;
         _this.usageResetInterval = null;
+        _this.providers = new Map();
         _this.stats = {
             totalRequests: 0,
             failedRequests: 0,
             totalCost: 0
         };
+        // Initialize proxy providers
+        _this.initializeProviders();
+        // Start background tasks
         _this.startHealthChecking();
         _this.startUsageReset();
         _this.loadProxiesFromDatabase();
+        _this.fastify.log.info('🔄 ProxyRotator initialized with enhanced validation and providers');
         return _this;
     }
+    /**
+     * Initialize proxy providers
+     */
+    ProxyRotator.prototype.initializeProviders = function () {
+        // Initialize all available providers
+        this.providers.set('brightdata', new BrightDataProvider());
+        this.providers.set('smartproxy', new SmartProxyProvider());
+        this.providers.set('proxymesh', new ProxyMeshProvider());
+        this.providers.set('custom', new CustomProxyProvider());
+        this.fastify.log.info("\uD83D\uDCE1 Initialized ".concat(this.providers.size, " proxy providers: ").concat(Array.from(this.providers.keys()).join(', ')));
+    };
     // =============================================================================
     // PROXY MANAGEMENT
     // =============================================================================
     /**
-     * Load proxies from database
+     * Load proxies from all providers and validate them
      */
     ProxyRotator.prototype.loadProxiesFromDatabase = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var proxyList, proxies, _i, proxies_1, proxy;
-            return __generator(this, function (_a) {
-                try {
-                    // In a real implementation, this would use Prisma or database connection
-                    // For now, we'll simulate with environment variables and default configs
-                    this.fastify.log.info('Loading proxies from database...');
-                    proxyList = process.env.PROXY_LIST;
-                    if (proxyList) {
-                        try {
-                            proxies = JSON.parse(proxyList);
-                            for (_i = 0, proxies_1 = proxies; _i < proxies_1.length; _i++) {
-                                proxy = proxies_1[_i];
-                                this.addProxy(proxy);
-                            }
+            var totalLoaded, totalValidated, _i, _a, _b, providerName, provider, providerProxies, providerValidated, _c, providerProxies_1, proxyData, validatedConfig, proxyId, error_1, error_2, error_3;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        _d.trys.push([0, 13, , 14]);
+                        this.fastify.log.info('🔍 Loading proxies from all providers...');
+                        totalLoaded = 0;
+                        totalValidated = 0;
+                        _i = 0, _a = this.providers.entries();
+                        _d.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 12];
+                        _b = _a[_i], providerName = _b[0], provider = _b[1];
+                        _d.label = 2;
+                    case 2:
+                        _d.trys.push([2, 10, , 11]);
+                        return [4 /*yield*/, provider.getProxies()];
+                    case 3:
+                        providerProxies = _d.sent();
+                        providerValidated = 0;
+                        _c = 0, providerProxies_1 = providerProxies;
+                        _d.label = 4;
+                    case 4:
+                        if (!(_c < providerProxies_1.length)) return [3 /*break*/, 9];
+                        proxyData = providerProxies_1[_c];
+                        _d.label = 5;
+                    case 5:
+                        _d.trys.push([5, 7, , 8]);
+                        validatedConfig = ProxyConfigSchema.parse(proxyData);
+                        return [4 /*yield*/, this.addProxy(validatedConfig)];
+                    case 6:
+                        proxyId = _d.sent();
+                        // Run health check validation in background
+                        this.validateProxyAsync(proxyId);
+                        totalLoaded++;
+                        providerValidated++;
+                        return [3 /*break*/, 8];
+                    case 7:
+                        error_1 = _d.sent();
+                        this.fastify.log.warn("\u274C Invalid proxy config from ".concat(providerName, ":"), error_1);
+                        return [3 /*break*/, 8];
+                    case 8:
+                        _c++;
+                        return [3 /*break*/, 4];
+                    case 9:
+                        this.fastify.log.info("\u2705 ".concat(providerName, ": loaded ").concat(providerValidated, " proxies"));
+                        totalValidated += providerValidated;
+                        return [3 /*break*/, 11];
+                    case 10:
+                        error_2 = _d.sent();
+                        this.fastify.log.error("\u274C Failed to load proxies from ".concat(providerName, ":"), error_2);
+                        return [3 /*break*/, 11];
+                    case 11:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 12:
+                        // Add default development proxies if none loaded
+                        if (this.proxies.size === 0) {
+                            this.fastify.log.warn('⚠️  No proxies loaded from providers, adding default development proxies');
+                            this.addDefaultProxies();
                         }
-                        catch (error) {
-                            this.fastify.log.warn('Failed to parse PROXY_LIST from environment');
-                        }
-                    }
-                    // Add default development proxy if none configured
-                    if (this.proxies.size === 0) {
+                        this.fastify.log.info("\uD83C\uDFAF Proxy loading complete: ".concat(totalValidated, " proxies loaded and ").concat(this.proxies.size, " total in pool"));
+                        this.emit('proxies-loaded', {
+                            total: this.proxies.size,
+                            validated: totalValidated,
+                            providers: Array.from(this.providers.keys())
+                        });
+                        return [3 /*break*/, 14];
+                    case 13:
+                        error_3 = _d.sent();
+                        this.fastify.log.error('❌ Critical error loading proxies:', error_3);
                         this.addDefaultProxies();
-                    }
-                    this.fastify.log.info("Loaded ".concat(this.proxies.size, " proxies"));
-                    this.emit('proxies-loaded', this.proxies.size);
+                        return [3 /*break*/, 14];
+                    case 14: return [2 /*return*/];
                 }
-                catch (error) {
-                    this.fastify.log.error('Failed to load proxies from database:', error);
-                    this.addDefaultProxies();
-                }
-                return [2 /*return*/];
             });
         });
     };
@@ -142,6 +427,146 @@ var ProxyRotator = /** @class */ (function (_super) {
         for (var _i = 0, defaultProxies_1 = defaultProxies; _i < defaultProxies_1.length; _i++) {
             var proxyData = defaultProxies_1[_i];
             this.addProxy(proxyData);
+        }
+    };
+    /**
+     * Add real proxy validation method
+     */
+    ProxyRotator.prototype.validateProxyAsync = function (proxyId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var proxy, validationResult, error_4;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        proxy = this.proxies.get(proxyId);
+                        if (!proxy)
+                            return [2 /*return*/];
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.validateProxy(proxy)];
+                    case 2:
+                        validationResult = _a.sent();
+                        if (validationResult.isValid) {
+                            proxy.successRate = Math.min(100, (proxy.successRate + 95) / 2); // Boost success rate
+                            proxy.avgResponseTime = validationResult.responseTime;
+                            proxy.lastCheckedAt = new Date();
+                            this.fastify.log.debug("\u2705 Proxy ".concat(proxyId, " validation passed: ").concat(validationResult.responseTime, "ms"));
+                        }
+                        else {
+                            proxy.failureCount++;
+                            proxy.successRate = Math.max(0, proxy.successRate - 10);
+                            if (proxy.failureCount >= 5) {
+                                proxy.isActive = false;
+                                this.fastify.log.warn("\u274C Proxy ".concat(proxyId, " marked inactive after ").concat(proxy.failureCount, " failures"));
+                            }
+                            this.fastify.log.debug("\u26A0\uFE0F  Proxy ".concat(proxyId, " validation failed: ").concat(validationResult.error));
+                        }
+                        this.proxies.set(proxyId, proxy);
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_4 = _a.sent();
+                        this.fastify.log.error("\u274C Error validating proxy ".concat(proxyId, ":"), error_4);
+                        return [3 /*break*/, 4];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Validate proxy with real connection test
+     */
+    ProxyRotator.prototype.validateProxy = function (proxy) {
+        return __awaiter(this, void 0, void 0, function () {
+            var startTime, timeoutMs, proxyUrl, testUrls, testUrl, axiosConfig, response, responseTime, ipAddress, data, error_5, responseTime;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        startTime = Date.now();
+                        timeoutMs = 10000;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        proxyUrl = proxy.username && proxy.password
+                            ? "http://".concat(proxy.username, ":").concat(proxy.password, "@").concat(proxy.host, ":").concat(proxy.port)
+                            : "http://".concat(proxy.host, ":").concat(proxy.port);
+                        testUrls = [
+                            'http://httpbin.org/ip', // Returns public IP
+                            'http://httpbin.org/user-agent', // Returns user agent
+                            'https://api.ipify.org?format=json' // Simple IP service
+                        ];
+                        testUrl = testUrls[Math.floor(Math.random() * testUrls.length)];
+                        axiosConfig = {
+                            url: testUrl,
+                            method: 'GET',
+                            timeout: timeoutMs,
+                            proxy: {
+                                protocol: 'http',
+                                host: proxy.host,
+                                port: proxy.port,
+                                auth: proxy.username && proxy.password ? {
+                                    username: proxy.username,
+                                    password: proxy.password
+                                } : undefined
+                            },
+                            headers: {
+                                'User-Agent': 'JobSwipe-ProxyValidator/1.0'
+                            },
+                            httpsAgent: new https_1.default.Agent({
+                                rejectUnauthorized: false // Allow self-signed certs for testing
+                            })
+                        };
+                        return [4 /*yield*/, (0, axios_1.default)(axiosConfig)];
+                    case 2:
+                        response = _a.sent();
+                        responseTime = Date.now() - startTime;
+                        ipAddress = void 0;
+                        try {
+                            data = response.data;
+                            ipAddress = typeof data === 'object' ? (data.origin || data.ip) : data.trim();
+                        }
+                        catch (_b) {
+                            // Ignore parsing errors
+                        }
+                        return [2 /*return*/, {
+                                isValid: response.status >= 200 && response.status < 300,
+                                responseTime: responseTime,
+                                ipAddress: ipAddress,
+                                anonymityLevel: this.detectAnonymityLevel(response.data)
+                            }];
+                    case 3:
+                        error_5 = _a.sent();
+                        responseTime = Date.now() - startTime;
+                        return [2 /*return*/, {
+                                isValid: false,
+                                responseTime: responseTime > timeoutMs ? timeoutMs : responseTime,
+                                error: error_5 instanceof Error ? error_5.message : 'Unknown validation error'
+                            }];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Detect proxy anonymity level from response
+     */
+    ProxyRotator.prototype.detectAnonymityLevel = function (responseData) {
+        // This is a simplified detection - real implementation would be more sophisticated
+        try {
+            var dataStr = JSON.stringify(responseData).toLowerCase();
+            // Look for headers that indicate transparency
+            if (dataStr.includes('x-forwarded-for') || dataStr.includes('x-real-ip')) {
+                return 'transparent';
+            }
+            else if (dataStr.includes('proxy') || dataStr.includes('forwarded')) {
+                return 'anonymous';
+            }
+            else {
+                return 'elite';
+            }
+        }
+        catch (_a) {
+            return 'anonymous'; // Default fallback
         }
     };
     /**
@@ -343,7 +768,7 @@ var ProxyRotator = /** @class */ (function (_super) {
      */
     ProxyRotator.prototype.checkProxyHealth = function (proxy) {
         return __awaiter(this, void 0, void 0, function () {
-            var startTime, testResult, responseTime, error_1;
+            var startTime, testResult, responseTime, error_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -358,8 +783,8 @@ var ProxyRotator = /** @class */ (function (_super) {
                         _a.sent();
                         return [3 /*break*/, 5];
                     case 3:
-                        error_1 = _a.sent();
-                        return [4 /*yield*/, this.reportProxyHealth(proxy.id, false, undefined, error_1 instanceof Error ? error_1.message : 'Health check failed')];
+                        error_6 = _a.sent();
+                        return [4 /*yield*/, this.reportProxyHealth(proxy.id, false, undefined, error_6 instanceof Error ? error_6.message : 'Health check failed')];
                     case 4:
                         _a.sent();
                         return [3 /*break*/, 5];

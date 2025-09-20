@@ -25,7 +25,7 @@ export async function POST() {
 
     console.log('📡 [Desktop API Route] Sending refresh request to backend...');
     // Forward request to Fastify API
-    const backendUrl = `${API_BASE_URL}/v1/auth/token/refresh`;
+    const backendUrl = `${API_BASE_URL}/api/v1/auth/token/refresh`;
     console.log('🌐 [Desktop API Route] Backend URL:', backendUrl);
     
     const response = await fetch(backendUrl, {

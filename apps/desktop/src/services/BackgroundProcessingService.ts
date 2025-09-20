@@ -665,7 +665,7 @@ export class BackgroundProcessingService extends EventEmitter {
       };
 
       // Send progress update to server
-      const response = await fetch(`${this.queuePollingService.getApiBaseUrl()}/v1/queue/applications/${execution.applicationId}/progress`, {
+      const response = await fetch(`${this.queuePollingService.getApiBaseUrl()}/api/v1/queue/applications/${execution.applicationId}/progress`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

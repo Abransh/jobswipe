@@ -398,3 +398,36 @@ This architecture provides **enterprise-grade reliability** with **startup-level
 
 
 this was the task assigned for you earlier 
+
+
+
+
+First the issue is confusion between queue/apply and /jobs/{id}/swipe, the /jobs/{id}/swipe is giving 500 error, anyways this what i want to 
+  be done so i am giving you the prompt once again, to rethink recheck and re plan and see if all the required taks are done , you will avoid 
+  uncessary things to do, focus on main taks, 
+  so you were assigned with a task earlier on plan mode with prompt @prompts/5thprompt.txt , so then with the plan you created few files to fix 
+  the issues and integrate stuff .
+  \
+  \
+  so now you will read @prompts/5thprompt.txt  and understand it, and then you will make a plan to complete taks assigned in 5thprompt.txt , this
+   is a very core file tells you how things works and those api files tlls api routes, endpoints and everything. now i want you to read those 
+  files very properly, check the endpoints, check if the structure has been implemented properly, because its too many files at this moment and 
+  we have to resolve into working system as mentioned in the 5thprompt.txt , if not everything lets do one by one. i want you ultrathink like a 
+  30+ years experienced developer who is experienced in coding and also is CTO to this project. so you will perform the best. make a plan, do not
+   do things which are not required at this moment, dont do extra things, unnecessary plan, mark the high impact stuff, i wanna make sure all the
+   requirments met and app is ready to be deployed.
+
+
+
+so we had a series of work as described in @prompts/6thprompt.txt and we are finally able to do a POST request to 
+  http://localhost:3001/api/v1/jobs/{id}/swipe, and we get 200 response\
+  \
+  but first i want you to examine what does api/v1/jobs/{id}/swipe this endpoint does, like what function it performs are we call 
+  this api, check the codebase
+   so the issue we have right now when i do http://localhost:3001/api/v1/jobs/c2f94a0f-9c28-4b36-82c8-79d963a27a9c/swipe i get 200 
+  but i dont see any browser automation scripts running, ultrathink where issue could be, work on if the mode is headless or 
+  heaful, keep it headfull for now, work on finding if the scripts are running if proxy is running etc etc. i want when i do a 
+  post req to /api/v1/jobs/{id}/swipe with all valid data, when you start the testing fist login with data   "email": 
+  "trynavigo@gmail.com",
+    "password": "Abranshis@2807",\
+  first check the issue, and when you think you have debugged it, then do the tests

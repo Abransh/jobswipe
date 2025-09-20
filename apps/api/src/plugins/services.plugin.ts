@@ -560,9 +560,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.decorate('serverAutomationService', serviceRegistry.get('serverAutomation'));
   fastify.decorate('automationLimits', serviceRegistry.get('automationLimits'));
   
-  if (db) {
-    fastify.decorate('db', db);
-  }
+  // Database decorator is registered by database.plugin.ts
 
   // Add service health check endpoint
   fastify.get('/health/services', {

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Construct and validate backend API URL
-    const backendUrl = `${API_BASE_URL}/v1/auth/login`;
+    const backendUrl = `${API_BASE_URL}/api/v1/auth/login`;
     console.log('🌐 [API Route] Backend URL:', backendUrl);
     console.log('🔧 [API Route] API_BASE_URL:', API_BASE_URL);
 

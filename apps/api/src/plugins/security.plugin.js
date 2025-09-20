@@ -162,14 +162,14 @@ var SecurityService = /** @class */ (function () {
     SecurityService.prototype.cleanup = function () {
         var now = new Date();
         // Clean rate limit entries
-        for (var _i = 0, _a = this.rateLimitStore.entries(); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Array.from(this.rateLimitStore.entries()); _i < _a.length; _i++) {
             var _b = _a[_i], key = _b[0], entry = _b[1];
             if (entry.resetTime <= now) {
                 this.rateLimitStore.delete(key);
             }
         }
         // Clean blocked IPs
-        for (var _c = 0, _d = this.blockedIps.entries(); _c < _d.length; _c++) {
+        for (var _c = 0, _d = Array.from(this.blockedIps.entries()); _c < _d.length; _c++) {
             var _e = _d[_c], ip = _e[0], blockInfo = _e[1];
             if (blockInfo.expiresAt <= now) {
                 this.blockedIps.delete(ip);

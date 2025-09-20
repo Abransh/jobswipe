@@ -214,14 +214,14 @@ class SecurityService {
     const now = new Date();
     
     // Clean rate limit entries
-    for (const [key, entry] of this.rateLimitStore.entries()) {
+    for (const [key, entry] of Array.from(this.rateLimitStore.entries())) {
       if (entry.resetTime <= now) {
         this.rateLimitStore.delete(key);
       }
     }
 
     // Clean blocked IPs
-    for (const [ip, blockInfo] of this.blockedIps.entries()) {
+    for (const [ip, blockInfo] of Array.from(this.blockedIps.entries())) {
       if (blockInfo.expiresAt <= now) {
         this.blockedIps.delete(ip);
       }

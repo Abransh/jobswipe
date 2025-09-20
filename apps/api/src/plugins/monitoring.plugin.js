@@ -429,7 +429,7 @@ var MonitoringService = /** @class */ (function () {
         return this.requestMetrics.filter(function (m) { return m.timestamp > cutoff && m.url.includes('/auth/login') && m.statusCode === 401; }).length;
     };
     MonitoringService.prototype.findTraceIdBySpan = function (spanId) {
-        for (var _i = 0, _a = this.traces.entries(); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Array.from(this.traces.entries()); _i < _a.length; _i++) {
             var _b = _a[_i], traceId = _b[0], spans = _b[1];
             if (spans.some(function (s) { return s.spanId === spanId; })) {
                 return traceId;
@@ -454,7 +454,7 @@ var MonitoringService = /** @class */ (function () {
         this.systemMetrics = this.systemMetrics.filter(function (m) { return m.timestamp > cutoff; });
         this.businessMetrics = this.businessMetrics.filter(function (m) { return m.timestamp > cutoff; });
         // Clean up old traces
-        for (var _i = 0, _a = this.traces.entries(); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Array.from(this.traces.entries()); _i < _a.length; _i++) {
             var _b = _a[_i], traceId = _b[0], spans = _b[1];
             var filteredSpans = spans.filter(function (s) { return s.startTime > cutoff; });
             if (filteredSpans.length === 0) {

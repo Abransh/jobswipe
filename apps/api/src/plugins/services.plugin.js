@@ -554,9 +554,7 @@ var servicesPlugin = function (fastify) { return __awaiter(void 0, void 0, void 
                 fastify.decorate('proxyRotator', serviceRegistry.get('proxyRotator'));
                 fastify.decorate('serverAutomationService', serviceRegistry.get('serverAutomation'));
                 fastify.decorate('automationLimits', serviceRegistry.get('automationLimits'));
-                if (db) {
-                    fastify.decorate('db', db);
-                }
+                // Database decorator is registered by database.plugin.ts
                 // Add service health check endpoint
                 fastify.get('/health/services', {
                     schema: {

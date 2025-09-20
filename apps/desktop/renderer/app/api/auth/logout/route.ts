@@ -19,7 +19,7 @@ export async function POST() {
     if (accessToken) {
       try {
         console.log('📡 [Desktop API Route] Calling backend logout...');
-        await fetch(`${API_BASE_URL}/v1/auth/logout`, {
+        await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`,

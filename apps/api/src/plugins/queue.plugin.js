@@ -189,7 +189,7 @@ var QueueService = /** @class */ (function () {
                             return [2 /*return*/];
                         _a.label = 1;
                     case 1:
-                        _a.trys.push([1, 4, , 5]);
+                        _a.trys.push([1, 5, , 6]);
                         // Test Redis connection
                         return [4 /*yield*/, this.redisConnection.ping()];
                     case 2:
@@ -203,14 +203,146 @@ var QueueService = /** @class */ (function () {
                     case 3:
                         // Wait for queues to be ready
                         _a.sent();
+                        // Initialize workers
+                        return [4 /*yield*/, this.initializeWorkers()];
+                    case 4:
+                        // Initialize workers
+                        _a.sent();
                         this.isInitialized = true;
                         console.log('✅ Queue service initialized successfully');
-                        return [3 /*break*/, 5];
-                    case 4:
+                        return [3 /*break*/, 6];
+                    case 5:
                         error_2 = _a.sent();
                         console.error('❌ Failed to initialize queue service:', error_2);
                         throw error_2;
-                    case 5: return [2 /*return*/];
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Initialize BullMQ workers for processing job applications
+     */
+    QueueService.prototype.initializeWorkers = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                try {
+                    // Create worker for processing job applications
+                    this.worker = new bullmq_1.Worker(this.config.queues.applications.name, function (job) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.processJobApplication(job)];
+                                case 1: return [2 /*return*/, _a.sent()];
+                            }
+                        });
+                    }); }, {
+                        connection: this.redisConnection,
+                        concurrency: this.config.workers.concurrency,
+                        maxStalledCount: this.config.workers.maxStalledCount,
+                        stalledInterval: this.config.workers.stalledInterval,
+                        removeOnComplete: { count: this.config.workers.removeOnComplete },
+                        removeOnFail: { count: this.config.workers.removeOnFail },
+                    });
+                    // Setup worker event listeners
+                    this.setupWorkerEventListeners();
+                    console.log('✅ BullMQ workers initialized successfully');
+                }
+                catch (error) {
+                    console.error('❌ Failed to initialize workers:', error);
+                    throw error;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * Setup worker event listeners for monitoring and logging
+     */
+    QueueService.prototype.setupWorkerEventListeners = function () {
+        if (!this.worker)
+            return;
+        this.worker.on('ready', function () {
+            console.log('🔄 Worker is ready and waiting for jobs');
+        });
+        this.worker.on('active', function (job) {
+            console.log("\uD83C\uDFC3 Worker started processing job ".concat(job.id));
+        });
+        this.worker.on('completed', function (job, result) {
+            console.log("\u2705 Worker completed job ".concat(job.id, ":"), result);
+        });
+        this.worker.on('failed', function (job, err) {
+            console.error("\u274C Worker failed job ".concat(job === null || job === void 0 ? void 0 : job.id, ":"), err);
+        });
+        this.worker.on('stalled', function (jobId) {
+            console.warn("\u26A0\uFE0F Worker job ".concat(jobId, " stalled"));
+        });
+        this.worker.on('error', function (err) {
+            console.error('❌ Worker error:', err);
+        });
+    };
+    /**
+     * Process job application - main worker logic
+     */
+    QueueService.prototype.processJobApplication = function (job) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, userId, jobId, applicationId, companyAutomation, userProfile, jobData, options, processingTime_1, success, error_3;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = job.data, userId = _a.userId, jobId = _a.jobId, applicationId = _a.applicationId, companyAutomation = _a.companyAutomation, userProfile = _a.userProfile, jobData = _a.jobData, options = _a.options;
+                        _b.label = 1;
+                    case 1:
+                        _b.trys.push([1, 7, , 8]);
+                        // Update progress
+                        return [4 /*yield*/, job.updateProgress(10)];
+                    case 2:
+                        // Update progress
+                        _b.sent();
+                        console.log("\uD83E\uDD16 Processing job application ".concat(applicationId, " for user ").concat(userId));
+                        // Simulate automation processing (replace with actual automation service calls)
+                        return [4 /*yield*/, job.updateProgress(30)];
+                    case 3:
+                        // Simulate automation processing (replace with actual automation service calls)
+                        _b.sent();
+                        processingTime_1 = Math.random() * 10000 + 5000;
+                        return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, processingTime_1); })];
+                    case 4:
+                        _b.sent();
+                        return [4 /*yield*/, job.updateProgress(80)];
+                    case 5:
+                        _b.sent();
+                        success = Math.random() > 0.1;
+                        return [4 /*yield*/, job.updateProgress(100)];
+                    case 6:
+                        _b.sent();
+                        if (success) {
+                            return [2 /*return*/, {
+                                    success: true,
+                                    applicationId: applicationId,
+                                    status: 'COMPLETED',
+                                    message: 'Job application submitted successfully',
+                                    submittedAt: new Date().toISOString(),
+                                    executionMode: 'desktop',
+                                    processingTime: Math.round(processingTime_1)
+                                }];
+                        }
+                        else {
+                            throw new Error('Automation failed: Unable to submit application');
+                        }
+                        return [3 /*break*/, 8];
+                    case 7:
+                        error_3 = _b.sent();
+                        console.error("\u274C Job application processing failed for ".concat(applicationId, ":"), error_3);
+                        return [2 /*return*/, {
+                                success: false,
+                                applicationId: applicationId,
+                                status: 'FAILED',
+                                message: error_3 instanceof Error ? error_3.message : 'Unknown error occurred',
+                                failedAt: new Date().toISOString(),
+                                executionMode: 'desktop'
+                            }];
+                    case 8: return [2 /*return*/];
                 }
             });
         });
@@ -220,7 +352,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.addJobApplication = function (data_1) {
         return __awaiter(this, arguments, void 0, function (data, isPriority) {
-            var queue, jobOptions, job, error_3;
+            var queue, jobOptions, job, error_4;
             if (isPriority === void 0) { isPriority = false; }
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -249,9 +381,9 @@ var QueueService = /** @class */ (function () {
                         console.log("Job application queued: ".concat(job.id, " for user ").concat(data.userId));
                         return [2 /*return*/, job.id];
                     case 3:
-                        error_3 = _a.sent();
-                        console.error('Failed to add job application to queue:', error_3);
-                        throw error_3;
+                        error_4 = _a.sent();
+                        console.error('Failed to add job application to queue:', error_4);
+                        throw error_4;
                     case 4: return [2 /*return*/];
                 }
             });
@@ -262,7 +394,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.getJobStatus = function (jobId) {
         return __awaiter(this, void 0, void 0, function () {
-            var job, state, progress, result, failedReason, error_4;
+            var job, state, progress, result, failedReason, error_5;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -299,8 +431,8 @@ var QueueService = /** @class */ (function () {
                                 completedAt: job.finishedOn ? new Date(job.finishedOn) : undefined,
                             }];
                     case 5:
-                        error_4 = _a.sent();
-                        console.error('Failed to get job status:', error_4);
+                        error_5 = _a.sent();
+                        console.error('Failed to get job status:', error_5);
                         return [2 /*return*/, null];
                     case 6: return [2 /*return*/];
                 }
@@ -312,7 +444,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.getQueueStats = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, appStats, priorityStats, error_5;
+            var _a, appStats, priorityStats, error_6;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -335,9 +467,9 @@ var QueueService = /** @class */ (function () {
                                 },
                             }];
                     case 2:
-                        error_5 = _b.sent();
-                        console.error('Failed to get queue statistics:', error_5);
-                        throw error_5;
+                        error_6 = _b.sent();
+                        console.error('Failed to get queue statistics:', error_6);
+                        throw error_6;
                     case 3: return [2 /*return*/];
                 }
             });
@@ -348,7 +480,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.getUserApplications = function (userId_1) {
         return __awaiter(this, arguments, void 0, function (userId, limit) {
-            var _a, appJobs, priorityJobs, allJobs, applications, _i, allJobs_1, job, status_1, error_6;
+            var _a, appJobs, priorityJobs, allJobs, applications, _i, allJobs_1, job, status_1, error_7;
             if (limit === void 0) { limit = 50; }
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -381,8 +513,8 @@ var QueueService = /** @class */ (function () {
                     // Sort by creation date (newest first)
                     return [2 /*return*/, applications.sort(function (a, b) { return b.createdAt.getTime() - a.createdAt.getTime(); })];
                     case 6:
-                        error_6 = _b.sent();
-                        console.error('Failed to get user applications:', error_6);
+                        error_7 = _b.sent();
+                        console.error('Failed to get user applications:', error_7);
                         return [2 /*return*/, []];
                     case 7: return [2 /*return*/];
                 }
@@ -394,7 +526,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.cancelJobApplication = function (jobId) {
         return __awaiter(this, void 0, void 0, function () {
-            var job, error_7;
+            var job, error_8;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -417,8 +549,8 @@ var QueueService = /** @class */ (function () {
                         console.log("Job application cancelled: ".concat(jobId));
                         return [2 /*return*/, true];
                     case 5:
-                        error_7 = _a.sent();
-                        console.error('Failed to cancel job application:', error_7);
+                        error_8 = _a.sent();
+                        console.error('Failed to cancel job application:', error_8);
                         return [2 /*return*/, false];
                     case 6: return [2 /*return*/];
                 }
@@ -430,7 +562,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.getHealthStatus = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var ping, stats, error_8;
+            var ping, stats, error_9;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -454,11 +586,11 @@ var QueueService = /** @class */ (function () {
                                 },
                             }];
                     case 3:
-                        error_8 = _a.sent();
+                        error_9 = _a.sent();
                         return [2 /*return*/, {
                                 status: 'unhealthy',
                                 details: {
-                                    error: error_8 instanceof Error ? error_8.message : 'Unknown error',
+                                    error: error_9 instanceof Error ? error_9.message : 'Unknown error',
                                     initialized: this.isInitialized,
                                 },
                             }];
@@ -472,7 +604,7 @@ var QueueService = /** @class */ (function () {
      */
     QueueService.prototype.shutdown = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var error_9;
+            var error_10;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -508,8 +640,8 @@ var QueueService = /** @class */ (function () {
                         console.log('Queue service shut down successfully');
                         return [3 /*break*/, 8];
                     case 7:
-                        error_9 = _a.sent();
-                        console.error('Error shutting down queue service:', error_9);
+                        error_10 = _a.sent();
+                        console.error('Error shutting down queue service:', error_10);
                         return [3 /*break*/, 8];
                     case 8: return [2 /*return*/];
                 }
@@ -551,7 +683,7 @@ exports.QueueService = QueueService;
 // QUEUE PLUGIN
 // =============================================================================
 var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, function () {
-    var config, queueService, error_10;
+    var config, queueService, error_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -617,9 +749,9 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                 fastify.log.info('✅ Queue Management Service initialized successfully');
                 return [3 /*break*/, 4];
             case 3:
-                error_10 = _a.sent();
-                fastify.log.error('❌ Failed to initialize Queue Management Service:', error_10);
-                throw error_10;
+                error_11 = _a.sent();
+                fastify.log.error('❌ Failed to initialize Queue Management Service:', error_11);
+                throw error_11;
             case 4:
                 // =============================================================================
                 // REGISTER WITH FASTIFY
@@ -656,7 +788,7 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                         },
                     },
                 }, function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-                    var health, statusCode, error_11;
+                    var health, statusCode, error_12;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -671,11 +803,11 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                                         queue: health.details,
                                     })];
                             case 2:
-                                error_11 = _a.sent();
+                                error_12 = _a.sent();
                                 return [2 /*return*/, reply.code(503).send({
                                         status: 'unhealthy',
                                         timestamp: new Date().toISOString(),
-                                        error: error_11 instanceof Error ? error_11.message : 'Queue health check failed',
+                                        error: error_12 instanceof Error ? error_12.message : 'Queue health check failed',
                                     })];
                             case 3: return [2 /*return*/];
                         }
@@ -697,7 +829,7 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                         },
                     },
                 }, function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-                    var stats, error_12;
+                    var stats, error_13;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
@@ -710,9 +842,9 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                                         stats: stats,
                                     })];
                             case 2:
-                                error_12 = _a.sent();
+                                error_13 = _a.sent();
                                 return [2 /*return*/, reply.code(500).send({
-                                        error: error_12 instanceof Error ? error_12.message : 'Failed to get queue stats',
+                                        error: error_13 instanceof Error ? error_13.message : 'Failed to get queue stats',
                                         timestamp: new Date().toISOString(),
                                     })];
                             case 3: return [2 /*return*/];

@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const backendUrl = process.env.API_BASE_URL || 'http://localhost:3001';
     
     // Forward the request to the backend API
-    const url = new URL('/v1/jobs', backendUrl);
+    const url = new URL('/api/v1/jobs', backendUrl);
     
     // Copy all search parameters to the backend request
     searchParams.forEach((value, key) => {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     
     console.log('🔗 [Desktop Jobs API] Proxying POST request to backend');
     
-    const response = await fetch(`${backendUrl}/v1/jobs`, {
+    const response = await fetch(`${backendUrl}/api/v1/jobs`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

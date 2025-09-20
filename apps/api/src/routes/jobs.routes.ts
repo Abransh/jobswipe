@@ -143,6 +143,39 @@ async function authenticateUser(request: any, reply: any) {
   }
 }
 
+/**
+ * Detect company automation type based on URL patterns
+ */
+function detectCompanyAutomation(url: string): string {
+  const urlLower = url.toLowerCase();
+
+  // Common job site patterns
+  const patterns = {
+    'linkedin': ['linkedin.com/jobs', 'linkedin.com/in/'],
+    'indeed': ['indeed.com'],
+    'glassdoor': ['glassdoor.com'],
+    'monster': ['monster.com'],
+    'ziprecruiter': ['ziprecruiter.com'],
+    'dice': ['dice.com'],
+    'stackoverflow': ['stackoverflow.com/jobs'],
+    'angellist': ['angel.co', 'wellfound.com'],
+    'greenhouse': ['greenhouse.io'],
+    'lever': ['lever.co'],
+    'workday': ['myworkdayjobs.com', 'workday.com'],
+    'bamboohr': ['bamboohr.com'],
+    'jobvite': ['jobvite.com'],
+    'smartrecruiters': ['smartrecruiters.com']
+  };
+
+  for (const [company, urls] of Object.entries(patterns)) {
+    if (urls.some(pattern => urlLower.includes(pattern))) {
+      return company;
+    }
+  }
+
+  return 'generic';
+}
+
 const jobsRoutes: FastifyPluginAsync = async function (fastify) {
   const jobService = new JobService(fastify);
 
@@ -406,7 +439,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
         type: 'object',
         properties: {
           direction: { type: 'string', enum: ['LEFT', 'RIGHT'] },
-          resumeId: { type: 'string', format: 'uuid' },
+        
           coverLetter: { type: 'string', maxLength: 2000 },
           priority: { type: 'integer', minimum: 1, maximum: 10, default: 5 },
           customFields: { type: 'object', additionalProperties: { type: 'string' } },
@@ -417,7 +450,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               deviceId: { type: 'string' },
               userAgent: { type: 'string' },
               ipAddress: { type: 'string' },
-              timestamp: { type: 'string', format: 'date-time' },
+            
             },
           },
         },
@@ -463,25 +496,36 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
         message: 'Job swipe request started'
       });
 
+      // Extract job ID from params
+      console.log('DEBUG: request.params =', request.params);
+      console.log('DEBUG: request.url =', request.url);
       const { id: jobId } = request.params as { id: string };
-      const data = JobSwipeRequestSchema.parse({
-        ...request.body,
-        jobId, // Override with URL parameter
-      });
+      console.log('DEBUG: extracted jobId =', jobId);
+
+      if (!jobId) {
+        return reply.code(400).send({
+          success: false,
+          error: 'Job ID is required',
+          errorCode: 'MISSING_JOB_ID',
+          correlationId,
+        });
+      }
+
+      const data = JobSwipeRequestSchema.parse(request.body);
       const user = getAuthenticatedUser(request);
 
       const enhancedLogContext = {
         ...logContext,
         userId: user.id,
         userEmail: user.email,
-        jobId: data.jobId,
+        jobId: jobId,
         swipeDirection: data.direction,
         source: data.metadata.source,
       };
 
       // Verify job exists and is active
       const jobPosting = await fastify.db.jobPosting.findUnique({
-        where: { id: data.jobId },
+        where: { id: jobId },
         include: { company: true },
       });
 
@@ -522,7 +566,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
         where: {
           userId_jobPostingId: {
             userId: user.id,
-            jobPostingId: data.jobId,
+            jobPostingId: jobId,
           },
         },
       });
@@ -533,7 +577,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           where: {
             userId_jobPostingId: {
               userId: user.id,
-              jobPostingId: data.jobId,
+              jobPostingId: jobId,
             },
           },
           update: {
@@ -543,7 +587,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           },
           create: {
             userId: user.id,
-            jobPostingId: data.jobId,
+            jobPostingId: jobId,
             direction: 'LEFT',
             deviceType: data.metadata.source,
             sessionId: data.metadata.deviceId,
@@ -563,7 +607,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           success: true,
           message: 'Left swipe recorded',
           data: {
-            jobId: data.jobId,
+            jobId: jobId,
             direction: 'LEFT',
             action: 'recorded',
             processingTime: Date.now() - startTime,
@@ -593,7 +637,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
 
         // Transform swipe data to match existing /v1/queue/apply schema
         const queueApplyData = {
-          jobId: data.jobId,
+          jobId: jobId,
           resumeId: data.resumeId,
           coverLetter: data.coverLetter,
           priority: data.priority || 5,
@@ -638,7 +682,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
             where: {
               userId_jobPostingId: {
                 userId: user.id,
-                jobPostingId: data.jobId,
+                jobPostingId: jobId,
               },
             },
             update: {
@@ -648,7 +692,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
             },
             create: {
               userId: user.id,
-              jobPostingId: data.jobId,
+              jobPostingId: jobId,
               direction: 'RIGHT',
               deviceType: data.metadata.source,
               sessionId: data.metadata.deviceId,
@@ -665,30 +709,114 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               message: 'Starting immediate server automation for right swipe',
             });
 
-            // This would trigger the full automation logic
-            // For now, return a success response indicating server automation
-            return reply.send({
-              success: true,
-              message: 'Right swipe processed - server automation triggered',
-              data: {
-                jobId: data.jobId,
-                direction: 'RIGHT',
-                action: 'automated_immediately',
-                executionMode: 'server',
-                serverAutomation: {
-                  eligible: true,
-                  remainingServerApplications: serverEligibility.remainingServerApplications - 1,
-                },
-                processingTime: Date.now() - startTime,
-              },
-              correlationId,
+            // Get user's profile data for automation
+            const userProfile = await fastify.db.userProfile.findUnique({
+              where: { userId: user.id },
             });
-          } else {
-            // Queue for desktop processing
-            const queueEntry = await fastify.db.applicationQueue.create({
+
+            // Detect company automation type based on URL patterns
+            const companyAutomation = detectCompanyAutomation(jobPosting.externalUrl || jobPosting.applyUrl || '');
+
+            // Prepare server automation request
+            const serverRequest = {
+              userId: user.id,
+              jobId: jobId,
+              applicationId: randomUUID(),
+              companyAutomation,
+              userProfile: {
+                firstName: userProfile?.firstName || '',
+                lastName: userProfile?.lastName || '',
+                email: user.email,
+                phone: userProfile?.phone || '',
+                resumeUrl: userProfile?.website || '',
+                currentTitle: userProfile?.currentTitle || '',
+                yearsExperience: userProfile?.yearsOfExperience || 0,
+                skills: userProfile?.skills || [],
+                currentLocation: userProfile?.location || '',
+                linkedinUrl: userProfile?.linkedin || '',
+                workAuthorization: userProfile?.workAuthorization || '',
+                coverLetter: data.coverLetter,
+                customFields: data.customFields || {}
+              },
+              jobData: {
+                id: jobId,
+                title: jobPosting.title,
+                company: jobPosting.company.name,
+                applyUrl: jobPosting.externalUrl || jobPosting.applyUrl || '',
+                location: jobPosting.location,
+                description: jobPosting.description,
+                requirements: Array.isArray(jobPosting.requirements) ? jobPosting.requirements : []
+              },
+              options: {
+                headless: false, // User requested headful mode by default
+                timeout: 300000, // 5 minutes
+                maxRetries: 2
+              }
+            };
+
+            try {
+              // Execute server automation
+              const automationResult = await fastify.serverAutomationService.executeAutomation(serverRequest, correlationId);
+
+              // Record server application usage
+              await fastify.automationLimits?.recordServerApplication(user.id);
+
+              fastify.log.info({
+                ...enhancedLogContext,
+                event: 'server_automation_completed',
+                message: 'Server automation completed from swipe',
+                success: automationResult.success,
+                processingTime: Date.now() - startTime
+              });
+
+              // Return immediate server automation result
+              return reply.send({
+                success: true,
+                message: 'Right swipe processed - server automation completed',
+                data: {
+                  jobId: jobId,
+                  direction: 'RIGHT',
+                  action: 'automated_immediately',
+                  executionMode: 'server',
+                  automation: {
+                    success: automationResult.success,
+                    applicationId: automationResult.applicationId,
+                    confirmationNumber: automationResult.confirmationNumber,
+                    status: automationResult.status,
+                    executionTime: automationResult.executionTime
+                  },
+                  serverAutomation: {
+                    eligible: true,
+                    remainingServerApplications: serverEligibility.remainingServerApplications - 1,
+                  },
+                  processingTime: Date.now() - startTime,
+                },
+                correlationId,
+              });
+
+            } catch (automationError) {
+              // Log automation error but continue with fallback to queue
+              fastify.log.error({
+                ...enhancedLogContext,
+                event: 'server_automation_failed',
+                message: 'Server automation failed, falling back to queue',
+                error: automationError instanceof Error ? automationError.message : 'Unknown error'
+              });
+
+              // Fall back to desktop queue processing
+              fastify.log.info({
+                ...enhancedLogContext,
+                event: 'fallback_to_queue',
+                message: 'Falling back to desktop queue due to automation failure'
+              });
+            }
+          }
+
+          // Queue for desktop processing (fallback or not eligible for server automation)
+          const queueEntry = await fastify.db.applicationQueue.create({
               data: {
                 userId: user.id,
-                jobPostingId: data.jobId,
+                jobPostingId: jobId,
                 status: 'PENDING',
                 priority: data.priority === 10 ? 'IMMEDIATE' :
                          data.priority >= 8 ? 'URGENT' :
@@ -715,7 +843,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               // Job queued notification
               fastify.websocket.emitToUser(user.id, 'job-queued-from-swipe', {
                 applicationId: queueEntry.id,
-                jobId: data.jobId,
+                jobId: jobId,
                 jobTitle: jobPosting.title,
                 company: jobPosting.company.name,
                 status: 'queued',
@@ -729,7 +857,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               // Application status update
               fastify.websocket.emitApplicationStatusUpdate(user.id, {
                 applicationId: queueEntry.id,
-                jobId: data.jobId,
+                jobId: jobId,
                 jobTitle: jobPosting.title,
                 company: jobPosting.company.name,
                 status: 'queued',
@@ -745,7 +873,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
                 title: 'Application Queued',
                 message: `${jobPosting.title} at ${jobPosting.company.name} has been queued for processing`,
                 applicationId: queueEntry.id,
-                jobId: data.jobId,
+                jobId: jobId,
                 timestamp: new Date().toISOString(),
                 duration: 5000,
                 actions: [
@@ -762,7 +890,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               success: true,
               message: 'Right swipe queued for desktop processing',
               data: {
-                jobId: data.jobId,
+                jobId: jobId,
                 direction: 'RIGHT',
                 action: 'queued_for_desktop',
                 executionMode: 'desktop',
@@ -778,7 +906,6 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               },
               correlationId,
             });
-          }
 
         } catch (automationError) {
           fastify.log.error({

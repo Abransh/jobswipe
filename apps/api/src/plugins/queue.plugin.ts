@@ -280,8 +280,8 @@ class QueueService {
           concurrency: this.config.workers.concurrency,
           maxStalledCount: this.config.workers.maxStalledCount,
           stalledInterval: this.config.workers.stalledInterval,
-          removeOnComplete: this.config.workers.removeOnComplete,
-          removeOnFail: this.config.workers.removeOnFail,
+          removeOnComplete: { count: this.config.workers.removeOnComplete },
+          removeOnFail: { count: this.config.workers.removeOnFail },
         }
       );
 

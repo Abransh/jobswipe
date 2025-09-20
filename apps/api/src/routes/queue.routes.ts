@@ -331,7 +331,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
   const logContext = {
     correlationId,
     requestId: (request as any).id || randomUUID(),
-    endpoint: '/v1/queue/apply',
+    endpoint: '/api/v1/queue/apply',
     userAgent: request.headers['user-agent'],
     ip: request.ip
   };

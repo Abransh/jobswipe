@@ -54,7 +54,31 @@ const AutomationStatusSchema = z.object({
  * Trigger job application automation
  */
 async function triggerAutomation(
-  request: FastifyRequest<{ Body: z.infer<typeof TriggerAutomationSchema> }>,
+  request: FastifyRequest<{
+    Body: {
+      applicationId: string;
+      userId: string;
+      jobId: string;
+      jobData: {
+        id: string;
+        title: string;
+        company: string;
+        applyUrl: string;
+        location?: string;
+        description?: string;
+      };
+      userProfile: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone?: string;
+        resume: {
+          url: string;
+          content?: string;
+        };
+      };
+    }
+  }>,
   reply: FastifyReply
 ) {
   try {
@@ -260,11 +284,51 @@ async function cancelAutomation(
 
 export async function automationRoutes(fastify: FastifyInstance) {
   // Trigger automation
-  fastify.post('/api/v1/automation/trigger', {
+  fastify.post('/automation/trigger', {
     schema: {
       description: 'Trigger job application automation',
       tags: ['Automation'],
-      body: TriggerAutomationSchema,
+      body: {
+        type: 'object',
+        required: ['applicationId', 'userId', 'jobId', 'jobData', 'userProfile'],
+        properties: {
+          applicationId: { type: 'string', format: 'uuid' },
+          userId: { type: 'string', format: 'uuid' },
+          jobId: { type: 'string', format: 'uuid' },
+          jobData: {
+            type: 'object',
+            required: ['id', 'title', 'company', 'applyUrl'],
+            properties: {
+              id: { type: 'string' },
+              title: { type: 'string' },
+              company: { type: 'string' },
+              applyUrl: { type: 'string', format: 'uri' },
+              location: { type: 'string' },
+              description: { type: 'string' }
+            }
+          },
+          userProfile: {
+            type: 'object',
+            required: ['firstName', 'lastName', 'email'],
+            properties: {
+              firstName: { type: 'string' },
+              lastName: { type: 'string' },
+              email: { type: 'string', format: 'email' },
+              phone: { type: 'string' },
+              resume: {
+                type: 'object',
+                required: ['url'],
+                properties: {
+                  url: { type: 'string', format: 'uri' },
+                  content: { type: 'string' }
+                }
+              }
+            }
+          },
+          executionMode: { type: 'string' },
+          priority: { type: 'integer', minimum: 1, maximum: 10 }
+        }
+      },
       response: {
         200: {
           type: 'object',
@@ -287,7 +351,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
   }, triggerAutomation);
 
   // Get automation status
-  fastify.get('/api/v1/automation/status/:applicationId', {
+  fastify.get('/automation/status/:applicationId', {
     schema: {
       description: 'Get automation status',
       tags: ['Automation'],
@@ -303,7 +367,17 @@ export async function automationRoutes(fastify: FastifyInstance) {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            data: AutomationStatusSchema
+            data: {
+              type: 'object',
+              required: ['applicationId', 'status'],
+              properties: {
+                applicationId: { type: 'string', format: 'uuid' },
+                status: { type: 'string', enum: ['PENDING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED'] },
+                progress: { type: 'number', minimum: 0, maximum: 100 },
+                message: { type: 'string' },
+                executionMode: { type: 'string', enum: ['server', 'desktop'] }
+              }
+            }
           }
         }
       }
@@ -311,7 +385,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
   }, getAutomationStatus);
 
   // Cancel automation
-  fastify.delete('/api/v1/automation/:applicationId', {
+  fastify.delete('/automation/:applicationId', {
     schema: {
       description: 'Cancel automation',
       tags: ['Automation'],

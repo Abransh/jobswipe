@@ -9,6 +9,7 @@
     "strict": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": false,
+    "noEmitOnError": false,
     "resolveJsonModule": true,
     "declaration": false,
     "declarationMap": false,

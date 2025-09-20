@@ -5,6 +5,23 @@
  * @author JobSwipe Team
  */
 
+// Load environment variables first
+import { config as dotenvConfig } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env.local file
+const envPath = resolve(__dirname, '../.env.local');
+dotenvConfig({ path: envPath });
+
+// Fallback to .env if .env.local doesn't exist
+dotenvConfig({ path: resolve(__dirname, '../.env') });
+
+console.log('🔧 Environment variables loaded from:', envPath);
+console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+console.log('🔧 Database URL:', process.env.DATABASE_URL ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 Redis URL:', process.env.REDIS_URL ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 JWT Secret:', process.env.JWT_SECRET ? '[CONFIGURED]' : '[MISSING]');
+
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -264,7 +281,7 @@ async function registerBasicRoutes(server: FastifyInstance, apiPrefix: string): 
   });
 
   // Basic token exchange routes
-  server.post('/token-exchange/initiate', async (request, reply) => {
+  server.post(`${apiPrefix}/token-exchange/initiate`, async (request, reply) => {
     return reply.send({
       success: true,
       exchangeToken: `basic_exchange_${Date.now()}`,
@@ -277,7 +294,7 @@ async function registerBasicRoutes(server: FastifyInstance, apiPrefix: string): 
     });
   });
 
-  server.post('/token-exchange/complete', async (request, reply) => {
+  server.post(`${apiPrefix}/token-exchange/complete`, async (request, reply) => {
     return reply.send({
       success: true,
       accessToken: `basic_desktop_${Date.now()}`,
@@ -454,9 +471,10 @@ async function createServer(): Promise<FastifyInstance> {
     max: config.rateLimit.max,
     timeWindow: config.rateLimit.timeWindow,
     allowList: ['127.0.0.1'],
-    redis: process.env.REDIS_URL ? {
-      url: process.env.REDIS_URL,
-    } : undefined,
+    // Disable Redis for rate limiting to fix pipeline issue
+    // redis: process.env.REDIS_URL ? {
+    //   url: process.env.REDIS_URL,
+    // } : undefined,
     keyGenerator: (request) => {
       return request.headers['x-forwarded-for'] as string ||
              request.headers['x-real-ip'] as string ||
@@ -682,7 +700,7 @@ async function createServer(): Promise<FastifyInstance> {
   // =============================================================================
 
   // API version prefix
-  const apiPrefix = process.env.API_PREFIX || '/v1';
+  const apiPrefix = process.env.API_PREFIX || '/api/v1';
 
   // Load routes conditionally
   const routes = await loadRoutes();
@@ -697,7 +715,7 @@ async function createServer(): Promise<FastifyInstance> {
 
       // Enterprise token exchange routes
       server.log.info('Registering enterprise token exchange routes...');
-      await server.register(routes.tokenExchangeRoutes, { prefix: '/token-exchange' });
+      await server.register(routes.tokenExchangeRoutes, { prefix: `${apiPrefix}/token-exchange` });
 
       // Enterprise queue management routes
       server.log.info('Registering enterprise queue management routes...');

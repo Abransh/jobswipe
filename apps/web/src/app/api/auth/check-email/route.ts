@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     console.log('📝 [API Route] Request body:', { email: body.email });
     
     // Construct and validate backend API URL
-    const backendUrl = `${API_BASE_URL}/v1/auth/check-email`;
+    const backendUrl = `${API_BASE_URL}/api/v1/auth/check-email`;
     console.log('🌐 [API Route] Backend URL:', backendUrl);
     console.log('🔧 [API Route] API_BASE_URL:', API_BASE_URL);
 
