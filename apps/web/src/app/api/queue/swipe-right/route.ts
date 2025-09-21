@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         direction: SwipeDirection.RIGHT,
         deviceType: metadata.source?.toUpperCase() || 'WEB',
         userAgent: metadata.userAgent,
-        metadata: {
+        matchFactors: {
           priority,
           customFields,
           source: metadata.source
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
           id: jobPosting.id,
           title: jobPosting.title,
           company: jobPosting.company.name,
-          applyUrl: jobPosting.applicationUrl || jobPosting.jobUrl || jobPosting.url,
+          applyUrl: jobPosting.applyUrl || jobPosting.sourceUrl || '',
           location: jobPosting.location,
           description: jobPosting.description
         },
@@ -162,10 +162,10 @@ export async function POST(request: NextRequest) {
           yearsExperience: userProfile?.yearsOfExperience,
           skills: userProfile?.skills || [],
           location: userProfile?.location,
-          workAuthorization: userProfile?.workAuthorization,
+          workAuthorization: 'US_CITIZEN', // Default value, can be enhanced later
           linkedinUrl: userProfile?.linkedin
         },
-        executionMode: (userProfile?.applicationCount || 0) <= 10 ? 'server' : 'desktop',
+        executionMode: 'server', // Default to server for now, can be enhanced later
         priority: mapPriority(priority)
       };
 

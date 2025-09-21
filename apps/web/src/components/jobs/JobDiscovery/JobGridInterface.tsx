@@ -9,7 +9,7 @@ import React, { useState, useCallback } from 'react';
 import { JobCard } from '@/components/jobs/JobCard';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
-import { queueApi, generateDeviceId, calculatePriority, type SwipeRightRequest } from '@/lib/api/queue';
+import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
 
 interface JobGridInterfaceProps {
   jobs: JobData[];
@@ -35,17 +35,13 @@ export function JobGridInterface({ jobs, searchQuery, filters, onApplicationUpda
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
       
-      const request: SwipeRightRequest = {
-        jobId: job.id,
-        priority,
-        metadata: {
-          source: 'web_grid',
-          deviceId,
-          userAgent: navigator.userAgent,
-        }
+      const metadata = {
+        source: 'web' as const,
+        deviceId,
+        userAgent: navigator.userAgent,
       };
-      
-      const response = await queueApi.swipeRight(request);
+
+      const response = await jobsApi.swipeRight(job.id, metadata, { priority });
       
       if (response.success && response.data) {
         const newStats = {

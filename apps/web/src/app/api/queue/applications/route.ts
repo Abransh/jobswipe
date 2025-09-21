@@ -5,50 +5,60 @@ export async function GET(request: NextRequest) {
   try {
     const authenticatedUser = await authenticateRequest(request);
     const { searchParams } = new URL(request.url);
-    
+
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
     const status = searchParams.get('status');
 
-    // TODO: Implement actual database query to fetch user applications
-    // This should query the applications table with proper filtering
-    
-    // For now, return a mock response
-    const mockApplications = [];
-    
-    const response = {
-      success: true,
-      data: {
-        applications: mockApplications,
-        pagination: {
-          total: 0,
-          limit,
-          offset,
-          hasMore: false
-        }
-      }
-    };
+    // Proxy request to Fastify backend API
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const queryParams = new URLSearchParams();
+    queryParams.append('limit', limit.toString());
+    queryParams.append('offset', offset.toString());
+    if (status) queryParams.append('status', status);
 
-    console.log('✅ [Queue API] Applications fetched:', {
+    const backendEndpoint = `${backendUrl}/api/v1/queue/applications?${queryParams.toString()}`;
+
+    // Get auth token from user's session
+    const authHeader = request.headers.get('authorization');
+
+    console.log('🔗 [Web API] Proxying to backend:', backendEndpoint);
+
+    const backendResponse = await fetch(backendEndpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
+      },
+    });
+
+    const backendData = await backendResponse.json();
+
+    if (!backendResponse.ok) {
+      console.error('❌ [Web API] Backend error:', backendResponse.status, backendData);
+      return NextResponse.json(backendData, { status: backendResponse.status });
+    }
+
+    console.log('✅ [Web API] Applications fetched from backend:', {
       userId: authenticatedUser.id,
       limit,
       offset,
       status,
-      count: mockApplications.length
+      count: backendData.data?.applications?.length || 0
     });
 
-    return NextResponse.json(response);
+    return NextResponse.json(backendData);
 
   } catch (error) {
-    console.error('❌ [Queue API] Applications fetch failed:', error);
-    
+    console.error('❌ [Web API] Applications fetch failed:', error);
+
     if (error instanceof AuthError) {
       return NextResponse.json(
         { success: false, error: error.message, errorCode: 'AUTH_ERROR' },
         { status: error.statusCode }
       );
     }
-    
+
     return NextResponse.json(
       { success: false, error: 'Internal server error', errorCode: 'INTERNAL_ERROR' },
       { status: 500 }

@@ -103,11 +103,15 @@ export interface CompanyData {
 export interface JobCardProps {
   job: JobData;
   matchScore?: number;
+  variant?: 'swipe' | 'grid' | 'list';
   onSwipeLeft?: (jobId: string) => void;
   onSwipeRight?: (jobId: string) => void;
+  onApply?: () => void | Promise<void>;
   onSave?: (jobId: string) => void;
   onShare?: (jobId: string) => void;
   onMoreInfo?: (jobId: string) => void;
+  isApplying?: boolean;
+  feedback?: { type: 'success' | 'error' | 'info'; message: string; jobId?: string };
   isLoading?: boolean;
   className?: string;
   style?: React.CSSProperties;

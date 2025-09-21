@@ -10,7 +10,7 @@ import { JobSwipeContainer } from '@/components/jobs/JobSwipe';
 import type { SwipeAnalytics, ExpansionTrigger } from '@/components/jobs/types/jobSwipe';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
-import { queueApi, generateDeviceId, calculatePriority, type SwipeRightRequest } from '@/lib/api/queue';
+import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
 
 interface JobSwipeInterfaceProps {
   jobs: JobData[];
@@ -66,17 +66,13 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
       
-      const request: SwipeRightRequest = {
-        jobId: job.id,
-        priority,
-        metadata: {
-          source: 'web',
-          deviceId,
-          userAgent: navigator.userAgent,
-        }
+      const metadata = {
+        source: 'web' as const,
+        deviceId,
+        userAgent: navigator.userAgent,
       };
-      
-      const response = await queueApi.swipeRight(request);
+
+      const response = await jobsApi.swipeRight(job.id, metadata, { priority });
       
       if (response.success && response.data) {
         setFeedback({

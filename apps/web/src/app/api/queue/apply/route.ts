@@ -55,14 +55,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Record the application action (swipe right for historical compatibility)
-    await prisma.userJobSwipe.create({
-      data: {
+    await prisma.userJobSwipe.upsert({
+      where: {
+        userId_jobPostingId: {
+          userId: authenticatedUser.id,
+          jobPostingId: jobId,
+        },
+      },
+      update: {
+        direction: SwipeDirection.RIGHT,
+        deviceType: metadata.source?.toUpperCase() || 'WEB',
+        userAgent: metadata.userAgent,
+        updatedAt: new Date(),
+      },
+      create: {
         userId: authenticatedUser.id,
         jobPostingId: jobId,
         direction: SwipeDirection.RIGHT,
         deviceType: metadata.source?.toUpperCase() || 'WEB',
         userAgent: metadata.userAgent,
-        metadata: {
+        matchFactors: {
           priority,
           customFields,
           source: metadata.source
@@ -131,8 +143,7 @@ export async function POST(request: NextRequest) {
 
     // Get user profile for automation
     const userProfile = await prisma.userProfile.findUnique({
-      where: { userId: authenticatedUser.id },
-      include: { user: true }
+      where: { userId: authenticatedUser.id }
     });
 
     // Trigger automation after successful database save
@@ -147,7 +158,7 @@ export async function POST(request: NextRequest) {
           id: jobPosting.id,
           title: jobPosting.title,
           company: jobPosting.company.name,
-          applyUrl: jobPosting.applicationUrl || jobPosting.jobUrl || jobPosting.url,
+          applyUrl: jobPosting.applyUrl || jobPosting.sourceUrl || '',
           location: jobPosting.location,
           description: jobPosting.description
         },
@@ -162,10 +173,10 @@ export async function POST(request: NextRequest) {
           yearsExperience: userProfile?.yearsOfExperience,
           skills: userProfile?.skills || [],
           location: userProfile?.location,
-          workAuthorization: userProfile?.workAuthorization,
+          workAuthorization: 'US_CITIZEN', // Default value, can be enhanced later
           linkedinUrl: userProfile?.linkedin
         },
-        executionMode: (userProfile?.applicationCount || 0) <= 10 ? 'server' : 'desktop',
+        executionMode: 'server', // Default to server for now, can be enhanced later
         priority: mapPriority(priority)
       };
 
