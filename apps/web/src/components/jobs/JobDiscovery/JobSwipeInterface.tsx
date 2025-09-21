@@ -5,9 +5,10 @@
  * Provides the familiar Tinder-like job swiping experience
  */
 
-import React, { useState, useCallback } from 'react';
-import { JobSwipeContainer } from '@/components/jobs/JobSwipe';
-import type { SwipeAnalytics, ExpansionTrigger } from '@/components/jobs/types/jobSwipe';
+import React, { useState, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { JobCard } from '@/components/jobs/JobCard';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
 import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
@@ -27,30 +28,55 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     rightSwipes: 0,
     expansions: 0
   });
-  
+
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isApplying, setIsApplying] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string, jobId?: string } | null>(null);
+  const [cardStack, setCardStack] = useState<JobData[]>(jobs.slice(0, 3)); // Show 3 cards in stack
+
+  // Update card stack when jobs change
+  useEffect(() => {
+    setCardStack(jobs.slice(currentIndex, currentIndex + 3));
+  }, [jobs, currentIndex]);
 
   // Handle swipe events
-  const handleSwipeLeft = useCallback((job: JobData, analytics: SwipeAnalytics) => {
-    console.log('👈 [JobSwipeInterface] Passed on job:', job.title, 'Analytics:', analytics);
-    console.log('📊 [JobSwipeInterface] Swipe stats before update:', swipeStats);
-    
-    setSwipeStats(prev => {
-      const newStats = {
-        ...prev,
-        totalSwipes: prev.totalSwipes + 1,
-        leftSwipes: prev.leftSwipes + 1
-      };
-      console.log('📊 [JobSwipeInterface] Updated swipe stats:', newStats);
-      return newStats;
-    });
-  }, [swipeStats]);
+  const handleSwipeLeft = useCallback(async (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return;
 
-  const handleSwipeRight = useCallback(async (job: JobData, analytics: SwipeAnalytics) => {
-    console.log('👉 [JobSwipeInterface] Applying to job:', job.title, 'Analytics:', analytics);
-    console.log('📊 [JobSwipeInterface] Current swipe stats:', swipeStats);
-    
+    console.log('👈 [JobSwipeInterface] Passed on job:', job.title);
+
+    setSwipeStats(prev => ({
+      ...prev,
+      totalSwipes: prev.totalSwipes + 1,
+      leftSwipes: prev.leftSwipes + 1
+    }));
+
+    try {
+      // Call API for left swipe (pass on job)
+      const deviceId = generateDeviceId();
+      const metadata = {
+        source: 'web' as const,
+        deviceId,
+        userAgent: navigator.userAgent,
+      };
+
+      await jobsApi.swipeLeft(job.id, metadata);
+      console.log('✅ [JobSwipeInterface] Left swipe recorded for:', job.title);
+    } catch (error) {
+      console.error('❌ [JobSwipeInterface] Failed to record left swipe:', error);
+    }
+
+    // Move to next card
+    setCurrentIndex(prev => Math.min(prev + 1, jobs.length - 1));
+  }, [jobs]);
+
+  const handleSwipeRight = useCallback(async (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return;
+
+    console.log('👉 [JobSwipeInterface] Applying to job:', job.title);
+
     // Update stats immediately for UI feedback
     const newRightSwipes = swipeStats.rightSwipes + 1;
     setSwipeStats(prev => ({
@@ -58,14 +84,14 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       totalSwipes: prev.totalSwipes + 1,
       rightSwipes: newRightSwipes
     }));
-    
+
     setFeedback(null);
     setIsApplying(job.id);
-    
+
     try {
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
-      
+
       const metadata = {
         source: 'web' as const,
         deviceId,
@@ -73,31 +99,34 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       };
 
       const response = await jobsApi.swipeRight(job.id, metadata, { priority });
-      
+
       if (response.success && response.data) {
         setFeedback({
           type: 'success',
-          message: `Application queued for ${job.title}! 🚀`
+          message: `Application queued for ${job.title}! 🚀`,
+          jobId: job.id
         });
-        
+
         // Update parent component with application stats
         const newStats = {
           totalApplications: newRightSwipes,
-          todayApplications: newRightSwipes, // TODO: Calculate actual today count
-          successRate: 95 // TODO: Calculate actual success rate
+          todayApplications: newRightSwipes,
+          successRate: 95
         };
         onApplicationUpdate?.(newStats);
+
+        // Move to next card after successful application
+        setCurrentIndex(prev => Math.min(prev + 1, jobs.length - 1));
       } else {
         throw new Error(response.error || 'Failed to queue application');
       }
-      
+
     } catch (error) {
       console.error('❌ Failed to queue job application:', error);
-      
+
       let errorMessage = 'Failed to apply to job. Please try again.';
-      
+
       if (error instanceof Error) {
-        // Handle specific error cases
         const message = error.message.toLowerCase();
         if (message.includes('not authenticated') || message.includes('401')) {
           errorMessage = 'Please log in to apply to jobs.';
@@ -109,12 +138,13 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           errorMessage = 'Network error. Please check your connection.';
         }
       }
-      
+
       setFeedback({
         type: 'error',
-        message: errorMessage
+        message: errorMessage,
+        jobId: job.id
       });
-      
+
       // Revert stats on error
       setSwipeStats(prev => ({
         ...prev,
@@ -125,7 +155,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       setIsApplying(null);
       setTimeout(() => setFeedback(null), 5000);
     }
-  }, [onApplicationUpdate, swipeStats.rightSwipes]);
+  }, [jobs, onApplicationUpdate, swipeStats.rightSwipes]);
 
   const handleJobSave = useCallback((job: JobData) => {
     console.log('💾 Saved job:', job.title);
@@ -145,31 +175,8 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     }
   }, []);
 
-  const handleJobExpand = useCallback((job: JobData, trigger: ExpansionTrigger) => {
-    console.log('📖 Expanded job details:', job.title, 'Trigger:', trigger);
-    setSwipeStats(prev => ({
-      ...prev,
-      expansions: prev.expansions + 1
-    }));
-  }, []);
 
-  const handleEmptyQueue = useCallback(() => {
-    console.log('🎉 All jobs viewed!');
-  }, []);
 
-  const fetchMoreJobs = useCallback(async (offset: number, limit: number): Promise<JobData[]> => {
-    console.log('🔄 JobSwipeInterface: fetchMoreJobs called with offset:', offset, 'limit:', limit);
-    
-    try {
-      // Return empty array for now - this should be replaced with actual API call
-      // In a real implementation, this would fetch more jobs from the API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return [];
-    } catch (error) {
-      console.error('❌ Failed to fetch more jobs:', error);
-      return [];
-    }
-  }, []);
 
   // Show empty state if no jobs match filters
   if (jobs.length === 0) {
@@ -201,94 +208,280 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   }
 
   return (
-    <div className="relative">
-      {/* Swipe Interface */}
-      <div className="pt-4">
-        <JobSwipeContainer
-          jobs={jobs}
-          fetchJobs={fetchMoreJobs}
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={handleSwipeRight}
-          onJobSave={handleJobSave}
-          onJobShare={handleJobShare}
-          onJobExpand={handleJobExpand}
-          onEmptyQueue={handleEmptyQueue}
-          config={{
-            enableAnimations: true,
-            autoExpandOnHover: true,
-            hoverDelay: 300,
-            trackAnalytics: true,
-            debugMode: process.env.NODE_ENV === 'development'
-          }}
-        />
+    <div className="relative min-h-screen flex flex-col items-center justify-start pt-16 p-4 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+      {/* Modern Stacked Card Interface */}
+      <div className="relative w-full max-w-sm mx-auto min-h-[600px]">
+        {cardStack.length > 0 ? (
+          <div className="relative h-[600px] overflow-visible">
+            {/* Stack of Cards */}
+            {cardStack.map((job, index) => {
+              const isTopCard = index === 0;
+              const zIndex = cardStack.length - index;
+              const scale = 1 - (index * 0.05);
+              const yOffset = index * 8;
+
+              return (
+                <motion.div
+                  key={`${job.id}-${currentIndex + index}`}
+                  className={cn(
+                    "absolute",
+                    isTopCard && "cursor-grab active:cursor-grabbing select-none"
+                  )}
+                  style={isTopCard ? {
+                    zIndex,
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                  } : {
+                    zIndex,
+                    scale,
+                    y: yOffset,
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                  }}
+                  initial={isTopCard ? { opacity: 1 } : { scale: 0.8, opacity: 0 }}
+                  animate={isTopCard ? { opacity: 1 } : {
+                    scale,
+                    y: yOffset,
+                    opacity: 1
+                  }}
+                  exit={{
+                    scale: 0.8,
+                    opacity: 0,
+                    transition: { duration: 0.2 }
+                  }}
+                  transition={isTopCard ? undefined : {
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    delay: index * 0.1
+                  }}
+                  // Add drag to the parent for the top card
+                  drag={isTopCard ? true : false}
+                  dragElastic={0.2}
+                  dragMomentum={false}
+                  whileDrag={{ scale: 1.05, rotate: 5 }}
+                  onMouseDown={() => {
+                    if (isTopCard) {
+                      console.log('🖱️ Mouse down on top card:', job.title);
+                    }
+                  }}
+                  onDragStart={() => {
+                    if (isTopCard) {
+                      console.log('🎯 Drag started on top card:', job.title);
+                    }
+                  }}
+                  onDrag={(_, info) => {
+                    if (isTopCard) {
+                      console.log('🔄 Dragging top card:', info.offset.x);
+                    }
+                  }}
+                  onDragEnd={(_, info) => {
+                    if (!isTopCard) return;
+
+                    const swipeThreshold = 100;
+                    const swipeVelocity = 300;
+
+                    console.log('🎯 Drag ended on top card:', {
+                      offsetX: info.offset.x,
+                      velocityX: info.velocity.x,
+                      threshold: swipeThreshold
+                    });
+
+                    const shouldSwipeRight = info.offset.x > swipeThreshold || info.velocity.x > swipeVelocity;
+                    const shouldSwipeLeft = info.offset.x < -swipeThreshold || info.velocity.x < -swipeVelocity;
+
+                    if (shouldSwipeRight) {
+                      console.log('👉 Swiping right on:', job.title);
+                      handleSwipeRight(job.id);
+                    } else if (shouldSwipeLeft) {
+                      console.log('👈 Swiping left on:', job.title);
+                      handleSwipeLeft(job.id);
+                    } else {
+                      console.log('↩️ Snapping back to center');
+                    }
+                  }}
+                >
+                  <JobCard
+                    job={job}
+                    variant={isTopCard ? "swipe" : "grid"}
+                    onSave={() => handleJobSave(job)}
+                    onShare={() => handleJobShare(job)}
+                    isApplying={isApplying === job.id}
+                    feedback={feedback?.jobId === job.id ? feedback : undefined}
+                    matchScore={Math.floor(Math.random() * 20) + 80} // Mock match score
+                    className={cn(
+                      !isTopCard && "pointer-events-none opacity-80"
+                    )}
+                  />
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Empty State */
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16"
+          >
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20l5 5 11-11" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Great job!</h3>
+            <p className="text-gray-600 mb-6">You've reviewed all available jobs. Check back later for new opportunities!</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              onClick={() => window.location.reload()}
+            >
+              Refresh Jobs
+            </motion.button>
+          </motion.div>
+        )}
       </div>
 
       {/* Stats Badge for Applied Jobs */}
-      {swipeStats.rightSwipes > 0 && (
-        <div className="fixed top-20 left-4 z-30">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 shadow-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm font-medium text-blue-800">
-                {swipeStats.rightSwipes} applied
-              </span>
+      <AnimatePresence>
+        {swipeStats.rightSwipes > 0 && (
+          <motion.div
+            initial={{ scale: 0, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0, y: 20 }}
+            className="fixed top-20 left-4 z-30"
+          >
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg px-4 py-2 shadow-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">
+                  {swipeStats.rightSwipes} applied
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Instructions for first-time users */}
-      {swipeStats.totalSwipes === 0 && (
-        <div className="absolute bottom-6 left-4 right-4 z-40 pointer-events-none">
-          <div className="max-w-md mx-auto bg-white rounded-lg p-4 shadow-lg border border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-2 text-center">How to use JobSwipe</h4>
-            <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-              <div className="flex items-center space-x-1">
-                <span className="text-red-500">←</span>
-                <span>Pass</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="text-green-500">→</span>
-                <span>Apply</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="text-blue-500">↑</span>
-                <span>Details</span>
+      <AnimatePresence>
+        {swipeStats.totalSwipes === 0 && cardStack.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ delay: 1 }}
+            className="fixed bottom-6 left-4 right-4 z-40 pointer-events-none"
+          >
+            <div className="max-w-md ml-10 mt-2 bg-white/90 backdrop-blur-xl rounded-2xl p-6  shadow-xl border border-white/20">
+              <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">How to JobSwipe</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Swipe left to pass</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Swipe right to apply</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">Tap bookmark to save</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Application feedback */}
-      {feedback && (
-        <div className="fixed top-20 left-4 right-4 z-50 pointer-events-none">
-          <div className="max-w-md mx-auto">
-            <div className={`
-              rounded-lg p-3 shadow-md border
-              ${feedback.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : ''}
-              ${feedback.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : ''}
-              ${feedback.type === 'info' ? 'bg-blue-50 border-blue-200 text-blue-800' : ''}
-            `}>
-              <p className="text-sm font-medium">{feedback.message}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Processing indicator */}
-      {isApplying && (
-        <div className="fixed top-20 left-4 right-4 z-50 pointer-events-none">
-          <div className="max-w-md mx-auto">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-md">
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                <p className="text-sm font-medium text-blue-800">Applying...</p>
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            className="fixed top-20 left-4 right-4 z-50 pointer-events-none"
+          >
+            <div className="max-w-md mx-auto">
+              <div className={cn(
+                "rounded-2xl p-4 shadow-xl border backdrop-blur-xl",
+                feedback.type === 'success' && 'bg-green-50/90 border-green-200 text-green-800',
+                feedback.type === 'error' && 'bg-red-50/90 border-red-200 text-red-800',
+                feedback.type === 'info' && 'bg-blue-50/90 border-blue-200 text-blue-800'
+              )}>
+                <p className="text-sm font-medium text-center">{feedback.message}</p>
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Processing indicator */}
+      <AnimatePresence>
+        {isApplying && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed top-20 left-4 right-4 z-50 pointer-events-none"
+          >
+            <div className="max-w-md mx-auto">
+              <div className="bg-blue-50/90 backdrop-blur-xl border border-blue-200 rounded-2xl p-4 shadow-xl">
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                  <p className="text-sm font-medium text-blue-800">Applying to job...</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Progress indicator */}
+      <motion.div
+        className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="bg-white/80 backdrop-blur-xl rounded-full px-4 py-2 shadow-lg border border-white/20">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <span className="font-medium">{currentIndex + 1}</span>
+            <span>of</span>
+            <span className="font-medium">{jobs.length}</span>
+            <div className="w-16 bg-gray-200 rounded-full h-1 ml-2">
+              <motion.div
+                className="bg-blue-500 h-1 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${((currentIndex + 1) / jobs.length) * 100}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
           </div>
         </div>
-      )}
+      </motion.div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+// import { useAuth } from '@/hooks/useAuth'; // Temporarily disabled
 import { 
   BriefcaseIcon,
   DocumentTextIcon,
@@ -112,14 +112,16 @@ const getStatusBadge = (status: string) => {
 };
 
 export function DashboardOverview() {
-  const { user } = useAuth();
+  // Temporarily bypass auth to fix loading issue
+  // TODO: Fix auth service and re-enable user data
+  // const { user } = useAuth();
 
   return (
     <div className="space-y-8">
       {/* Welcome Message */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">
-          Welcome back, {user?.name?.split(' ')[0] || 'there'}!
+          Welcome back!
         </h2>
         <p className="text-blue-100">
           You've made great progress on your job search. Keep up the momentum!
