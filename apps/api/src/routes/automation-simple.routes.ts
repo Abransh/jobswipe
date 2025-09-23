@@ -77,6 +77,8 @@ async function triggerAutomation(
           content?: string;
         };
       };
+      executionMode?: 'server' | 'desktop';
+      priority?: 'low' | 'normal' | 'high';
     }
   }>,
   reply: FastifyReply

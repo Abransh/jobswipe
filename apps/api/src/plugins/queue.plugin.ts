@@ -600,9 +600,9 @@ class QueueService {
     switch (state) {
       case 'waiting':
       case 'delayed':
-        return QueueStatus.QUEUED;
+        return QueueStatus.PENDING;
       case 'active':
-        return QueueStatus.PROCESSING;
+        return QueueStatus.RUNNING;
       case 'completed':
         return QueueStatus.COMPLETED;
       case 'failed':

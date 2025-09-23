@@ -184,7 +184,7 @@ class ServiceRegistry {
   async getHealth(): Promise<Record<string, any>> {
     const health: Record<string, any> = {};
 
-    for (const [name, healthCheck] of this.healthChecks.entries()) {
+    for (const [name, healthCheck] of Array.from(this.healthChecks.entries())) {
       try {
         health[name] = await healthCheck();
       } catch (error) {
@@ -204,7 +204,7 @@ class ServiceRegistry {
   getMetrics(): Record<string, any> {
     const metrics: Record<string, any> = {};
     
-    for (const [name, service] of this.services.entries()) {
+    for (const [name, service] of Array.from(this.services.entries())) {
       if (service && typeof service.getMetrics === 'function') {
         try {
           metrics[name] = service.getMetrics();
@@ -221,7 +221,7 @@ class ServiceRegistry {
    * Shutdown all services
    */
   async shutdown(): Promise<void> {
-    for (const [name, service] of this.services.entries()) {
+    for (const [name, service] of Array.from(this.services.entries())) {
       if (service && typeof service.shutdown === 'function') {
         try {
           await service.shutdown();

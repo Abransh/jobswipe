@@ -676,7 +676,7 @@ async function createServer(): Promise<FastifyInstance> {
     try {
       // Check both security services if available
       const basicSecurityStats = server.security?.getStats?.() || {};
-      const advancedSecurityStats = server.advancedSecurity?.getHealthStatus?.() || {};
+      const advancedSecurityStats = (server as any).advancedSecurity?.getHealthStatus?.() || {};
       
       return reply.code(200).send({
         status: 'healthy',

@@ -185,7 +185,7 @@ var ServiceRegistry = /** @class */ (function () {
                 switch (_e.label) {
                     case 0:
                         health = {};
-                        _i = 0, _a = this.healthChecks.entries();
+                        _i = 0, _a = Array.from(this.healthChecks.entries());
                         _e.label = 1;
                     case 1:
                         if (!(_i < _a.length)) return [3 /*break*/, 6];
@@ -219,7 +219,7 @@ var ServiceRegistry = /** @class */ (function () {
      */
     ServiceRegistry.prototype.getMetrics = function () {
         var metrics = {};
-        for (var _i = 0, _a = this.services.entries(); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Array.from(this.services.entries()); _i < _a.length; _i++) {
             var _b = _a[_i], name_2 = _b[0], service = _b[1];
             if (service && typeof service.getMetrics === 'function') {
                 try {
@@ -241,7 +241,7 @@ var ServiceRegistry = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _i = 0, _a = this.services.entries();
+                        _i = 0, _a = Array.from(this.services.entries());
                         _c.label = 1;
                     case 1:
                         if (!(_i < _a.length)) return [3 /*break*/, 6];

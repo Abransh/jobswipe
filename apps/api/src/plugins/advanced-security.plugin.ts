@@ -8,7 +8,7 @@
 import { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 
-async function advancedSecurityPlugin(fastify: FastifyInstance): Promise<void> {
+async function advancedSecurityPlugin(fastify: FastifyInstance, options: any): Promise<void> {
   fastify.log.info('Advanced Security Plugin initialized (minimal mode)');
   
   // Placeholder for advanced security features

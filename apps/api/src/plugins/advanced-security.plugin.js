@@ -43,7 +43,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fastify_plugin_1 = require("fastify-plugin");
-function advancedSecurityPlugin(fastify) {
+function advancedSecurityPlugin(fastify, options) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             fastify.log.info('Advanced Security Plugin initialized (minimal mode)');

@@ -655,9 +655,9 @@ var QueueService = /** @class */ (function () {
         switch (state) {
             case 'waiting':
             case 'delayed':
-                return database_1.QueueStatus.QUEUED;
+                return database_1.QueueStatus.PENDING;
             case 'active':
-                return database_1.QueueStatus.PROCESSING;
+                return database_1.QueueStatus.RUNNING;
             case 'completed':
                 return database_1.QueueStatus.COMPLETED;
             case 'failed':
