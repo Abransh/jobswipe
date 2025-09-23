@@ -6,18 +6,20 @@
  */
 
 import { db } from '@jobswipe/database';
-import type { 
-  JobType, 
-  JobLevel, 
-  JobCategory, 
-  RemoteType, 
-  CompanySize 
+import type {
+  JobType,
+  JobLevel,
+  JobCategory,
+  CompanySize
 } from '@jobswipe/database';
 
+import { RemoteType } from '@jobswipe/database';
+
 // Import enums directly from Prisma
-import { 
+import {
   JobStatus,
-  CompanyStatus 
+  CompanyStatus,
+  Prisma
 } from '@jobswipe/database';
 
 // =============================================================================
@@ -183,9 +185,9 @@ export class JobService {
         status: JobStatus.ACTIVE,
         isActive: true,
         OR: [
-          { city: { contains: location, mode: 'insensitive' } },
-          { location: { contains: location, mode: 'insensitive' } },
-          { state: { contains: location, mode: 'insensitive' } }
+          { city: { contains: location, mode: Prisma.QueryMode.insensitive } },
+          { location: { contains: location, mode: Prisma.QueryMode.insensitive } },
+          { state: { contains: location, mode: Prisma.QueryMode.insensitive } }
         ]
       };
 
@@ -311,13 +313,13 @@ export class JobService {
         {
           title: {
             contains: searchQuery,
-            mode: 'insensitive'
+            mode: Prisma.QueryMode.insensitive
           }
         },
         {
           description: {
             contains: searchQuery,
-            mode: 'insensitive'
+            mode: Prisma.QueryMode.insensitive
           }
         },
         {
@@ -329,7 +331,7 @@ export class JobService {
           company: {
             name: {
               contains: searchQuery,
-              mode: 'insensitive'
+              mode: Prisma.QueryMode.insensitive
             }
           }
         }
@@ -341,16 +343,16 @@ export class JobService {
       where.OR = [
         ...(where.OR || []),
         {
-          city: { contains: filters.location, mode: 'insensitive' }
+          city: { contains: filters.location, mode: Prisma.QueryMode.insensitive }
         },
         {
-          state: { contains: filters.location, mode: 'insensitive' }
+          state: { contains: filters.location, mode: Prisma.QueryMode.insensitive }
         },
         {
-          country: { contains: filters.location, mode: 'insensitive' }
+          country: { contains: filters.location, mode: Prisma.QueryMode.insensitive }
         },
         {
-          location: { contains: filters.location, mode: 'insensitive' }
+          location: { contains: filters.location, mode: Prisma.QueryMode.insensitive }
         }
       ];
     }

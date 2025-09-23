@@ -855,7 +855,8 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               });
 
               // Application status update
-              fastify.websocket.emitApplicationStatusUpdate(user.id, {
+              (fastify.websocket as any).emitApplicationStatusUpdate({
+                userId: user.id,
                 applicationId: queueEntry.id,
                 jobId: jobId,
                 jobTitle: jobPosting.title,
@@ -867,7 +868,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
               });
 
               // User notification
-              fastify.websocket.emitNotification(user.id, {
+              (fastify.websocket as any).emitNotification(user.id, {
                 id: randomUUID(),
                 type: 'info',
                 title: 'Application Queued',

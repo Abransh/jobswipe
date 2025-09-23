@@ -679,10 +679,7 @@ var QueueService = /** @class */ (function () {
     return QueueService;
 }());
 exports.QueueService = QueueService;
-// =============================================================================
-// QUEUE PLUGIN
-// =============================================================================
-var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, function () {
+var queuePlugin = function (fastify, options) { return __awaiter(void 0, void 0, void 0, function () {
     var config, queueService, error_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -758,6 +755,7 @@ var queuePlugin = function (fastify) { return __awaiter(void 0, void 0, void 0, 
                 // =============================================================================
                 // Decorate Fastify instance
                 fastify.decorate('queueService', queueService);
+                fastify.decorate('applicationQueue', queueService); // Alias for routes compatibility
                 // Connect WebSocket service if available (after websocket plugin loads)
                 fastify.addHook('onReady', function () { return __awaiter(void 0, void 0, void 0, function () {
                     return __generator(this, function (_a) {

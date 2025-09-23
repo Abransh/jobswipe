@@ -597,6 +597,58 @@ var AutomationService = /** @class */ (function (_super) {
             });
         });
     };
+    /**
+     * Execute job application immediately (for API routes)
+     */
+    AutomationService.prototype.executeJobApplication = function (jobData, userProfile, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var applicationData, applicationId, error_2;
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        applicationData = {
+                            userId: options.application_id || 'api-user',
+                            jobData: {
+                                id: jobData.job_id || jobData.id,
+                                title: jobData.title,
+                                company: jobData.company,
+                                applyUrl: jobData.apply_url || jobData.applyUrl,
+                                location: jobData.location,
+                                description: jobData.description
+                            },
+                            userProfile: {
+                                firstName: userProfile.firstName,
+                                lastName: userProfile.lastName,
+                                email: userProfile.email,
+                                phone: userProfile.phone || '',
+                                resumeUrl: (_a = userProfile.resume) === null || _a === void 0 ? void 0 : _a.url
+                            },
+                            options: {
+                                headless: options.execution_mode === 'server',
+                                timeout: 30000,
+                                maxRetries: 2
+                            }
+                        };
+                        return [4 /*yield*/, this.queueApplication(applicationData)];
+                    case 1:
+                        applicationId = _b.sent();
+                        return [2 /*return*/, {
+                                status: 'QUEUED',
+                                executionMode: options.execution_mode || 'server',
+                                message: 'Application queued for processing',
+                                progress: 10
+                            }];
+                    case 2:
+                        error_2 = _b.sent();
+                        this.fastify.log.error('Failed to execute job application:', error_2);
+                        throw error_2;
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
     return AutomationService;
 }(events_1.EventEmitter));
 exports.AutomationService = AutomationService;

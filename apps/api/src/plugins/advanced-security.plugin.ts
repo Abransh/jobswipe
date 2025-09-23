@@ -17,7 +17,7 @@ async function advancedSecurityPlugin(fastify: FastifyInstance, options: any): P
   });
 }
 
-export default fastifyPlugin(advancedSecurityPlugin, {
+export default fastifyPlugin(advancedSecurityPlugin as any, {
   name: 'advanced-security',
   fastify: '4.x',
 });

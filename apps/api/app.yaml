@@ -1,0 +1,127 @@
+# DigitalOcean App Platform Configuration for JobSwipe API
+# https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+
+name: jobswipe-api
+region: nyc
+
+# Services configuration
+services:
+  - name: api
+    source_dir: /
+    dockerfile_path: Dockerfile
+    github:
+      repo: your-username/jobswipe
+      branch: main
+
+    # Build configuration
+    build_command: pnpm run build:production
+
+    # Run configuration
+    run_command: node dist/index.js
+
+    # Resource configuration
+    instance_count: 1
+    instance_size_slug: basic-xxs
+
+    # Health check
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+    # HTTP configuration
+    http_port: 3001
+
+    # Environment variables (production)
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: "3001"
+      - key: API_HOST
+        value: "0.0.0.0"
+      - key: API_CORS_ORIGIN
+        value: "https://your-frontend-domain.com"
+
+      # Database (you'll need to add your database connection)
+      - key: DATABASE_URL
+        value: "${db.DATABASE_URL}"
+        type: SECRET
+
+      # Redis (optional - for caching and sessions)
+      - key: REDIS_URL
+        value: "${redis.REDIS_URL}"
+        type: SECRET
+
+      # JWT Configuration
+      - key: JWT_SECRET
+        value: "${jwt.JWT_SECRET}"
+        type: SECRET
+      - key: JWT_REFRESH_SECRET
+        value: "${jwt.JWT_REFRESH_SECRET}"
+        type: SECRET
+
+      # Security
+      - key: ENCRYPTION_KEY
+        value: "${security.ENCRYPTION_KEY}"
+        type: SECRET
+      - key: CSRF_SECRET
+        value: "${security.CSRF_SECRET}"
+        type: SECRET
+
+      # Rate limiting
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: RATE_LIMIT_WINDOW
+        value: "900000"
+
+      # Logging
+      - key: LOG_LEVEL
+        value: "info"
+      - key: LOG_STRUCTURED
+        value: "true"
+
+      # Monitoring
+      - key: MONITORING_ENABLED
+        value: "true"
+      - key: ALERT_ERROR_RATE_THRESHOLD
+        value: "0.05"
+      - key: ALERT_RESPONSE_TIME_THRESHOLD
+        value: "2000"
+
+# Database configuration (PostgreSQL)
+databases:
+  - name: jobswipe-db
+    engine: PG
+    version: "15"
+    size: db-s-1vcpu-1gb
+    num_nodes: 1
+
+# Domain configuration
+domains:
+  - domain: api.yourdomain.com
+    type: PRIMARY
+    wildcard: false
+    zone: yourdomain.com
+
+# Alerts configuration
+alerts:
+  - rule: CPU_UTILIZATION
+    disabled: false
+    value: 80
+  - rule: MEM_UTILIZATION
+    disabled: false
+    value: 80
+  - rule: RESTART_COUNT
+    disabled: false
+    value: 10
+
+# Features
+features:
+  - buildpack-stack=ubuntu-22
+
+# Region
+region: nyc3

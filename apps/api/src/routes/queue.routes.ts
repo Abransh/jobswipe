@@ -756,7 +756,8 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
             });
 
             // Application status update
-            request.server.websocket.emitApplicationStatusUpdate(user.id, {
+            (request.server.websocket as any).emitApplicationStatusUpdate({
+              userId: user.id,
               applicationId: queueEntry.id,
               jobId: data.jobId,
               jobTitle: queueJobData.jobData.title,
@@ -1299,14 +1300,12 @@ async function queuePositionUpdateHandler(request: AuthenticatedRequest, reply: 
 
     // Emit WebSocket event for queue position update
     if (request.server.websocket) {
-      request.server.websocket.emitQueuePositionUpdate(user.id, {
-        applicationId: id,
-        status: 'queued',
-        queuePosition: data.position,
+      (request.server.websocket as any).emitQueuePositionUpdate({
+        userId: user.id,
+        totalInQueue: data.position, // Using position as total for now
+        userPosition: data.position,
         estimatedWaitTime: data.estimatedTime,
-        isPriority: ['IMMEDIATE', 'URGENT'].includes(application.priority),
-        message: `You are #${data.position} in the queue`,
-        timestamp: data.timestamp,
+        processingCount: 1
       });
     }
 
@@ -1382,7 +1381,7 @@ async function progressUpdateHandler(request: AuthenticatedRequest, reply: Fasti
     // Emit WebSocket events for real-time updates
     if (request.server.websocket) {
       // Automation progress update
-      request.server.websocket.emitAutomationProgress(user.id, {
+      (request.server.websocket as any).emitAutomationProgress(user.id, {
         applicationId: id,
         jobId: application.jobPostingId,
         jobTitle: application.jobSnapshot?.title || 'Unknown Job',
@@ -1398,7 +1397,7 @@ async function progressUpdateHandler(request: AuthenticatedRequest, reply: Fasti
       });
 
       // Application status update
-      request.server.websocket.emitApplicationStatusUpdate(user.id, {
+      (request.server.websocket as any).emitApplicationStatusUpdate(user.id, {
         applicationId: id,
         jobId: application.jobPostingId,
         jobTitle: application.jobSnapshot?.title || 'Unknown Job',
@@ -1415,7 +1414,7 @@ async function progressUpdateHandler(request: AuthenticatedRequest, reply: Fasti
 
       // Send notification for significant progress milestones
       if (data.progress.percentage === 100 || data.status === 'completed') {
-        request.server.websocket.emitNotification(user.id, {
+        (request.server.websocket as any).emitNotification(user.id, {
           id: randomUUID(),
           type: 'success',
           title: 'Application Completed',
@@ -1433,7 +1432,7 @@ async function progressUpdateHandler(request: AuthenticatedRequest, reply: Fasti
           ]
         });
       } else if (data.status === 'failed') {
-        request.server.websocket.emitNotification(user.id, {
+        (request.server.websocket as any).emitNotification(user.id, {
           id: randomUUID(),
           type: 'error',
           title: 'Application Failed',
@@ -1571,9 +1570,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Queue job application
   fastify.post('/apply', {
     schema: {
-      summary: 'Queue job application when user applies to a job',
-      description: 'Creates a job application queue entry when user applies to a job',
-      tags: ['Queue'],
+      // summary: 'Queue job application when user applies to a job',
+      // description: 'Creates a job application queue entry when user applies to a job',
+      // tags: ['Queue'],
       body: {
         type: 'object',
         properties: {
@@ -1619,10 +1618,10 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Backward compatibility alias - TODO: Remove after client migration
   fastify.post('/swipe-right', {
     schema: {
-      summary: '[DEPRECATED] Use /apply instead',
-      description: 'Legacy endpoint - use /apply instead',
-      tags: ['Queue', 'Deprecated'],
-      deprecated: true,
+      // summary: '[DEPRECATED] Use /apply instead',
+      // description: 'Legacy endpoint - use /apply instead',
+      // tags: ['Queue', 'Deprecated'],
+      // deprecated: true,
       body: {
         type: 'object',
         properties: {
@@ -1650,9 +1649,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Get user applications
   fastify.get('/applications', {
     schema: {
-      summary: 'Get user job applications from queue',
-      description: 'Retrieves paginated list of user job applications',
-      tags: ['Queue'],
+      // summary: 'Get user job applications from queue',
+      // description: 'Retrieves paginated list of user job applications',
+      // tags: ['Queue'],
       querystring: {
         type: 'object',
         properties: {
@@ -1679,9 +1678,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Get specific application
   fastify.get('/applications/:id', {
     schema: {
-      summary: 'Get specific job application details',
-      description: 'Retrieves detailed information about a specific job application',
-      tags: ['Queue'],
+      // summary: 'Get specific job application details',
+      // description: 'Retrieves detailed information about a specific job application',
+      // tags: ['Queue'],
       params: {
         type: 'object',
         properties: {
@@ -1695,9 +1694,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Application actions
   fastify.post('/applications/:id/action', {
     schema: {
-      summary: 'Perform action on job application',
-      description: 'Cancel, retry, or prioritize a job application',
-      tags: ['Queue'],
+      // summary: 'Perform action on job application',
+      // description: 'Cancel, retry, or prioritize a job application',
+      // tags: ['Queue'],
       params: {
         type: 'object',
         properties: {
@@ -1725,9 +1724,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Queue statistics
   fastify.get('/stats', {
     schema: {
-      summary: 'Get queue statistics for user',
-      description: 'Retrieves queue statistics and recent application activity',
-      tags: ['Queue'],
+      // summary: 'Get queue statistics for user',
+      // description: 'Retrieves queue statistics and recent application activity',
+      // tags: ['Queue'],
       response: {
         200: {
           type: 'object',
@@ -1743,9 +1742,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Progress updates from desktop app
   fastify.post('/applications/:id/progress', {
     schema: {
-      summary: 'Update application progress from desktop automation',
-      description: 'Receives progress updates from desktop app and broadcasts via WebSocket',
-      tags: ['Queue'],
+      // summary: 'Update application progress from desktop automation',
+      // description: 'Receives progress updates from desktop app and broadcasts via WebSocket',
+      // tags: ['Queue'],
       params: {
         type: 'object',
         properties: {
@@ -1781,9 +1780,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Queue position endpoint
   fastify.get('/applications/:id/position', {
     schema: {
-      summary: 'Get queue position for application',
-      description: 'Returns the current position and estimated time for an application in the queue',
-      tags: ['Queue'],
+      // summary: 'Get queue position for application',
+      // description: 'Returns the current position and estimated time for an application in the queue',
+      // tags: ['Queue'],
       params: {
         type: 'object',
         properties: {
@@ -1797,9 +1796,9 @@ export async function registerQueueRoutes(fastify: FastifyInstance) {
   // Queue position updates from desktop app
   fastify.post('/applications/:id/queue-position', {
     schema: {
-      summary: 'Update queue position from desktop app',
-      description: 'Receives queue position updates from desktop app and broadcasts via WebSocket',
-      tags: ['Queue'],
+      // summary: 'Update queue position from desktop app',
+      // description: 'Receives queue position updates from desktop app and broadcasts via WebSocket',
+      // tags: ['Queue'],
       params: {
         type: 'object',
         properties: {

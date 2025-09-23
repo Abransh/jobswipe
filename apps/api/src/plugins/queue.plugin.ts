@@ -815,7 +815,7 @@ declare module 'fastify' {
 // EXPORTS
 // =============================================================================
 
-export default fastifyPlugin(queuePlugin, {
+export default fastifyPlugin(queuePlugin as any, {
   name: 'queue',
   fastify: '4.x',
   dependencies: ['services'], // Depends on services plugin for Redis

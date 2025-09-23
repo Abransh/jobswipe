@@ -288,8 +288,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
   // Trigger automation
   fastify.post('/automation/trigger', {
     schema: {
-      description: 'Trigger job application automation',
-      tags: ['Automation'],
+      // description: 'Trigger job application automation',
+      // tags: ['Automation'],
       body: {
         type: 'object',
         required: ['applicationId', 'userId', 'jobId', 'jobData', 'userProfile'],
@@ -355,8 +355,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
   // Get automation status
   fastify.get('/automation/status/:applicationId', {
     schema: {
-      description: 'Get automation status',
-      tags: ['Automation'],
+      // description: 'Get automation status',
+      // tags: ['Automation'],
       params: {
         type: 'object',
         properties: {
@@ -389,8 +389,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
   // Cancel automation
   fastify.delete('/automation/:applicationId', {
     schema: {
-      description: 'Cancel automation',
-      tags: ['Automation'],
+      // description: 'Cancel automation',
+      // tags: ['Automation'],
       params: {
         type: 'object',
         properties: {

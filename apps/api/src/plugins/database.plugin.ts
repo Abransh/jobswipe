@@ -370,7 +370,7 @@ const databasePlugin: FastifyPluginAsync<DatabasePluginOptions> = async (
   fastify.log.info('Database plugin registered successfully');
 };
 
-export default fastifyPlugin(databasePlugin, {
+export default fastifyPlugin(databasePlugin as any, {
   name: 'database',
   fastify: '4.x'
 });

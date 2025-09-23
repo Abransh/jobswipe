@@ -11,11 +11,14 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
-import { 
-  JwtTokenService, 
-  RedisSessionService, 
-  SecurityMiddlewareService 
+import {
+  ServerJwtTokenService,
+  RedisSessionService,
+  SecurityMiddlewareService
 } from '@jobswipe/shared';
+
+// Import createDesktopTokenConfig directly
+const { createDesktopTokenConfig } = require('@jobswipe/shared/dist/services/jwt-token.service');
 import { 
   TokenExchangeRequest,
   TokenExchangeResponse,
@@ -129,7 +132,7 @@ class TokenExchangeService {
   private cleanupInterval: NodeJS.Timeout;
 
   private constructor(
-    private jwtService: JwtTokenService,
+    private jwtService: any, // ServerJwtTokenService
     private sessionService: RedisSessionService
   ) {
     // Initialize Redis client (replace with real Redis in production)
@@ -142,7 +145,7 @@ class TokenExchangeService {
   }
 
   static getInstance(
-    jwtService: JwtTokenService,
+    jwtService: any, // ServerJwtTokenService
     sessionService: RedisSessionService
   ): TokenExchangeService {
     if (!TokenExchangeService.instance) {
@@ -242,7 +245,6 @@ class TokenExchangeService {
     await this.redis.setex(redisKey, 60, JSON.stringify(exchangeSession)); // Keep for 1 minute for audit
 
     // Generate long-lived desktop token
-    const { createDesktopTokenConfig } = await import('@jobswipe/shared');
     const tokenConfig = createDesktopTokenConfig(
       exchangeSession.userId as any,
       'user@example.com', // This would come from the user data
@@ -413,7 +415,7 @@ class TokenExchangeService {
 // =============================================================================
 
 export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
-  const jwtService = fastify.jwtService as JwtTokenService;
+  const jwtService = fastify.jwtService as ServerJwtTokenService;
   const sessionService = fastify.sessionService as RedisSessionService;
   const securityService = fastify.security;
   

@@ -46,8 +46,8 @@ RUN pnpm install --frozen-lockfile
 COPY src/ ./src/
 COPY tsconfig.json ./
 
-# Build the application (using minimal version)
-RUN pnpm run build:minimal
+# Build the application (using full version)
+RUN pnpm run build:production
 
 # ==============================================================================
 # Production Stage - Final production image
@@ -78,4 +78,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application with dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "dist/minimal-index.js"]
+CMD ["node", "dist/index.js"]
