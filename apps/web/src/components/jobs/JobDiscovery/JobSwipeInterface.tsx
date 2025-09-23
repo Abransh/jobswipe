@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { JobCard } from '@/components/jobs/JobCard';
+import { JobDetailModal } from '@/components/jobs/JobDetailModal/JobDetailModal';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
 import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
@@ -33,6 +34,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   const [isApplying, setIsApplying] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string, jobId?: string } | null>(null);
   const [cardStack, setCardStack] = useState<JobData[]>(jobs.slice(0, 3)); // Show 3 cards in stack
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
 
   // Update card stack when jobs change
   useEffect(() => {
@@ -163,7 +168,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
 
   const handleJobShare = useCallback((job: JobData) => {
     console.log('🔗 Shared job:', job.title);
-    
+
     if (navigator.share) {
       navigator.share({
         title: `${job.title} at ${job.company.name}`,
@@ -174,6 +179,41 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       navigator.clipboard.writeText(`https://jobswipe.com/jobs/${job.id}`);
     }
   }, []);
+
+  // Modal handlers
+  const handleViewDetails = useCallback((job: JobData) => {
+    console.log('👁️ Opening job details for:', job.title);
+    setSelectedJob(job);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedJob(null);
+  }, []);
+
+  const handleModalApply = useCallback(async (jobId: string) => {
+    // Find the job and apply
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      await handleSwipeRight(jobId);
+      handleCloseModal();
+    }
+  }, [jobs, handleSwipeRight]);
+
+  const handleModalSave = useCallback((jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      handleJobSave(job);
+    }
+  }, [jobs, handleJobSave]);
+
+  const handleModalShare = useCallback((jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      handleJobShare(job);
+    }
+  }, [jobs, handleJobShare]);
 
 
 
@@ -277,18 +317,51 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
                       console.log('🔄 Dragging top card:', info.offset.x);
                     }
                   }}
+                  onClick={(e) => {
+                    if (!isTopCard) return;
+
+                    // Check if clicking on action buttons
+                    if ((e.target as HTMLElement).closest('button')) {
+                      return;
+                    }
+
+                    console.log('🎯 Click detected on top card - opening job details for:', job.title);
+                    handleViewDetails(job);
+                  }}
                   onDragEnd={(_, info) => {
                     if (!isTopCard) return;
 
                     const swipeThreshold = 100;
                     const swipeVelocity = 300;
+                    const clickThreshold = 5; // Maximum distance for a click
+                    const clickVelocityThreshold = 50; // Maximum velocity for a click
+
+                    // Calculate total drag distance
+                    const dragDistance = Math.sqrt(
+                      Math.pow(info.offset.x, 2) + Math.pow(info.offset.y, 2)
+                    );
+                    const totalVelocity = Math.sqrt(
+                      Math.pow(info.velocity.x, 2) + Math.pow(info.velocity.y, 2)
+                    );
 
                     console.log('🎯 Drag ended on top card:', {
                       offsetX: info.offset.x,
+                      offsetY: info.offset.y,
                       velocityX: info.velocity.x,
+                      velocityY: info.velocity.y,
+                      dragDistance,
+                      totalVelocity,
                       threshold: swipeThreshold
                     });
 
+                    // Check if this was a click (minimal movement and velocity)
+                    if (dragDistance < clickThreshold && totalVelocity < clickVelocityThreshold) {
+                      console.log('🎯 Drag-click detected - opening job details for:', job.title);
+                      handleViewDetails(job);
+                      return;
+                    }
+
+                    // Handle as swipe
                     const shouldSwipeRight = info.offset.x > swipeThreshold || info.velocity.x > swipeVelocity;
                     const shouldSwipeLeft = info.offset.x < -swipeThreshold || info.velocity.x < -swipeVelocity;
 
@@ -308,6 +381,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
                     variant={isTopCard ? "swipe" : "grid"}
                     onSave={() => handleJobSave(job)}
                     onShare={() => handleJobShare(job)}
+                    onViewDetails={handleViewDetails}
                     isApplying={isApplying === job.id}
                     feedback={feedback?.jobId === job.id ? feedback : undefined}
                     matchScore={Math.floor(Math.random() * 20) + 80} // Mock match score
@@ -482,6 +556,18 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           </div>
         </div>
       </motion.div>
+
+      {/* Job Detail Modal */}
+      <JobDetailModal
+        job={selectedJob}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onApply={handleModalApply}
+        onSave={handleModalSave}
+        onShare={handleModalShare}
+        matchScore={selectedJob ? Math.floor(Math.random() * 20) + 80 : undefined}
+        isApplying={selectedJob ? isApplying === selectedJob.id : false}
+      />
     </div>
   );
 }

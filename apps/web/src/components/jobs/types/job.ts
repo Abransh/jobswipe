@@ -110,6 +110,7 @@ export interface JobCardProps {
   onSave?: (jobId: string) => void;
   onShare?: (jobId: string) => void;
   onMoreInfo?: (jobId: string) => void;
+  onViewDetails?: (job: JobData) => void;
   isApplying?: boolean;
   feedback?: { type: 'success' | 'error' | 'info'; message: string; jobId?: string };
   isLoading?: boolean;

@@ -34,6 +34,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
   onSave,
   onShare,
   onMoreInfo,
+  onViewDetails,
   isApplying = false,
   feedback,
   isLoading = false,
@@ -76,6 +77,21 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
       onSwipeRight(job.id);
     }
   }, [onApply, onSwipeRight, job.id]);
+
+  // Handle card click to view details (simplified)
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // Prevent card click if clicking on action buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    // This will be handled by parent component for swipe variant
+    // Only handle click for non-swipe variants
+    if (variant !== 'swipe' && onViewDetails) {
+      console.log('🎯 Card clicked - opening details for:', job.title);
+      onViewDetails(job);
+    }
+  }, [variant, onViewDetails, job]);
 
   // Show match score on mount
   useEffect(() => {
@@ -137,6 +153,8 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
         "backdrop-blur-xl bg-white/90",
         // Hover states
         "transition-all duration-300 ease-out",
+        // Cursor pointer when onViewDetails is available
+        onViewDetails && "cursor-pointer",
         className
       )}
       style={{
@@ -149,6 +167,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
       whileHover={variant === 'swipe' ? "hover" : undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
       {...props}
     >
       {/* Swipe feedback is now handled by parent wrapper */}

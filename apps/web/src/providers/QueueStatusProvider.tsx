@@ -90,7 +90,7 @@ export function QueueStatusProvider({ children, apiUrl }: QueueStatusProviderPro
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
-        maxReconnectionDelay: 5000,
+        reconnectionDelayMax: 5000,
       });
 
       // Connection event handlers
@@ -172,7 +172,6 @@ export function QueueStatusProvider({ children, apiUrl }: QueueStatusProviderPro
           status: 'completed',
           success: data.success,
           completedAt: new Date().toISOString(),
-          responseData: data.responseData,
         });
       });
 
@@ -188,7 +187,6 @@ export function QueueStatusProvider({ children, apiUrl }: QueueStatusProviderPro
           status: 'failed',
           success: false,
           errorMessage: data.errorMessage,
-          errorType: data.errorType,
           completedAt: new Date().toISOString(),
         });
       });
@@ -226,7 +224,11 @@ export function QueueStatusProvider({ children, apiUrl }: QueueStatusProviderPro
     if (!socket || !isConnected) return;
 
     socket.emit('subscribe-application', applicationId);
-    setSubscribedApplications(prev => new Set([...prev, applicationId]));
+    setSubscribedApplications(prev => {
+      const newSet = new Set(prev);
+      newSet.add(applicationId);
+      return newSet;
+    });
   }, [socket, isConnected]);
 
   // Unsubscribe from application updates

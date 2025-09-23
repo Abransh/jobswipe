@@ -371,12 +371,12 @@ export class WebSocketClient extends EventEmitter {
   }
 
   private resubscribe(): void {
-    for (const channel of this.subscriptions) {
+    this.subscriptions.forEach(channel => {
       this.send({
         type: 'subscribe',
         data: { channel }
       });
-    }
+    });
   }
 
   // =============================================================================
