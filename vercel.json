@@ -1,8 +1,8 @@
 {
   "version": 2,
   "name": "jobswipe-web",
-  "buildCommand": "cd apps/web && npm run build",
-  "devCommand": "cd apps/web && npm run dev",
+  "buildCommand": "pnpm run build:web",
+  "devCommand": "pnpm run dev:web",
   "installCommand": "npm install -g pnpm && pnpm install --frozen-lockfile",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs",
