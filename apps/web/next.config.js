@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Enable app directory
-    appDir: true,
-    // Server components logging
-    logging: {
-      level: 'verbose',
-    },
+    // Note: appDir is no longer needed in Next.js 15 (stable)
+    // Server components logging (updated format)
+    serverComponentsExternalPackages: [],
   },
   // TypeScript configuration
   typescript: {
