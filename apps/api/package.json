@@ -15,11 +15,11 @@
     "start": "node dist/index.js",
     "start:minimal": "node dist/minimal-index.js",
     "start:production": "NODE_ENV=production node dist/minimal-index.js",
-    "db:generate": "cd ../../packages/database && pnpm run generate",
-    "db:migrate": "cd ../../packages/database && pnpm run migrate",
-    "db:seed": "cd ../../packages/database && pnpm run seed",
-    "db:studio": "cd ../../packages/database && pnpm run studio",
-    "db:reset": "cd ../../packages/database && pnpm run reset",
+    "db:generate": "cd ../../packages/database && pnpm run db:generate",
+    "db:migrate": "cd ../../packages/database && pnpm run db:migrate",
+    "db:seed": "cd ../../packages/database && pnpm run db:seed",
+    "db:studio": "cd ../../packages/database && pnpm run db:studio",
+    "db:reset": "cd ../../packages/database && pnpm run db:reset",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "type-check": "tsc --noEmit",
@@ -27,8 +27,7 @@
     "test": "echo 'Tests not implemented yet'",
     "test:unit": "echo 'Unit tests not implemented yet'",
     "test:integration": "echo 'Integration tests not implemented yet'",
-    "clean": "rm -rf dist",
-    "postinstall": "pnpm run db:generate"
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@fastify/cors": "^8.4.0",
