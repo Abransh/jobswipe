@@ -630,8 +630,12 @@ class QueueService {
 // QUEUE PLUGIN
 // =============================================================================
 
-const queuePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
-  const config: QueueConfig = {
+interface QueuePluginOptions {}
+
+const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
+  fastify: FastifyInstance,
+  options: QueuePluginOptions
+) => {  const config: QueueConfig = {
     redis: {
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -707,6 +711,8 @@ const queuePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
   // Decorate Fastify instance
   fastify.decorate('queueService', queueService);
+  fastify.decorate('applicationQueue', queueService); // Alias for routes compatibility
+
 
   // Connect WebSocket service if available (after websocket plugin loads)
   fastify.addHook('onReady', async () => {
@@ -800,6 +806,8 @@ const queuePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 declare module 'fastify' {
   interface FastifyInstance {
     queueService: QueueService;
+    applicationQueue: any; // For BullMQ Job access in routes
+
   }
 }
 

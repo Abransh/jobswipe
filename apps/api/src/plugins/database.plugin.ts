@@ -6,7 +6,7 @@
  * @security Production-grade database connection with proper error handling
  */
 
-import { FastifyInstance, FastifyPluginAsync } from 'fastify';
+import { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import { getEnvironmentConfig } from '../utils/env-validation';
 
@@ -32,7 +32,7 @@ try {
 // INTERFACES & TYPES
 // =============================================================================
 
-interface DatabasePluginOptions {
+interface DatabasePluginOptions extends FastifyPluginOptions {
   connectionString?: string;
   poolSize?: number;
   timeout?: number;

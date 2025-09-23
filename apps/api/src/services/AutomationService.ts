@@ -642,4 +642,53 @@ export class AutomationService extends EventEmitter {
     // For now, just log
     this.fastify.log.info(`Updating application in database: ${application.applicationId} (${application.status})`);
   }
+
+  /**
+   * Execute job application immediately (for API routes)
+   */
+  async executeJobApplication(
+    jobData: any,
+    userProfile: any,
+    options: any
+  ): Promise<{ status: string; executionMode: string; message: string; progress?: number }> {
+    try {
+      // Create job application data structure
+      const applicationData: JobApplicationData = {
+        userId: options.application_id || 'api-user',
+        jobData: {
+          id: jobData.job_id || jobData.id,
+          title: jobData.title,
+          company: jobData.company,
+          applyUrl: jobData.apply_url || jobData.applyUrl,
+          location: jobData.location,
+          description: jobData.description
+        },
+        userProfile: {
+          firstName: userProfile.firstName,
+          lastName: userProfile.lastName,
+          email: userProfile.email,
+          phone: userProfile.phone || '',
+          resumeUrl: userProfile.resume?.url
+        },
+        options: {
+          headless: options.execution_mode === 'server',
+          timeout: 30000,
+          maxRetries: 2
+        }
+      };
+
+      // Queue the application for processing
+      const applicationId = await this.queueApplication(applicationData);
+
+      return {
+        status: 'QUEUED',
+        executionMode: options.execution_mode || 'server',
+        message: 'Application queued for processing',
+        progress: 10
+      };
+    } catch (error) {
+      this.fastify.log.error('Failed to execute job application:', error);
+      throw error;
+    }
+  }
 }

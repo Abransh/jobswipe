@@ -929,6 +929,43 @@ export class WebSocketService extends EventEmitter {
     this.stop();
     this.removeAllListeners();
   }
+
+  // =============================================================================
+  // ALIAS METHODS FOR ROUTE COMPATIBILITY
+  // =============================================================================
+
+  /**
+   * Alias for sendApplicationStatusUpdate (for route compatibility)
+   */
+  async emitApplicationStatusUpdate(update: ApplicationStatusUpdate): Promise<void> {
+    return this.sendApplicationStatusUpdate(update);
+  }
+
+  /**
+   * Alias for sendNotification (for route compatibility)
+   */
+  async emitNotification(userId: string, notification: {
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message: string;
+    data?: any;
+  }): Promise<void> {
+    return this.sendNotification(userId, notification);
+  }
+
+  /**
+   * Alias for sendQueuePositionUpdate (for route compatibility)
+   */
+  async emitQueuePositionUpdate(update: QueuePositionUpdate): Promise<void> {
+    return this.sendQueuePositionUpdate(update);
+  }
+
+  /**
+   * Alias for sendAutomationProgressUpdate (for route compatibility)
+   */
+  async emitAutomationProgress(update: AutomationProgressUpdate): Promise<void> {
+    return this.sendAutomationProgressUpdate(update);
+  }
 }
 
 export default WebSocketService;
