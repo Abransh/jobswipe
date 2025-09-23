@@ -339,3 +339,4 @@ automation-results/
 
 # User data exports (GDPR)
 user-exports/
+.vercel
