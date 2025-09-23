@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    // Note: appDir is no longer needed in Next.js 15 (stable)
-    // Server components logging (updated format)
-    serverComponentsExternalPackages: [],
-  },
+  // Server components configuration (Next.js 15)
+  serverExternalPackages: [],
   // TypeScript configuration
   typescript: {
     // Dangerously allow production builds to successfully complete even if your project has type errors

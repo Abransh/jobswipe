@@ -28,7 +28,6 @@
     "test:unit": "echo 'Unit tests not implemented yet'",
     "test:integration": "echo 'Integration tests not implemented yet'",
     "clean": "rm -rf dist",
-    "preinstall": "cd ../../ && pnpm install",
     "postinstall": "pnpm run db:generate"
   },
   "dependencies": {
