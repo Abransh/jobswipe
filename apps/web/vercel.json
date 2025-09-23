@@ -1,6 +1,21 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "version": 2,
+  "name": "jobswipe-web",
+  "buildCommand": "cd ../.. && pnpm run build:web",
+  "devCommand": "cd ../.. && pnpm run dev:web",
+  "installCommand": "cd ../.. && npm install -g pnpm && pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
-  "installCommand": "npm install"
+  "framework": "nextjs",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
+  "regions": ["iad1"],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
