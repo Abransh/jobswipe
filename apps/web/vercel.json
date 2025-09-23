@@ -3,7 +3,7 @@
   "name": "jobswipe-web",
   "buildCommand": "cd ../.. && pnpm run build:web",
   "devCommand": "cd ../.. && pnpm run dev:web",
-  "installCommand": "cd ../.. && npm install -g pnpm && pnpm install --frozen-lockfile",
+  "installCommand": "cd ../.. && npm install -g pnpm && pnpm install --no-frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
