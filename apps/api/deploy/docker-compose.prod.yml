@@ -1,0 +1,86 @@
+# ==============================================================================
+# JobSwipe API - Production Docker Compose for DigitalOcean
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # Main API Service
+  jobswipe-api:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: jobswipe-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      # Application
+      NODE_ENV: production
+      API_PORT: 3001
+      API_HOST: 0.0.0.0
+
+      # Database (DigitalOcean Managed Database)
+      DATABASE_URL: ${DATABASE_URL}
+
+      # Redis (DigitalOcean Managed Redis)
+      REDIS_URL: ${REDIS_URL}
+
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+
+      # Logging
+      LOG_LEVEL: info
+
+      # API Configuration
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-900000}
+
+    networks:
+      - jobswipe-network
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Nginx Reverse Proxy (Optional - for SSL termination)
+  nginx:
+    image: nginx:alpine
+    container_name: jobswipe-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      jobswipe-api:
+        condition: service_healthy
+    networks:
+      - jobswipe-network
+
+networks:
+  jobswipe-network:
+    driver: bridge
+
+# Volumes for persistent data (if needed)
+volumes:
+  logs_data:
+    driver: local
