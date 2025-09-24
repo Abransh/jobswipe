@@ -122,6 +122,3 @@ alerts:
 # Features
 features:
   - buildpack-stack=ubuntu-22
-
-# Region
-region: nyc3

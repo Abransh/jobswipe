@@ -17,8 +17,18 @@ import {
   SecurityMiddlewareService
 } from '@jobswipe/shared';
 
-// Import createDesktopTokenConfig directly
-const { createDesktopTokenConfig } = require('@jobswipe/shared/dist/services/jwt-token.service');
+// Mock createDesktopTokenConfig for development
+const createDesktopTokenConfig = (userId: any, email: string, name?: string, role?: string, deviceId?: string, deviceName?: string) => ({
+  sub: userId,
+  email,
+  name,
+  role: role || 'user',
+  device_id: deviceId,
+  device_name: deviceName,
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+  type: 'desktop'
+});
 import { 
   TokenExchangeRequest,
   TokenExchangeResponse,
