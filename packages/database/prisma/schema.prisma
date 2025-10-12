@@ -96,18 +96,21 @@ model UserProfile {
   // Personal Information
   firstName    String?
   lastName     String?
+  fullName     String? // Full name from onboarding
   displayName  String?
   phone        String?
   dateOfBirth  DateTime?
   gender       String?
-  
+
   // Location Details
   address      String?
   city         String?
   state        String?
   country      String?
+  currentCountry String? // Current country for work authorization
+  currentLocation String? // Current location string
   postalCode   String?
-  location     String? // Current location string
+  location     String? // Legacy location string
   
   // Professional Links
   website      String?
@@ -147,8 +150,13 @@ model UserProfile {
   showEmail          Boolean @default(false)
   showPhone          Boolean @default(false)
   
-  // Automation Fields
-  workAuthorization   String?   // citizen, visa, etc.
+  // Automation Fields & Work Authorization
+  workAuthorization   String?   // Legacy field
+  workAuthorizationStatus String? // Current country work auth status (CITIZEN, PERMANENT_RESIDENT, etc.)
+  canWorkInCurrentCountry Boolean? // Can work in current country
+  interestedInInternational Boolean? @default(false) // Interested in international jobs
+  targetRegions       String[] // Target international regions (US, EU, UK, CANADA, etc.)
+  workAuthByRegion    Json? // Work authorization status by region
   coverLetterTemplate String?   // Default cover letter template
   automationPreferences Json?   // Automation settings and preferences
   
