@@ -5,6 +5,8 @@ import { PrismaClient, ApplicationStatus, QueueStatus, SwipeDirection, Applicati
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
+  console.warn('⚠️ DEPRECATION WARNING: /api/queue/swipe-right is deprecated. Use POST /api/v1/jobs/:id/swipe instead.');
+
   try {
     const authenticatedUser = await authenticateRequest(request);
     const body = await request.json();

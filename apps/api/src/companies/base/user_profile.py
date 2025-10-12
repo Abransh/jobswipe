@@ -165,19 +165,22 @@ class JobData(BaseModel):
 
 class AutomationConfig(BaseModel):
     """Configuration for automation execution"""
-    
+
     # Browser settings
     headless: bool = True
     timeout: int = 300000  # 5 minutes in milliseconds
     screenshot_enabled: bool = True
-    
+
     # Retry settings
     max_retries: int = 3
     retry_delay: int = 5000  # 5 seconds in milliseconds
-    
+
     # Captcha handling
     captcha_timeout: int = 120000  # 2 minutes
     manual_captcha_fallback: bool = True
+
+    # Proxy configuration (REQUIRED for free tier server automation)
+    proxy: Optional[Dict[str, Any]] = None  # Contains: host, port, username, password, type
     
     # Company-specific settings
     company_settings: Dict[str, Any] = {}

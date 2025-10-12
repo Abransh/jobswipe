@@ -28,21 +28,43 @@ export function JobGridInterface({ jobs, searchQuery, filters, onApplicationUpda
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string, jobId?: string } | null>(null);
 
   const handleJobApply = useCallback(async (job: JobData) => {
+    console.log('🔵 [APPLY START - GRID VIEW]', {
+      jobId: job.id,
+      jobTitle: job.title,
+      company: job.company.name,
+      timestamp: new Date().toISOString(),
+      view: 'grid'
+    });
+
     setApplyingJobs(prev => new Set(prev).add(job.id));
     setFeedback(null);
-    
+
     try {
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
-      
+
       const metadata = {
         source: 'web' as const,
         deviceId,
         userAgent: navigator.userAgent,
       };
 
+      console.log('🟡 [API CALL - GRID VIEW]', {
+        endpoint: `/api/v1/jobs/${job.id}/swipe`,
+        metadata,
+        priority
+      });
+
       const response = await jobsApi.swipeRight(job.id, metadata, { priority });
-      
+
+      console.log('🟢 [API RESPONSE - GRID VIEW]', {
+        success: response.success,
+        action: response.data?.action,
+        executionMode: response.data?.executionMode,
+        remainingApps: response.data?.serverAutomation?.remainingServerApplications,
+        correlationId: response.correlationId
+      });
+
       if (response.success && response.data) {
         const newStats = {
           totalApplications: applicationStats.totalApplications + 1,
@@ -51,29 +73,46 @@ export function JobGridInterface({ jobs, searchQuery, filters, onApplicationUpda
         };
         setApplicationStats(newStats);
         onApplicationUpdate?.(newStats);
-        
+
         setFeedback({
           type: 'success',
-          message: `Application queued for ${job.title}! 🚀`,
+          message: `Application queued for ${job.title}! 🚀${response.data.serverAutomation?.remainingServerApplications !== undefined ? ` (${response.data.serverAutomation.remainingServerApplications} server apps remaining)` : ''}`,
           jobId: job.id
+        });
+
+        console.log('✅ [APPLY COMPLETE - GRID VIEW]', {
+          jobId: job.id,
+          success: true,
+          totalApplications: newStats.totalApplications
         });
       } else {
         throw new Error(response.error || 'Failed to queue application');
       }
-      
+
     } catch (error) {
-      console.error('❌ Failed to queue job application:', error);
-      
+      console.error('🔴 [API ERROR - GRID VIEW]', {
+        jobId: job.id,
+        jobTitle: job.title,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
+
       let errorMessage = 'Failed to apply to job. Please try again.';
-      
+
       if (error instanceof Error) {
-        if (error.message.includes('User not authenticated')) {
+        const message = error.message.toLowerCase();
+        if (message.includes('not authenticated') || message.includes('401')) {
           errorMessage = 'Please log in to apply to jobs.';
-        } else if (error.message.includes('Already applied')) {
+        } else if (message.includes('already applied') || message.includes('409')) {
           errorMessage = 'You have already applied to this job.';
+        } else if (message.includes('rate limit') || message.includes('429')) {
+          errorMessage = 'Too many applications. Please wait a moment.';
+        } else if (message.includes('proxy')) {
+          errorMessage = 'Server automation unavailable. Try again or use desktop app.';
         }
       }
-      
+
       setFeedback({
         type: 'error',
         message: errorMessage,
@@ -85,7 +124,7 @@ export function JobGridInterface({ jobs, searchQuery, filters, onApplicationUpda
         newSet.delete(job.id);
         return newSet;
       });
-      
+
       setTimeout(() => setFeedback(null), 5000);
     }
   }, [applicationStats, onApplicationUpdate]);

@@ -210,17 +210,42 @@ export class ServerAutomationService extends EventEmitter {
     }
 
     try {
-      // Get proxy for this automation
+      // Get proxy for this automation (REQUIRED for free tier, optional for paid)
       const proxy = await this.proxyRotator.getNextProxy();
-      
-      // Execute the automation using Python Bridge
+
+      // CRITICAL: Free tier MUST use proxy for server automation
+      // This is enforced at the AutomationLimits layer, but we add defense-in-depth here
+      if (!proxy) {
+        this.fastify.log.warn({
+          ...logContext,
+          event: 'proxy_unavailable',
+          message: 'No proxy available for server automation - this should be caught earlier'
+        });
+
+        throw new Error(
+          'Proxy service unavailable. Please try again later or use desktop app for unlimited applications.'
+        );
+      }
+
+      this.fastify.log.info({
+        ...logContext,
+        event: 'proxy_selected',
+        message: `Using proxy: ${proxy.host}:${proxy.port}`,
+        proxyProvider: proxy.provider,
+        proxyType: proxy.proxyType,
+        proxyCountry: proxy.country
+      });
+
+      // Execute the automation using Python Bridge with proxy
       const result = await this.executeWithPythonBridge(request, proxy, logContext.correlationId);
-      
-      // Report proxy success
-      if (proxy && result.success) {
+
+      // Report proxy health after execution
+      if (result.success) {
         await this.proxyRotator.reportProxyHealth(proxy.id, true, result.executionTime);
-      } else if (proxy && !result.success) {
+        this.fastify.log.debug(`✅ Proxy health reported: ${proxy.id} - SUCCESS`);
+      } else {
         await this.proxyRotator.reportProxyHealth(proxy.id, false, undefined, result.error);
+        this.fastify.log.debug(`⚠️ Proxy health reported: ${proxy.id} - FAILURE: ${result.error}`);
       }
 
       // Add server metadata
@@ -659,6 +684,8 @@ export class ServerAutomationService extends EventEmitter {
     if (url.includes('greenhouse.io') || url.includes('grnh.se')) {
       return 'greenhouse';
     }
+
+ 
     
     if (url.includes('linkedin.com')) {
       return 'linkedin';

@@ -1,41 +1,109 @@
-can you tell me what my terminal logs say 
-
-
-{"level":30,"time":1757860084494,"pid":7276,"hostname":"192.168.1.9","reqId":"req-4","req":{"method":"POST","url":"/v1/queue/apply","hostname":"localhost:3001","remoteAddress":"::1","remotePort":52856},"msg":"incoming request"}
-2025-09-14T14:28:04.494Z INFO [9lQMbBHy] Request started: POST /v1/queue/apply
-{"level":30,"time":1757860084511,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","event":"request_started","message":"Job application request started"}
-{"level":30,"time":1757860085741,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"job_validated","message":"Job posting found and validated","jobTitle":"sexydeveloper","company":"Jobswipe","jobLocation":null}
-{"level":30,"time":1757860086236,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"database_transaction_started","message":"Starting database transaction for job application"}
-Job application queued: 2 for user a627f660-d0e8-4cad-a363-06eadcccfd75
-{"level":30,"time":1757860088008,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"bullmq_job_queued","message":"Application queued in BullMQ for processing","queueJobId":"2","queueName":"priority","executionMode":"worker"}
-prisma:error 
-Invalid `tx.applicationQueue.update()` invocation in
-/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37
-
-  578 }
-  579 
-  580 // Update the database entry with queue job ID
-→ 581 await tx.applicationQueue.update({
-        where: {
-          id: "ee0408e8-9874-463a-b776-1080408bbb88"
-        },
-        data: {
-          status: "QUEUED",
-                  ~~~~~~~~
-          automationConfig: {
-            source: "web",
-            deviceId: "web_1755960555682_r4kskpk9g",
-            timestamp: "2025-09-14T14:28:06.984Z",
-            queueJobId: "2",
-            queuedAt: "2025-09-14T14:28:08.014Z",
-            isPriority: true
-          }
-        }
-      })
-
-Invalid value for argument `status`. Expected QueueStatus.
-{"level":50,"time":1757860088024,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"bullmq_queue_failed","message":"Failed to queue job in BullMQ - job saved for manual processing","error":"\nInvalid `tx.applicationQueue.update()` invocation in\n/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37\n\n  578 }\n  579 \n  580 // Update the database entry with queue job ID\n→ 581 await tx.applicationQueue.update({\n        where: {\n          id: \"ee0408e8-9874-463a-b776-1080408bbb88\"\n        },\n        data: {\n          status: \"QUEUED\",\n                  ~~~~~~~~\n          automationConfig: {\n            source: \"web\",\n            deviceId: \"web_1755960555682_r4kskpk9g\",\n            timestamp: \"2025-09-14T14:28:06.984Z\",\n            queueJobId: \"2\",\n            queuedAt: \"2025-09-14T14:28:08.014Z\",\n            isPriority: true\n          }\n        }\n      })\n\nInvalid value for argument `status`. Expected QueueStatus.","errorStack":"PrismaClientValidationError: \nInvalid `tx.applicationQueue.update()` invocation in\n/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:37\n\n  578 }\n  579 \n  580 // Update the database entry with queue job ID\n→ 581 await tx.applicationQueue.update({\n        where: {\n          id: \"ee0408e8-9874-463a-b776-1080408bbb88\"\n        },\n        data: {\n          status: \"QUEUED\",\n                  ~~~~~~~~\n          automationConfig: {\n            source: \"web\",\n            deviceId: \"web_1755960555682_r4kskpk9g\",\n            timestamp: \"2025-09-14T14:28:06.984Z\",\n            queueJobId: \"2\",\n            queuedAt: \"2025-09-14T14:28:08.014Z\",\n            isPriority: true\n          }\n        }\n      })\n\nInvalid value for argument `status`. Expected QueueStatus.\n    at wn (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:29:1363)\n    at $n.handleRequestError (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6958)\n    at $n.handleAndLogRequestError (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6623)\n    at $n.request (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:121:6307)\n    at async l (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:130:9633)\n    at async <anonymous> (/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:581:11)\n    at async Proxy._transactionWithCallback (/Users/abranshbaliyan/jobswipe/packages/database/src/generated/runtime/library.js:130:8000)\n    at async Object.applyHandler (/Users/abranshbaliyan/jobswipe/apps/api/src/routes/queue.routes.ts:379:20)","queueServiceAvailable":true,"websocketAvailable":true}
-{"level":30,"time":1757860088299,"pid":7276,"hostname":"192.168.1.9","correlationId":"b31b8e8c-940e-47b6-90b8-b4b4a02ba856","requestId":"req-4","endpoint":"/v1/queue/apply","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36","ip":"::1","userId":"a627f660-d0e8-4cad-a363-06eadcccfd75","userEmail":"trynavigo@gmail.com","jobId":"c2f94a0f-9c28-4b36-82c8-79d963a27a9c","source":"web","event":"request_completed_success","message":"Job application request completed successfully","processingTimeMs":3788,"applicationId":"ee0408e8-9874-463a-b776-1080408bbb88","queuePosition":22}
-2025-09-14T14:28:04.494Z WARN [9lQMbBHy] Request completed in 3807ms
-2025-09-14T14:28:04.494Z INFO [9lQMbBHy] Request completed: 201
-{"level":30,"time":1757860088310,"pid":7276,"hostname":"192.168.1.9","reqId":"req-4","res":{"statusCode":201},"responseTime":3807.5534589998424,"msg":"request completed"}
+   correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    companyAutomation: "greenhouse"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    jobId: "c2f94a0f-9c28-4b36-82c8-79d963a27a9c"
+    serverId: "server_c61a88eb"
+    event: "server_automation_started"
+    message: "Starting server automation for greenhouse"
+    jobTitle: "sexydeveloper"
+    company: "Jobswipe"
+[20:23:10 UTC] INFO:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    companyAutomation: "greenhouse"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    jobId: "c2f94a0f-9c28-4b36-82c8-79d963a27a9c"
+    serverId: "server_c61a88eb"
+    event: "proxy_selected"
+    message: "Using proxy: 127.0.0.1:8080"
+    proxyProvider: "development"
+    proxyType: "datacenter"
+    proxyCountry: "US"
+[20:23:10 UTC] INFO:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    companyAutomation: "greenhouse"
+    jobTitle: "sexydeveloper"
+    company: "Jobswipe"
+    event: "python_execution_started"
+    message: "Starting Python automation for greenhouse"
+    scriptPath: "/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/run_automation.py"
+[20:23:10 UTC] INFO:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    companyAutomation: "greenhouse"
+    jobTitle: "sexydeveloper"
+    company: "Jobswipe"
+    event: "python_execution_debug"
+    message: "Python execution environment"
+    pythonPath: "/Users/abranshbaliyan/jobswipe/venv/bin/python"
+    scriptPath: "/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/run_automation.py"
+    workingDirectory: "/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse"
+    dataSource: "bridge"
+    dataFilePath: "/tmp/job_data_494acc34-3740-4772-92ee-5a019bea766e_1760214190317.json"
+2025-10-11T20:23:08.774Z WARN  [ny148z-5] Request completed in 2971ms
+  Performance: 2971ms
+2025-10-11T20:23:08.774Z INFO  [ny148z-5] Request completed: 200
+[20:23:11 UTC] ERROR:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    companyAutomation: "greenhouse"
+    jobTitle: "sexydeveloper"
+    company: "Jobswipe"
+    event: "python_complete_failure"
+    message: "Python execution failed completely"
+    exitCode: 1
+    parseError: "Failed to parse Python result: Error: No valid JSON result found in Python output"
+    stderr: "Traceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 26, in __getattr__\n    module = import_module(full_module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/session.py\", line 11, in <module>\n    from cdp_use import CDPClient\nModuleNotFoundError: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 108, in __getattr__\n    attr = getattr(module, attr_name)\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 32, in __getattr__\n    raise ImportError(f'Failed to import {name} from {full_module_path}: {e}') from e\nImportError: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 103, in __getattr__\n    module = import_module(module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/agent/service.py\", line 36, in <module>\n    from browser_use import Browser, BrowserProfile, BrowserSession\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/run_automation.py\", line 21, in <module>\n    from greenhouse import GreenhouseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/greenhouse.py\", line 16, in <module>\n    from database_automation import DatabaseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/database_automation.py\", line 19, in <module>\n    from base_automation import BaseJobAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/base_automation.py\", line 19, in <module>\n    from browser_use import Agent, Controller, ActionResult\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Agent from browser_use.agent.service: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'"
+    stdout: ""
+[20:23:11 UTC] ERROR:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    companyAutomation: "greenhouse"
+    jobTitle: "sexydeveloper"
+    company: "Jobswipe"
+    event: "python_execution_failed"
+    message: "Python automation failed"
+    errorStack: "Error: Python process failed with code 1. Stderr: Traceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 26, in __getattr__\n    module = import_module(full_module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/session.py\", line 11, in <module>\n    from cdp_use import CDPClient\nModuleNotFoundError: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 108, in __getattr__\n    attr = getattr(module, attr_name)\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 32, in __getattr__\n    raise ImportError(f'Failed to import {name} from {full_module_path}: {e}') from e\nImportError: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 103, in __getattr__\n    module = import_module(module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/agent/service.py\", line 36, in <module>\n    from browser_use import Browser, BrowserProfile, BrowserSession\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/run_automation.py\", line 21, in <module>\n    from greenhouse import GreenhouseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/greenhouse.py\", line 16, in <module>\n    from database_automation import DatabaseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/database_automation.py\", line 19, in <module>\n    from base_automation import BaseJobAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/base_automation.py\", line 19, in <module>\n    from browser_use import Agent, Controller, ActionResult\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Agent from browser_use.agent.service: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n. Parse error: Error: Failed to parse Python result: Error: No valid JSON result found in Python output\n    at ChildProcess.<anonymous> (/Users/abranshbaliyan/jobswipe/apps/api/src/services/PythonBridge.ts:515:18)\n    at ChildProcess.emit (node:events:524:28)\n    at maybeClose (node:internal/child_process:1104:16)\n    at Socket.<anonymous> (node:internal/child_process:456:11)\n    at Socket.emit (node:events:524:28)\n    at Pipe.<anonymous> (node:net:343:12)"
+    error: "Python process failed with code 1. Stderr: Traceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 26, in __getattr__\n    module = import_module(full_module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/session.py\", line 11, in <module>\n    from cdp_use import CDPClient\nModuleNotFoundError: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 108, in __getattr__\n    attr = getattr(module, attr_name)\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/browser/__init__.py\", line 32, in __getattr__\n    raise ImportError(f'Failed to import {name} from {full_module_path}: {e}') from e\nImportError: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 103, in __getattr__\n    module = import_module(module_path)\n  File \"/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py\", line 88, in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen importlib._bootstrap>\", line 1387, in _gcd_import\n  File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load\n  File \"<frozen importlib._bootstrap>\", line 1331, in _find_and_load_unlocked\n  File \"<frozen importlib._bootstrap>\", line 935, in _load_unlocked\n  File \"<frozen importlib._bootstrap_external>\", line 1026, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/agent/service.py\", line 36, in <module>\n    from browser_use import Browser, BrowserProfile, BrowserSession\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/run_automation.py\", line 21, in <module>\n    from greenhouse import GreenhouseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/greenhouse/greenhouse.py\", line 16, in <module>\n    from database_automation import DatabaseAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/database_automation.py\", line 19, in <module>\n    from base_automation import BaseJobAutomation\n  File \"/Users/abranshbaliyan/jobswipe/apps/desktop/companies/base/base_automation.py\", line 19, in <module>\n    from browser_use import Agent, Controller, ActionResult\n  File \"/Users/abranshbaliyan/jobswipe/browser-use/browser_use/__init__.py\", line 113, in __getattr__\n    raise ImportError(f'Failed to import {name} from {module_path}: {e}') from e\nImportError: Failed to import Agent from browser_use.agent.service: Failed to import Browser from browser_use.browser: Failed to import BrowserSession from browser_use.browser.session: No module named 'cdp_use'\n. Parse error: Error: Failed to parse Python result: Error: No valid JSON result found in Python output"
+[20:23:11 UTC] INFO:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    applicationId: "494acc34-3740-4772-92ee-5a019bea766e"
+    companyAutomation: "greenhouse"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    jobId: "c2f94a0f-9c28-4b36-82c8-79d963a27a9c"
+    serverId: "server_c61a88eb"
+    event: "server_automation_completed"
+    message: "Server automation completed"
+    success: false
+    executionTimeMs: 0
+    stepsCompleted: 0
+    screenshotsTaken: 0
+    captchaEvents: 0
+[20:23:11 UTC] INFO: Recorded server application for user a627f660-d0e8-4cad-a363-06eadcccfd75: 1/50
+[20:23:11 UTC] INFO:
+    correlationId: "5fc9eb3d-4cfc-4721-8f03-71a6008eaa44"
+    requestId: "req-2"
+    endpoint: "/v1/jobs/:id/swipe"
+    userAgent: "JobSwipe-Postman-Tests/1.0.0"
+    ip: "::1"
+    userId: "a627f660-d0e8-4cad-a363-06eadcccfd75"
+    userEmail: "trynavigo@gmail.com"
+    jobId: "c2f94a0f-9c28-4b36-82c8-79d963a27a9c"
+    swipeDirection: "RIGHT"
+    source: "web"
+    event: "server_automation_completed"
+    message: "Server automation completed from swipe"
+    success: false
+    processingTime: 2936
+[20:23:11 UTC] INFO: request completed
+    reqId: "req-2"
+    res: {
+      "statusCode": 200
+    }
+    responseTime: 2980.5867499113083

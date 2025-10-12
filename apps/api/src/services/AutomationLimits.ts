@@ -43,7 +43,7 @@ export class AutomationLimits extends EventEmitter {
   // Default limits by plan
   private readonly DEFAULT_LIMITS = {
     free: {
-      serverApplicationsLimit: 5,
+      serverApplicationsLimit: 15, // Generous free tier: 15 server automations with proxy rotation
       monthlyApplicationsLimit: 20,
       dailyApplicationsLimit: 3
     },

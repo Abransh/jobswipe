@@ -8,8 +8,7 @@ now we will complete the other necessary things, so the overview of the project 
   will run locally and then the proxy rotation wont be there since the job application will be applied to unique user's ip so
   it will be different, now understanding the project and understanding the part where we have build all the essential stuff
   check out @apps/api/ and @apps/desktop/ , while desktop folder, the electron folder is not yet perfect, we have to look into
-  it.  invoke @agent-jobswipe-tech-lead and @agent-fastify-backend-specialist @agent-ai-browser-automation-specialist  , use
-  these agents to understand together what all has to be done. Also the reason desktop app and redis and bullmq exists is , if
+  it.   , Also the reason desktop app and redis and bullmq exists is , if
   user downloaded the desktop app, and if user is on web and swipes right, we will queue the application and as soon as user
   opens desktop the app retrives all the info and job id's user applied and then executes the python job applying scripts
   locally, you have to ultrathink and plan the next steps and find what all is missing

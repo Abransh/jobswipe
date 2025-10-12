@@ -253,13 +253,35 @@ class BaseJobAutomation(ABC):
             raise RuntimeError("No valid LLM API key found. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY")
     
     def _create_browser_session(self) -> BrowserSession:
-        """Create and return a browser session"""
-        browser_config = BrowserConfig(
-            headless=self.config.headless,
-            disable_security=True,
-            window_size={'width': 1920, 'height': 1080}
-        )
-        
+        """Create and return a browser session with optional proxy support"""
+        # Base browser configuration
+        browser_config_args = {
+            'headless': self.config.headless,
+            'disable_security': True,
+            'window_size': {'width': 1920, 'height': 1080}
+        }
+
+        # Add proxy configuration if provided
+        if hasattr(self.config, 'proxy') and self.config.proxy:
+            proxy_config = self.config.proxy
+            self.logger.info(f"Configuring browser with proxy: {proxy_config.get('host')}:{proxy_config.get('port')}")
+
+            # Format proxy URL for browser-use/Playwright
+            if proxy_config.get('username') and proxy_config.get('password'):
+                proxy_url = f"http://{proxy_config['username']}:{proxy_config['password']}@{proxy_config['host']}:{proxy_config['port']}"
+            else:
+                proxy_url = f"http://{proxy_config['host']}:{proxy_config['port']}"
+
+            browser_config_args['proxy'] = {
+                'server': proxy_url,
+                'bypass': None  # No proxy bypass
+            }
+
+            self.logger.info(f"✅ Proxy configured for automation: {proxy_config.get('type', 'unknown')} proxy")
+        else:
+            self.logger.info("No proxy configured - running without proxy")
+
+        browser_config = BrowserConfig(**browser_config_args)
         return BrowserSession(browser_config=browser_config)
     
     @abstractmethod

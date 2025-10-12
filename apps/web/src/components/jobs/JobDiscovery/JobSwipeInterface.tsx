@@ -47,9 +47,18 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   // Handle swipe events
   const handleSwipeLeft = useCallback(async (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
-    if (!job) return;
+    if (!job) {
+      console.error('❌ [JobSwipeInterface] Job not found for left swipe:', jobId);
+      return;
+    }
 
-    console.log('👈 [JobSwipeInterface] Passed on job:', job.title);
+    console.log('👈 [SWIPE LEFT]', {
+      jobId,
+      jobTitle: job.title,
+      company: job.company.name,
+      timestamp: new Date().toISOString(),
+      view: 'swipe'
+    });
 
     setSwipeStats(prev => ({
       ...prev,
@@ -67,9 +76,13 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       };
 
       await jobsApi.swipeLeft(job.id, metadata);
-      console.log('✅ [JobSwipeInterface] Left swipe recorded for:', job.title);
+      console.log('✅ [LEFT SWIPE RECORDED]', { jobId, jobTitle: job.title });
     } catch (error) {
-      console.error('❌ [JobSwipeInterface] Failed to record left swipe:', error);
+      console.error('🔴 [LEFT SWIPE ERROR]', {
+        jobId,
+        jobTitle: job.title,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
 
     // Move to next card
@@ -78,9 +91,18 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
 
   const handleSwipeRight = useCallback(async (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
-    if (!job) return;
+    if (!job) {
+      console.error('❌ [JobSwipeInterface] Job not found:', jobId);
+      return;
+    }
 
-    console.log('👉 [JobSwipeInterface] Applying to job:', job.title);
+    console.log('🔵 [SWIPE START]', {
+      jobId,
+      jobTitle: job.title,
+      company: job.company.name,
+      timestamp: new Date().toISOString(),
+      view: 'swipe'
+    });
 
     // Update stats immediately for UI feedback
     const newRightSwipes = swipeStats.rightSwipes + 1;
@@ -103,12 +125,26 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         userAgent: navigator.userAgent,
       };
 
+      console.log('🟡 [API CALL] Calling jobsApi.swipeRight', {
+        endpoint: `/api/v1/jobs/${job.id}/swipe`,
+        metadata,
+        priority
+      });
+
       const response = await jobsApi.swipeRight(job.id, metadata, { priority });
+
+      console.log('🟢 [API RESPONSE]', {
+        success: response.success,
+        action: response.data?.action,
+        executionMode: response.data?.executionMode,
+        remainingApps: response.data?.serverAutomation?.remainingServerApplications,
+        correlationId: response.correlationId
+      });
 
       if (response.success && response.data) {
         setFeedback({
           type: 'success',
-          message: `Application queued for ${job.title}! 🚀`,
+          message: `Application queued for ${job.title}! 🚀${response.data.serverAutomation?.remainingServerApplications !== undefined ? ` (${response.data.serverAutomation.remainingServerApplications} server apps remaining)` : ''}`,
           jobId: job.id
         });
 
@@ -122,12 +158,24 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
 
         // Move to next card after successful application
         setCurrentIndex(prev => Math.min(prev + 1, jobs.length - 1));
+
+        console.log('✅ [SWIPE COMPLETE]', {
+          jobId,
+          success: true,
+          totalApplications: newRightSwipes
+        });
       } else {
         throw new Error(response.error || 'Failed to queue application');
       }
 
     } catch (error) {
-      console.error('❌ Failed to queue job application:', error);
+      console.error('🔴 [API ERROR]', {
+        jobId,
+        jobTitle: job.title,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
 
       let errorMessage = 'Failed to apply to job. Please try again.';
 
@@ -141,6 +189,8 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           errorMessage = 'Too many applications. Please wait a moment.';
         } else if (message.includes('network') || message.includes('fetch')) {
           errorMessage = 'Network error. Please check your connection.';
+        } else if (message.includes('proxy')) {
+          errorMessage = 'Server automation unavailable. Try again or use desktop app.';
         }
       }
 

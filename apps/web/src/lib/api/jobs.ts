@@ -283,12 +283,34 @@ class JobsApiService {
       },
     };
 
-    console.log('👆 [Jobs API] Swiping job:', jobId, 'direction:', request.direction);
+    console.log('🌐 [Jobs API Client] Initiating swipe', {
+      jobId,
+      direction: request.direction,
+      source: request.metadata.source,
+      endpoint: `/jobs/${jobId}/swipe`,
+      timestamp: new Date().toISOString()
+    });
 
     const response = await this.apiRequest<SwipeJobResponse['data']>(`/jobs/${jobId}/swipe`, {
       method: 'POST',
       body: JSON.stringify(requestWithMetadata),
     });
+
+    if (response.success) {
+      console.log('✅ [Jobs API Client] Swipe successful', {
+        jobId,
+        direction: request.direction,
+        executionMode: response.data?.executionMode,
+        remainingApps: response.data?.serverAutomation?.remainingServerApplications
+      });
+    } else {
+      console.error('❌ [Jobs API Client] Swipe failed', {
+        jobId,
+        direction: request.direction,
+        error: response.error,
+        errorCode: response.errorCode
+      });
+    }
 
     return {
       success: response.success,
