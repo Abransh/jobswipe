@@ -429,6 +429,8 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
                   <JobCard
                     job={job}
                     variant={isTopCard ? "swipe" : "grid"}
+                    onSwipeLeft={() => handleSwipeLeft(job.id)}
+                    onSwipeRight={() => handleSwipeRight(job.id)}
                     onSave={() => handleJobSave(job)}
                     onShare={() => handleJobShare(job)}
                     onViewDetails={handleViewDetails}
