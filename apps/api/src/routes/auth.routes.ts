@@ -519,6 +519,7 @@ async function refreshTokenHandler(
 
 /**
  * Request password reset
+ * SECURITY: Implements proper token storage with expiration
  */
 async function passwordResetHandler(
   request: PasswordResetRouteRequest,
@@ -526,26 +527,60 @@ async function passwordResetHandler(
 ): Promise<PasswordResetResponse> {
   try {
     const validatedData = PasswordResetRequestSchema.parse(request.body);
-    
+
     // Find user
     const user = await findUserByEmail(validatedData.email);
-    
+
     // Always return success to prevent email enumeration
     const response: PasswordResetResponse = {
       success: true,
       message: 'If the email exists, a password reset link has been sent',
     };
-    
+
     if (user) {
-      // In a real implementation, you'd send an email with a reset token
-      // Generate reset token (in real app, store this in database)
+      // Generate cryptographically secure reset token
       const resetToken = generateSecureToken(32);
+
+      // Hash the token before storing (security best practice)
+      const crypto = require('crypto');
+      const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+      // Set token expiration (15 minutes from now)
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+      // Delete any existing reset tokens for this user (cleanup)
+      await request.server.db.verificationToken.deleteMany({
+        where: {
+          identifier: `password-reset:${user.email}`,
+        },
+      });
+
+      // Store hashed token in database with expiration
+      await request.server.db.verificationToken.create({
+        data: {
+          identifier: `password-reset:${user.email}`,
+          token: tokenHash,
+          expires: expiresAt,
+        },
+      });
+
+      // TODO: Send email with reset link containing the UNHASHED token
+      // The reset link would be: https://yourdomain.com/reset-password?token={resetToken}
+      // Email service integration:
+      // await sendPasswordResetEmail(user.email, resetToken);
+
+      request.server.log.info({
+        msg: 'Password reset token generated',
+        userId: user.id,
+        email: user.email,
+        expiresAt: expiresAt.toISOString(),
+      });
     }
-    
+
     return reply.status(200).send(response);
-    
+
   } catch (error) {
-    // Password reset error handled
+    request.server.log.error('Password reset error:', error);
     return reply.status(500).send({
       success: false,
       message: 'Password reset failed',
@@ -555,6 +590,7 @@ async function passwordResetHandler(
 
 /**
  * Complete password reset with token
+ * SECURITY: Validates token, checks expiration, ensures one-time use
  */
 async function passwordResetCompleteHandler(
   request: FastifyRequest<{ Body: { token: string; newPassword: string; source: string } }>,
@@ -562,18 +598,120 @@ async function passwordResetCompleteHandler(
 ): Promise<PasswordResetResponse> {
   try {
     const { token, newPassword, source } = request.body;
-    
-    // In a real implementation, you'd verify the reset token from database
-    // For now, just return success
-    // Password reset completed
-    
+
+    // Validate inputs
+    if (!token || !newPassword) {
+      return reply.status(400).send({
+        success: false,
+        message: 'Token and new password are required',
+      });
+    }
+
+    // Validate password strength (minimum 8 characters)
+    if (newPassword.length < 8) {
+      return reply.status(400).send({
+        success: false,
+        message: 'Password must be at least 8 characters long',
+      });
+    }
+
+    // Hash the provided token (tokens are stored hashed)
+    const crypto = require('crypto');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find the verification token in database
+    const verificationToken = await request.server.db.verificationToken.findFirst({
+      where: {
+        token: tokenHash,
+        // Only match password reset tokens (identifier format: password-reset:email)
+        identifier: {
+          startsWith: 'password-reset:',
+        },
+      },
+    });
+
+    // Token not found
+    if (!verificationToken) {
+      request.server.log.warn('Invalid password reset token attempt');
+      return reply.status(400).send({
+        success: false,
+        message: 'Invalid or expired reset token',
+      });
+    }
+
+    // Check if token is expired
+    if (new Date() > verificationToken.expires) {
+      // Delete expired token
+      await request.server.db.verificationToken.delete({
+        where: {
+          identifier_token: {
+            identifier: verificationToken.identifier,
+            token: verificationToken.token,
+          },
+        },
+      });
+
+      request.server.log.warn('Expired password reset token attempt');
+      return reply.status(400).send({
+        success: false,
+        message: 'Reset token has expired. Please request a new one.',
+      });
+    }
+
+    // Extract email from identifier (format: "password-reset:email@example.com")
+    const email = verificationToken.identifier.replace('password-reset:', '');
+
+    // Find user by email
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return reply.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Hash the new password
+    const newPasswordHash = await hashPassword(newPassword);
+
+    // Update user's password
+    await request.server.db.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newPasswordHash,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Delete the used token (one-time use only)
+    await request.server.db.verificationToken.delete({
+      where: {
+        identifier_token: {
+          identifier: verificationToken.identifier,
+          token: verificationToken.token,
+        },
+      },
+    });
+
+    // SECURITY: Revoke all existing sessions for this user (force re-login)
+    // This ensures that if someone else had access, they're logged out
+    await request.server.db.session.deleteMany({
+      where: { userId: user.id },
+    });
+
+    request.server.log.info({
+      msg: 'Password reset successful',
+      userId: user.id,
+      email: user.email,
+      source,
+    });
+
     return reply.status(200).send({
       success: true,
-      message: 'Password reset successfully',
+      message: 'Password reset successfully. Please login with your new password.',
     });
-    
+
   } catch (error) {
-    // Password reset complete error handled
+    request.server.log.error('Password reset completion error:', error);
     return reply.status(500).send({
       success: false,
       message: 'Password reset completion failed',
