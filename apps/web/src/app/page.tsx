@@ -170,9 +170,13 @@ function HeroSection() {
   );
 }
 
-// Animated Job Cards - Shows the swipe interface
+// Animated Job Cards - Shows the swipe interface with premium interactions
 function AnimatedJobCards() {
   const [currentCard, setCurrentCard] = useState(0);
+  const [showGesture, setShowGesture] = useState(false);
+  const [tiltStyle, setTiltStyle] = useState({});
+  const [isDesktop, setIsDesktop] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const cards = [
     { title: 'Senior Frontend Engineer', company: 'TechCorp', salary: '$120k-$180k', match: 95 },
@@ -180,6 +184,7 @@ function AnimatedJobCards() {
     { title: 'React Developer', company: 'InnovateLab', salary: '$110k-$160k', match: 92 },
   ];
 
+  // Auto-cycle cards
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentCard((prev) => (prev + 1) % cards.length);
@@ -187,66 +192,165 @@ function AnimatedJobCards() {
     return () => clearInterval(interval);
   }, []);
 
+  // Check if desktop for 3D tilt
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+
+  // Show swipe gesture indicator once (sessionStorage)
+  useEffect(() => {
+    const hasSeenGesture = sessionStorage.getItem('hasSeenSwipeGesture');
+    if (!hasSeenGesture) {
+      const timer = setTimeout(() => {
+        setShowGesture(true);
+        // Hide after 3 seconds
+        setTimeout(() => {
+          setShowGesture(false);
+          sessionStorage.setItem('hasSeenSwipeGesture', 'true');
+        }, 3000);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Apple-style 3D tilt effect (desktop only)
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDesktop || !cardRef.current) return;
+
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // Calculate rotation (subtle, max 10 degrees)
+    const rotateX = ((y - centerY) / centerY) * 5; // Max 5deg
+    const rotateY = ((centerX - x) / centerX) * 5; // Max 5deg
+
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`,
+      transition: 'transform 0.1s ease-out',
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({
+      transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+      transition: 'transform 0.3s ease-out',
+    });
+  };
+
   return (
-    <div className="relative w-full max-w-md mx-auto h-[600px]">
-      <AnimatePresence mode="wait">
-        {cards.map((card, index) => {
-          if (index !== currentCard) return null;
+    <div className="relative w-full max-w-md mx-auto">
+      {/* Cards Container */}
+      <div className="relative h-[600px] sm:h-[650px]">
+        <AnimatePresence mode="wait">
+          {cards.map((card, index) => {
+            if (index !== currentCard) return null;
 
-          return (
-            <motion.div
-              key={index}
-              initial={{ scale: 0.95, opacity: 0, rotateY: -10 }}
-              animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-              exit={{ scale: 1.05, opacity: 0, x: 300 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-premium border border-gray-200 dark:border-gray-800 p-8 overflow-hidden"
-            >
-              {/* Match Score */}
-              <div className="absolute top-6 right-6 h-16 w-16 rounded-full bg-white dark:bg-gray-800 shadow-card border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center">
-                <span className="text-title-3 font-semibold text-primary leading-none">{card.match}</span>
-                <span className="text-caption text-gray-500">match</span>
-              </div>
+            return (
+              <motion.div
+                key={index}
+                ref={cardRef}
+                initial={{ scale: 0.95, opacity: 0, rotateY: -10 }}
+                animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                exit={{ scale: 1.05, opacity: 0, x: 300 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                style={isDesktop ? tiltStyle : {}}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-premium border border-gray-200 dark:border-gray-800 p-6 sm:p-8 overflow-hidden cursor-pointer"
+              >
+                {/* Match Score */}
+                <div className="absolute top-4 sm:top-6 right-4 sm:right-6 h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-white dark:bg-gray-800 shadow-card border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center">
+                  <span className="text-headline sm:text-title-3 font-semibold text-primary leading-none">{card.match}</span>
+                  <span className="text-caption text-gray-500 dark:text-gray-400">match</span>
+                </div>
 
-              {/* Company Logo */}
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-purple flex items-center justify-center mb-6">
-                <span className="text-2xl font-bold text-white">{card.company.charAt(0)}</span>
-              </div>
+                {/* Company Logo */}
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-primary to-purple flex items-center justify-center mb-4 sm:mb-6">
+                  <span className="text-xl sm:text-2xl font-bold text-white">{card.company.charAt(0)}</span>
+                </div>
 
-              {/* Job Info */}
-              <h3 className="text-title-2 font-semibold text-gray-900 dark:text-white mb-2">{card.title}</h3>
-              <p className="text-headline text-gray-600 dark:text-gray-400 mb-6">{card.company}</p>
+                {/* Job Info */}
+                <h3 className="text-title-3 sm:text-title-2 font-semibold text-gray-900 dark:text-white mb-2 pr-16">{card.title}</h3>
+                <p className="text-callout sm:text-headline text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">{card.company}</p>
 
-              {/* Salary */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success-light dark:bg-success/20 border border-success/20 mb-8">
-                <span className="text-subhead font-semibold text-success">{card.salary}</span>
-              </div>
+                {/* Salary */}
+                <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-success-light dark:bg-success/20 border border-success/20 mb-6 sm:mb-8">
+                  <span className="text-footnote sm:text-subhead font-semibold text-success">{card.salary}</span>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="absolute bottom-8 left-8 right-8 flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 h-14 rounded-lg border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
-                  Skip
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex-1 h-14 rounded-lg bg-primary text-white font-semibold shadow-card hover:bg-primary/90 transition-colors"
-                >
-                  Apply Now
-                </motion.button>
-              </div>
-            </motion.div>
-          );
-        })}
+                {/* Action Buttons */}
+                <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 right-6 sm:right-8 flex gap-3 sm:gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 h-12 sm:h-14 rounded-lg border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-subhead sm:text-callout"
+                  >
+                    Skip
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex-1 h-12 sm:h-14 rounded-lg bg-primary text-white font-semibold shadow-card hover:bg-primary/90 transition-colors text-subhead sm:text-callout"
+                  >
+                    Apply Now
+                  </motion.button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {/* Stack effect */}
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-card border border-gray-200 dark:border-gray-800 -z-10 translate-y-4 scale-95 opacity-60 pointer-events-none" />
+        <div className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-minimal border border-gray-200 dark:border-gray-800 -z-20 translate-y-8 scale-90 opacity-30 pointer-events-none" />
+      </div>
+
+      {/* Swipe Gesture Indicator (shows once) */}
+      <AnimatePresence>
+        {showGesture && (
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.5 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
+          >
+            <div className="flex items-center gap-3 bg-white dark:bg-gray-900 px-6 py-4 rounded-full shadow-premium border border-primary/30">
+              <motion.div
+                animate={{ x: [0, 20, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <ArrowRightIcon className="h-6 w-6 text-primary" />
+              </motion.div>
+              <span className="text-subhead font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                Swipe right to apply
+              </span>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
-      {/* Stack effect */}
-      <div className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-card border border-gray-200 dark:border-gray-800 -z-10 translate-y-4 scale-95 opacity-60" />
-      <div className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-minimal border border-gray-200 dark:border-gray-800 -z-20 translate-y-8 scale-90 opacity-30" />
+      {/* Tagline below cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1 }}
+        className="mt-8 text-center"
+      >
+        <p className="text-callout sm:text-headline text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2 flex-wrap">
+          <span className="text-2xl">👆</span>
+          <span className="font-medium">Just swipe right.</span>
+          <span className="text-primary font-semibold">Our AI applies for you.</span>
+        </p>
+      </motion.div>
     </div>
   );
 }
