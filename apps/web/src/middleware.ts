@@ -50,6 +50,8 @@ export default async function middleware(req: NextRequest) {
       console.log(`[Middleware] ${pathname} - Auth: ${isAuthenticated ? 'SUCCESS' : 'FAILED'}`, {
         user: authResult.user?.email,
         error: authResult.error,
+        hasCookies: req.cookies.getAll().length > 0,
+        cookieNames: req.cookies.getAll().map(c => c.name),
         ip: getClientIP(req),
         userAgent: getUserAgent(req)?.substring(0, 100),
       });
