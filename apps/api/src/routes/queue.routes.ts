@@ -824,9 +824,82 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         priority: queueEntry.priority,
       };
     });
-    
+
+    // WEBSOCKET PUSH: Immediately push job to desktop app (replaces polling!)
+    if (request.server.websocket) {
+      try {
+        // Get the full job data with snapshot for desktop
+        const fullApplication = await request.server.db.applicationQueue.findUnique({
+          where: { id: result.applicationId },
+          include: {
+            jobSnapshot: {
+              select: {
+                title: true,
+                companyName: true,
+                location: true,
+                companyLogo: true,
+                salaryMin: true,
+                salaryMax: true,
+                currency: true,
+                remote: true,
+                type: true,
+                applyUrl: true,
+              },
+            },
+          },
+        });
+
+        if (fullApplication) {
+          // Push job to desktop stream
+          request.server.websocket.emitJobToDesktop(user.id, {
+            id: fullApplication.id,
+            jobId: fullApplication.jobPostingId,
+            userId: fullApplication.userId,
+            status: fullApplication.status.toLowerCase(),
+            priority: fullApplication.priority.toLowerCase(),
+            useCustomResume: fullApplication.useCustomResume,
+            resumeId: fullApplication.resumeId || undefined,
+            coverLetter: fullApplication.coverLetter || undefined,
+            customFields: fullApplication.customFields || {},
+            automationConfig: fullApplication.automationConfig || {},
+            job: {
+              title: fullApplication.jobSnapshot?.title || 'Unknown Job',
+              company: fullApplication.jobSnapshot?.companyName || 'Unknown Company',
+              location: fullApplication.jobSnapshot?.location || '',
+              logo: fullApplication.jobSnapshot?.companyLogo || undefined,
+              salary: {
+                min: fullApplication.jobSnapshot?.salaryMin || undefined,
+                max: fullApplication.jobSnapshot?.salaryMax || undefined,
+                currency: fullApplication.jobSnapshot?.currency || undefined,
+              },
+              remote: fullApplication.jobSnapshot?.remote ?? false,
+              type: fullApplication.jobSnapshot?.type || '',
+              url: fullApplication.jobSnapshot?.applyUrl || '',
+            },
+            createdAt: fullApplication.createdAt.toISOString(),
+            updatedAt: fullApplication.updatedAt.toISOString(),
+          });
+
+          request.server.log.info({
+            ...enhancedLogContext,
+            event: 'job_pushed_to_desktop',
+            message: 'Job pushed to desktop app via WebSocket',
+            applicationId: result.applicationId
+          });
+        }
+      } catch (wsError) {
+        // Don't fail the request if WebSocket push fails
+        request.server.log.warn({
+          ...enhancedLogContext,
+          event: 'websocket_push_failed',
+          message: 'Failed to push job to desktop via WebSocket',
+          error: wsError instanceof Error ? wsError.message : String(wsError)
+        });
+      }
+    }
+
     const processingTime = Date.now() - startTime;
-    
+
     request.server.log.info({
       ...enhancedLogContext,
       event: 'request_completed_success',
