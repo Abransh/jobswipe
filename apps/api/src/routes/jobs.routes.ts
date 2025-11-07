@@ -618,21 +618,68 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
 
       // Handle RIGHT swipe (trigger automation via existing /v1/queue/apply)
       if (data.direction === 'RIGHT') {
-        // Check if user already applied (swiped right)
-        if (existingSwipe && existingSwipe.direction === 'RIGHT') {
-          fastify.log.warn({
-            ...enhancedLogContext,
-            event: 'duplicate_right_swipe',
-            message: 'User already swiped right on this job',
-            existingSwipeId: existingSwipe.id,
-          });
+        // SECURITY FIX: Use transaction to prevent race condition between check and create
+        // Wrap duplicate check and swipe creation in atomic transaction
+        try {
+          await fastify.db.$transaction(async (tx) => {
+            // Check if user already applied (swiped right) - INSIDE transaction for atomicity
+            const existingRightSwipe = await tx.userJobSwipe.findUnique({
+              where: {
+                userId_jobPostingId: {
+                  userId: user.id,
+                  jobPostingId: jobId,
+                },
+              },
+            });
 
-          return reply.code(409).send({
-            success: false,
-            error: 'Already applied to this job',
-            errorCode: 'DUPLICATE_APPLICATION',
-            correlationId,
+            if (existingRightSwipe && existingRightSwipe.direction === 'RIGHT') {
+              fastify.log.warn({
+                ...enhancedLogContext,
+                event: 'duplicate_right_swipe',
+                message: 'User already swiped right on this job',
+                existingSwipeId: existingRightSwipe.id,
+              });
+
+              // Throw error to rollback transaction and signal duplicate
+              throw new Error('DUPLICATE_APPLICATION');
+            }
+
+            // Record the right swipe atomically (check and create are now atomic)
+            await tx.userJobSwipe.upsert({
+              where: {
+                userId_jobPostingId: {
+                  userId: user.id,
+                  jobPostingId: jobId,
+                },
+              },
+              update: {
+                direction: 'RIGHT',
+                deviceType: data.metadata.source,
+                updatedAt: new Date(),
+              },
+              create: {
+                userId: user.id,
+                jobPostingId: jobId,
+                direction: 'RIGHT',
+                deviceType: data.metadata.source,
+                sessionId: data.metadata.deviceId,
+                ipAddress: data.metadata.ipAddress,
+                userAgent: data.metadata.userAgent,
+              },
+            });
           });
+        } catch (transactionError) {
+          // Handle duplicate application error
+          if (transactionError instanceof Error && transactionError.message === 'DUPLICATE_APPLICATION') {
+            return reply.code(409).send({
+              success: false,
+              error: 'Already applied to this job',
+              errorCode: 'DUPLICATE_APPLICATION',
+              correlationId,
+            });
+          }
+          // Re-throw other errors
+          throw transactionError;
         }
 
         // Transform swipe data to match existing /v1/queue/apply schema
@@ -676,30 +723,6 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
             upgradeRequired: true,
             suggestedAction: 'Download desktop app for unlimited applications',
           };
-
-          // Record the right swipe first
-          await fastify.db.userJobSwipe.upsert({
-            where: {
-              userId_jobPostingId: {
-                userId: user.id,
-                jobPostingId: jobId,
-              },
-            },
-            update: {
-              direction: 'RIGHT',
-              deviceType: data.metadata.source,
-              updatedAt: new Date(),
-            },
-            create: {
-              userId: user.id,
-              jobPostingId: jobId,
-              direction: 'RIGHT',
-              deviceType: data.metadata.source,
-              sessionId: data.metadata.deviceId,
-              ipAddress: data.metadata.ipAddress,
-              userAgent: data.metadata.userAgent,
-            },
-          });
 
           // If eligible for server automation, execute immediately
           if (serverEligibility.allowed && fastify.serverAutomationService) {
