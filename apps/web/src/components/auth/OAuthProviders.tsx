@@ -80,33 +80,11 @@ export function OAuthProviders({ callbackUrl }: OAuthProvidersProps) {
       id: 'google',
       name: 'Google',
       icon: GoogleIcon,
-      bgColor: 'bg-white hover:bg-gray-50',
-      textColor: 'text-gray-900',
-      borderColor: 'border-gray-300',
     },
     {
       id: 'github',
       name: 'GitHub',
       icon: GitHubIcon,
-      bgColor: 'bg-gray-900 hover:bg-gray-800',
-      textColor: 'text-white',
-      borderColor: 'border-gray-900',
-    },
-    {
-      id: 'linkedin',
-      name: 'LinkedIn',
-      icon: LinkedInIcon,
-      bgColor: 'bg-blue-600 hover:bg-blue-700',
-      textColor: 'text-white',
-      borderColor: 'border-blue-600',
-    },
-    {
-      id: 'microsoft',
-      name: 'Microsoft',
-      icon: MicrosoftIcon,
-      bgColor: 'bg-white hover:bg-gray-50',
-      textColor: 'text-gray-900',
-      borderColor: 'border-gray-300',
     },
   ];
 
@@ -115,25 +93,24 @@ export function OAuthProviders({ callbackUrl }: OAuthProvidersProps) {
       {providers.map((provider) => {
         const Icon = provider.icon;
         const isLoading = loadingProvider === provider.id;
-        
+
         return (
-          <Button
+          <button
             key={provider.id}
             type="button"
-            variant="outline"
-            className={`w-full ${provider.bgColor} ${provider.textColor} ${provider.borderColor} border`}
             onClick={() => handleOAuthSignIn(provider.id)}
             disabled={isLoading || loadingProvider !== null}
+            className="w-full h-11 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-subhead font-medium text-gray-900 dark:text-white"
           >
             {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin text-gray-600 dark:text-gray-400" />
             ) : (
               <Icon />
             )}
-            <span className="ml-2">
+            <span>
               {isLoading ? 'Connecting...' : `Continue with ${provider.name}`}
             </span>
-          </Button>
+          </button>
         );
       })}
     </div>
