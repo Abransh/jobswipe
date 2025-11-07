@@ -6,10 +6,15 @@ import { AuthProvider } from '@/components/providers/AuthProvider';
 import { QueueStatusProvider } from '@/providers/QueueStatusProvider';
 
 
+// Premium font loading with SF Pro Display-inspired weights
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  // Load all weights for premium typography system
+  weight: ['200', '300', '400', '500', '600', '700'],
+  // Enable variable font for smoother weights
+  preload: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
