@@ -13,9 +13,9 @@ import {
 
 /**
  * Edge Runtime compatible middleware using custom JWT authentication
- * Replaces NextAuth with lightweight JWT verification for better performance
+ * SECURITY: Now performs full JWT signature verification (not just structure)
  */
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   try {
     const { nextUrl } = req;
     const pathname = nextUrl.pathname;
@@ -41,8 +41,8 @@ export default function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
-    // Verify authentication for other routes
-    const authResult: MiddlewareAuthResult = verifyAuthFromRequest(req);
+    // SECURITY: Verify authentication with FULL signature verification
+    const authResult: MiddlewareAuthResult = await verifyAuthFromRequest(req);
     const isAuthenticated = authResult.isAuthenticated;
 
     // Log authentication attempt for debugging

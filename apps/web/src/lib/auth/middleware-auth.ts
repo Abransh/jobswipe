@@ -159,16 +159,86 @@ function validateJwtStructure(token: string): TokenVerificationResult {
 }
 
 /**
- * Validate token without signature verification (for middleware performance)
- * 
- * Note: This is a simplified validation for middleware performance.
- * Full signature verification should be done at the API level.
- * This approach works because:
- * 1. Cookies are HTTP-only and secure
- * 2. The real verification happens in the API
- * 3. This prevents unnecessary API calls for obviously invalid tokens
+ * Verify JWT signature using Web Crypto API (Edge Runtime compatible)
+ * SECURITY: This now performs FULL signature verification, not just structure validation
+ *
+ * @param token - The JWT token to verify
+ * @returns Promise<TokenVerificationResult> - Verification result with payload
+ */
+async function verifyTokenWithSignature(token: string): Promise<TokenVerificationResult> {
+  try {
+    // First validate basic structure
+    const structureCheck = validateJwtStructure(token);
+    if (!structureCheck.valid) {
+      return structureCheck;
+    }
+
+    // Split token into parts
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return { valid: false, error: 'Invalid token format' };
+    }
+
+    const [headerB64, payloadB64, signatureB64] = parts;
+
+    // Get JWT secret from environment
+    const jwtSecret = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('❌ JWT_SECRET not configured');
+      return { valid: false, error: 'Server configuration error' };
+    }
+
+    // Create signing input (header.payload)
+    const signingInput = `${headerB64}.${payloadB64}`;
+
+    // Convert secret to bytes
+    const encoder = new TextEncoder();
+    const secretKey = encoder.encode(jwtSecret);
+
+    // Import key for HMAC-SHA256 (Edge Runtime compatible)
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      secretKey,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+
+    // Convert signature from base64url to ArrayBuffer
+    const signatureBytes = Uint8Array.from(
+      atob(signatureB64.replace(/-/g, '+').replace(/_/g, '/')),
+      c => c.charCodeAt(0)
+    );
+
+    // Verify signature
+    const isValid = await crypto.subtle.verify(
+      'HMAC',
+      cryptoKey,
+      signatureBytes,
+      encoder.encode(signingInput)
+    );
+
+    if (!isValid) {
+      console.warn('🔒 JWT signature verification failed - potential token forgery attempt');
+      return { valid: false, error: 'Invalid token signature' };
+    }
+
+    // Signature is valid, return payload from structure check
+    return structureCheck;
+
+  } catch (error) {
+    console.error('JWT verification error:', error);
+    return { valid: false, error: 'Token verification failed' };
+  }
+}
+
+/**
+ * Synchronous token verification wrapper
+ * DEPRECATED: Use verifyTokenWithSignature for proper security
+ * This should only be used in specific edge cases where async is not possible
  */
 function verifyTokenBasic(token: string): TokenVerificationResult {
+  console.warn('⚠️ Using basic token validation without signature verification - NOT RECOMMENDED');
   return validateJwtStructure(token);
 }
 
@@ -178,8 +248,9 @@ function verifyTokenBasic(token: string): TokenVerificationResult {
 
 /**
  * Verify authentication from request cookies (Edge Runtime compatible)
+ * SECURITY: Now performs full JWT signature verification
  */
-export function verifyAuthFromRequest(request: NextRequest): MiddlewareAuthResult {
+export async function verifyAuthFromRequest(request: NextRequest): Promise<MiddlewareAuthResult> {
   try {
     // Debug logging in development
     if (process.env.NODE_ENV === 'development') {
@@ -189,16 +260,16 @@ export function verifyAuthFromRequest(request: NextRequest): MiddlewareAuthResul
 
     // Extract access token from cookies
     const accessToken = extractTokenFromCookies(request, JWT_CONSTANTS.ACCESS_TOKEN_COOKIE);
-    
+
     // Debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔑 Token extraction:', { 
-        cookieName: JWT_CONSTANTS.ACCESS_TOKEN_COOKIE, 
+      console.log('🔑 Token extraction:', {
+        cookieName: JWT_CONSTANTS.ACCESS_TOKEN_COOKIE,
         hasToken: !!accessToken,
         tokenPreview: accessToken ? `${accessToken.substring(0, 20)}...` : 'none'
       });
     }
-    
+
     if (!accessToken) {
       return {
         isAuthenticated: false,
@@ -206,10 +277,15 @@ export function verifyAuthFromRequest(request: NextRequest): MiddlewareAuthResul
       };
     }
 
-    // Verify token structure and basic claims
-    const verification = verifyTokenBasic(accessToken);
-    
+    // SECURITY: Verify token with FULL signature verification
+    const verification = await verifyTokenWithSignature(accessToken);
+
     if (!verification.valid) {
+      // Log security event for monitoring
+      if (verification.error === 'Invalid token signature') {
+        console.error('🚨 SECURITY ALERT: Invalid JWT signature detected - potential forgery attempt');
+      }
+
       return {
         isAuthenticated: false,
         error: verification.error,
