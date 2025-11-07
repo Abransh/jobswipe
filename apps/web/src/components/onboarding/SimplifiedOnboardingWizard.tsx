@@ -221,7 +221,7 @@ export function SimplifiedOnboardingWizard({
         setSuccess('Skipped onboarding - you can complete it later from your profile!');
         setTimeout(() => {
           onComplete?.();
-          router.push('/dashboard');
+          router.push('/jobs');
         }, 1500);
       } else {
         setError('Failed to skip onboarding');
@@ -250,7 +250,7 @@ export function SimplifiedOnboardingWizard({
         setSuccess('🎉 Welcome to JobSwipe! Your profile is ready!');
         setTimeout(() => {
           onComplete?.();
-          router.push('/dashboard');
+          router.push('/jobs');
         }, 2000);
       } else {
         const errorData = await response.json();

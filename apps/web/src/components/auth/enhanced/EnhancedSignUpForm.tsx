@@ -109,7 +109,7 @@ export function EnhancedSignUpForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/jobs';
   
   // Use the custom auth context
   const { register: registerUser, isLoading, error, clearError } = useAuth();

@@ -256,20 +256,8 @@ export function AuthProvider({ children, config }: AuthProviderProps) {
     ]
   );
 
-  // Show loading state during SSR and initial client-side hydration
-  if (!isClient) {
-    return (
-      <AuthContext.Provider value={contextValue}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-600">Initializing authentication...</p>
-          </div>
-        </div>
-      </AuthContext.Provider>
-    );
-  }
-
+  // Always render children, even during SSR and initial hydration
+  // The auth state will be handled by isLoading flag in contextValue
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
@@ -323,7 +311,7 @@ export function useAuth(): AuthContextValue {
     
     // Also provide safe defaults during initial client-side mount
     // This prevents the "must be used within AuthProvider" error during hydration
-    console.warn('useAuth: Context not available during initial hydration, providing safe defaults');
+    // Note: This is expected during SSR/hydration and not an error
     return {
       // Auth state
       user: null,

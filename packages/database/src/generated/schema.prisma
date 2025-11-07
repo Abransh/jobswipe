@@ -1,85 +1,57 @@
-// JobSwipe Enterprise Database Schema
-// Comprehensive schema for job application automation platform
-// Built for scalability, security, and GDPR compliance
-
 generator client {
   provider        = "prisma-client-js"
   output          = "../src/generated"
-  previewFeatures = ["postgresqlExtensions", "views", "relationJoins", "fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "postgresqlExtensions", "views", "relationJoins"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  // extensions = [uuid_ossp, pgcrypto] // Temporarily disabled for Neon compatibility
 }
 
-// =============================================================================
-// USER MANAGEMENT & AUTHENTICATION
-// =============================================================================
-
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  passwordHash  String?
-  name          String?
-  avatar        String?
-  emailVerified DateTime?
-
-  // Enterprise Security
-  role          UserRole   @default(USER)
-  status        UserStatus @default(ACTIVE)
-  lastLoginAt   DateTime?
-  loginAttempts Int        @default(0)
-  lockedUntil   DateTime?
-
-  // GDPR Compliance
-  dataConsent        Boolean   @default(false)
-  consentDate        DateTime?
-  dataRetentionUntil DateTime?
-  isDeleted          Boolean   @default(false)
-  deletedAt          DateTime?
-
-  // Onboarding Tracking
-  onboardingCompleted   Boolean   @default(false)
-  onboardingProgress    Int       @default(0) // Percentage 0-100
-  onboardingStep        Int       @default(1) // Current step 1-5
+  id                    String             @id @default(uuid())
+  email                 String             @unique
+  passwordHash          String?
+  name                  String?
+  avatar                String?
+  emailVerified         DateTime?
+  role                  UserRole           @default(USER)
+  status                UserStatus         @default(ACTIVE)
+  lastLoginAt           DateTime?
+  loginAttempts         Int                @default(0)
+  lockedUntil           DateTime?
+  dataConsent           Boolean            @default(false)
+  consentDate           DateTime?
+  dataRetentionUntil    DateTime?
+  isDeleted             Boolean            @default(false)
+  deletedAt             DateTime?
+  onboardingCompleted   Boolean            @default(false)
+  onboardingProgress    Int                @default(0)
+  onboardingStep        Int                @default(1)
   onboardingStartedAt   DateTime?
   onboardingCompletedAt DateTime?
-
-  // Metadata
-  ipAddress String?
-  userAgent String?
-  timezone  String?
-  locale    String? @default("en")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  profile      UserProfile?
-  preferences  UserPreferences?
-  accounts     Account[]
-  sessions     Session[]
-  resumes      Resume[]
-  applications JobApplication[]
-  subscription Subscription?
-  usageRecords UsageRecord[]
-  savedJobs    SavedJob[]
-  jobSwipes    UserJobSwipe[]
-  auditLogs    AuditLog[]
-
-  // Analytics
-  analyticsEvents AnalyticsEvent[]
-
-  // Notifications
-  notifications UserNotification[]
-
-  // Company Reviews
-  companyReviews CompanyReview[]
-
-  // Application Queue
-  applicationQueue ApplicationQueue[]
+  ipAddress             String?
+  userAgent             String?
+  timezone              String?
+  locale                String?            @default("en")
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  accounts              Account[]
+  analyticsEvents       AnalyticsEvent[]
+  applicationQueue      ApplicationQueue[]
+  auditLogs             AuditLog[]
+  companyReviews        CompanyReview[]
+  applications          JobApplication[]
+  resumes               Resume[]
+  savedJobs             SavedJob[]
+  sessions              Session[]
+  subscription          Subscription?
+  usageRecords          UsageRecord[]
+  jobSwipes             UserJobSwipe[]
+  notifications         UserNotification[]
+  preferences           UserPreferences?
+  profile               UserProfile?
 
   @@index([email])
   @@index([status])
@@ -89,71 +61,50 @@ model User {
 }
 
 model UserProfile {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Personal Information
-  firstName   String?
-  lastName    String?
-  displayName String?
-  phone       String?
-  dateOfBirth DateTime?
-  gender      String?
-
-  // Location Details
-  address    String?
-  city       String?
-  state      String?
-  country    String?
-  postalCode String?
-  location   String? // Current location string
-
-  // Professional Links
-  website   String?
-  linkedin  String?
-  github    String?
-  portfolio String?
-  blog      String?
-
-  // Professional Summary
-  bio      String?
-  headline String?
-  summary  String?
-
-  // Career Information
-  currentTitle      String?
-  currentCompany    String?
-  experienceLevel   String?
-  yearsOfExperience Int?
-
-  // Skills & Expertise
-  skills         String[] // Array of skills
-  certifications Json? // Professional certifications
-  languages      Json? // Languages and proficiency levels
-
-  // Education Background
-  education Json? // Structured education history
-
-  // Work Preferences
-  desiredJobTypes   String[] // Remote, onsite, hybrid
-  desiredSalaryMin  Int?
-  desiredSalaryMax  Int?
-  preferredCurrency String?
-  willingToRelocate Boolean? @default(false)
-
-  // Privacy Settings
-  profileVisibility ProfileVisibility @default(PRIVATE)
-  showEmail         Boolean           @default(false)
-  showPhone         Boolean           @default(false)
-
-  // Automation Fields
-  workAuthorization     String? // citizen, visa, etc.
-  coverLetterTemplate   String? // Default cover letter template
-  automationPreferences Json? // Automation settings and preferences
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String            @id @default(uuid())
+  userId                String            @unique
+  firstName             String?
+  lastName              String?
+  displayName           String?
+  phone                 String?
+  dateOfBirth           DateTime?
+  gender                String?
+  address               String?
+  city                  String?
+  state                 String?
+  country               String?
+  postalCode            String?
+  location              String?
+  website               String?
+  linkedin              String?
+  github                String?
+  portfolio             String?
+  blog                  String?
+  bio                   String?
+  headline              String?
+  summary               String?
+  currentTitle          String?
+  currentCompany        String?
+  experienceLevel       String?
+  yearsOfExperience     Int?
+  skills                String[]
+  certifications        Json?
+  languages             Json?
+  education             Json?
+  desiredJobTypes       String[]
+  desiredSalaryMin      Int?
+  desiredSalaryMax      Int?
+  preferredCurrency     String?
+  willingToRelocate     Boolean?          @default(false)
+  profileVisibility     ProfileVisibility @default(PRIVATE)
+  showEmail             Boolean           @default(false)
+  showPhone             Boolean           @default(false)
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  automationPreferences Json?
+  coverLetterTemplate   String?
+  workAuthorization     String?
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([city, state, country])
@@ -161,71 +112,56 @@ model UserProfile {
 }
 
 model UserPreferences {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Job Search Preferences
-  jobSearchRadius  Int?             @default(50) // miles/km
-  jobTypes         String[] // Full-time, part-time, contract, etc.
-  experienceLevels String[] // Entry, mid, senior, etc.
-  industries       String[] // Tech, finance, healthcare, etc.
-  companyTypes     String[] // Startup, enterprise, non-profit, etc.
-  remotePref       RemotePreference @default(NO_PREFERENCE)
-
-  // Notification Preferences
-  emailNotifications Boolean @default(true)
-  pushNotifications  Boolean @default(true)
-  smsNotifications   Boolean @default(false)
-
-  // Specific Notification Types
-  newJobMatches      Boolean @default(true)
-  applicationUpdates Boolean @default(true)
-  interviewReminders Boolean @default(true)
-  weeklyDigest       Boolean @default(true)
-  promotionalEmails  Boolean @default(false)
-
-  // Application Automation Preferences
-  autoApplyEnabled      Boolean  @default(false)
+  id                    String           @id @default(uuid())
+  userId                String           @unique
+  jobSearchRadius       Int?             @default(50)
+  jobTypes              String[]
+  experienceLevels      String[]
+  industries            String[]
+  companyTypes          String[]
+  remotePref            RemotePreference @default(NO_PREFERENCE)
+  emailNotifications    Boolean          @default(true)
+  pushNotifications     Boolean          @default(true)
+  smsNotifications      Boolean          @default(false)
+  newJobMatches         Boolean          @default(true)
+  applicationUpdates    Boolean          @default(true)
+  interviewReminders    Boolean          @default(true)
+  weeklyDigest          Boolean          @default(true)
+  promotionalEmails     Boolean          @default(false)
+  autoApplyEnabled      Boolean          @default(false)
   autoApplyJobTypes     String[]
-  autoApplyMaxPerDay    Int?     @default(5)
-  autoApplyRequireMatch Boolean  @default(true)
-
-  // Privacy Preferences
-  dataProcessingConsent Boolean @default(false)
-  marketingConsent      Boolean @default(false)
-  analyticsConsent      Boolean @default(false)
-  thirdPartySharing     Boolean @default(false)
-
-  // Theme & Display
-  theme      String? @default("light")
-  language   String? @default("en")
-  timezone   String?
-  dateFormat String? @default("MM/DD/YYYY")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  autoApplyMaxPerDay    Int?             @default(5)
+  autoApplyRequireMatch Boolean          @default(true)
+  dataProcessingConsent Boolean          @default(false)
+  marketingConsent      Boolean          @default(false)
+  analyticsConsent      Boolean          @default(false)
+  thirdPartySharing     Boolean          @default(false)
+  theme                 String?          @default("light")
+  language              String?          @default("en")
+  timezone              String?
+  dateFormat            String?          @default("MM/DD/YYYY")
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("user_preferences")
 }
 
-// NextAuth.js required models
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -250,43 +186,27 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-// =============================================================================
-// JOB SWIPING SYSTEM (Core Tinder-like Functionality)
-// =============================================================================
-
 model UserJobSwipe {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-
-  // Swipe Action
-  direction  SwipeDirection // LEFT (reject) or RIGHT (like)
-  confidence Float? // AI confidence score (0-1)
-
-  // Context Data
-  deviceType String? // web, mobile, desktop
-  sessionId  String? // User session tracking
-  position   Int? // Position in swipe deck
-  timeSpent  Int? // Time spent viewing (seconds)
-
-  // Matching Algorithm Data
-  matchScore   Float? // Algorithm match score (0-100)
-  matchFactors Json? // What factors contributed to match
-
-  // Feedback Loop
-  userFeedback   String? // User can provide feedback on why they swiped
-  isCorrectMatch Boolean? // Later feedback on whether it was a good match
-
-  // Metadata
-  ipAddress String?
-  userAgent String?
-  location  String? // Geographic location when swiped
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(uuid())
+  userId         String
+  jobPostingId   String
+  direction      SwipeDirection
+  confidence     Float?
+  deviceType     String?
+  sessionId      String?
+  position       Int?
+  timeSpent      Int?
+  matchScore     Float?
+  matchFactors   Json?
+  userFeedback   String?
+  isCorrectMatch Boolean?
+  ipAddress      String?
+  userAgent      String?
+  location       String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  jobPosting     JobPosting     @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, jobPostingId])
   @@index([userId, direction])
@@ -296,58 +216,39 @@ model UserJobSwipe {
   @@map("user_job_swipes")
 }
 
-// =============================================================================
-// BROWSER AUTOMATION SYSTEM
-// =============================================================================
-
 model ApplicationQueue {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-
-  applicationId String?
-  application   JobApplication? @relation(fields: [applicationId], references: [id])
-
-  // Queue Management
-  status      QueueStatus   @default(PENDING)
-  priority    QueuePriority @default(NORMAL)
-  attempts    Int           @default(0)
-  maxAttempts Int           @default(3)
-
-  // Scheduling
-  scheduledAt DateTime?
-  startedAt   DateTime?
-  completedAt DateTime?
-  failedAt    DateTime?
-  nextRetryAt DateTime?
-
-  // Automation Configuration
-  useCustomResume Boolean @default(false)
-  resumeId        String?
-  coverLetter     String?
-  customFields    Json? // Custom form fields for this application
-
-  // Browser Automation Data
-  automationConfig Json? // Browser automation specific config
-  requiresCaptcha  Boolean @default(false)
-  captchaSolved    Boolean @default(false)
-
-  // Results
-  success      Boolean?
-  errorMessage String?
-  errorType    String?
-  responseData Json? // Response from job site
-
-  // Desktop App Integration
-  desktopSessionId String? // Session ID from desktop app
-  jobSnapshot      JobSnapshot? // Optional snapshot of job data at time of queuing
+  id               String          @id @default(uuid())
+  userId           String
+  jobPostingId     String
+  applicationId    String?
+  status           QueueStatus     @default(PENDING)
+  priority         QueuePriority   @default(NORMAL)
+  attempts         Int             @default(0)
+  maxAttempts      Int             @default(3)
+  scheduledAt      DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  failedAt         DateTime?
+  nextRetryAt      DateTime?
+  useCustomResume  Boolean         @default(false)
+  resumeId         String?
+  coverLetter      String?
+  customFields     Json?
+  automationConfig Json?
+  requiresCaptcha  Boolean         @default(false)
+  captchaSolved    Boolean         @default(false)
+  success          Boolean?
+  errorMessage     String?
+  errorType        String?
+  responseData     Json?
+  desktopSessionId String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  application      JobApplication? @relation(fields: [applicationId], references: [id])
+  jobPosting       JobPosting      @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   automationLogs   AutomationLog[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  jobSnapshot      JobSnapshot?
 
   @@index([userId, status])
   @@index([status, scheduledAt])
@@ -357,34 +258,23 @@ model ApplicationQueue {
 }
 
 model AutomationLog {
-  id      String           @id @default(uuid())
-  queueId String
-  queue   ApplicationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
-
-  // Log Details
-  level   LogLevel @default(INFO)
-  message String
-  details Json? // Detailed log data
-
-  // Browser Automation Context
-  step            String? // Which automation step
-  elementSelector String? // CSS selector being targeted
-  action          String? // click, type, wait, etc.
-
-  // Error Information
-  errorType  String?
-  stackTrace String?
-  screenshot String? // URL to screenshot if error occurred
-
-  // Performance Data
-  executionTime Int? // Time taken for this step (ms)
-  memoryUsage   Int? // Memory usage (bytes)
-
-  // Context
-  browserInfo Json? // Browser and system info
-  pageUrl     String? // Current page URL
-
-  createdAt DateTime @default(now())
+  id              String           @id @default(uuid())
+  queueId         String
+  level           LogLevel         @default(INFO)
+  message         String
+  details         Json?
+  step            String?
+  elementSelector String?
+  action          String?
+  errorType       String?
+  stackTrace      String?
+  screenshot      String?
+  executionTime   Int?
+  memoryUsage     Int?
+  browserInfo     Json?
+  pageUrl         String?
+  createdAt       DateTime         @default(now())
+  queue           ApplicationQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
 
   @@index([queueId, level])
   @@index([createdAt])
@@ -393,47 +283,32 @@ model AutomationLog {
 }
 
 model AutomationProxy {
-  id String @id @default(uuid())
-
-  // Proxy Configuration
-  host     String
-  port     Int
-  username String?
-  password String?
-
-  // Proxy Details
-  proxyType ProxyType @default(RESIDENTIAL)
-  provider  String? // Bright Data, Oxylabs, etc.
-  country   String? // Proxy country
-  region    String? // Proxy region/city
-
-  // Status & Health
-  isActive      Boolean   @default(true)
-  failureCount  Int       @default(0)
-  successRate   Float     @default(100.0)
-  lastUsedAt    DateTime?
-  lastCheckedAt DateTime?
-
-  // Rate Limiting
-  requestsPerHour    Int? @default(100)
-  dailyLimit         Int? @default(1000)
-  currentHourlyUsage Int  @default(0)
-  currentDailyUsage  Int  @default(0)
-
-  // Performance Metrics
-  avgResponseTime Int? // Average response time in ms
-  uptime          Float? // Uptime percentage
-
-  // Cost Management
-  costPerRequest Decimal? // Cost per request if applicable
-  monthlyLimit   Decimal? // Monthly cost limit
-
-  // Metadata
-  notes String? // Admin notes
-  tags  String[] // Organization tags
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  host               String
+  port               Int
+  username           String?
+  password           String?
+  proxyType          ProxyType @default(RESIDENTIAL)
+  provider           String?
+  country            String?
+  region             String?
+  isActive           Boolean   @default(true)
+  failureCount       Int       @default(0)
+  successRate        Float     @default(100.0)
+  lastUsedAt         DateTime?
+  lastCheckedAt      DateTime?
+  requestsPerHour    Int?      @default(100)
+  dailyLimit         Int?      @default(1000)
+  currentHourlyUsage Int       @default(0)
+  currentDailyUsage  Int       @default(0)
+  avgResponseTime    Int?
+  uptime             Float?
+  costPerRequest     Decimal?
+  monthlyLimit       Decimal?
+  notes              String?
+  tags               String[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([isActive, proxyType])
   @@index([provider, isActive])
@@ -443,51 +318,30 @@ model AutomationProxy {
   @@map("automation_proxies")
 }
 
-// =============================================================================
-// ENTERPRISE SECURITY & AUDIT SYSTEM
-// =============================================================================
-
 model AuditLog {
-  id String @id @default(uuid())
-
-  // Actor Information
-  userId    String?
-  user      User?     @relation(fields: [userId], references: [id])
-  actorType ActorType @default(USER)
-  actorId   String? // Could be system, API key, etc.
-
-  // Action Details
-  action     String // What action was performed
-  resource   String // What resource was affected
-  resourceId String? // ID of the affected resource
-
-  // Request Context
-  method     String? // HTTP method
-  endpoint   String? // API endpoint
-  statusCode Int? // Response status code
-
-  // Security Context
-  ipAddress String?
-  userAgent String?
-  sessionId String?
-
-  // Data Changes
-  oldValues Json? // Previous values (for updates)
-  newValues Json? // New values (for updates/creates)
-
-  // Risk Assessment
-  riskLevel   RiskLevel @default(LOW)
-  riskFactors String[] // Factors contributing to risk
-
-  // Compliance
-  dataCategory String? // Type of data accessed (PII, etc.)
-  legalBasis   String? // GDPR legal basis
-
-  // Metadata
-  metadata Json? // Additional context data
-  tags     String[] // Searchable tags
-
-  createdAt DateTime @default(now())
+  id           String    @id @default(uuid())
+  userId       String?
+  actorType    ActorType @default(USER)
+  actorId      String?
+  action       String
+  resource     String
+  resourceId   String?
+  method       String?
+  endpoint     String?
+  statusCode   Int?
+  ipAddress    String?
+  userAgent    String?
+  sessionId    String?
+  oldValues    Json?
+  newValues    Json?
+  riskLevel    RiskLevel @default(LOW)
+  riskFactors  String[]
+  dataCategory String?
+  legalBasis   String?
+  metadata     Json?
+  tags         String[]
+  createdAt    DateTime  @default(now())
+  user         User?     @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
   @@index([action, createdAt])
@@ -498,49 +352,30 @@ model AuditLog {
   @@map("audit_logs")
 }
 
-// =============================================================================
-// ANALYTICS & BUSINESS INTELLIGENCE
-// =============================================================================
-
 model AnalyticsEvent {
-  id     String  @id @default(uuid())
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  // Event Details
-  eventType     String // job_view, application_start, etc.
-  eventCategory String // user_action, system_event, etc.
-  eventName     String // Specific event name
-
-  // Event Properties
-  properties Json? // Event-specific properties
-  traits     Json? // User traits at time of event
-
-  // Context
-  sessionId  String?
-  deviceType String? // web, mobile, desktop
-  platform   String? // browser, iOS, Android, Windows, etc.
-
-  // Location & Network
-  ipAddress String?
-  country   String?
-  region    String?
-  city      String?
-
-  // Technical Context
-  userAgent String?
-  referrer  String?
-  pageUrl   String?
-
-  // Business Metrics
-  revenue  Decimal? // Revenue associated with event
-  currency String?
-
-  // Timing
+  id             String   @id @default(uuid())
+  userId         String?
+  eventType      String
+  eventCategory  String
+  eventName      String
+  properties     Json?
+  traits         Json?
+  sessionId      String?
+  deviceType     String?
+  platform       String?
+  ipAddress      String?
+  country        String?
+  region         String?
+  city           String?
+  userAgent      String?
+  referrer       String?
+  pageUrl        String?
+  revenue        Decimal?
+  currency       String?
   timestamp      DateTime @default(now())
-  processingTime Int? // Time to process event (ms)
-
-  createdAt DateTime @default(now())
+  processingTime Int?
+  createdAt      DateTime @default(now())
+  user           User?    @relation(fields: [userId], references: [id])
 
   @@index([userId, eventType])
   @@index([eventType, timestamp])
@@ -549,46 +384,29 @@ model AnalyticsEvent {
   @@map("analytics_events")
 }
 
-// =============================================================================
-// NOTIFICATION SYSTEM
-// =============================================================================
-
 model UserNotification {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Notification Details
-  type      NotificationType
-  title     String
-  message   String
-  actionUrl String? // URL to navigate when clicked
-
-  // Targeting
-  channel  NotificationChannel  @default(IN_APP)
-  priority NotificationPriority @default(NORMAL)
-
-  // Status
-  status    NotificationStatus @default(UNREAD)
-  readAt    DateTime?
-  clickedAt DateTime?
-
-  // Delivery
+  id           String               @id @default(uuid())
+  userId       String
+  type         NotificationType
+  title        String
+  message      String
+  actionUrl    String?
+  channel      NotificationChannel  @default(IN_APP)
+  priority     NotificationPriority @default(NORMAL)
+  status       NotificationStatus   @default(UNREAD)
+  readAt       DateTime?
+  clickedAt    DateTime?
   sentAt       DateTime?
   deliveredAt  DateTime?
   failedAt     DateTime?
   errorMessage String?
-
-  // Metadata
-  metadata   Json? // Additional notification data
-  templateId String? // Reference to template used
-
-  // Scheduling
-  scheduledFor DateTime? // For scheduled notifications
-  expiresAt    DateTime? // When notification expires
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  metadata     Json?
+  templateId   String?
+  scheduledFor DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
   @@index([type, createdAt])
@@ -597,29 +415,20 @@ model UserNotification {
   @@map("user_notifications")
 }
 
-// =============================================================================
-// SYSTEM CONFIGURATION & TEMPLATES
-// =============================================================================
-
 model SystemSetting {
-  id       String      @id @default(uuid())
-  key      String      @unique
-  value    String
-  type     SettingType @default(STRING)
-  category String      @default("general")
-
-  // Metadata
-  description String?
-  isPublic    Boolean @default(false)
-  isEncrypted Boolean @default(false)
-
-  // Validation
-  validationRule String? // Regex or validation rule
+  id             String      @id @default(uuid())
+  key            String      @unique
+  value          String
+  type           SettingType @default(STRING)
+  category       String      @default("general")
+  description    String?
+  isPublic       Boolean     @default(false)
+  isEncrypted    Boolean     @default(false)
+  validationRule String?
   defaultValue   String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  updatedBy String? // User ID who updated
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  updatedBy      String?
 
   @@index([category])
   @@index([isPublic])
@@ -627,94 +436,64 @@ model SystemSetting {
 }
 
 model NotificationTemplate {
-  id   String           @id @default(uuid())
-  name String           @unique
-  type NotificationType
-
-  // Template Content
-  subject  String? // For email notifications
-  title    String
-  body     String // Supports templating variables
-  htmlBody String? // HTML version for emails
-
-  // Configuration
-  channel  NotificationChannel @default(IN_APP)
-  isActive Boolean             @default(true)
-
-  // Personalization
-  variables  Json? // Available template variables
-  conditions Json? // Conditions for when to use template
-
-  // Metadata
-  category String?
-  tags     String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String              @id @default(uuid())
+  name       String              @unique
+  type       NotificationType
+  subject    String?
+  title      String
+  body       String
+  htmlBody   String?
+  channel    NotificationChannel @default(IN_APP)
+  isActive   Boolean             @default(true)
+  variables  Json?
+  conditions Json?
+  category   String?
+  tags       String[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 
   @@index([type, isActive])
   @@index([channel, isActive])
   @@map("notification_templates")
 }
 
-// =============================================================================
-// COMPANY & JOB MANAGEMENT (Enhanced)
-// =============================================================================
-
 model Company {
-  id          String       @id @default(uuid())
-  name        String
-  slug        String       @unique
-  description String?
-  website     String?
-  logo        String?
-  industry    String?
-  size        CompanySize?
-
-  // Location Information
-  headquarters String?
-  locations    Json? // Multiple office locations
-  country      String?
-
-  // Company Details
-  foundedYear   Int?
-  employeeCount Int?
-  revenue       String?
-  fundingStage  String?
-
-  // Social & External Links
-  linkedinUrl   String?
-  glassdoorUrl  String?
-  crunchbaseUrl String?
-  twitterUrl    String?
-  facebookUrl   String?
-
-  // Company Culture & Benefits
-  benefits        Json? // Structured benefits data
-  cultureValues   String[]
-  workEnvironment Json? // Remote policy, office culture, etc.
-
-  // Verification & Quality
-  isVerified         Boolean   @default(false)
+  id                 String          @id @default(uuid())
+  name               String
+  slug               String          @unique
+  description        String?
+  website            String?
+  logo               String?
+  industry           String?
+  size               CompanySize?
+  headquarters       String?
+  locations          Json?
+  country            String?
+  foundedYear        Int?
+  employeeCount      Int?
+  revenue            String?
+  fundingStage       String?
+  linkedinUrl        String?
+  glassdoorUrl       String?
+  crunchbaseUrl      String?
+  twitterUrl         String?
+  facebookUrl        String?
+  benefits           Json?
+  cultureValues      String[]
+  workEnvironment    Json?
+  isVerified         Boolean         @default(false)
   verifiedAt         DateTime?
   verificationSource String?
-  qualityScore       Float? // Algorithm-calculated quality score
-
-  // SEO & Discovery
-  keywords String[] // For search optimization
-  tags     String[] // Internal tags
-
-  // Status
-  status          CompanyStatus @default(ACTIVE)
-  isBlacklisted   Boolean       @default(false)
-  blacklistReason String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  jobPostings    JobPosting[]
-  companyReviews CompanyReview[]
+  qualityScore       Float?
+  keywords           String[]
+  tags               String[]
+  status             CompanyStatus   @default(ACTIVE)
+  isBlacklisted      Boolean         @default(false)
+  blacklistReason    String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  companyReviews     CompanyReview[]
+  jobPostings        JobPosting[]
 
   @@index([slug])
   @@index([industry])
@@ -726,42 +505,30 @@ model Company {
 }
 
 model CompanyReview {
-  id        String  @id @default(uuid())
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
-
-  // Review Content
-  title   String?
-  content String
-  rating  Float // 1-5 stars
-
-  // Review Categories
+  id              String          @id @default(uuid())
+  companyId       String
+  userId          String?
+  title           String?
+  content         String
+  rating          Float
   workLifeBalance Float?
   compensation    Float?
   culture         Float?
   management      Float?
   careerGrowth    Float?
-
-  // Reviewer Context
-  jobTitle       String?
-  department     String?
-  employmentType EmploymentType?
-  workDuration   String? // "6 months", "2 years", etc.
-
-  // Status
-  isApproved  Boolean @default(false)
-  isAnonymous Boolean @default(true)
-  isVerified  Boolean @default(false)
-
-  // Metadata
-  helpfulVotes Int @default(0)
-  reportCount  Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  jobTitle        String?
+  department      String?
+  employmentType  EmploymentType?
+  workDuration    String?
+  isApproved      Boolean         @default(false)
+  isAnonymous     Boolean         @default(true)
+  isVerified      Boolean         @default(false)
+  helpfulVotes    Int             @default(0)
+  reportCount     Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user            User?           @relation(fields: [userId], references: [id])
 
   @@index([companyId, isApproved])
   @@index([rating])
@@ -770,90 +537,63 @@ model CompanyReview {
 }
 
 model JobPosting {
-  id           String  @id @default(uuid())
-  title        String
-  description  String
-  requirements String?
-  benefits     String?
-
-  // Job Classification
-  type       JobType     @default(FULL_TIME)
-  level      JobLevel    @default(MID)
-  department String?
-  category   JobCategory @default(OTHER)
-
-  // Work Arrangement
-  remote     Boolean    @default(false)
-  remoteType RemoteType @default(ONSITE)
-  location   String?
-  timeZone   String?
-
-  // Location Details
-  city        String?
-  state       String?
-  country     String?
-  coordinates Json? // Lat/lng for mapping
-
-  // Compensation
-  salaryMin  Int?
-  salaryMax  Int?
-  currency   String?     @default("USD")
-  salaryType SalaryType? // hourly, annual, contract
-  equity     String?
-  bonus      String?
-
-  // Job Requirements
-  experienceYears Int?
-  skills          String[] // Required skills
-  education       String? // Required education level
-  languages       String[] // Required languages
-
-  // Company Context
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  // External Integration
-  externalId String? // ID from job board
-  source     JobSource @default(MANUAL)
-  sourceUrl  String? // Original job posting URL
-  applyUrl   String? // Direct application URL
-
-  // SEO & Search
-  keywords String[] // For search optimization
-  tags     String[] // Internal tags
-
-  // Quality & Verification
-  qualityScore Float? // Algorithm quality score
-  isVerified   Boolean   @default(false)
-  verifiedAt   DateTime?
-
-  // Status & Lifecycle
-  status     JobStatus @default(ACTIVE)
-  isActive   Boolean   @default(true)
-  isFeatured Boolean   @default(false)
-  isUrgent   Boolean   @default(false)
-
-  // Dates
-  postedAt      DateTime?
-  expiresAt     DateTime?
-  lastScrapedAt DateTime? // When job was last updated from source
-
-  // Analytics
-  viewCount        Int @default(0)
-  applicationCount Int @default(0)
-  rightSwipeCount  Int @default(0)
-  leftSwipeCount   Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  applications JobApplication[]
-  savedBy      SavedJob[]
-  swipes       UserJobSwipe[]
-  queueItems   ApplicationQueue[]
-  snapshots    JobSnapshot[] // Snapshots of this job when queued for applications
-  enhancements ResumeEnhancement[]
+  id               String              @id @default(uuid())
+  title            String
+  description      String
+  requirements     String?
+  benefits         String?
+  type             JobType             @default(FULL_TIME)
+  level            JobLevel            @default(MID)
+  department       String?
+  category         JobCategory         @default(OTHER)
+  remote           Boolean             @default(false)
+  remoteType       RemoteType          @default(ONSITE)
+  location         String?
+  timeZone         String?
+  city             String?
+  state            String?
+  country          String?
+  coordinates      Json?
+  salaryMin        Int?
+  salaryMax        Int?
+  currency         String?             @default("USD")
+  salaryType       SalaryType?
+  equity           String?
+  bonus            String?
+  experienceYears  Int?
+  skills           String[]
+  education        String?
+  languages        String[]
+  companyId        String
+  externalId       String?
+  source           JobSource           @default(MANUAL)
+  sourceUrl        String?
+  applyUrl         String?
+  keywords         String[]
+  tags             String[]
+  qualityScore     Float?
+  isVerified       Boolean             @default(false)
+  verifiedAt       DateTime?
+  status           JobStatus           @default(ACTIVE)
+  isActive         Boolean             @default(true)
+  isFeatured       Boolean             @default(false)
+  isUrgent         Boolean             @default(false)
+  postedAt         DateTime?
+  expiresAt        DateTime?
+  lastScrapedAt    DateTime?
+  viewCount        Int                 @default(0)
+  applicationCount Int                 @default(0)
+  rightSwipeCount  Int                 @default(0)
+  leftSwipeCount   Int                 @default(0)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  queueItems       ApplicationQueue[]
+  applications     JobApplication[]
+  company          Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  snapshots        JobSnapshot[]
+  enhancements     ResumeEnhancement[]
+  savedBy          SavedJob[]
+  swipes           UserJobSwipe[]
 
   @@index([companyId])
   @@index([type, level])
@@ -870,93 +610,63 @@ model JobPosting {
   @@map("job_postings")
 }
 
-// Job Snapshot - Immutable copy of job data at application time
 model JobSnapshot {
-  id String @id @default(uuid())
-
-  // References
-  originalJobId      String // Original JobPosting ID
-  originalJob        JobPosting       @relation(fields: [originalJobId], references: [id], onDelete: Cascade)
-  applicationQueueId String           @unique // One-to-one with ApplicationQueue
-  applicationQueue   ApplicationQueue @relation(fields: [applicationQueueId], references: [id], onDelete: Cascade)
-
-  // Frozen Job Data (snapshot at time of application)
-  title        String
-  description  String
-  requirements String?
-  benefits     String?
-
-  // Job Classification (frozen)
-  type       String // Stored as string to preserve original value
-  level      String
-  department String?
-  category   String
-
-  // Work Arrangement (frozen)
-  remote     Boolean
-  remoteType String
-  location   String?
-  timeZone   String?
-
-  // Location Details (frozen)
-  city        String?
-  state       String?
-  country     String?
-  coordinates Json?
-
-  // Compensation (frozen)
-  salaryMin  Int?
-  salaryMax  Int?
-  currency   String?
-  salaryType String?
-  equity     String?
-  bonus      String?
-
-  // Job Requirements (frozen)
-  experienceYears Int?
-  skills          String[]
-  education       String?
-  languages       String[]
-
-  // Company Data (frozen snapshot)
+  id                 String           @id @default(uuid())
+  originalJobId      String
+  applicationQueueId String           @unique
+  title              String
+  description        String
+  requirements       String?
+  benefits           String?
+  type               String
+  level              String
+  department         String?
+  category           String
+  remote             Boolean
+  remoteType         String
+  location           String?
+  timeZone           String?
+  city               String?
+  state              String?
+  country            String?
+  coordinates        Json?
+  salaryMin          Int?
+  salaryMax          Int?
+  currency           String?
+  salaryType         String?
+  equity             String?
+  bonus              String?
+  experienceYears    Int?
+  skills             String[]
+  education          String?
+  languages          String[]
   companyName        String
   companyLogo        String?
   companyWebsite     String?
   companyIndustry    String?
   companySize        String?
   companyDescription String?
-
-  // External Integration (frozen)
-  externalId String?
-  source     String
-  sourceUrl  String?
-  applyUrl   String?
-
-  // Metadata
-  qualityScore Float?
-  isVerified   Boolean
-
-  // Original Status at time of snapshot
-  originalStatus String
-  isActive       Boolean
-  isFeatured     Boolean
-  isUrgent       Boolean
-
-  // Original Dates
-  originalPostedAt  DateTime?
-  originalExpiresAt DateTime?
-
-  // Analytics at time of snapshot
-  viewCount        Int @default(0)
-  applicationCount Int @default(0)
-  rightSwipeCount  Int @default(0)
-  leftSwipeCount   Int @default(0)
-
-  // Snapshot Metadata
-  snapshotVersion String @default("1.0")
-  snapshotReason  String @default("USER_SWIPE_RIGHT")
-
-  createdAt DateTime @default(now())
+  externalId         String?
+  source             String
+  sourceUrl          String?
+  applyUrl           String?
+  qualityScore       Float?
+  isVerified         Boolean
+  originalStatus     String
+  isActive           Boolean
+  isFeatured         Boolean
+  isUrgent           Boolean
+  originalPostedAt   DateTime?
+  originalExpiresAt  DateTime?
+  viewCount          Int              @default(0)
+  applicationCount   Int              @default(0)
+  rightSwipeCount    Int              @default(0)
+  leftSwipeCount     Int              @default(0)
+  snapshotVersion    String           @default("1.0")
+  snapshotReason     String           @default("USER_SWIPE_RIGHT")
+  createdAt          DateTime         @default(now())
+  applicationQueue   ApplicationQueue @relation(fields: [applicationQueueId], references: [id], onDelete: Cascade)
+  originalJob        JobPosting       @relation(fields: [originalJobId], references: [id], onDelete: Cascade)
 
   @@index([originalJobId])
   @@index([applicationQueueId])
@@ -967,56 +677,35 @@ model JobSnapshot {
   @@map("job_snapshots")
 }
 
-// =============================================================================
-// RESUME TEMPLATE & ENHANCEMENT SYSTEM
-// =============================================================================
-
 model ResumeTemplate {
-  id          String           @id @default(uuid())
-  name        String
-  description String?
-  category    TemplateCategory @default(GENERAL)
-
-  // Template Structure
-  content  Json // JSON structure for the template
-  sections Json // Available sections configuration
-  styling  Json // Styling and layout configuration
-
-  // Preview & Assets
-  preview    String? // Preview image URL
-  thumbnails Json? // Multiple preview sizes
-
-  // Template Metadata
-  industry   String? // Target industry
-  experience String? // Target experience level
-  jobTypes   String[] // Suitable job types
-
-  // Quality & Ratings
-  qualityScore Float? // Template quality score
-  downloads    Int    @default(0)
-  ratings      Float? // Average user rating
-  ratingCount  Int    @default(0)
-
-  // Access Control
-  isActive  Boolean @default(true)
-  isPremium Boolean @default(false)
-  isPublic  Boolean @default(true)
-
-  // SEO & Discovery
-  tags     String[] // Template tags
-  keywords String[] // Search keywords
-
-  // Analytics
-  usageCount  Int    @default(0)
-  successRate Float? // Application success rate with this template
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  createdBy String? // User or admin who created
-
-  // Relations
-  resumes      Resume[]
+  id           String              @id @default(uuid())
+  name         String
+  description  String?
+  category     TemplateCategory    @default(GENERAL)
+  content      Json
+  sections     Json
+  styling      Json
+  preview      String?
+  thumbnails   Json?
+  industry     String?
+  experience   String?
+  jobTypes     String[]
+  qualityScore Float?
+  downloads    Int                 @default(0)
+  ratings      Float?
+  ratingCount  Int                 @default(0)
+  isActive     Boolean             @default(true)
+  isPremium    Boolean             @default(false)
+  isPublic     Boolean             @default(true)
+  tags         String[]
+  keywords     String[]
+  usageCount   Int                 @default(0)
+  successRate  Float?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  createdBy    String?
   enhancements ResumeEnhancement[]
+  resumes      Resume[]
 
   @@index([category, isActive])
   @@index([isPremium, isActive])
@@ -1028,61 +717,39 @@ model ResumeTemplate {
 }
 
 model Resume {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  templateId String?
-  template   ResumeTemplate? @relation(fields: [templateId], references: [id])
-
-  // Resume Identity
-  name  String
-  title String? // Professional title
-
-  // Content Structure
-  content  Json // Complete resume content
-  sections Json // Section-by-section content
-  metadata Json? // Additional metadata
-
-  // File Storage
-  pdfUrl  String? // Generated PDF URL
-  docxUrl String? // Generated DOCX URL
-  htmlUrl String? // Generated HTML URL
-
-  // File Metadata
-  fileSize      Int? // File size in bytes
-  pageCount     Int? // Number of pages
-  lastGenerated DateTime? // When files were last generated
-
-  // Version Control
-  version        Int     @default(1)
-  parentResumeId String? // For resume versions
-  isDefault      Boolean @default(false)
-
-  // Privacy & Sharing
-  visibility ResumeVisibility @default(PRIVATE)
-  shareToken String? // For sharing resume publicly
-
-  // Analytics
-  viewCount        Int @default(0)
-  downloadCount    Int @default(0)
-  applicationCount Int @default(0)
-
-  // AI Enhancement
-  aiEnhanced      Boolean @default(false)
-  enhancementData Json? // AI enhancement metadata
-
-  // Quality Metrics
-  completeness     Float? // Completeness score (0-100)
-  readabilityScore Float? // ATS readability score
-  keywordMatch     Float? // Keyword optimization score
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  applications JobApplication[]
-  enhancements ResumeEnhancement[]
+  id               String              @id @default(uuid())
+  userId           String
+  templateId       String?
+  name             String
+  title            String?
+  content          Json
+  sections         Json
+  metadata         Json?
+  pdfUrl           String?
+  docxUrl          String?
+  htmlUrl          String?
+  fileSize         Int?
+  pageCount        Int?
+  lastGenerated    DateTime?
+  version          Int                 @default(1)
+  parentResumeId   String?
+  isDefault        Boolean             @default(false)
+  visibility       ResumeVisibility    @default(PRIVATE)
+  shareToken       String?
+  viewCount        Int                 @default(0)
+  downloadCount    Int                 @default(0)
+  applicationCount Int                 @default(0)
+  aiEnhanced       Boolean             @default(false)
+  enhancementData  Json?
+  completeness     Float?
+  readabilityScore Float?
+  keywordMatch     Float?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  applications     JobApplication[]
+  enhancements     ResumeEnhancement[]
+  template         ResumeTemplate?     @relation(fields: [templateId], references: [id])
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isDefault])
   @@index([templateId])
@@ -1093,40 +760,27 @@ model Resume {
 }
 
 model ResumeEnhancement {
-  id       String @id @default(uuid())
-  resumeId String
-  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-
-  templateId String?
-  template   ResumeTemplate? @relation(fields: [templateId], references: [id])
-
-  jobPostingId String?
-  jobPosting   JobPosting? @relation(fields: [jobPostingId], references: [id])
-
-  // Enhancement Details
-  type        EnhancementType
-  description String
-
-  // Before & After
-  originalContent Json // Original content
-  enhancedContent Json // Enhanced content
-  changes         Json // Specific changes made
-
-  // AI Context
-  aiModel    String? // Which AI model was used
-  prompt     String? // Prompt used for enhancement
-  confidence Float? // AI confidence score
-
-  // Results
-  isApplied Boolean   @default(false)
-  appliedAt DateTime?
-
-  // Performance Tracking
-  improvedMatch Float? // Improvement in job match score
-  successRate   Float? // Success rate after enhancement
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String          @id @default(uuid())
+  resumeId        String
+  templateId      String?
+  jobPostingId    String?
+  type            EnhancementType
+  description     String
+  originalContent Json
+  enhancedContent Json
+  changes         Json
+  aiModel         String?
+  prompt          String?
+  confidence      Float?
+  isApplied       Boolean         @default(false)
+  appliedAt       DateTime?
+  improvedMatch   Float?
+  successRate     Float?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  jobPosting      JobPosting?     @relation(fields: [jobPostingId], references: [id])
+  resume          Resume          @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  template        ResumeTemplate? @relation(fields: [templateId], references: [id])
 
   @@index([resumeId, type])
   @@index([jobPostingId])
@@ -1135,82 +789,53 @@ model ResumeEnhancement {
   @@map("resume_enhancements")
 }
 
-// =============================================================================
-// JOB APPLICATION TRACKING SYSTEM
-// =============================================================================
-
 model JobApplication {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-
-  resumeId String?
-  resume   Resume? @relation(fields: [resumeId], references: [id])
-
-  // Application Management
-  status   ApplicationStatus   @default(DRAFT)
-  priority ApplicationPriority @default(MEDIUM)
-  source   ApplicationSource   @default(MANUAL)
-
-  // Application Content
-  coverLetter  String?
-  customFields Json? // Custom form fields for specific applications
-  notes        String? // User notes
-
-  // Resume Customization
-  customResume  Json? // Job-specific resume modifications
-  resumeVersion String? // Version identifier
-
-  // Timeline & Status Tracking
-  appliedAt   DateTime?
-  viewedAt    DateTime? // When employer viewed application
-  responseAt  DateTime? // When employer responded
-  interviewAt DateTime? // Interview date
-  followUpAt  DateTime? // Next follow-up date
-  rejectedAt  DateTime?
-  acceptedAt  DateTime?
-
-  // External System Integration
-  externalId         String? // ID from ATS system
-  atsUrl             String? // Link to ATS application
-  confirmationNumber String? // Application confirmation number
-
-  // Automation Data
+  id                 String                   @id @default(uuid())
+  userId             String
+  jobPostingId       String
+  resumeId           String?
+  status             ApplicationStatus        @default(DRAFT)
+  priority           ApplicationPriority      @default(MEDIUM)
+  source             ApplicationSource        @default(MANUAL)
+  coverLetter        String?
+  customFields       Json?
+  notes              String?
+  customResume       Json?
+  resumeVersion      String?
+  appliedAt          DateTime?
+  viewedAt           DateTime?
+  responseAt         DateTime?
+  interviewAt        DateTime?
+  followUpAt         DateTime?
+  rejectedAt         DateTime?
+  acceptedAt         DateTime?
+  externalId         String?
+  atsUrl             String?
+  confirmationNumber String?
   automationStatus   AutomationStatus?
-  automationAttempts Int               @default(0)
-  automationData     Json? // Data from automation process
+  automationAttempts Int                      @default(0)
+  automationData     Json?
   lastAutomationAt   DateTime?
-
-  // Execution Tracking
-  executionMode   ExecutionMode? @default(DESKTOP) // server or desktop
-  serverIpAddress String? // IP address if executed on server
-  proxyUsed       String? // Proxy configuration used
-  automationLogs  Json? // Step-by-step automation logs
-
-  // Communication Tracking
-  lastContactAt  DateTime?
-  contactMethod  String? // Email, phone, LinkedIn, etc.
-  recruiterName  String?
-  recruiterEmail String?
-  recruiterPhone String?
-
-  // Success Metrics
-  responseTime   Int? // Time to response in hours
-  interviewCount Int  @default(0)
-
-  // Quality & Matching
-  matchScore Float? // How well job matches user profile
-  appliedVia String? // Platform used to apply
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  interactions ApplicationInteraction[]
-  queueItems   ApplicationQueue[]
+  lastContactAt      DateTime?
+  contactMethod      String?
+  recruiterName      String?
+  recruiterEmail     String?
+  recruiterPhone     String?
+  responseTime       Int?
+  interviewCount     Int                      @default(0)
+  matchScore         Float?
+  appliedVia         String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  automationLogs     Json?
+  executionMode      ExecutionMode?           @default(DESKTOP)
+  proxyUsed          String?
+  serverIpAddress    String?
+  interactions       ApplicationInteraction[]
+  queueItems         ApplicationQueue[]
+  jobPosting         JobPosting               @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  resume             Resume?                  @relation(fields: [resumeId], references: [id])
+  user               User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, jobPostingId])
   @@index([userId, status])
@@ -1223,52 +848,35 @@ model JobApplication {
 }
 
 model ApplicationInteraction {
-  id            String         @id @default(uuid())
-  applicationId String
-  application   JobApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-
-  // Interaction Details
-  type        InteractionType
-  title       String
-  description String?
-  outcome     InteractionOutcome?
-
-  // Contact Information
-  contactPerson String?
-  contactEmail  String?
-  contactPhone  String?
-  contactRole   String? // Recruiter, Hiring Manager, etc.
-
-  // Communication Details
-  medium   String? // Email, phone, video call, in-person
-  location String? // For in-person meetings
-  duration Int? // Duration in minutes
-
-  // Scheduling
-  scheduledAt     DateTime?
-  startedAt       DateTime?
-  completedAt     DateTime?
-  rescheduledFrom DateTime?
-
-  // Content & Results
-  agenda    String? // Meeting agenda or purpose
-  notes     String? // Interaction notes
-  feedback  String? // Feedback received
-  nextSteps String? // Next steps discussed
-
-  // File Attachments
-  attachments Json? // File URLs and metadata
-
-  // Follow-up
-  requiresFollowUp  Boolean   @default(false)
+  id                String              @id @default(uuid())
+  applicationId     String
+  type              InteractionType
+  title             String
+  description       String?
+  outcome           InteractionOutcome?
+  contactPerson     String?
+  contactEmail      String?
+  contactPhone      String?
+  contactRole       String?
+  medium            String?
+  location          String?
+  duration          Int?
+  scheduledAt       DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  rescheduledFrom   DateTime?
+  agenda            String?
+  notes             String?
+  feedback          String?
+  nextSteps         String?
+  attachments       Json?
+  requiresFollowUp  Boolean             @default(false)
   followUpDate      DateTime?
-  followUpCompleted Boolean   @default(false)
-
-  // Metadata
-  metadata Json? // Additional structured data
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  followUpCompleted Boolean             @default(false)
+  metadata          Json?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  application       JobApplication      @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@index([applicationId, type])
   @@index([scheduledAt])
@@ -1278,29 +886,21 @@ model ApplicationInteraction {
 }
 
 model SavedJob {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  jobPostingId String
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-
-  // Organization
-  folder   String? // User-defined folder/category
-  notes    String? // User notes
-  tags     String[] // User-defined tags
-  priority SavedJobPriority @default(MEDIUM)
-
-  // Alerts
-  alertOnUpdate   Boolean   @default(false)
-  alertOnDeadline Boolean   @default(false)
+  id              String           @id @default(uuid())
+  userId          String
+  jobPostingId    String
+  folder          String?
+  notes           String?
+  tags            String[]
+  priority        SavedJobPriority @default(MEDIUM)
+  alertOnUpdate   Boolean          @default(false)
+  alertOnDeadline Boolean          @default(false)
   reminderDate    DateTime?
-
-  // Metadata
-  savedReason String? // Why user saved this job
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  savedReason     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  jobPosting      JobPosting       @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, jobPostingId])
   @@index([userId, folder])
@@ -1309,58 +909,37 @@ model SavedJob {
   @@map("saved_jobs")
 }
 
-// =============================================================================
-// SUBSCRIPTION & BILLING SYSTEM
-// =============================================================================
-
 model Subscription {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Plan Details
-  plan   SubscriptionPlan   @default(FREE)
-  status SubscriptionStatus @default(ACTIVE)
-
-  // Billing Integration
+  id                   String             @id @default(uuid())
+  userId               String             @unique
+  plan                 SubscriptionPlan   @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
   stripeCustomerId     String?
   stripeSubscriptionId String?
   stripePriceId        String?
   stripeProductId      String?
-
-  // Billing Cycle
-  currentPeriodStart DateTime?
-  currentPeriodEnd   DateTime?
-  cancelAtPeriodEnd  Boolean   @default(false)
-  canceledAt         DateTime?
-  cancelReason       String?
-
-  // Trial Management
-  trialStart DateTime?
-  trialEnd   DateTime?
-  trialUsed  Boolean   @default(false)
-
-  // Plan Limits
-  monthlyApplications Int? // Monthly application limit
-  resumeTemplates     Int? // Resume template access
-  prioritySupport     Boolean @default(false)
-
-  // Billing History
-  lastPaymentAt     DateTime?
-  lastPaymentAmount Decimal?
-  nextBillingDate   DateTime?
-
-  // Promo & Discounts
-  promoCode       String?
-  discountPercent Float?
-  discountEndsAt  DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  usageRecords   UsageRecord[]
-  billingHistory BillingHistory[]
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  cancelReason         String?
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  trialUsed            Boolean            @default(false)
+  monthlyApplications  Int?
+  resumeTemplates      Int?
+  prioritySupport      Boolean            @default(false)
+  lastPaymentAt        DateTime?
+  lastPaymentAmount    Decimal?
+  nextBillingDate      DateTime?
+  promoCode            String?
+  discountPercent      Float?
+  discountEndsAt       DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  billingHistory       BillingHistory[]
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usageRecords         UsageRecord[]
 
   @@index([plan, status])
   @@index([stripeCustomerId])
@@ -1369,32 +948,21 @@ model Subscription {
 }
 
 model BillingHistory {
-  id             String       @id @default(uuid())
-  subscriptionId String
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-
-  // Transaction Details
-  amount   Decimal
-  currency String        @default("USD")
-  status   PaymentStatus
-
-  // Stripe Integration
+  id                    String        @id @default(uuid())
+  subscriptionId        String
+  amount                Decimal
+  currency              String        @default("USD")
+  status                PaymentStatus
   stripeInvoiceId       String?
   stripePaymentIntentId String?
-
-  // Invoice Details
-  description String?
-  invoiceUrl  String?
-
-  // Billing Period
-  periodStart DateTime
-  periodEnd   DateTime
-
-  // Metadata
-  metadata Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  description           String?
+  invoiceUrl            String?
+  periodStart           DateTime
+  periodEnd             DateTime
+  metadata              Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  subscription          Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
   @@index([subscriptionId, status])
   @@index([status, createdAt])
@@ -1402,27 +970,20 @@ model BillingHistory {
 }
 
 model UsageRecord {
-  id     String @id @default(uuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id             String        @id @default(uuid())
+  userId         String
   subscriptionId String?
+  feature        UsageFeature
+  count          Int           @default(1)
+  metadata       Json?
+  sessionId      String?
+  deviceType     String?
+  ipAddress      String?
+  date           DateTime      @default(now()) @db.Date
+  hour           Int?
+  createdAt      DateTime      @default(now())
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
-
-  // Usage Details
-  feature  UsageFeature
-  count    Int          @default(1)
-  metadata Json? // Feature-specific usage data
-
-  // Context
-  sessionId  String? // User session
-  deviceType String? // web, mobile, desktop
-  ipAddress  String?
-
-  // Time Tracking
-  date      DateTime @default(now()) @db.Date
-  hour      Int? // Hour of day (0-23)
-  createdAt DateTime @default(now())
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, feature, date])
   @@index([userId, feature])
@@ -1431,11 +992,6 @@ model UsageRecord {
   @@map("usage_records")
 }
 
-// =============================================================================
-// COMPREHENSIVE ENUM DEFINITIONS
-// =============================================================================
-
-// User Management Enums
 enum UserRole {
   USER
   PREMIUM_USER
@@ -1467,7 +1023,6 @@ enum RemotePreference {
   NO_PREFERENCE
 }
 
-// Job & Company Enums
 enum JobType {
   FULL_TIME
   PART_TIME
@@ -1595,7 +1150,6 @@ enum EmploymentType {
   TEMPORARY
 }
 
-// Application & Automation Enums
 enum ApplicationStatus {
   DRAFT
   QUEUED
@@ -1684,7 +1238,6 @@ enum QueuePriority {
   IMMEDIATE
 }
 
-// Interaction & Communication Enums
 enum InteractionType {
   APPLICATION_SUBMITTED
   EMAIL_RECEIVED
@@ -1727,7 +1280,6 @@ enum InteractionOutcome {
   WITHDRAWN
 }
 
-// Resume & Template Enums
 enum TemplateCategory {
   GENERAL
   TECHNOLOGY
@@ -1767,14 +1319,12 @@ enum EnhancementType {
   IMPACT_ENHANCEMENT
 }
 
-// Swiping & Matching Enums
 enum SwipeDirection {
   LEFT
   RIGHT
   SUPER_LIKE
 }
 
-// Subscription & Billing Enums
 enum SubscriptionPlan {
   FREE
   BASIC
@@ -1813,7 +1363,6 @@ enum SavedJobPriority {
   URGENT
 }
 
-// Usage & Analytics Enums
 enum UsageFeature {
   JOB_SEARCH
   JOB_VIEW
@@ -1841,7 +1390,6 @@ enum UsageFeature {
   AUDIT_LOG_ENTRY
 }
 
-// Notification Enums
 enum NotificationType {
   JOB_MATCH
   APPLICATION_UPDATE
@@ -1891,7 +1439,6 @@ enum NotificationStatus {
   FAILED
 }
 
-// System & Security Enums
 enum SettingType {
   STRING
   NUMBER

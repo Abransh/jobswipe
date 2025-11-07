@@ -196,11 +196,11 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   profileVisibility: 'profileVisibility',
   showEmail: 'showEmail',
   showPhone: 'showPhone',
-  workAuthorization: 'workAuthorization',
-  coverLetterTemplate: 'coverLetterTemplate',
-  automationPreferences: 'automationPreferences',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  automationPreferences: 'automationPreferences',
+  coverLetterTemplate: 'coverLetterTemplate',
+  workAuthorization: 'workAuthorization'
 };
 
 exports.Prisma.UserPreferencesScalarFieldEnum = {
@@ -752,10 +752,6 @@ exports.Prisma.JobApplicationScalarFieldEnum = {
   automationAttempts: 'automationAttempts',
   automationData: 'automationData',
   lastAutomationAt: 'lastAutomationAt',
-  executionMode: 'executionMode',
-  serverIpAddress: 'serverIpAddress',
-  proxyUsed: 'proxyUsed',
-  automationLogs: 'automationLogs',
   lastContactAt: 'lastContactAt',
   contactMethod: 'contactMethod',
   recruiterName: 'recruiterName',
@@ -766,7 +762,11 @@ exports.Prisma.JobApplicationScalarFieldEnum = {
   matchScore: 'matchScore',
   appliedVia: 'appliedVia',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  automationLogs: 'automationLogs',
+  executionMode: 'executionMode',
+  proxyUsed: 'proxyUsed',
+  serverIpAddress: 'serverIpAddress'
 };
 
 exports.Prisma.ApplicationInteractionScalarFieldEnum = {
@@ -948,8 +948,8 @@ exports.Prisma.UserProfileOrderByRelevanceFieldEnum = {
   skills: 'skills',
   desiredJobTypes: 'desiredJobTypes',
   preferredCurrency: 'preferredCurrency',
-  workAuthorization: 'workAuthorization',
-  coverLetterTemplate: 'coverLetterTemplate'
+  coverLetterTemplate: 'coverLetterTemplate',
+  workAuthorization: 'workAuthorization'
 };
 
 exports.Prisma.UserPreferencesOrderByRelevanceFieldEnum = {
@@ -1257,13 +1257,13 @@ exports.Prisma.JobApplicationOrderByRelevanceFieldEnum = {
   externalId: 'externalId',
   atsUrl: 'atsUrl',
   confirmationNumber: 'confirmationNumber',
-  serverIpAddress: 'serverIpAddress',
-  proxyUsed: 'proxyUsed',
   contactMethod: 'contactMethod',
   recruiterName: 'recruiterName',
   recruiterEmail: 'recruiterEmail',
   recruiterPhone: 'recruiterPhone',
-  appliedVia: 'appliedVia'
+  appliedVia: 'appliedVia',
+  proxyUsed: 'proxyUsed',
+  serverIpAddress: 'serverIpAddress'
 };
 
 exports.Prisma.ApplicationInteractionOrderByRelevanceFieldEnum = {

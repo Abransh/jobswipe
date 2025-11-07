@@ -55,7 +55,7 @@ export function EnhancedSignInForm() {
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+  const callbackUrl = searchParams.get('callbackUrl') || '/jobs';
   
   // Use the custom auth context
   const { login, isLoading, error, clearError } = useAuth();

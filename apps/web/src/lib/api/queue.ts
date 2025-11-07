@@ -40,6 +40,7 @@ export interface ApplicationStatus {
     company: string;
     location: string;
     logo?: string;
+    url?: string; // Job application URL (applyUrl or sourceUrl)
     salary?: {
       min?: number;
       max?: number;
@@ -47,6 +48,15 @@ export interface ApplicationStatus {
     };
     remote: boolean;
     type: string;
+  };
+  // Optional metadata for future features
+  metadata?: {
+    resume?: {
+      summary?: string;
+      fileName?: string;
+      url?: string;
+    };
+    responses?: Record<string, string | string[]>;
   };
   createdAt: string;
   updatedAt: string;
@@ -94,7 +104,7 @@ class QueueApiService {
   constructor() {
     // Use Fastify API backend directly for better performance and consistency
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    this.apiVersion = 'v1'; // Use Fastify API route structure
+    this.apiVersion = 'api/v1'; // Use Fastify API route structure with /api prefix
   }
 
   /**

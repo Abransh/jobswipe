@@ -22,6 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { queueApi, type ApplicationStatus } from '@/lib/api/queue';
 import { useQueueStatus, getStatusColor, getStatusIcon, formatStatusMessage } from '@/providers/QueueStatusProvider';
+import { ApplicationDetailModal } from '@/components/applications/ApplicationDetailModal';
 import { formatDistanceToNow } from 'date-fns';
 
 // =============================================================================
@@ -35,6 +36,8 @@ export default function ApplicationsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationStatus | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const { 
     isConnected, 
@@ -274,15 +277,29 @@ export default function ApplicationsPage() {
           <div className="space-y-4">
             <AnimatePresence>
               {filteredApplications.map((application) => (
-                <ApplicationCard 
-                  key={application.id} 
+                <ApplicationCard
+                  key={application.id}
                   application={application}
                   isRealtime={realtimeApplications.has(application.id)}
+                  onViewDetails={() => {
+                    setSelectedApplication(application);
+                    setIsDetailModalOpen(true);
+                  }}
                 />
               ))}
             </AnimatePresence>
           </div>
         )}
+
+        {/* Application Detail Modal */}
+        <ApplicationDetailModal
+          application={selectedApplication}
+          isOpen={isDetailModalOpen}
+          onClose={() => {
+            setIsDetailModalOpen(false);
+            setSelectedApplication(null);
+          }}
+        />
       </div>
     </div>
   );
@@ -333,9 +350,10 @@ function StatusCard({ title, count, icon, color, active, onClick }: StatusCardPr
 interface ApplicationCardProps {
   application: ApplicationStatus;
   isRealtime: boolean;
+  onViewDetails: () => void;
 }
 
-function ApplicationCard({ application, isRealtime }: ApplicationCardProps) {
+function ApplicationCard({ application, isRealtime, onViewDetails }: ApplicationCardProps) {
   const statusColors = getStatusColor(application.status);
   const statusIcon = getStatusIcon(application.status);
 
@@ -386,6 +404,13 @@ function ApplicationCard({ application, isRealtime }: ApplicationCardProps) {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
+            <button
+              onClick={onViewDetails}
+              className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg font-medium transition-colors"
+            >
+              View Details
+            </button>
+
             {application.status === 'failed' && (
               <button
                 onClick={() => {/* Retry logic */}}
@@ -395,7 +420,7 @@ function ApplicationCard({ application, isRealtime }: ApplicationCardProps) {
                 <ArrowPathIcon className="w-4 h-4" />
               </button>
             )}
-            
+
             {(application.status === 'pending' || application.status === 'queued') && (
               <button
                 onClick={() => {/* Cancel logic */}}

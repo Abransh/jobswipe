@@ -150,7 +150,7 @@
   so part 1, we are building a tinder like application but for applying to jobs, so user sees job card, swipes right, the job is
   applied, now what i mean by this. so we wil have job applications link which are usually links og greenhouse or ahsbyhq or
   lvever or workday etc etc. \
-  so in the database we have a dataset of jobs where we have job name, descitpion and all things, along with a link\
+  so in the database we have a dataset of jobs where we have job name, description and all things, along with a link\
   also we have a agentic library which is named "browser-use" so what it does is, it makes AI agent access browser using DOM
   access. \
   so when an user swipes right on a particular job card, the automation of applying to jobs is started. \

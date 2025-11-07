@@ -8,8 +8,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 import { JobCard } from '@/components/jobs/JobCard';
 import { JobDetailModal } from '@/components/jobs/JobDetailModal/JobDetailModal';
+import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
 import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
@@ -23,6 +25,8 @@ interface JobSwipeInterfaceProps {
 }
 
 export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpdate }: JobSwipeInterfaceProps) {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
   const [swipeStats, setSwipeStats] = useState({
     totalSwipes: 0,
     leftSwipes: 0,
@@ -39,10 +43,30 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
 
+  // Login prompt modal state
+  const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [pendingJobId, setPendingJobId] = useState<string | null>(null);
+
   // Update card stack when jobs change
   useEffect(() => {
     setCardStack(jobs.slice(currentIndex, currentIndex + 3));
   }, [jobs, currentIndex]);
+
+  // Check for pending swipe on mount (after successful login)
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      const pendingSwipeJobId = sessionStorage.getItem('pending_swipe_job_id');
+      if (pendingSwipeJobId) {
+        console.log('🔄 [PENDING SWIPE] Executing pending swipe for job:', pendingSwipeJobId);
+        sessionStorage.removeItem('pending_swipe_job_id');
+
+        // Small delay to ensure UI is ready
+        setTimeout(() => {
+          handleSwipeRight(pendingSwipeJobId);
+        }, 500);
+      }
+    }
+  }, [authLoading, isAuthenticated]);
 
   // Handle swipe events
   const handleSwipeLeft = useCallback(async (jobId: string) => {
@@ -93,6 +117,15 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     const job = jobs.find(j => j.id === jobId);
     if (!job) {
       console.error('❌ [JobSwipeInterface] Job not found:', jobId);
+      return;
+    }
+
+    // Check authentication before proceeding
+    if (!authLoading && !isAuthenticated) {
+      console.log('🔒 [AUTH CHECK] User not authenticated, showing login prompt');
+      setPendingJobId(jobId);
+      sessionStorage.setItem('pending_swipe_job_id', jobId);
+      setIsLoginPromptOpen(true);
       return;
     }
 
@@ -210,7 +243,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       setIsApplying(null);
       setTimeout(() => setFeedback(null), 5000);
     }
-  }, [jobs, onApplicationUpdate, swipeStats.rightSwipes]);
+  }, [jobs, onApplicationUpdate, swipeStats.rightSwipes, isAuthenticated, authLoading]);
 
   const handleJobSave = useCallback((job: JobData) => {
     console.log('💾 Saved job:', job.title);
@@ -619,6 +652,17 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         onShare={handleModalShare}
         matchScore={selectedJob ? Math.floor(Math.random() * 20) + 80 : undefined}
         isApplying={selectedJob ? isApplying === selectedJob.id : false}
+      />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        isOpen={isLoginPromptOpen}
+        onClose={() => {
+          setIsLoginPromptOpen(false);
+          setPendingJobId(null);
+          sessionStorage.removeItem('pending_swipe_job_id');
+        }}
+        jobTitle={pendingJobId ? jobs.find(j => j.id === pendingJobId)?.title : undefined}
       />
     </div>
   );

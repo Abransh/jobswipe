@@ -59,8 +59,8 @@ export default function middleware(req: NextRequest) {
     if (isAuthRoute(pathname)) {
       if (isAuthenticated) {
         // Redirect authenticated users away from auth pages
-        console.log(`Redirecting authenticated user from ${pathname} to /dashboard`);
-        return NextResponse.redirect(new URL('/dashboard', nextUrl));
+        console.log(`Redirecting authenticated user from ${pathname} to /jobs`);
+        return NextResponse.redirect(new URL('/jobs', nextUrl));
       }
       // Allow unauthenticated users to access auth pages
       return NextResponse.next();

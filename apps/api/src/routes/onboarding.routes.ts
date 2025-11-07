@@ -1,6 +1,45 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 
+interface AuthRequest extends FastifyRequest {
+  user?: {
+    userId: string;
+    [key: string]: any;
+  };
+}
+
+async function authMiddleware(request: AuthRequest, reply: FastifyReply): Promise<void> {
+  try {
+    const authHeader = request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return reply.status(401).send({
+        success: false,
+        error: 'Authentication required',
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const tokenResult = await request.server.jwtService.verifyToken(token);
+
+    if (!tokenResult.valid || !tokenResult.payload) {
+      return reply.status(401).send({
+        success: false,
+        error: 'Invalid token',
+      });
+    }
+
+    request.user = {
+      userId: tokenResult.payload.sub,
+      ...tokenResult.payload,
+    };
+  } catch (error) {
+    return reply.status(500).send({
+      success: false,
+      error: 'Authentication failed',
+    });
+  }
+}
+
 const progressSchema = z.object({
   currentStep: z.number().min(1).max(5),
   completedSteps: z.array(z.number()),
@@ -49,8 +88,8 @@ const completeSchema = z.object({
 
 export async function registerOnboardingRoutes(server: FastifyInstance) {
   server.get('/onboarding/progress', {
-    preHandler: [(server as any).jwtAuthenticate]
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authMiddleware]
+  }, async (request: AuthRequest, reply: FastifyReply) => {
     try {
       const user = (request as any).user;
 
@@ -107,8 +146,8 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
   });
 
   server.post('/onboarding/progress', {
-    preHandler: [(server as any).jwtAuthenticate]
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authMiddleware]
+  }, async (request: AuthRequest, reply: FastifyReply) => {
     try {
       const user = (request as any).user;
       const validation = progressSchema.safeParse(request.body);
@@ -226,8 +265,8 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
   });
 
   server.post('/onboarding/complete', {
-    preHandler: [(server as any).jwtAuthenticate]
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authMiddleware]
+  }, async (request: AuthRequest, reply: FastifyReply) => {
     try {
       const user = (request as any).user;
       const validation = completeSchema.safeParse(request.body);
@@ -293,8 +332,8 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
   });
 
   server.post('/onboarding/skip', {
-    preHandler: [(server as any).jwtAuthenticate]
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authMiddleware]
+  }, async (request: AuthRequest, reply: FastifyReply) => {
     try {
       const user = (request as any).user;
 

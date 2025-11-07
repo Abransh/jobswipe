@@ -58,7 +58,7 @@ export function EssentialProfileStep({
     resolver: zodResolver(essentialProfileSchema),
     mode: 'onChange',
     defaultValues: {
-      fullName: data?.fullName || '', // Keep for compatibility but don't show in UI
+      fullName: data?.fullName || '', // Populated from user.name in parent wizard
       phone: data?.phone || '',
       roleType: data?.roleType || '',
       salaryMin: data?.salaryMin,
@@ -143,6 +143,7 @@ export function EssentialProfileStep({
   };
 
   const onSubmit = (formData: EssentialProfileData) => {
+    // Validate resume file
     if (!resumeFile) {
       setError('resumeFile', {
         type: 'required',
@@ -151,14 +152,30 @@ export function EssentialProfileStep({
       return;
     }
 
+    // Validate role selection
+    if (!selectedRole || selectedRole.trim() === '') {
+      setError('roleType', {
+        type: 'required',
+        message: 'Please select or enter a role type'
+      });
+      return;
+    }
+
+    // Build final data - ensure fullName is always included
     const finalData = {
       ...formData,
-      fullName: data?.fullName || formData.fullName, // Ensure fullName is included
+      fullName: data?.fullName || formData.fullName || '', // Fallback to empty string to satisfy schema
       roleType: selectedRole,
       resumeFile: resumeFile
     };
 
-    onNext();
+    // Update parent with final data before proceeding
+    onDataChange(finalData);
+
+    // Small delay to ensure state updates propagate
+    setTimeout(() => {
+      onNext();
+    }, 100);
   };
 
   return (

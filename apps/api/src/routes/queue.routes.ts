@@ -914,6 +914,11 @@ async function getApplicationsHandler(request: AuthenticatedRequest, reply: Fast
           include: { company: true },
         },
         jobSnapshot: true,
+        application: {
+          include: {
+            resume: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: query.limit,
@@ -927,34 +932,74 @@ async function getApplicationsHandler(request: AuthenticatedRequest, reply: Fast
       },
     });
     
-    const formattedApplications = applications.map(app => ({
-      id: app.id,
-      jobId: app.jobPostingId,
-      status: app.status.toLowerCase(),
-      priority: app.priority.toLowerCase(),
-      attempts: app.attempts,
-      maxAttempts: app.maxAttempts,
-      scheduledAt: app.scheduledAt,
-      startedAt: app.startedAt,
-      completedAt: app.completedAt,
-      success: app.success,
-      errorMessage: app.errorMessage,
-      job: {
-        title: app.jobSnapshot?.title || app.jobPosting.title,
-        company: app.jobSnapshot?.companyName || app.jobPosting.company.name,
-        location: app.jobSnapshot?.location || app.jobPosting.location,
-        logo: app.jobSnapshot?.companyLogo || app.jobPosting.company.logo,
-        salary: {
-          min: app.jobSnapshot?.salaryMin || app.jobPosting.salaryMin,
-          max: app.jobSnapshot?.salaryMax || app.jobPosting.salaryMax,
-          currency: app.jobSnapshot?.currency || app.jobPosting.currency,
+    const formattedApplications = applications.map(app => {
+      // Build metadata from database fields
+      const metadata: any = {};
+
+      // Add resume data if available
+      if (app.application?.resume) {
+        metadata.resume = {
+          fileName: app.application.resume.name || 'Resume.pdf',
+          summary: app.application.resume.metadata?.summary || null,
+          url: app.application.resume.pdfUrl || app.application.resume.htmlUrl || null,
+        };
+      }
+
+      // Add responses data from customFields or responseData
+      if (app.customFields || app.responseData) {
+        const responses: Record<string, any> = {};
+
+        // Merge customFields into responses
+        if (app.customFields && typeof app.customFields === 'object') {
+          Object.assign(responses, app.customFields);
+        }
+
+        // Merge responseData into responses
+        if (app.responseData && typeof app.responseData === 'object') {
+          Object.assign(responses, app.responseData);
+        }
+
+        // Add cover letter as a response if present
+        if (app.coverLetter) {
+          responses['Cover Letter'] = app.coverLetter;
+        }
+
+        if (Object.keys(responses).length > 0) {
+          metadata.responses = responses;
+        }
+      }
+
+      return {
+        id: app.id,
+        jobId: app.jobPostingId,
+        status: app.status.toLowerCase(),
+        priority: app.priority.toLowerCase(),
+        attempts: app.attempts,
+        maxAttempts: app.maxAttempts,
+        scheduledAt: app.scheduledAt,
+        startedAt: app.startedAt,
+        completedAt: app.completedAt,
+        success: app.success,
+        errorMessage: app.errorMessage,
+        job: {
+          title: app.jobSnapshot?.title || app.jobPosting.title,
+          company: app.jobSnapshot?.companyName || app.jobPosting.company.name,
+          location: app.jobSnapshot?.location || app.jobPosting.location,
+          logo: app.jobSnapshot?.companyLogo || app.jobPosting.company.logo,
+          url: app.jobSnapshot?.applyUrl || app.jobPosting.applyUrl || app.jobSnapshot?.sourceUrl || app.jobPosting.sourceUrl,
+          salary: {
+            min: app.jobSnapshot?.salaryMin || app.jobPosting.salaryMin,
+            max: app.jobSnapshot?.salaryMax || app.jobPosting.salaryMax,
+            currency: app.jobSnapshot?.currency || app.jobPosting.currency,
+          },
+          remote: app.jobSnapshot?.remote ?? app.jobPosting.remote,
+          type: app.jobSnapshot?.type || app.jobPosting.type,
         },
-        remote: app.jobSnapshot?.remote ?? app.jobPosting.remote,
-        type: app.jobSnapshot?.type || app.jobPosting.type,
-      },
-      createdAt: app.createdAt,
-      updatedAt: app.updatedAt,
-    }));
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+        createdAt: app.createdAt,
+        updatedAt: app.updatedAt,
+      };
+    });
     
     return reply.send({
       success: true,
@@ -1007,6 +1052,11 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
           include: { company: true },
         },
         jobSnapshot: true,
+        application: {
+          include: {
+            resume: true,
+          },
+        },
         automationLogs: {
           orderBy: { createdAt: 'desc' },
           take: 50,
@@ -1035,7 +1085,43 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
         request.server.log.warn('Failed to get automation status:', error);
       }
     }
-    
+
+    // Build metadata from database fields
+    const metadata: any = {};
+
+    // Add resume data if available
+    if (application.application?.resume) {
+      metadata.resume = {
+        fileName: application.application.resume.name || 'Resume.pdf',
+        summary: application.application.resume.metadata?.summary || null,
+        url: application.application.resume.pdfUrl || application.application.resume.htmlUrl || null,
+      };
+    }
+
+    // Add responses data from customFields or responseData
+    if (application.customFields || application.responseData) {
+      const responses: Record<string, any> = {};
+
+      // Merge customFields into responses
+      if (application.customFields && typeof application.customFields === 'object') {
+        Object.assign(responses, application.customFields);
+      }
+
+      // Merge responseData into responses
+      if (application.responseData && typeof application.responseData === 'object') {
+        Object.assign(responses, application.responseData);
+      }
+
+      // Add cover letter as a response if present
+      if (application.coverLetter) {
+        responses['Cover Letter'] = application.coverLetter;
+      }
+
+      if (Object.keys(responses).length > 0) {
+        metadata.responses = responses;
+      }
+    }
+
     const formattedApplication = {
       id: application.id,
       jobId: application.jobPostingId,
@@ -1057,9 +1143,11 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
         description: application.jobSnapshot?.description || application.jobPosting.description,
         requirements: application.jobSnapshot?.requirements || application.jobPosting.requirements,
         location: application.jobSnapshot?.location || application.jobPosting.location,
+        url: application.jobSnapshot?.applyUrl || application.jobPosting.applyUrl || application.jobSnapshot?.sourceUrl || application.jobPosting.sourceUrl,
         applyUrl: application.jobSnapshot?.applyUrl || application.jobPosting.applyUrl,
         sourceUrl: application.jobSnapshot?.sourceUrl || application.jobPosting.sourceUrl,
       },
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       logs: application.automationLogs.map(log => ({
         id: log.id,
         level: log.level.toLowerCase(),

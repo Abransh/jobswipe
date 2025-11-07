@@ -213,7 +213,7 @@ function JobsPageContent() {
   }, []);
 
   return (
-    <div 
+    <div
       className="min-h-screen bg-gray-50"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -226,51 +226,13 @@ function JobsPageContent() {
         </div>
       )}
 
-      {/* Enhanced Header with Breadcrumbs */}
+      {/* Simplified Header - Navigation is now in sidebar via layout */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        {/* Breadcrumb Navigation */}
-        <div className="bg-gray-50 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="flex py-2" aria-label="Breadcrumb">
-              <ol className="flex items-center space-x-4">
-                <li>
-                  <div>
-                    <a href="/" className="text-gray-400 hover:text-gray-500 text-sm">
-                      Home
-                    </a>
-                  </div>
-                </li>
-                <li>
-                  <div className="flex items-center">
-                    <svg className="flex-shrink-0 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                    <span className="ml-4 text-sm font-medium text-gray-900">Job Discovery</span>
-                  </div>
-                </li>
-                {(searchQuery || filters.location) && (
-                  <li>
-                    <div className="flex items-center">
-                      <svg className="flex-shrink-0 h-4 w-4 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                      <span className="ml-4 text-sm text-gray-500 truncate max-w-32">
-                        {searchQuery || filters.location}
-                      </span>
-                    </div>
-                  </li>
-                )}
-              </ol>
-            </nav>
-          </div>
-        </div>
-        
-        {/* Main Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo and Title */}
+            {/* Job Count and Stats */}
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold text-gray-900">JobSwipe</h1>
+              <h1 className="text-xl font-bold text-gray-900">Discover Jobs</h1>
               <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-500">
                   {loading ? 'Loading...' : `${totalCount} ${totalCount === 1 ? 'job' : 'jobs'}`}
@@ -304,25 +266,12 @@ function JobsPageContent() {
 
             {/* View Controls */}
             <div className="flex items-center space-x-2">
-              {/* Applications Dashboard Link (Mobile Hidden) */}
-              {applicationStats.totalApplications > 0 && (
-                <a
-                  href="/dashboard/applications"
-                  className="hidden sm:flex items-center space-x-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <span>View Applications</span>
-                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-blue-600 rounded-full">
-                    {applicationStats.totalApplications}
-                  </span>
-                </a>
-              )}
-              
               {/* Filters Toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`p-2 rounded-lg transition-colors ${
-                  showFilters 
-                    ? 'bg-blue-100 text-blue-600' 
+                  showFilters
+                    ? 'bg-blue-100 text-blue-600'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
                 title="Filters"
@@ -332,14 +281,13 @@ function JobsPageContent() {
                 </svg>
               </button>
 
-              {/* View Mode Selector with Mobile Swipe Indicator */}
+              {/* View Mode Selector */}
               <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
-                {/* Desktop View Mode Buttons */}
                 <button
                   onClick={() => handleViewChange('swipe')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'swipe' 
-                      ? 'bg-white text-blue-600 shadow-sm' 
+                    viewMode === 'swipe'
+                      ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
                   title="Swipe View"
@@ -351,8 +299,8 @@ function JobsPageContent() {
                 <button
                   onClick={() => handleViewChange('list')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' 
-                      ? 'bg-white text-blue-600 shadow-sm' 
+                    viewMode === 'list'
+                      ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
                   title="List View"
@@ -364,8 +312,8 @@ function JobsPageContent() {
                 <button
                   onClick={() => handleViewChange('grid')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' 
-                      ? 'bg-white text-blue-600 shadow-sm' 
+                    viewMode === 'grid'
+                      ? 'bg-white text-blue-600 shadow-sm'
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
                   title="Grid View"
@@ -376,30 +324,18 @@ function JobsPageContent() {
                 </button>
               </div>
 
-              {/* Mobile View Mode Indicator with Swipe Hint */}
-              <div className="sm:hidden flex flex-col items-center">
-                <div className="flex items-center space-x-1 bg-gray-100 rounded-full px-3 py-1">
-                  <span className="text-xs font-medium text-gray-600 capitalize">{viewMode}</span>
-                  <div className="flex space-x-1">
-                    {['swipe', 'list', 'grid'].map((mode) => (
-                      <div
-                        key={mode}
-                        className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                          viewMode === mode ? 'bg-blue-600' : 'bg-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {/* Swipe Hint */}
-                <div className="flex items-center mt-1 text-xs text-gray-400">
-                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                  </svg>
-                  <span>Swipe to change view</span>
-                  <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
+              {/* Mobile View Mode Indicator */}
+              <div className="sm:hidden flex items-center space-x-1 bg-gray-100 rounded-full px-3 py-1">
+                <span className="text-xs font-medium text-gray-600 capitalize">{viewMode}</span>
+                <div className="flex space-x-1">
+                  {['swipe', 'list', 'grid'].map((mode) => (
+                    <div
+                      key={mode}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                        viewMode === mode ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
