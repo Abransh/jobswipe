@@ -336,45 +336,48 @@ async function createServer(): Promise<FastifyInstance> {
   
   if (plugins) {
     try {
-      // Register database connection first
-      server.log.info('Registering database plugin...');
+      // CORRECTED PLUGIN LOADING ORDER (Issue #11)
+      // Order is critical - plugins depend on earlier plugins being loaded
+
+      // 1. Database plugin - MUST be first (everything depends on database)
+      server.log.info('[1/8] Registering database plugin...');
       await server.register(plugins.databasePlugin as any);
 
-      // Register services first (JWT, Redis, Security)
-      server.log.info('Registering enterprise services plugin...');
+      // 2. Services plugin - Core services (JWT, Redis, Security)
+      server.log.info('[2/8] Registering enterprise services plugin (JWT, Redis, Security)...');
       await server.register(plugins.servicesPlugin as any);
 
-      // Register enterprise logging plugin
-      server.log.info('Registering enterprise logging plugin...');
+      // 3. Logging plugin - Centralized logging system (needs services for Redis)
+      server.log.info('[3/8] Registering enterprise logging plugin...');
       await server.register(plugins.loggingPlugin as any);
 
-      // Register monitoring and observability plugin
-      server.log.info('Registering enterprise monitoring plugin...');
+      // 4. Monitoring plugin - Metrics and observability (needs logging)
+      server.log.info('[4/8] Registering enterprise monitoring plugin...');
       await server.register(plugins.monitoringPlugin as any);
 
-      // Register queue management plugin
-      server.log.info('Registering queue management plugin...');
-      await server.register(plugins.queuePlugin as any);
-
-      // Register WebSocket plugin
-      server.log.info('Registering WebSocket plugin...');
-      await server.register(plugins.websocketPlugin as any);
-
-      // Register advanced security plugin
-      server.log.info('Registering advanced security plugin...');
+      // 5. Advanced security plugin - CSRF, XSS, attack detection (needs services)
+      server.log.info('[5/8] Registering advanced security plugin (CSRF, attack detection)...');
       await server.register(plugins.advancedSecurityPlugin as any);
 
-      // Register basic security plugin (for backwards compatibility)
-      server.log.info('Registering basic security plugin...');
+      // 6. Basic security plugin - Backwards compatibility (load after advanced)
+      server.log.info('[6/8] Registering basic security plugin (backwards compatibility)...');
       await server.register(plugins.securityPlugin as any);
-      
-      server.log.info('✅ All enterprise plugins registered successfully');
+
+      // 7. Queue plugin - Application plugin (needs database, services, security)
+      server.log.info('[7/8] Registering queue management plugin...');
+      await server.register(plugins.queuePlugin as any);
+
+      // 8. WebSocket plugin - Application plugin (needs services for auth, security for protection)
+      server.log.info('[8/8] Registering WebSocket plugin...');
+      await server.register(plugins.websocketPlugin as any);
+
+      server.log.info('✅ All 8 enterprise plugins registered successfully in correct order');
     } catch (error) {
-      server.log.warn('Some enterprise plugins failed to load, continuing with basic functionality');
+      server.log.warn('⚠️ Some enterprise plugins failed to load, continuing with basic functionality');
       server.log.error(error);
     }
   } else {
-    server.log.warn('Enterprise plugins not available, using basic security headers');
+    server.log.warn('⚠️ Enterprise plugins not available, using basic security headers fallback');
   }
 
   // Add comprehensive security headers fallback for all requests
