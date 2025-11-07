@@ -327,6 +327,20 @@ public
 .tern-port
 
 # =============================================================================
+# TypeScript Compiled Files
+# =============================================================================
+# Compiled JavaScript files in TypeScript source directories
+# (NEVER commit compiled .js files - source is .ts)
+apps/*/src/**/*.js
+apps/*/src/**/*.js.map
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+
+# Exception: Keep JavaScript config files (not compiled from TypeScript)
+!*.config.js
+!*rc.js
+
+# =============================================================================
 # Custom Project Ignores
 # =============================================================================
 # Job scraping data
