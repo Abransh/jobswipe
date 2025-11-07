@@ -39,6 +39,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string, jobId?: string } | null>(null);
   const [cardStack, setCardStack] = useState<JobData[]>(jobs.slice(0, 3)); // Show 3 cards in stack
 
+  // Application progress state
+  const [applicationProgress, setApplicationProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState<'uploading' | 'filling' | 'submitting' | 'complete' | null>(null);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
@@ -148,6 +152,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     setFeedback(null);
     setIsApplying(job.id);
 
+    // Start progress animation
+    setApplicationProgress(0);
+    setProgressStage('uploading');
+
     try {
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
@@ -157,6 +165,46 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         deviceId,
         userAgent: navigator.userAgent,
       };
+
+      // Simulate progress stages for better UX
+      // Stage 1: Uploading resume (0-30%)
+      const uploadProgress = setInterval(() => {
+        setApplicationProgress(prev => {
+          if (prev >= 30) {
+            clearInterval(uploadProgress);
+            setProgressStage('filling');
+            return prev;
+          }
+          return prev + 2;
+        });
+      }, 50);
+
+      // Stage 2: Filling application (30-70%)
+      setTimeout(() => {
+        const fillProgress = setInterval(() => {
+          setApplicationProgress(prev => {
+            if (prev >= 70) {
+              clearInterval(fillProgress);
+              setProgressStage('submitting');
+              return prev;
+            }
+            return prev + 2;
+          });
+        }, 40);
+      }, 800);
+
+      // Stage 3: Submitting (70-95%)
+      setTimeout(() => {
+        const submitProgress = setInterval(() => {
+          setApplicationProgress(prev => {
+            if (prev >= 95) {
+              clearInterval(submitProgress);
+              return prev;
+            }
+            return prev + 1.5;
+          });
+        }, 35);
+      }, 1600);
 
       console.log('🟡 [API CALL] Calling jobsApi.swipeRight', {
         endpoint: `/api/v1/jobs/${job.id}/swipe`,
@@ -175,6 +223,16 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       });
 
       if (response.success && response.data) {
+        // Complete progress animation
+        setApplicationProgress(100);
+        setProgressStage('complete');
+
+        // Wait a moment to show 100% before hiding
+        setTimeout(() => {
+          setApplicationProgress(0);
+          setProgressStage(null);
+        }, 1000);
+
         setFeedback({
           type: 'success',
           message: `Application queued for ${job.title}! 🚀${response.data.serverAutomation?.remainingServerApplications !== undefined ? ` (${response.data.serverAutomation.remainingServerApplications} server apps remaining)` : ''}`,
@@ -232,6 +290,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         message: errorMessage,
         jobId: job.id
       });
+
+      // Reset progress on error
+      setApplicationProgress(0);
+      setProgressStage(null);
 
       // Revert stats on error
       setSwipeStats(prev => ({
@@ -514,6 +576,59 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           </motion.div>
         )}
       </div>
+
+      {/* Application Progress Bar - Top Right */}
+      <AnimatePresence>
+        {progressStage && (
+          <motion.div
+            initial={{ opacity: 0, x: 20, y: -20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 20, y: -20 }}
+            className="fixed top-20 right-4 z-50"
+          >
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-premium border border-gray-200 dark:border-gray-800 p-3 min-w-[280px]">
+              {/* Stage Label */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-footnote font-semibold text-gray-900 dark:text-white">
+                  {progressStage === 'uploading' && '📄 Uploading resume...'}
+                  {progressStage === 'filling' && '✍️ Filling application...'}
+                  {progressStage === 'submitting' && '🚀 Submitting...'}
+                  {progressStage === 'complete' && '✅ Complete!'}
+                </span>
+                <span className="text-caption font-bold text-primary">
+                  {Math.round(applicationProgress)}%
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  className={cn(
+                    "h-full rounded-full",
+                    progressStage === 'complete'
+                      ? 'bg-success'
+                      : 'bg-gradient-to-r from-primary to-purple'
+                  )}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${applicationProgress}%` }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                />
+              </div>
+
+              {/* Estimated time */}
+              {progressStage !== 'complete' && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-caption text-gray-500 dark:text-gray-400 mt-1.5 text-center"
+                >
+                  Estimated time: {progressStage === 'uploading' ? '2-3' : progressStage === 'filling' ? '3-4' : '1-2'}s
+                </motion.p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats Badge for Applied Jobs - Premium Style */}
       <AnimatePresence>
