@@ -184,8 +184,9 @@ async function verifyTokenWithSignature(token: string): Promise<TokenVerificatio
     // Get JWT secret from environment
     const jwtSecret = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET;
     if (!jwtSecret) {
-      console.error('❌ JWT_SECRET not configured');
-      return { valid: false, error: 'Server configuration error' };
+      console.error('❌ CRITICAL: JWT_SECRET not configured in environment variables');
+      console.error('📋 Available env vars:', Object.keys(process.env).filter(k => k.includes('JWT') || k.includes('SECRET')));
+      return { valid: false, error: 'Server configuration error - JWT secret missing' };
     }
 
     // Create signing input (header.payload)
@@ -369,19 +370,24 @@ export function getUserAgent(request: NextRequest): string | undefined {
 // =============================================================================
 
 /**
- * Check if route is protected
+ * Check if route is protected (requires authentication)
+ *
+ * NOTE: /jobs is intentionally NOT protected - it's publicly accessible
+ * Authentication is enforced at the action level (e.g., when swiping on a job)
  */
 export function isProtectedRoute(pathname: string): boolean {
   const protectedRoutes = [
     '/dashboard',
-    '/profile', 
+    '/profile',
     '/settings',
     '/applications',
     '/resumes',
-    '/jobs/saved',
+    '/jobs/saved',  // Saved jobs requires auth
     '/automation',
   ];
-  
+
+  // IMPORTANT: /jobs is public - users can browse jobs without auth
+  // Authentication is required only when they try to swipe/apply
   return protectedRoutes.some(route => pathname.startsWith(route));
 }
 
@@ -402,6 +408,9 @@ export function isAuthRoute(pathname: string): boolean {
 
 /**
  * Check if route is public (no auth required)
+ *
+ * NOTE: /jobs is also public but handled separately to allow
+ * for action-level authentication (swipe requires auth, browse doesn't)
  */
 export function isPublicRoute(pathname: string): boolean {
   const publicRoutes = [
@@ -412,9 +421,10 @@ export function isPublicRoute(pathname: string): boolean {
     '/terms',
     '/pricing',
     '/help',
+    '/jobs',  // Public - users can browse jobs without auth
     '/api/health',
   ];
-  
+
   return publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
 }
 
