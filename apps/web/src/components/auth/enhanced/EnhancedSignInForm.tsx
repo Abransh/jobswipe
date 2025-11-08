@@ -1,164 +1,62 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@jobswipe/shared/browser';
 import Link from 'next/link';
-import { 
-  Eye, 
-  EyeOff, 
-  Loader2, 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock,
-  Fingerprint,
-  Smartphone
-} from 'lucide-react';
+import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import { OAuthProviders } from '../OAuthProviders';
 import { FormInput } from '../FormInput';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   rememberMe: z.boolean().optional(),
-  deviceTrust: z.boolean().optional(),
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
 
-interface SecurityEvent {
-  type: 'success' | 'warning' | 'error' | 'info';
-  message: string;
-  timestamp: Date;
-}
-
-interface RateLimitInfo {
-  remaining: number;
-  reset: Date;
-  blocked: boolean;
-}
-
 export function EnhancedSignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
-  const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
-  const [biometricSupported, setBiometricSupported] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
-  const [lastAttemptTime, setLastAttemptTime] = useState<Date | null>(null);
-  
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/jobs';
-  
-  // Use the custom auth context
+
   const { login, isLoading, error, clearError } = useAuth();
 
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     mode: 'onChange',
   });
 
-  const email = watch('email');
-  const password = watch('password');
-
-  // Check for biometric authentication support
-  useEffect(() => {
-    const checkBiometricSupport = async () => {
-      try {
-        if (typeof window !== 'undefined' && 'credentials' in navigator) {
-          const available = await (navigator.credentials as any).get({
-            publicKey: {
-              challenge: new Uint8Array(32),
-              rp: { name: 'JobSwipe' },
-              user: {
-                id: new Uint8Array(16),
-                name: 'test',
-                displayName: 'Test User',
-              },
-              pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
-              timeout: 60000,
-            },
-          });
-          setBiometricSupported(!!available);
-        }
-      } catch (error) {
-        // Biometric not supported or available
-        setBiometricSupported(false);
-      }
-    };
-
-    checkBiometricSupport();
-  }, []);
-
-  // Add security event
-  const addSecurityEvent = (type: SecurityEvent['type'], message: string) => {
-    setSecurityEvents(prev => [...prev.slice(-4), {
-      type,
-      message,
-      timestamp: new Date(),
-    }]);
-  };
-
-  // Real-time validation feedback
-  const getEmailValidationStatus = () => {
-    if (!email) return null;
-    if (errors.email) return 'error';
-    if (z.string().email().safeParse(email).success) return 'success';
-    return 'warning';
-  };
-
-  const getPasswordValidationStatus = () => {
-    if (!password) return null;
-    if (errors.password) return 'error';
-    if (password.length >= 8) return 'success';
-    return 'warning';
-  };
-
-  const handleBiometricAuth = async () => {
-    try {
-      addSecurityEvent('info', 'Biometric authentication initiated');
-      
-      const credential = await (navigator.credentials as any).get({
-        publicKey: {
-          challenge: new Uint8Array(32),
-          rpId: window.location.hostname,
-          allowCredentials: [],
-          userVerification: 'required',
-        },
-      });
-
-      if (credential) {
-        // In a real implementation, send credential to server for verification
-        addSecurityEvent('success', 'Biometric authentication successful');
-        router.push(callbackUrl);
-      }
-    } catch (error) {
-      addSecurityEvent('error', 'Biometric authentication failed');
-    }
-  };
-
   const onSubmit = async (data: SignInFormData) => {
-    // Clear any existing errors
-    clearError();
-    setAttemptCount(prev => prev + 1);
-    setLastAttemptTime(new Date());
-
     try {
-      addSecurityEvent('info', 'Sign-in attempt initiated');
+      clearError();
+      console.log('🔐 Attempting login...');
 
-      const response = await login(data.email, data.password);
+      const result = await login(data.email, data.password);
+
+      console.log('📊 Login result:', { success: result.success, hasUser: !!result.user });
+
+      if (result.success) {
+        console.log('✅ Login successful, redirecting to:', callbackUrl);
+
+        // Show success toast
+        toast.success('Welcome back!', {
+          description: 'You have successfully signed in.',
+          duration: 3000,
+        });
 
       if (response.success && response.user) {
         addSecurityEvent('success', 'Authentication successful');
@@ -179,247 +77,149 @@ export function EnhancedSignInForm() {
           router.push(callbackUrl);
         }
       } else {
-        // Handle specific error cases
-        if (error?.includes('Invalid email or password')) {
-          addSecurityEvent('error', 'Invalid credentials provided');
-        } else if (error?.includes('Account')) {
-          addSecurityEvent('error', 'Account access denied');
-        } else if (error?.includes('Rate limit') || error?.includes('Too many')) {
-          addSecurityEvent('error', 'Rate limit exceeded');
-          setRateLimitInfo({
-            remaining: 0,
-            reset: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
-            blocked: true,
-          });
-        } else {
-          addSecurityEvent('error', 'Unknown authentication error');
-        }
+        console.error('❌ Login failed:', result);
+        toast.error('Login failed', {
+          description: 'Please check your credentials and try again.',
+        });
       }
-    } catch (error: any) {
-      addSecurityEvent('error', 'Unexpected authentication error');
-      // Error is automatically handled by the auth context
+    } catch (err) {
+      console.error('❌ Sign in error:', err);
+      // Error will be displayed by the error state from useAuth
+      toast.error('Login failed', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+      });
     }
   };
 
-  const isRateLimited = rateLimitInfo?.blocked && rateLimitInfo.reset > new Date();
-  const showSecurityWarning = attemptCount >= 3;
-
   return (
-    <div className="space-y-6">
-      {/* Security Status */}
-      {securityEvents.length > 0 && (
-        <div className="space-y-2">
-          {securityEvents.slice(-2).map((event, index) => (
-            <Alert key={index} variant={event.type === 'error' ? 'destructive' : 'default'}>
-              <div className="flex items-center space-x-2">
-                {event.type === 'success' && <CheckCircle className="h-4 w-4" />}
-                {event.type === 'error' && <AlertTriangle className="h-4 w-4" />}
-                {event.type === 'warning' && <AlertTriangle className="h-4 w-4" />}
-                {event.type === 'info' && <Shield className="h-4 w-4" />}
-                <AlertDescription>{event.message}</AlertDescription>
-              </div>
-            </Alert>
-          ))}
-        </div>
-      )}
-
-      {/* Rate Limit Warning */}
-      {isRateLimited && (
-        <Alert variant="destructive">
-          <Clock className="h-4 w-4" />
-          <AlertDescription>
-            Too many failed attempts. Please try again after{' '}
-            {rateLimitInfo?.reset.toLocaleTimeString()}.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Security Warning */}
-      {showSecurityWarning && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Multiple failed attempts detected. Consider using password recovery or biometric authentication.
-          </AlertDescription>
-        </Alert>
-      )}
-
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
       {/* OAuth Providers */}
-      <OAuthProviders callbackUrl={callbackUrl} />
-
-      {/* Biometric Authentication */}
-      {biometricSupported && (
-        <div className="space-y-4">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or use biometric</span>
-            </div>
-          </div>
-          
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={handleBiometricAuth}
-            disabled={isLoading || isRateLimited}
-          >
-            <Fingerprint className="mr-2 h-4 w-4" />
-            Use Biometric Authentication
-          </Button>
-        </div>
-      )}
+      <div>
+        <OAuthProviders callbackUrl={callbackUrl} />
+      </div>
 
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-gray-200 dark:border-gray-800" />
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with password</span>
+        <div className="relative flex justify-center text-footnote">
+          <span className="px-3 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+            Or continue with email
+          </span>
         </div>
       </div>
 
-      {/* Error Message */}
+      {/* Error Alert */}
       {error && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3 rounded-lg bg-error-light dark:bg-error/20 border border-error/20"
+        >
+          <p className="text-footnote text-error flex items-center gap-2">
+            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+            </svg>
+            {error}
+          </p>
+        </motion.div>
       )}
 
       {/* Sign In Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="relative">
-          <FormInput
-            id="email"
-            label="Email address"
-            type="email"
-            autoComplete="email"
-            required
-            {...register('email')}
-            error={errors.email?.message}
-          />
-          {/* Real-time validation indicator */}
-          <div className="absolute right-3 top-8 flex items-center">
-            {getEmailValidationStatus() === 'success' && (
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            )}
-            {getEmailValidationStatus() === 'error' && (
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            )}
-          </div>
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Email Field */}
+        <FormInput
+          id="email"
+          type="email"
+          label="Email"
+          placeholder="you@example.com"
+          icon={Mail}
+          error={errors.email?.message}
+          {...register('email')}
+          required
+        />
 
-        <div className="relative">
-          <FormInput
-            id="password"
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="current-password"
-            required
-            {...register('password')}
-            error={errors.password?.message}
-          />
-          <button
-            type="button"
-            className="absolute right-10 top-8 flex items-center"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-400" />
-            ) : (
-              <Eye className="h-4 w-4 text-gray-400" />
-            )}
-          </button>
-          {/* Real-time validation indicator */}
-          <div className="absolute right-3 top-8 flex items-center">
-            {getPasswordValidationStatus() === 'success' && (
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            )}
-            {getPasswordValidationStatus() === 'error' && (
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                {...register('rememberMe')}
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
+        {/* Password Field */}
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-subhead font-medium text-gray-900 dark:text-white">
+            Password<span className="text-error ml-1">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             </div>
-
-            <div className="flex items-center">
-              <input
-                id="device-trust"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                {...register('deviceTrust')}
-              />
-              <label htmlFor="device-trust" className="ml-2 text-sm text-gray-900 flex items-center">
-                <Smartphone className="h-3 w-3 mr-1" />
-                Trust this device
-              </label>
-            </div>
-          </div>
-
-          <div className="text-sm">
-            <Link
-              href="/auth/reset-password"
-              className="font-medium text-blue-600 hover:text-blue-500"
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              className="appearance-none block w-full h-11 border rounded-lg transition-all duration-quick text-subhead text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary pl-10 pr-10"
+              {...register('password')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              Forgot your password?
-            </Link>
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
           </div>
+          {errors.password && (
+            <p className="text-footnote text-error flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" />
+              </svg>
+              {errors.password.message}
+            </p>
+          )}
         </div>
 
-        <Button
+        {/* Remember Me & Forgot Password */}
+        <div className="flex items-center justify-between">
+          <label className="flex items-center cursor-pointer group">
+            <input
+              type="checkbox"
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 text-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+              {...register('rememberMe')}
+            />
+            <span className="ml-2 text-subhead text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+              Remember me
+            </span>
+          </label>
+          <Link
+            href="/auth/forgot-password"
+            className="text-subhead font-medium text-primary hover:text-primary/90 transition-colors"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        {/* Submit Button */}
+        <motion.button
           type="submit"
-          disabled={isLoading || !isValid || isRateLimited}
-          className="w-full"
+          disabled={isLoading}
+          whileHover={{ scale: isLoading ? 1 : 1.02 }}
+          whileTap={{ scale: isLoading ? 1 : 0.98 }}
+          className="w-full h-11 px-4 rounded-lg bg-primary text-white font-semibold shadow-card hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-subhead"
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
               Signing in...
             </>
           ) : (
-            <>
-              <Shield className="mr-2 h-4 w-4" />
-              Sign in securely
-            </>
+            'Sign in'
           )}
-        </Button>
+        </motion.button>
       </form>
-
-      {/* Security Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-medium text-blue-900">Security Notice</p>
-            <p className="text-blue-700 mt-1">
-              Your connection is encrypted and secure. We use enterprise-grade security measures
-              to protect your account.
-            </p>
-            {lastAttemptTime && (
-              <p className="text-blue-600 mt-2">
-                Last attempt: {lastAttemptTime.toLocaleString()}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    </motion.div>
   );
 }

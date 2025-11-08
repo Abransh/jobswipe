@@ -1,15 +1,21 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Metadata } from 'next';
+import { Toaster } from 'sonner';
 
 import '@/styles/globals.css';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { QueueStatusProvider } from '@/providers/QueueStatusProvider';
 
 
+// Premium font loading with SF Pro Display-inspired weights
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  // Load all weights for premium typography system
+  weight: ['200', '300', '400', '500', '600', '700'],
+  // Enable variable font for smoother weights
+  preload: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -107,6 +113,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </div>
           </QueueStatusProvider>
         </AuthProvider>
+        <Toaster
+          position="top-right"
+          richColors
+          expand={false}
+          duration={4000}
+          closeButton
+        />
       </body>
     </html>
   );

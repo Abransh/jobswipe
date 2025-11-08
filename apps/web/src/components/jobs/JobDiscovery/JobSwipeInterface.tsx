@@ -39,6 +39,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error' | 'info', message: string, jobId?: string } | null>(null);
   const [cardStack, setCardStack] = useState<JobData[]>(jobs.slice(0, 3)); // Show 3 cards in stack
 
+  // Application progress state
+  const [applicationProgress, setApplicationProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState<'uploading' | 'filling' | 'submitting' | 'complete' | null>(null);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobData | null>(null);
@@ -148,6 +152,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     setFeedback(null);
     setIsApplying(job.id);
 
+    // Start progress animation
+    setApplicationProgress(0);
+    setProgressStage('uploading');
+
     try {
       const deviceId = generateDeviceId();
       const priority = calculatePriority(job.isUrgent);
@@ -157,6 +165,46 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         deviceId,
         userAgent: navigator.userAgent,
       };
+
+      // Simulate progress stages for better UX
+      // Stage 1: Uploading resume (0-30%)
+      const uploadProgress = setInterval(() => {
+        setApplicationProgress(prev => {
+          if (prev >= 30) {
+            clearInterval(uploadProgress);
+            setProgressStage('filling');
+            return prev;
+          }
+          return prev + 2;
+        });
+      }, 50);
+
+      // Stage 2: Filling application (30-70%)
+      setTimeout(() => {
+        const fillProgress = setInterval(() => {
+          setApplicationProgress(prev => {
+            if (prev >= 70) {
+              clearInterval(fillProgress);
+              setProgressStage('submitting');
+              return prev;
+            }
+            return prev + 2;
+          });
+        }, 40);
+      }, 800);
+
+      // Stage 3: Submitting (70-95%)
+      setTimeout(() => {
+        const submitProgress = setInterval(() => {
+          setApplicationProgress(prev => {
+            if (prev >= 95) {
+              clearInterval(submitProgress);
+              return prev;
+            }
+            return prev + 1.5;
+          });
+        }, 35);
+      }, 1600);
 
       console.log('🟡 [API CALL] Calling jobsApi.swipeRight', {
         endpoint: `/api/v1/jobs/${job.id}/swipe`,
@@ -175,6 +223,16 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       });
 
       if (response.success && response.data) {
+        // Complete progress animation
+        setApplicationProgress(100);
+        setProgressStage('complete');
+
+        // Wait a moment to show 100% before hiding
+        setTimeout(() => {
+          setApplicationProgress(0);
+          setProgressStage(null);
+        }, 1000);
+
         setFeedback({
           type: 'success',
           message: `Application queued for ${job.title}! 🚀${response.data.serverAutomation?.remainingServerApplications !== undefined ? ` (${response.data.serverAutomation.remainingServerApplications} server apps remaining)` : ''}`,
@@ -232,6 +290,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         message: errorMessage,
         jobId: job.id
       });
+
+      // Reset progress on error
+      setApplicationProgress(0);
+      setProgressStage(null);
 
       // Revert stats on error
       setSwipeStats(prev => ({
@@ -331,171 +393,182 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-start pt-16 p-4 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
-      {/* Modern Stacked Card Interface */}
-      <div className="relative w-full max-w-sm mx-auto min-h-[600px]">
+    <div className="relative min-h-screen flex flex-col items-center justify-start pt-16 p-4 bg-gray-50 dark:bg-gray-950">
+      {/* Modern Stacked Card Interface - Landing Page Style */}
+      <div className="relative w-full max-w-md mx-auto min-h-[600px]">
         {cardStack.length > 0 ? (
-          <div className="relative h-[600px] overflow-visible">
+          <div className="relative h-[600px] sm:h-[650px]">
             {/* Stack of Cards */}
-            {cardStack.map((job, index) => {
-              const isTopCard = index === 0;
-              const zIndex = cardStack.length - index;
-              const scale = 1 - (index * 0.05);
-              const yOffset = index * 8;
+            <AnimatePresence mode="wait">
+              {cardStack.map((job, index) => {
+                const isTopCard = index === 0;
+                const matchScore = Math.floor(Math.random() * 20) + 80;
 
-              return (
-                <motion.div
-                  key={`${job.id}-${currentIndex + index}`}
-                  className={cn(
-                    "absolute",
-                    isTopCard && "cursor-grab active:cursor-grabbing select-none"
-                  )}
-                  style={isTopCard ? {
-                    zIndex,
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                  } : {
-                    zIndex,
-                    scale,
-                    y: yOffset,
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                  }}
-                  initial={isTopCard ? { opacity: 1 } : { scale: 0.8, opacity: 0 }}
-                  animate={isTopCard ? { opacity: 1 } : {
-                    scale,
-                    y: yOffset,
-                    opacity: 1
-                  }}
-                  exit={{
-                    scale: 0.8,
-                    opacity: 0,
-                    transition: { duration: 0.2 }
-                  }}
-                  transition={isTopCard ? undefined : {
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    delay: index * 0.1
-                  }}
-                  // Add drag to the parent for the top card
-                  drag={isTopCard ? true : false}
-                  dragElastic={0.2}
-                  dragMomentum={false}
-                  whileDrag={{ scale: 1.05, rotate: 5 }}
-                  onMouseDown={() => {
-                    if (isTopCard) {
-                      console.log('🖱️ Mouse down on top card:', job.title);
-                    }
-                  }}
-                  onDragStart={() => {
-                    if (isTopCard) {
-                      console.log('🎯 Drag started on top card:', job.title);
-                    }
-                  }}
-                  onDrag={(_, info) => {
-                    if (isTopCard) {
-                      console.log('🔄 Dragging top card:', info.offset.x);
-                    }
-                  }}
-                  onClick={(e) => {
-                    if (!isTopCard) return;
+                if (!isTopCard) {
+                  // Background stack cards
+                  return (
+                    <div
+                      key={`${job.id}-${currentIndex + index}-stack`}
+                      className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-card border border-gray-200 dark:border-gray-800 pointer-events-none"
+                      style={{
+                        zIndex: cardStack.length - index,
+                        transform: `translateY(${index * 8}px) scale(${1 - (index * 0.05)})`,
+                        opacity: 0.6 - (index * 0.3)
+                      }}
+                    />
+                  );
+                }
 
-                    // Check if clicking on action buttons
-                    if ((e.target as HTMLElement).closest('button')) {
-                      return;
-                    }
+                // Format salary
+                const formatSalary = () => {
+                  if (!job.salaryMin && !job.salaryMax) return null;
+                  if (job.salaryMin && job.salaryMax) {
+                    return `$${(job.salaryMin / 1000).toFixed(0)}k–$${(job.salaryMax / 1000).toFixed(0)}k`;
+                  }
+                  if (job.salaryMin) return `From $${(job.salaryMin / 1000).toFixed(0)}k`;
+                  if (job.salaryMax) return `Up to $${(job.salaryMax / 1000).toFixed(0)}k`;
+                  return null;
+                };
 
-                    console.log('🎯 Click detected on top card - opening job details for:', job.title);
-                    handleViewDetails(job);
-                  }}
-                  onDragEnd={(_, info) => {
-                    if (!isTopCard) return;
-
-                    const swipeThreshold = 100;
-                    const swipeVelocity = 300;
-                    const clickThreshold = 5; // Maximum distance for a click
-                    const clickVelocityThreshold = 50; // Maximum velocity for a click
-
-                    // Calculate total drag distance
-                    const dragDistance = Math.sqrt(
-                      Math.pow(info.offset.x, 2) + Math.pow(info.offset.y, 2)
-                    );
-                    const totalVelocity = Math.sqrt(
-                      Math.pow(info.velocity.x, 2) + Math.pow(info.velocity.y, 2)
-                    );
-
-                    console.log('🎯 Drag ended on top card:', {
-                      offsetX: info.offset.x,
-                      offsetY: info.offset.y,
-                      velocityX: info.velocity.x,
-                      velocityY: info.velocity.y,
-                      dragDistance,
-                      totalVelocity,
-                      threshold: swipeThreshold
-                    });
-
-                    // Check if this was a click (minimal movement and velocity)
-                    if (dragDistance < clickThreshold && totalVelocity < clickVelocityThreshold) {
-                      console.log('🎯 Drag-click detected - opening job details for:', job.title);
+                return (
+                  <motion.div
+                    key={`${job.id}-${currentIndex}`}
+                    className="absolute inset-0 bg-white dark:bg-gray-900 rounded-2xl shadow-premium border border-gray-200 dark:border-gray-800 p-6 sm:p-8 overflow-hidden cursor-grab active:cursor-grabbing"
+                    style={{ zIndex: cardStack.length }}
+                    initial={{ scale: 0.95, opacity: 0, rotateY: -10 }}
+                    animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                    exit={{ scale: 1.05, opacity: 0, x: 300 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    drag
+                    dragElastic={0.2}
+                    dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                    onDragEnd={(_, info) => {
+                      const swipeThreshold = 100;
+                      if (info.offset.x > swipeThreshold) {
+                        handleSwipeRight(job.id);
+                      } else if (info.offset.x < -swipeThreshold) {
+                        handleSwipeLeft(job.id);
+                      }
+                    }}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest('button')) return;
                       handleViewDetails(job);
-                      return;
-                    }
+                    }}
+                  >
+                    {/* Match Score */}
+                    <div className="absolute top-4 sm:top-6 right-4 sm:right-6 h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-white dark:bg-gray-800 shadow-card border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center">
+                      <span className="text-headline sm:text-title-3 font-semibold text-primary leading-none">{matchScore}</span>
+                      <span className="text-caption text-gray-500 dark:text-gray-400">match</span>
+                    </div>
 
-                    // Handle as swipe
-                    const shouldSwipeRight = info.offset.x > swipeThreshold || info.velocity.x > swipeVelocity;
-                    const shouldSwipeLeft = info.offset.x < -swipeThreshold || info.velocity.x < -swipeVelocity;
+                    {/* Company Logo */}
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-primary to-purple flex items-center justify-center mb-4 sm:mb-6">
+                      {job.company.logo ? (
+                        <img
+                          src={job.company.logo}
+                          alt={job.company.name}
+                          className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+                        />
+                      ) : (
+                        <span className="text-xl sm:text-2xl font-bold text-white">
+                          {job.company.name.charAt(0)}
+                        </span>
+                      )}
+                    </div>
 
-                    if (shouldSwipeRight) {
-                      console.log('👉 Swiping right on:', job.title);
-                      handleSwipeRight(job.id);
-                    } else if (shouldSwipeLeft) {
-                      console.log('👈 Swiping left on:', job.title);
-                      handleSwipeLeft(job.id);
-                    } else {
-                      console.log('↩️ Snapping back to center');
-                    }
-                  }}
-                >
-                  <JobCard
-                    job={job}
-                    variant={isTopCard ? "swipe" : "grid"}
-                    onSwipeLeft={() => handleSwipeLeft(job.id)}
-                    onSwipeRight={() => handleSwipeRight(job.id)}
-                    onSave={() => handleJobSave(job)}
-                    onShare={() => handleJobShare(job)}
-                    onViewDetails={handleViewDetails}
-                    isApplying={isApplying === job.id}
-                    feedback={feedback?.jobId === job.id ? feedback : undefined}
-                    matchScore={Math.floor(Math.random() * 20) + 80} // Mock match score
-                    className={cn(
-                      !isTopCard && "pointer-events-none opacity-80"
+                    {/* Job Info */}
+                    <h3 className="text-title-3 sm:text-title-2 font-semibold text-gray-900 dark:text-white mb-2 pr-16">
+                      {job.title}
+                    </h3>
+                    <p className="text-callout sm:text-headline text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
+                      {job.company.name}
+                    </p>
+
+                    {/* Location & Remote */}
+                    {(job.location || job.remote) && (
+                      <div className="flex items-center gap-2 mb-4 sm:mb-6">
+                        {job.location && (
+                          <span className="text-footnote sm:text-subhead text-gray-600 dark:text-gray-400">
+                            📍 {job.location}
+                          </span>
+                        )}
+                        {job.remote && (
+                          <span className="px-2 py-1 rounded-md bg-primary/10 text-primary text-footnote sm:text-subhead font-medium">
+                            Remote
+                          </span>
+                        )}
+                      </div>
                     )}
-                  />
-                </motion.div>
-              );
-            })}
+
+                    {/* Salary */}
+                    {formatSalary() && (
+                      <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-success-light dark:bg-success/20 border border-success/20 mb-6 sm:mb-8">
+                        <span className="text-footnote sm:text-subhead font-semibold text-success">
+                          {formatSalary()}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 right-6 sm:right-8 flex gap-3 sm:gap-4">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSwipeLeft(job.id);
+                        }}
+                        className="flex-1 h-12 sm:h-14 rounded-lg border-2 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-subhead sm:text-callout"
+                      >
+                        Skip
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSwipeRight(job.id);
+                        }}
+                        disabled={isApplying === job.id}
+                        className="flex-1 h-12 sm:h-14 rounded-lg bg-primary text-white font-semibold shadow-card hover:bg-primary/90 transition-colors text-subhead sm:text-callout disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isApplying === job.id ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                            <span>Applying...</span>
+                          </div>
+                        ) : (
+                          'Apply Now'
+                        )}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         ) : (
-          /* Empty State */
+          /* Empty State - Premium Style */
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-16"
           >
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7 20l5 5 11-11" />
+            <div className="w-24 h-24 mx-auto bg-success-light dark:bg-success/20 rounded-full flex items-center justify-center mb-6">
+              <svg className="w-12 h-12 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Great job!</h3>
-            <p className="text-gray-600 mb-6">You've reviewed all available jobs. Check back later for new opportunities!</p>
+            <h3 className="text-title-3 font-semibold text-gray-900 dark:text-white mb-2">
+              Great job! 🎉
+            </h3>
+            <p className="text-callout text-gray-600 dark:text-gray-400 mb-6">
+              You've reviewed all available jobs. Check back later for new opportunities!
+            </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+              className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors shadow-card text-subhead"
               onClick={() => window.location.reload()}
             >
               Refresh Jobs
@@ -504,7 +577,60 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         )}
       </div>
 
-      {/* Stats Badge for Applied Jobs */}
+      {/* Application Progress Bar - Top Right */}
+      <AnimatePresence>
+        {progressStage && (
+          <motion.div
+            initial={{ opacity: 0, x: 20, y: -20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 20, y: -20 }}
+            className="fixed top-20 right-4 z-50"
+          >
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-premium border border-gray-200 dark:border-gray-800 p-3 min-w-[280px]">
+              {/* Stage Label */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-footnote font-semibold text-gray-900 dark:text-white">
+                  {progressStage === 'uploading' && '📄 Uploading resume...'}
+                  {progressStage === 'filling' && '✍️ Filling application...'}
+                  {progressStage === 'submitting' && '🚀 Submitting...'}
+                  {progressStage === 'complete' && '✅ Complete!'}
+                </span>
+                <span className="text-caption font-bold text-primary">
+                  {Math.round(applicationProgress)}%
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  className={cn(
+                    "h-full rounded-full",
+                    progressStage === 'complete'
+                      ? 'bg-success'
+                      : 'bg-gradient-to-r from-primary to-purple'
+                  )}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${applicationProgress}%` }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                />
+              </div>
+
+              {/* Estimated time */}
+              {progressStage !== 'complete' && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-caption text-gray-500 dark:text-gray-400 mt-1.5 text-center"
+                >
+                  Estimated time: {progressStage === 'uploading' ? '2-3' : progressStage === 'filling' ? '3-4' : '1-2'}s
+                </motion.p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Stats Badge for Applied Jobs - Premium Style */}
       <AnimatePresence>
         {swipeStats.rightSwipes > 0 && (
           <motion.div
@@ -513,10 +639,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
             exit={{ scale: 0, y: 20 }}
             className="fixed top-20 left-4 z-30"
           >
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg px-4 py-2 shadow-lg">
+            <div className="bg-success text-white rounded-lg px-4 py-2 shadow-card border border-success">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium">
+                <span className="text-subhead font-semibold">
                   {swipeStats.rightSwipes} applied
                 </span>
               </div>
@@ -525,48 +651,51 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         )}
       </AnimatePresence>
 
-      {/* Instructions for first-time users */}
+      {/* Instructions for first-time users - Premium Style */}
       <AnimatePresence>
         {swipeStats.totalSwipes === 0 && cardStack.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 1.5 }}
             className="fixed bottom-6 left-4 right-4 z-40 pointer-events-none"
           >
-            <div className="max-w-md ml-10 mt-2 bg-white/90 backdrop-blur-xl rounded-2xl p-6  shadow-xl border border-white/20">
-              <h4 className="text-lg font-bold text-gray-900 mb-4 text-center">How to JobSwipe</h4>
+            <div className="max-w-md mx-auto bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl p-6 shadow-premium border border-gray-200 dark:border-gray-800">
+              <h4 className="text-headline font-semibold text-gray-900 dark:text-white mb-4 text-center">
+                👆 How to JobSwipe
+              </h4>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">Swipe left to pass</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-error-light dark:bg-error/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </div>
+                  <span className="text-subhead font-medium text-gray-700 dark:text-gray-300">
+                    Swipe left to skip
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">Swipe right to apply</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-success-light dark:bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
+                  <span className="text-subhead font-medium text-gray-700 dark:text-gray-300">
+                    Swipe right to apply
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                      </svg>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">Tap bookmark to save</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-primary-light dark:bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </div>
+                  <span className="text-subhead font-medium text-gray-700 dark:text-gray-300">
+                    Tap card for details
+                  </span>
                 </div>
               </div>
             </div>
@@ -574,7 +703,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         )}
       </AnimatePresence>
 
-      {/* Application feedback */}
+      {/* Application feedback - Premium Style */}
       <AnimatePresence>
         {feedback && (
           <motion.div
@@ -585,19 +714,19 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           >
             <div className="max-w-md mx-auto">
               <div className={cn(
-                "rounded-2xl p-4 shadow-xl border backdrop-blur-xl",
-                feedback.type === 'success' && 'bg-green-50/90 border-green-200 text-green-800',
-                feedback.type === 'error' && 'bg-red-50/90 border-red-200 text-red-800',
-                feedback.type === 'info' && 'bg-blue-50/90 border-blue-200 text-blue-800'
+                "rounded-xl p-4 shadow-card border",
+                feedback.type === 'success' && 'bg-success-light dark:bg-success/20 border-success text-success',
+                feedback.type === 'error' && 'bg-error-light dark:bg-error/20 border-error text-error',
+                feedback.type === 'info' && 'bg-primary-light dark:bg-primary/20 border-primary text-primary'
               )}>
-                <p className="text-sm font-medium text-center">{feedback.message}</p>
+                <p className="text-subhead font-semibold text-center">{feedback.message}</p>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Processing indicator */}
+      {/* Processing indicator - Premium Style */}
       <AnimatePresence>
         {isApplying && (
           <motion.div
@@ -607,10 +736,10 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
             className="fixed top-20 left-4 right-4 z-50 pointer-events-none"
           >
             <div className="max-w-md mx-auto">
-              <div className="bg-blue-50/90 backdrop-blur-xl border border-blue-200 rounded-2xl p-4 shadow-xl">
+              <div className="bg-primary-light dark:bg-primary/20 border border-primary rounded-xl p-4 shadow-card">
                 <div className="flex items-center justify-center space-x-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
-                  <p className="text-sm font-medium text-blue-800">Applying to job...</p>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                  <p className="text-subhead font-semibold text-primary">Applying to job...</p>
                 </div>
               </div>
             </div>
@@ -618,21 +747,21 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         )}
       </AnimatePresence>
 
-      {/* Progress indicator */}
+      {/* Progress indicator - Premium Style */}
       <motion.div
         className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <div className="bg-white/80 backdrop-blur-xl rounded-full px-4 py-2 shadow-lg border border-white/20">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span className="font-medium">{currentIndex + 1}</span>
+        <div className="bg-white dark:bg-gray-900 backdrop-blur-xl rounded-full px-4 py-2 shadow-card border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center space-x-2 text-subhead text-gray-600 dark:text-gray-400">
+            <span className="font-semibold text-gray-900 dark:text-white">{currentIndex + 1}</span>
             <span>of</span>
-            <span className="font-medium">{jobs.length}</span>
-            <div className="w-16 bg-gray-200 rounded-full h-1 ml-2">
+            <span className="font-semibold text-gray-900 dark:text-white">{jobs.length}</span>
+            <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1 ml-2">
               <motion.div
-                className="bg-blue-500 h-1 rounded-full"
+                className="bg-primary h-1 rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${((currentIndex + 1) / jobs.length) * 100}%` }}
                 transition={{ duration: 0.5 }}
