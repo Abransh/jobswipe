@@ -162,15 +162,22 @@ export function EnhancedSignInForm() {
 
       if (response.success && response.user) {
         addSecurityEvent('success', 'Authentication successful');
-        
+
         // Store device trust if selected
         if (data.deviceTrust) {
           localStorage.setItem('deviceTrusted', 'true');
           localStorage.setItem('deviceTrustDate', new Date().toISOString());
         }
-        
-        // Redirect to callback URL on successful login
-        router.push(callbackUrl);
+
+        // CRITICAL FIX: Use window.location.href for full page reload
+        // This ensures HTTP-only cookies are properly available to middleware
+        // router.push() doesn't reload the page, so middleware might not see new cookies
+        if (typeof window !== 'undefined') {
+          window.location.href = callbackUrl;
+        } else {
+          // Fallback for SSR (shouldn't happen in client component)
+          router.push(callbackUrl);
+        }
       } else {
         // Handle specific error cases
         if (error?.includes('Invalid email or password')) {
