@@ -274,7 +274,7 @@ class BaseJobAutomation(ABC):
         elif os.getenv('GOOGLE_API_KEY') and ChatGoogle:
             return ChatGoogle(
                 api_key=os.getenv('GOOGLE_API_KEY'),
-                model="gemini-pro",
+                model="gemini-2.5-pro",
                 temperature=0.1
             )
         else:
