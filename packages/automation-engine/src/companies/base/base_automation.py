@@ -16,7 +16,10 @@ from typing import Dict, List, Optional, Any, Union
 
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
-from browser_use.controller.service import Controller
+from browser_use.tools.service import Controller
+from browser_use.browser.session import BrowserSession
+from browser_use.agent.views import ActionResult
+from pydantic import BaseModel, Field
 
 # Import LLMs from langchain (required by browser-use)
 try:
@@ -89,13 +92,48 @@ class BaseJobAutomation(ABC):
     def _setup_common_actions(self):
         """Setup common browser automation actions"""
 
-        @self.controller.action("Upload resume file to form")
-        async def upload_resume(file_path: str):
+        # Define parameter model for upload_resume
+        class UploadResumeParams(BaseModel):
+            file_path: str = Field(..., description="Path to the resume file to upload")
+
+        @self.controller.action("Upload resume file to form", param_model=UploadResumeParams)
+        async def upload_resume(params: UploadResumeParams, browser_session: BrowserSession):
             """Upload resume file to any file input element"""
-            # Note: browser_session is auto-injected by browser-use, not needed as parameter
-            return ActionResult(
-                extracted_content=f"Resume upload requested for: {file_path}"
-            )
+            try:
+                page = await browser_session.get_current_page()
+
+                # Common file upload selectors
+                selectors = [
+                    'input[type="file"]',
+                    'input[accept*=".pdf"]',
+                    'input[accept*="resume"]',
+                    'input[name*="resume"]',
+                    'input[name*="cv"]',
+                    '[data-testid*="upload"]',
+                    '[data-cy*="upload"]'
+                ]
+
+                for selector in selectors:
+                    elements = page.locator(selector)
+                    count = await elements.count()
+
+                    if count > 0:
+                        try:
+                            await elements.first.set_input_files(params.file_path)
+                            self.logger.info(f"Successfully uploaded resume: {params.file_path}")
+                            return ActionResult(
+                                extracted_content=f"Resume uploaded successfully: {params.file_path}"
+                            )
+                        except Exception as e:
+                            self.logger.warning(f"Failed to upload with selector {selector}: {e}")
+                            continue
+
+                return ActionResult(
+                    error="No file upload element found on the page"
+                )
+
+            except Exception as e:
+                return ActionResult(error=f"Upload failed: {str(e)}")
 
         @self.controller.action("Detect and handle captcha")
         async def detect_captcha():

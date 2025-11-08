@@ -12,17 +12,15 @@ import { AutomationService } from '../services/AutomationService';
 import { ServerAutomationService } from '../services/ServerAutomationService';
 import { AutomationLimits } from '../services/AutomationLimits';
 import { ProxyRotator } from '../services/ProxyRotator';
+import { AuthService, createAuthService } from '../services/AuthService';
+
 // Import server services conditionally
-let ServerJwtTokenService: any = null;
-let RedisSessionService: any = null; 
-let createJwtTokenService: any = null;
+let RedisSessionService: any = null;
 let createRedisSessionService: any = null;
 
 try {
   const serverModule = require('@jobswipe/shared/server');
-  ServerJwtTokenService = serverModule.ServerJwtTokenService;
   RedisSessionService = serverModule.RedisSessionService;
-  createJwtTokenService = serverModule.createJwtTokenService;
   createRedisSessionService = serverModule.createRedisSessionService;
   console.log('✅ Server modules loaded successfully');
 } catch (error) {
@@ -288,61 +286,42 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   const serviceRegistry = new ServiceRegistry();
 
   // =============================================================================
-  // JWT TOKEN SERVICE
+  // JWT TOKEN SERVICE (HS256 with AuthService)
   // =============================================================================
 
-  fastify.log.info('Initializing JWT Token Service...');
-  
-  let jwtService: any;
+  fastify.log.info('Initializing JWT Authentication Service (HS256)...');
+
+  let jwtService: AuthService;
   try {
-    if (!createJwtTokenService) {
-      throw new Error('createJwtTokenService not available');
-    }
+    fastify.log.info('Creating AuthService with HS256 (HMAC-SHA256)...');
 
-    fastify.log.info('Creating JWT service with config:', {
-      keyRotationInterval: config.jwt.keyRotationInterval,
-      maxKeyAge: config.jwt.maxKeyAge,
-      revokedTokensCleanupInterval: config.jwt.revokedTokensCleanupInterval,
-    });
-
-    jwtService = createJwtTokenService({
-      keyRotationInterval: config.jwt.keyRotationInterval,
-      maxKeyAge: config.jwt.maxKeyAge,
-      revokedTokensCleanupInterval: config.jwt.revokedTokensCleanupInterval,
-    });
-
-    fastify.log.info('JWT service created, waiting for initialization...');
-
-    // Wait for service to initialize
-    await new Promise(resolve => setTimeout(resolve, 200));
+    // Create AuthService instance (HS256)
+    jwtService = createAuthService(fastify);
 
     serviceRegistry.register(
       'jwt',
       jwtService,
-      () => Promise.resolve(jwtService.getHealthStatus())
+      () => Promise.resolve({
+        status: 'healthy' as const,
+        details: {
+          algorithm: 'HS256',
+          hasJwtSecret: !!process.env.JWT_SECRET,
+          hasRefreshSecret: !!process.env.JWT_REFRESH_SECRET,
+        }
+      })
     );
 
-    fastify.log.info('✅ JWT Token Service initialized successfully');
+    fastify.log.info('✅ JWT Authentication Service (HS256) initialized successfully');
+    fastify.log.info('   Algorithm: HS256 (HMAC-SHA256)');
+    fastify.log.info('   Compatible with Next.js middleware');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize JWT Token Service:', error);
+    fastify.log.error('❌ Failed to initialize JWT Authentication Service:', error);
     fastify.log.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
-    
-    // Create fallback JWT service
-    fastify.log.warn('Using fallback JWT service implementation');
-    jwtService = {
-      createToken: async () => 'fallback-jwt-token',
-      verifyToken: async () => ({ valid: true, payload: { sub: 'fallback-user' } }),
-      getHealthStatus: () => ({ status: 'degraded', details: { fallback: true } }),
-    };
-    
-    serviceRegistry.register(
-      'jwt',
-      jwtService,
-      () => Promise.resolve(jwtService.getHealthStatus())
-    );
+
+    throw new Error('JWT Authentication Service is required - cannot start server without it');
   }
 
   // =============================================================================
@@ -653,7 +632,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
 declare module 'fastify' {
   interface FastifyInstance {
-    jwtService: any;
+    jwtService: AuthService;
     sessionService: any;
     securityService: SecurityMiddlewareService;
     serviceRegistry: ServiceRegistry;

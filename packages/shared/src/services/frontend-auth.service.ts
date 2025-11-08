@@ -312,7 +312,7 @@ export class FrontendAuthService {
         console.log('🚀 Login attempt starting:', { email });
       }
 
-      const response = await this.makeAuthRequest('/api/auth/login', {
+      const response = await this.makeAuthRequest('/api/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify(loginRequest),
       });

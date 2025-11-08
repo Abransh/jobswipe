@@ -178,16 +178,14 @@ async def execute_server_automation(
     # Create proxy manager with single proxy if provided
     proxy_manager = None
     if proxy:
-        from ..core.proxy_manager import ProxyServer
-        proxy_server = ProxyServer(
+        proxy_manager = ProxyManager()
+        proxy_manager.add_proxy(
             host=proxy.host,
             port=proxy.port,
             username=proxy.username,
             password=proxy.password,
             type=proxy.type
         )
-        proxy_manager = ProxyManager()
-        proxy_manager.add_proxy(proxy_server)
 
     # Execute automation
     integration = ServerAutomationIntegration(proxy_manager=proxy_manager)

@@ -6,17 +6,7 @@
  * @author JobSwipe Team
  */
 
-import { ServerJwtTokenService } from './server-jwt-token.service';
 import { RedisSessionService } from './redis-session-stub.service';
-
-/**
- * Configuration for JWT Token Service
- */
-export interface JwtServiceConfig {
-  keyRotationInterval?: number;
-  maxKeyAge?: number;
-  revokedTokensCleanupInterval?: number;
-}
 
 /**
  * Configuration for Redis Service
@@ -44,37 +34,6 @@ export interface SessionConfig {
 }
 
 /**
- * Create JWT Token Service with configuration (Server-Only)
- */
-export function createJwtTokenService(config?: JwtServiceConfig): ServerJwtTokenService {
-  return new ServerJwtTokenService(
-    config?.keyRotationInterval,
-    config?.maxKeyAge,
-    config?.revokedTokensCleanupInterval
-  );
-}
-
-// This function is now defined below after the SecurityMiddlewareService interface
-
-/**
- * Get default JWT Token Service instance (SERVER-ONLY)
- * This function creates the instance only when called, preventing browser initialization
- */
-export function getDefaultJwtTokenService(): ServerJwtTokenService | null {
-  if (typeof window !== 'undefined') {
-    console.warn('Default JWT Token Service not available in browser environment');
-    return null;
-  }
-  
-  try {
-    return createJwtTokenService();
-  } catch (error) {
-    console.error('Failed to create default JWT Token Service:', error);
-    return null;
-  }
-}
-
-/**
  * Get default Redis Session Service instance
  * This function creates the instance only when called, preventing browser initialization
  */
@@ -84,14 +43,6 @@ export function getDefaultRedisSessionService(): RedisSessionService {
     port: 6379,
   });
 }
-
-// Re-export JWT token configuration functions
-export {
-  createAccessTokenConfig,
-  createRefreshTokenConfig,
-  createDesktopTokenConfig,
-  createVerificationTokenConfig
-} from './server-jwt-token.service';
 
 /**
  * Security Middleware Service interface
