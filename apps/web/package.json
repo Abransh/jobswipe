@@ -10,7 +10,9 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next out node_modules"
+    "clean": "rm -rf .next out node_modules",
+    "check-auth": "node scripts/check-auth-setup.js",
+    "setup": "npm run check-auth"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

@@ -242,6 +242,8 @@ model ApplicationQueue {
   errorType        String?
   responseData     Json?
   desktopSessionId String?
+  claimedBy        String?         // 'SERVER' or 'DESKTOP' - prevents duplicate processing
+  claimedAt        DateTime?        // When the job was claimed for processing
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   application      JobApplication? @relation(fields: [applicationId], references: [id])

@@ -114,7 +114,8 @@ export class ServerAutomationService extends EventEmitter {
     
     this.config = {
       pythonPath: process.env.PYTHON_PATH || path.join(__dirname, '../../../../venv/bin/python'),
-      companiesPath: process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../desktop/companies'),
+      // Updated to point to unified automation engine scripts directory
+      companiesPath: process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../../packages/automation-engine/scripts'),
       timeout: parseInt(process.env.SERVER_AUTOMATION_TIMEOUT || '120000'), // 2 minutes
       screenshotEnabled: process.env.SCREENSHOT_ENABLED !== 'false',
       screenshotPath: process.env.SCREENSHOT_PATH || '/tmp/jobswipe/screenshots',
