@@ -20,7 +20,10 @@ if browser_use_path.exists():
     sys.path.insert(0, str(browser_use_path))
 
 from browser_use import Agent, Controller, ActionResult
-from browser_use.browser import BrowserConfig, BrowserSession
+from browser_use.browser import Browser, BrowserProfile  # Updated API: BrowserConfig -> BrowserProfile, BrowserSession -> Browser
+
+# Type alias for backward compatibility in code
+BrowserSession = Browser
 from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI
 
 # Import from unified core
@@ -80,7 +83,7 @@ class BaseJobAutomation(ABC):
         """Setup common browser automation actions"""
 
         @self.controller.action("Upload resume file to form")
-        async def upload_resume(file_path: str, browser_session: BrowserSession):
+        async def upload_resume(file_path: str, browser_session: Browser):
             """Upload resume file to any file input element"""
             try:
                 page = await browser_session.get_current_page()
@@ -292,8 +295,8 @@ class BaseJobAutomation(ABC):
         if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
             self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
 
-        # Create BrowserConfig with options from context
-        browser_config = BrowserConfig(
+        # Create BrowserProfile with options from context
+        browser_profile = BrowserProfile(
             headless=browser_options.get('headless', True),
             disable_security=True,
             window_size={'width': 1920, 'height': 1080}
@@ -301,13 +304,13 @@ class BaseJobAutomation(ABC):
 
         # Add proxy if configured (server mode)
         if 'proxy' in browser_options and browser_options['proxy']:
-            browser_config.proxy = browser_options['proxy']
+            browser_profile.proxy = browser_options['proxy']
 
         # Add user data dir if configured (desktop mode)
         if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
-            browser_config.user_data_dir = browser_options['user_data_dir']
+            browser_profile.user_data_dir = browser_options['user_data_dir']
 
-        return BrowserSession(browser_config=browser_config)
+        return Browser(config=browser_profile)
 
     @abstractmethod
     def get_company_specific_task(self, user_profile: UserProfile, job_data: JobData) -> str:

@@ -16,7 +16,8 @@ import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
 import { ResumeUploadModal } from '@/components/resume/ResumeUploadModal';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
-import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
+import { generateDeviceId, calculatePriority } from '@/lib/api/jobs';
+import { queueApi } from '@/lib/api/queue';
 
 interface JobSwipeInterfaceProps {
   jobs: JobData[];
@@ -103,7 +104,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
     }));
 
     try {
-      // Call API for left swipe (pass on job)
+      // Call API for left swipe (pass on job) - just record analytics, no queue
       const deviceId = generateDeviceId();
       const metadata = {
         source: 'web' as const,
@@ -111,7 +112,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         userAgent: navigator.userAgent,
       };
 
-      await jobsApi.swipeLeft(job.id, metadata);
+      // TODO: Add left swipe tracking endpoint if needed
       console.log('✅ [LEFT SWIPE RECORDED]', { jobId, jobTitle: job.title });
     } catch (error) {
       console.error('🔴 [LEFT SWIPE ERROR]', {
@@ -224,20 +225,23 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
         }, 35);
       }, 1600);
 
-      console.log('🟡 [API CALL] Calling jobsApi.swipeRight', {
-        endpoint: `/api/v1/jobs/${job.id}/swipe`,
+      console.log('🟡 [API CALL] Calling queueApi.swipeRight', {
+        endpoint: `/api/v1/queue/apply`,
         metadata,
         priority
       });
 
-      const response = await jobsApi.swipeRight(job.id, metadata, { priority });
+      const response = await queueApi.swipeRight({
+        jobId: job.id,
+        priority,
+        metadata
+      });
 
       console.log('🟢 [API RESPONSE]', {
         success: response.success,
-        action: response.data?.action,
-        executionMode: response.data?.executionMode,
-        remainingApps: response.data?.serverAutomation?.remainingServerApplications,
-        correlationId: response.correlationId
+        applicationId: response.data?.applicationId,
+        status: response.data?.status,
+        priority: response.data?.priority
       });
 
       if (response.success && response.data) {
