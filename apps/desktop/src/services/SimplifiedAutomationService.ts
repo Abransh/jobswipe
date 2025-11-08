@@ -117,10 +117,11 @@ export class SimplifiedAutomationService extends EventEmitter {
   constructor() {
     super();
 
-    // Simple, clean configuration
+    // Simple, clean configuration (updated to use unified automation engine)
     this.config = {
       pythonPath: process.env.PYTHON_PATH || 'python3',
-      companiesPath: path.join(__dirname, '../companies'),
+      // Updated to point to unified automation engine scripts directory
+      companiesPath: path.join(__dirname, '../../../packages/automation-engine/scripts'),
       headless: process.env.AUTOMATION_HEADLESS !== 'false',
       timeout: parseInt(process.env.AUTOMATION_TIMEOUT || '300000'), // 5 minutes
       maxConcurrentJobs: parseInt(process.env.MAX_CONCURRENT_JOBS || '3'),
@@ -359,40 +360,63 @@ export class SimplifiedAutomationService extends EventEmitter {
     applicationId: string
   ): Promise<AutomationResult> {
     return new Promise((resolve, reject) => {
-      // Create environment variables for Python script
+      // Create environment variables for Python script (unified engine format)
       const env = {
         ...process.env,
-        
-        // Execution mode
-        EXECUTION_MODE: 'desktop',
-        DATA_SOURCE: 'database',
-        
-        // Database connection
-        DATABASE_URL: process.env.DATABASE_URL,
-        
-        // User and job identifiers
+
+        // Execution identifiers
         USER_ID: data.userId,
         JOB_ID: data.jobData.id,
         APPLICATION_ID: applicationId,
-        
+
+        // User profile data
+        USER_FIRST_NAME: data.userProfile.firstName,
+        USER_LAST_NAME: data.userProfile.lastName,
+        USER_EMAIL: data.userProfile.email,
+        USER_PHONE: data.userProfile.phone,
+        USER_RESUME_URL: data.userProfile.resumeUrl || '',
+        USER_RESUME_LOCAL_PATH: data.userProfile.resumeLocalPath || '',
+        USER_CURRENT_TITLE: data.userProfile.currentTitle || '',
+        USER_YEARS_EXPERIENCE: (data.userProfile.yearsExperience || 0).toString(),
+        USER_SKILLS: JSON.stringify(data.userProfile.skills || []),
+        USER_CURRENT_LOCATION: data.userProfile.currentLocation || '',
+        USER_LINKEDIN_URL: data.userProfile.linkedinUrl || '',
+        USER_WORK_AUTHORIZATION: data.userProfile.workAuthorization || '',
+        USER_COVER_LETTER: data.userProfile.coverLetter || '',
+
+        // Job data
+        JOB_TITLE: data.jobData.title,
+        JOB_COMPANY: data.jobData.company,
+        JOB_APPLY_URL: data.jobData.applyUrl,
+        JOB_LOCATION: data.jobData.location || '',
+        JOB_DESCRIPTION: data.jobData.description || '',
+
+        // Browser profile path (optional, for pre-filled data)
+        BROWSER_PROFILE_PATH: this.getBrowserProfilePath() || '',
+
         // AI API keys
         ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
         OPENAI_API_KEY: process.env.OPENAI_API_KEY,
         GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
-        
+
         // Automation configuration
         AUTOMATION_HEADLESS: (data.options?.headless !== false).toString(),
         AUTOMATION_TIMEOUT: (data.options?.timeout || this.config.timeout).toString(),
         SCREENSHOT_ENABLED: this.config.screenshotEnabled.toString(),
-        SCREENSHOT_PATH: this.config.screenshotPath
+        SCREENSHOT_PATH: this.config.screenshotPath,
+
+        // Legacy compatibility
+        EXECUTION_MODE: 'desktop',
+        DATA_SOURCE: 'database',
+        DATABASE_URL: process.env.DATABASE_URL
       };
 
-      // Execute Python automation script
-      const scriptPath = path.join(this.config.companiesPath, companyAutomation, 'run_automation.py');
-      
+      // Use unified automation engine wrapper script (desktop mode)
+      const scriptPath = path.join(this.config.companiesPath, 'run_desktop_automation.py');
+
       const pythonProcess = spawn(this.config.pythonPath, [scriptPath], {
         env,
-        cwd: path.join(this.config.companiesPath, companyAutomation)
+        cwd: this.config.companiesPath // Run from scripts directory
       });
 
       this.activeProcesses.set(applicationId, pythonProcess);
@@ -739,5 +763,42 @@ export class SimplifiedAutomationService extends EventEmitter {
       result[company] = [...patterns];
     }
     return result;
+  }
+
+  /**
+   * Get browser profile path for pre-filled data
+   * Attempts to detect Chrome/Chromium profile on the system
+   */
+  private getBrowserProfilePath(): string | undefined {
+    try {
+      const homeDir = process.env.HOME || process.env.USERPROFILE;
+      if (!homeDir) return undefined;
+
+      const possiblePaths = [
+        path.join(homeDir, '.config', 'google-chrome', 'Default'),
+        path.join(homeDir, '.config', 'chromium', 'Default'),
+        path.join(homeDir, 'Library', 'Application Support', 'Google', 'Chrome', 'Default'), // macOS
+        path.join(homeDir, 'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default') // Windows
+      ];
+
+      // Synchronous check (only during initialization, so acceptable)
+      for (const profilePath of possiblePaths) {
+        try {
+          const fs = require('fs');
+          if (fs.existsSync(profilePath)) {
+            console.log(`✅ Found browser profile: ${profilePath}`);
+            return profilePath;
+          }
+        } catch {
+          // Continue to next path
+        }
+      }
+
+      console.log('ℹ️ No browser profile found (will use clean browser)');
+      return undefined;
+    } catch (error) {
+      console.warn('Failed to detect browser profile:', error);
+      return undefined;
+    }
   }
 }

@@ -51,6 +51,8 @@ async function loadRoutes() {
     const { registerOnboardingRoutes } = await import('./routes/onboarding.routes');
     console.log('Onboarding routes loaded successfully');
 
+    const { registerDesktopRoutes } = await import('./routes/desktop.routes');
+    console.log('Desktop routes loaded successfully');
     const resumeRoutes = await import('./routes/resumes.routes');
     console.log('Resume routes loaded successfully');
 
@@ -61,6 +63,7 @@ async function loadRoutes() {
       jobsRoutes: jobsRoutes.default,
       automationRoutes: automationRoutes.automationRoutes,
       registerOnboardingRoutes,
+      registerDesktopRoutes
       resumeRoutes: resumeRoutes.default
     };
   } catch (error) {

@@ -28,6 +28,7 @@ interface WebSocketService {
   emitToApplication: (applicationId: string, event: string, data: any) => void;
   broadcastQueueUpdate: (event: string, data: any) => void;
   getUserSocketCount: (userId: string) => number;
+  emitJobToDesktop: (userId: string, job: any) => void; // NEW: Push jobs to desktop stream
 }
 
 declare module 'fastify' {
@@ -217,6 +218,160 @@ const websocketPlugin = async (
       });
 
       // =============================================================================
+      // DESKTOP QUEUE STREAM HANDLERS (REPLACES POLLING)
+      // =============================================================================
+
+      /**
+       * Desktop app subscribes to queue stream for pending jobs
+       * This replaces the old polling mechanism
+       */
+      socket.on('subscribe-queue-stream', async () => {
+        try {
+          socket.join(`queue-stream:user:${userId}`);
+          log.info(`🖥️  Desktop app ${socket.id} subscribed to queue stream for user ${userId}`);
+
+          // Immediately send all pending jobs to desktop (no waiting!)
+          if (fastify.db) {
+            const pendingApplications = await fastify.db.applicationQueue.findMany({
+              where: {
+                userId,
+                status: { in: ['PENDING', 'QUEUED'] },
+                claimedBy: null, // Only unclaimed jobs
+              },
+              include: {
+                jobSnapshot: {
+                  select: {
+                    title: true,
+                    companyName: true,
+                    location: true,
+                    companyLogo: true,
+                    salaryMin: true,
+                    salaryMax: true,
+                    currency: true,
+                    remote: true,
+                    type: true,
+                    applyUrl: true,
+                  },
+                },
+              },
+              orderBy: [
+                { priority: 'desc' },
+                { createdAt: 'asc' },
+              ],
+              take: 50,
+            });
+
+            if (pendingApplications.length > 0) {
+              log.info(`📨 Sending ${pendingApplications.length} pending jobs to desktop app ${socket.id}`);
+
+              // Emit each job individually for processing
+              for (const application of pendingApplications) {
+                socket.emit('queue-job-available', {
+                  id: application.id,
+                  jobId: application.jobPostingId,
+                  userId: application.userId,
+                  status: application.status.toLowerCase(),
+                  priority: application.priority.toLowerCase(),
+                  useCustomResume: application.useCustomResume,
+                  resumeId: application.resumeId || undefined,
+                  coverLetter: application.coverLetter || undefined,
+                  customFields: application.customFields || {},
+                  automationConfig: application.automationConfig || {},
+                  job: {
+                    title: application.jobSnapshot?.title || 'Unknown Job',
+                    company: application.jobSnapshot?.companyName || 'Unknown Company',
+                    location: application.jobSnapshot?.location || '',
+                    logo: application.jobSnapshot?.companyLogo || undefined,
+                    salary: {
+                      min: application.jobSnapshot?.salaryMin || undefined,
+                      max: application.jobSnapshot?.salaryMax || undefined,
+                      currency: application.jobSnapshot?.currency || undefined,
+                    },
+                    remote: application.jobSnapshot?.remote ?? false,
+                    type: application.jobSnapshot?.type || '',
+                    url: application.jobSnapshot?.applyUrl || '',
+                  },
+                  createdAt: application.createdAt.toISOString(),
+                  updatedAt: application.updatedAt.toISOString(),
+                });
+              }
+
+              // Send summary
+              socket.emit('queue-stream-initialized', {
+                totalPending: pendingApplications.length,
+                timestamp: new Date().toISOString(),
+                message: 'Queue stream initialized successfully',
+              });
+            } else {
+              // No pending jobs
+              socket.emit('queue-stream-initialized', {
+                totalPending: 0,
+                timestamp: new Date().toISOString(),
+                message: 'No pending jobs - queue is empty',
+              });
+            }
+          } else {
+            log.warn('Database not available for queue stream');
+            socket.emit('error', { message: 'Database service not available' });
+          }
+        } catch (error) {
+          log.error(`Error in subscribe-queue-stream for user ${userId}:`, error);
+          socket.emit('error', {
+            message: 'Failed to subscribe to queue stream',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      });
+
+      /**
+       * Desktop app unsubscribes from queue stream
+       */
+      socket.on('unsubscribe-queue-stream', () => {
+        socket.leave(`queue-stream:user:${userId}`);
+        log.info(`🖥️  Desktop app ${socket.id} unsubscribed from queue stream for user ${userId}`);
+      });
+
+      /**
+       * Desktop app acknowledges receiving a job
+       * This helps track which jobs have been claimed
+       */
+      socket.on('queue-job-claimed', async (data: { applicationId: string }) => {
+        try {
+          const { applicationId } = data;
+
+          if (!applicationId) {
+            socket.emit('error', { message: 'Application ID required' });
+            return;
+          }
+
+          // Update database to mark job as claimed by desktop
+          if (fastify.db) {
+            await fastify.db.applicationQueue.update({
+              where: { id: applicationId },
+              data: {
+                claimedBy: 'DESKTOP',
+                claimedAt: new Date(),
+                status: 'PROCESSING',
+              },
+            });
+
+            log.info(`✅ Job ${applicationId} claimed by desktop app ${socket.id}`);
+
+            socket.emit('queue-job-claim-confirmed', {
+              applicationId,
+              claimedAt: new Date().toISOString(),
+            });
+          }
+        } catch (error) {
+          log.error(`Error claiming job:`, error);
+          socket.emit('error', {
+            message: 'Failed to claim job',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      });
+
+      // =============================================================================
       // HEARTBEAT
       // =============================================================================
 
@@ -273,6 +428,15 @@ const websocketPlugin = async (
       getUserSocketCount: (userId: string) => {
         const room = io.sockets.adapter.rooms.get(`user:${userId}`);
         return room ? room.size : 0;
+      },
+
+      // NEW: Emit new job to desktop queue stream (replaces polling)
+      emitJobToDesktop: (userId: string, job: any) => {
+        io.to(`queue-stream:user:${userId}`).emit('queue-job-available', {
+          ...job,
+          timestamp: new Date().toISOString(),
+        });
+        log.info(`📨 Pushed new job to desktop stream for user ${userId}: ${job.id}`);
       },
     };
 

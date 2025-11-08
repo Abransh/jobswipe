@@ -42,6 +42,24 @@ export function initializeAutomationServices(apiBaseUrl?: string): void {
 
     console.log('✅ Automation services initialized successfully');
 
+    // Auto-start background processing if user is authenticated
+    tokenStorage.getToken().then(token => {
+      if (token && backgroundProcessingService) {
+        console.log('User token found, auto-starting background processing service...');
+        backgroundProcessingService.start()
+          .then(() => {
+            console.log('✅ Background processing service auto-started successfully');
+          })
+          .catch(error => {
+            console.error('❌ Failed to auto-start background processing service:', error);
+          });
+      } else {
+        console.log('No user token found, background processing will start after login');
+      }
+    }).catch(error => {
+      console.error('Error checking for user token:', error);
+    });
+
   } catch (error) {
     console.error('❌ Failed to initialize automation services:', error);
   }

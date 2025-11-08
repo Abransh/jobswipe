@@ -113,7 +113,8 @@ export class PythonBridge extends EventEmitter {
 
     this.config = {
       pythonPath: config?.pythonPath || process.env.PYTHON_PATH || path.join(__dirname, '../../../desktop/venv/bin/python'),
-      companiesPath: config?.companiesPath || process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../desktop/companies'),
+      // Updated to point to unified automation engine
+      companiesPath: config?.companiesPath || process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../../packages/automation-engine/scripts'),
       timeout: config?.timeout || parseInt(process.env.PYTHON_TIMEOUT || '120000'), // 2 minutes
       screenshotEnabled: config?.screenshotEnabled ?? (process.env.SCREENSHOT_ENABLED !== 'false'),
       screenshotPath: config?.screenshotPath || process.env.SCREENSHOT_PATH || '/tmp/jobswipe/screenshots',
@@ -247,9 +248,20 @@ export class PythonBridge extends EventEmitter {
 
   /**
    * Get the path to the automation script
+   * Now uses unified wrapper script that auto-detects company type
    */
   private getScriptPath(companyAutomation: string): string {
-    return path.join(this.config.companiesPath, companyAutomation, 'run_automation.py');
+    // Use unified automation engine wrapper script (server mode)
+    const unifiedScriptPath = path.join(__dirname, '../../../../packages/automation-engine/scripts/run_server_automation.py');
+
+    this.fastify.log.debug({
+      event: 'unified_engine_script_path',
+      message: 'Using unified automation engine',
+      scriptPath: unifiedScriptPath,
+      companyType: companyAutomation
+    });
+
+    return unifiedScriptPath;
   }
 
   /**
@@ -280,15 +292,16 @@ export class PythonBridge extends EventEmitter {
       AUTOMATION_MAX_RETRIES: (request.automationConfig.maxRetries || this.config.maxRetries).toString(),
       SCREENSHOT_ENABLED: this.config.screenshotEnabled.toString(),
       SCREENSHOT_PATH: request.automationConfig.screenshotPath || this.config.screenshotPath,
-      
-      // Proxy configuration (if provided)
-      ...(request.proxyConfig && {
-        PROXY_HOST: request.proxyConfig.host,
-        PROXY_PORT: request.proxyConfig.port.toString(),
-        PROXY_USERNAME: request.proxyConfig.username || '',
-        PROXY_PASSWORD: request.proxyConfig.password || '',
-        PROXY_TYPE: request.proxyConfig.type
-      }),
+
+      // Proxy configuration (unified engine expects JSON format)
+      PROXY_CONFIG: request.proxyConfig ? JSON.stringify({
+        enabled: true,
+        host: request.proxyConfig.host,
+        port: request.proxyConfig.port,
+        username: request.proxyConfig.username,
+        password: request.proxyConfig.password,
+        type: request.proxyConfig.type
+      }) : undefined,
       
       // Basic user data (for simple access)
       USER_FIRST_NAME: request.userProfile.firstName,

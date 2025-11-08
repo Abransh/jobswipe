@@ -10,12 +10,16 @@ import { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from 'fasti
 import fastifyPlugin from 'fastify-plugin';
 import { getEnvironmentConfig } from '../utils/env-validation';
 
-// Database imports with fallbacks
+// SECURITY FIX: Database imports with strict production validation
+// In production, database package MUST be available - no fallbacks
 let db: any = null;
 let getUserById: any = null;
 let createUser: any = null;
 let updateUser: any = null;
 let deleteUser: any = null;
+
+// Check if we're in production mode at import time
+const isProduction = process.env.NODE_ENV === 'production';
 
 try {
   const databaseModule = require('@jobswipe/database');
@@ -25,7 +29,18 @@ try {
   updateUser = databaseModule.updateUser;
   deleteUser = databaseModule.deleteUser;
 } catch (error) {
-  console.warn('⚠️  Database package not available:', error instanceof Error ? error.message : 'Unknown error');
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+  // CRITICAL: In production, database package is required - fail immediately
+  if (isProduction) {
+    const criticalError = `CRITICAL ERROR: Database package (@jobswipe/database) is required in production but could not be loaded: ${errorMessage}`;
+    console.error('❌', criticalError);
+    throw new Error(criticalError);
+  }
+
+  // In development, log warning but allow server to start (useful for testing non-DB features)
+  console.warn('⚠️  Database package not available in development mode:', errorMessage);
+  console.warn('⚠️  Server will start but database operations will fail. Install @jobswipe/database to fix this.');
 }
 
 // =============================================================================
@@ -64,10 +79,23 @@ class DatabaseManager {
 
   /**
    * Initialize database connection
+   * SECURITY FIX: Fail fast if database is not available in production
    */
   async initialize(): Promise<void> {
+    const envConfig = getEnvironmentConfig();
+
     if (!db) {
-      this.fastify.log.warn('Database not available - running without database connectivity');
+      const errorMessage = 'Database client not available - package import failed';
+
+      // CRITICAL: In production, database is REQUIRED
+      if (envConfig.nodeEnv === 'production') {
+        this.fastify.log.fatal(errorMessage);
+        throw new Error(`CRITICAL: ${errorMessage}. Production deployment requires @jobswipe/database package.`);
+      }
+
+      // In development, warn but allow to continue (useful for testing non-DB features)
+      this.fastify.log.warn(`⚠️  ${errorMessage} - running without database connectivity in development mode`);
+      this.fastify.log.warn('⚠️  Database operations will fail. Install and configure @jobswipe/database to fix this.');
       return;
     }
 
@@ -76,13 +104,23 @@ class DatabaseManager {
       await this.testConnection();
       this.connectionChecked = true;
 
-      this.fastify.log.info('✅ Database connection established successfully');
+      this.fastify.log.info('✅ Database connection established successfully', {
+        environment: envConfig.nodeEnv,
+        databaseUrl: process.env.DATABASE_URL ? '***configured***' : 'not set'
+      });
 
       // Setup cleanup on app close
       this.fastify.addHook('onClose', this.cleanup.bind(this));
 
     } catch (error) {
       this.fastify.log.error('❌ Failed to establish database connection:', error);
+
+      // CRITICAL: In production, database connection failure is fatal
+      if (envConfig.nodeEnv === 'production') {
+        throw new Error(`CRITICAL: Database connection failed in production: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+
+      // In development, throw error (can be caught by plugin initialization)
       throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -262,16 +300,26 @@ const databasePlugin: FastifyPluginAsync<DatabasePluginOptions> = async (
   // Initialize database manager
   const manager = new DatabaseManager(fastify);
 
+  // SECURITY FIX: Fail-fast database initialization
+  // Production mode will throw an error if database is unavailable (handled in initialize())
+  // Development mode will log warnings but continue (allows testing non-DB features)
   try {
     await manager.initialize();
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    // In production, initialize() will already throw - this catch won't be reached
+    // unless there's an unexpected error. Re-throw to prevent server startup.
     if (envConfig.nodeEnv === 'production') {
-      // In production, database is required
+      fastify.log.fatal('CRITICAL: Database initialization failed in production', { error: errorMessage });
       throw error;
-    } else {
-      // In development, continue without database
-      fastify.log.warn('Continuing without database in development mode');
     }
+
+    // In development, log the error and continue without database
+    fastify.log.warn('⚠️  Database initialization failed in development mode - continuing without database', {
+      error: errorMessage,
+      warning: 'Database operations will fail until database is properly configured'
+    });
   }
 
   // Create database service
