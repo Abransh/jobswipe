@@ -455,7 +455,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         });
         
         // Detect company automation type based on URL patterns
-        const companyAutomation = detectCompanyAutomation(jobPosting.externalUrl);
+        const companyAutomation = detectCompanyAutomation(jobPosting.applyUrl || jobPosting.sourceUrl || '');
         
         // Prepare server automation request
         const serverRequest = {
@@ -482,7 +482,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
             id: data.jobId,
             title: jobPosting.title,
             company: jobPosting.company.name,
-            applyUrl: jobPosting.externalUrl,
+            applyUrl: jobPosting.applyUrl || jobPosting.sourceUrl || '',
             location: jobPosting.location,
             description: jobPosting.description,
             requirements: Array.isArray(jobPosting.requirements) ? jobPosting.requirements : []
@@ -595,8 +595,11 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         },
       });
       
-      // Create job snapshot within transaction
-      const snapshot = await tx.jobSnapshot.create({
+      // Create job snapshot within transaction (optional - skip if not available)
+      let snapshot = null;
+      try {
+        if (tx.jobSnapshot) {
+          snapshot = await tx.jobSnapshot.create({
         data: {
           applicationQueueId: queueEntry.id,
           originalJobId: jobPosting.id,
@@ -674,7 +677,17 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
           leftSwipeCount: jobPosting.leftSwipeCount,
         },
       });
-      
+        }
+      } catch (snapshotError) {
+        // Log but don't fail if snapshot creation fails
+        request.server.log.warn({
+          ...enhancedLogContext,
+          event: 'job_snapshot_creation_failed',
+          message: 'Failed to create job snapshot, continuing without it',
+          error: snapshotError instanceof Error ? snapshotError.message : 'Unknown error'
+        });
+      }
+
       // Queue job application using BullMQ
       if (request.server.queueService) {
         // Transform data to match BullMQ JobData format
