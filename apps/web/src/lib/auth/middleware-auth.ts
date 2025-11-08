@@ -181,10 +181,11 @@ async function verifyTokenWithSignature(token: string): Promise<TokenVerificatio
 
     const [headerB64, payloadB64, signatureB64] = parts;
 
-    // Get JWT secret from environment
-    const jwtSecret = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET;
+    // Get JWT secret from environment (server-side only, never NEXT_PUBLIC_*)
+    const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       console.error('❌ CRITICAL: JWT_SECRET not configured in environment variables');
+      console.error('⚠️  SECURITY: JWT_SECRET must be server-side only (not NEXT_PUBLIC_JWT_SECRET)');
       console.error('📋 Available env vars:', Object.keys(process.env).filter(k => k.includes('JWT') || k.includes('SECRET')));
       return { valid: false, error: 'Server configuration error - JWT secret missing' };
     }

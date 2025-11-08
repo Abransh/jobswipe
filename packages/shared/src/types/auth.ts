@@ -754,10 +754,11 @@ export const RATE_LIMITS = {
 
 /**
  * Security configuration
+ * Note: Using HS256 (HMAC-SHA256) for JWT signing - symmetric algorithm with shared secret
  */
 export const SECURITY_CONFIG = {
   BCRYPT_ROUNDS: 12,
-  JWT_ALGORITHM: 'RS256' as const,
+  JWT_ALGORITHM: 'HS256' as const,
   SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
   MAX_SESSIONS_PER_USER: 5,
   SUSPICIOUS_ACTIVITY_THRESHOLD: 3,
