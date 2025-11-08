@@ -29,6 +29,7 @@ import {
 export default function LandingPage() {
   return (
     <div className="relative bg-white dark:bg-black overflow-hidden">
+      <Navigation />
       <HeroSection />
       <ProblemSection />
       <SolutionSection />
@@ -41,6 +42,73 @@ export default function LandingPage() {
   );
 }
 
+// Navigation Header - Fixed top navigation with login/signup
+function Navigation() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 shadow-minimal'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="container-premium">
+        <div className="flex items-center justify-between h-16 sm:h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gray-900 dark:bg-white flex items-center justify-center transition-transform group-hover:scale-105">
+              <span className="text-base sm:text-lg font-bold text-white dark:text-gray-900">J</span>
+            </div>
+            <span className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              JobSwipe
+            </span>
+          </Link>
+
+          {/* Auth Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Sign In Button - Outline */}
+            <Link href="/auth/signin">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="h-9 sm:h-10 px-3 sm:px-5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900 text-gray-900 dark:text-white font-medium text-footnote sm:text-subhead transition-colors"
+              >
+                <span className="hidden sm:inline">Sign in</span>
+                <span className="sm:hidden">Login</span>
+              </motion.button>
+            </Link>
+
+            {/* Sign Up Button - Primary */}
+            <Link href="/auth/signup">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="h-9 sm:h-10 px-3 sm:px-5 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold text-footnote sm:text-subhead shadow-card transition-colors"
+              >
+                <span className="hidden sm:inline">Get Started</span>
+                <span className="sm:hidden">Sign up</span>
+              </motion.button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </motion.nav>
+  );
+}
+
 // Hero Section - The first impression
 function HeroSection() {
   const [isVisible, setIsVisible] = useState(false);
@@ -50,7 +118,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-950 dark:via-black dark:to-gray-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(0,122,255,0.05),transparent_50%)]" />
