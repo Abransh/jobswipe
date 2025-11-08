@@ -378,6 +378,7 @@ export function getUserAgent(request: NextRequest): string | undefined {
 export function isProtectedRoute(pathname: string): boolean {
   const protectedRoutes = [
     '/dashboard',
+    '/jobs',
     '/profile',
     '/settings',
     '/applications',

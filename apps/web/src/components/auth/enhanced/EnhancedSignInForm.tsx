@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import { OAuthProviders } from '../OAuthProviders';
 import { FormInput } from '../FormInput';
@@ -42,13 +43,37 @@ export function EnhancedSignInForm() {
   const onSubmit = async (data: SignInFormData) => {
     try {
       clearError();
+      console.log('🔐 Attempting login...');
+
       const result = await login(data.email, data.password);
 
+      console.log('📊 Login result:', { success: result.success, hasUser: !!result.user });
+
       if (result.success) {
-        router.push(callbackUrl);
+        console.log('✅ Login successful, redirecting to:', callbackUrl);
+
+        // Show success toast
+        toast.success('Welcome back!', {
+          description: 'You have successfully signed in.',
+          duration: 3000,
+        });
+
+        // Small delay to show toast before redirect
+        setTimeout(() => {
+          window.location.href = callbackUrl;
+        }, 500);
+      } else {
+        console.error('❌ Login failed:', result);
+        toast.error('Login failed', {
+          description: 'Please check your credentials and try again.',
+        });
       }
     } catch (err) {
-      console.error('Sign in error:', err);
+      console.error('❌ Sign in error:', err);
+      // Error will be displayed by the error state from useAuth
+      toast.error('Login failed', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred',
+      });
     }
   };
 
