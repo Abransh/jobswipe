@@ -5,7 +5,7 @@
 
 import { app, BrowserWindow, Menu } from 'electron';
 import * as path from 'path';
-import { setupAllIPCHandlers } from './main/ipcHandlers';
+import { initializeAutomationServices, cleanupAutomationServices } from './main/ipcHandlers-automation';
 
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null;
@@ -258,17 +258,21 @@ function createMenu(): void {
 // App event handlers
 app.whenReady().then(() => {
   console.log('🚀 JobSwipe Desktop starting...');
-  
-  // Set up IPC handlers before creating window
-  setupAllIPCHandlers();
-  
+
+  // Get API base URL from environment or use default
+  const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3001';
+
+  // Initialize automation services with BackgroundProcessingService
+  console.log('Initializing automation services with API base URL:', apiBaseUrl);
+  initializeAutomationServices(apiBaseUrl);
+
   // Create main window
   createWindow();
-  
+
   // Create application menu
   createMenu();
-  
-  console.log('✅ JobSwipe Desktop ready');
+
+  console.log('✅ JobSwipe Desktop ready with queue-based automation');
 });
 
 app.on('window-all-closed', () => {
@@ -276,6 +280,11 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  console.log('Cleaning up automation services before quit...');
+  cleanupAutomationServices();
 });
 
 app.on('activate', () => {
