@@ -94,29 +94,36 @@ export class AuthService {
   constructor(fastify: FastifyInstance) {
     this.fastify = fastify;
 
-    // Load configuration from environment
-    this.jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production';
+    // SECURITY FIX: Require JWT secrets to be set in environment - no fallback defaults
+    // This prevents using predictable secrets that could compromise authentication
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      const errorMsg = 'CRITICAL SECURITY ERROR: JWT_SECRET and JWT_REFRESH_SECRET must be set in environment variables. Never use default secrets.';
+      this.fastify.log.fatal(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    // Load configuration from environment (all secrets required, other settings have safe defaults)
+    this.jwtSecret = process.env.JWT_SECRET;
+    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
     this.defaultExpiresIn = process.env.JWT_EXPIRES_IN || '24h';
     this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
     this.saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
 
-    // Validate configuration
-    if (process.env.NODE_ENV === 'production') {
-      if (this.jwtSecret === 'your-super-secret-jwt-key-change-in-production') {
-        throw new Error('JWT_SECRET must be set in production environment');
-      }
-      if (this.jwtRefreshSecret === 'your-super-secret-refresh-key-change-in-production') {
-        throw new Error('JWT_REFRESH_SECRET must be set in production environment');
-      }
+    // Additional validation: ensure secrets are strong enough
+    if (this.jwtSecret.length < 32) {
+      this.fastify.log.warn('⚠️  JWT_SECRET is shorter than 32 characters. Consider using a stronger secret.');
+    }
+    if (this.jwtRefreshSecret.length < 32) {
+      this.fastify.log.warn('⚠️  JWT_REFRESH_SECRET is shorter than 32 characters. Consider using a stronger secret.');
     }
 
-    this.fastify.log.info('AuthService initialized with configuration:', {
+    this.fastify.log.info('✅ AuthService initialized securely with configuration:', {
       defaultExpiresIn: this.defaultExpiresIn,
       refreshExpiresIn: this.refreshExpiresIn,
       saltRounds: this.saltRounds,
-      hasJwtSecret: !!this.jwtSecret,
-      hasRefreshSecret: !!this.jwtRefreshSecret,
+      jwtSecretLength: this.jwtSecret.length,
+      refreshSecretLength: this.jwtRefreshSecret.length,
+      environment: process.env.NODE_ENV || 'development'
     });
   }
 
