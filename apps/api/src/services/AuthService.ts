@@ -213,7 +213,7 @@ export class AuthService {
         try {
           const user = await this.fastify.db.user.findUnique({
             where: { id: payload.userId },
-            select: { id: true, email: true, isActive: true, status: true },
+            select: { id: true, email: true, status: true },
           });
 
           if (!user) {
@@ -223,7 +223,7 @@ export class AuthService {
             };
           }
 
-          if (!user.isActive || user.status !== 'ACTIVE') {
+          if (user.status !== 'ACTIVE') {
             return {
               valid: false,
               error: 'User account is not active',
