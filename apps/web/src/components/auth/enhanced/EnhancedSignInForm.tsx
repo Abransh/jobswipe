@@ -42,11 +42,7 @@ export function EnhancedSignInForm() {
   const onSubmit = async (data: SignInFormData) => {
     try {
       clearError();
-      const result = await login({
-        email: data.email,
-        password: data.password,
-        rememberMe: data.rememberMe,
-      });
+      const result = await login(data.email, data.password);
 
       if (result.success) {
         router.push(callbackUrl);
