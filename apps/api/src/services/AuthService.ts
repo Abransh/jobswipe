@@ -94,22 +94,20 @@ export class AuthService {
   constructor(fastify: FastifyInstance) {
     this.fastify = fastify;
 
-    // Load configuration from environment
-    this.jwtSecret = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
-    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production';
-    this.defaultExpiresIn = process.env.JWT_EXPIRES_IN || '24h';
-    this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
-    this.saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
-
-    // Validate configuration
-    if (process.env.NODE_ENV === 'production') {
-      if (this.jwtSecret === 'your-super-secret-jwt-key-change-in-production') {
-        throw new Error('JWT_SECRET must be set in production environment');
-      }
-      if (this.jwtRefreshSecret === 'your-super-secret-refresh-key-change-in-production') {
-        throw new Error('JWT_REFRESH_SECRET must be set in production environment');
-      }
+    // SECURITY: Require JWT secrets - NO FALLBACKS
+    if (!process.env.JWT_SECRET) {
+      throw new Error('CRITICAL: JWT_SECRET environment variable is required');
     }
+    if (!process.env.JWT_REFRESH_SECRET) {
+      throw new Error('CRITICAL: JWT_REFRESH_SECRET environment variable is required');
+    }
+
+    // Load configuration from environment (NO FALLBACKS)
+    this.jwtSecret = process.env.JWT_SECRET;
+    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    this.defaultExpiresIn = process.env.JWT_EXPIRES_IN || '15m'; // 15 minutes (secure default)
+    this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d'; // 7 days (secure default)
+    this.saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
 
     this.fastify.log.info('AuthService initialized with configuration:', {
       defaultExpiresIn: this.defaultExpiresIn,

@@ -35,9 +35,6 @@ import {
 } from '@jobswipe/shared';
 
 // Import server utilities conditionally
-let createAccessTokenConfig: any = null;
-let createRefreshTokenConfig: any = null;
-let createDesktopTokenConfig: any = null;
 let hashPassword: any = null;
 let verifyPassword: any = null;
 let generateSecureToken: any = null;
@@ -45,16 +42,13 @@ let extractIpFromHeaders: any = null;
 
 try {
   const serverModule = require('@jobswipe/shared/server');
-  createAccessTokenConfig = serverModule.createAccessTokenConfig;
-  createRefreshTokenConfig = serverModule.createRefreshTokenConfig;
-  createDesktopTokenConfig = serverModule.createDesktopTokenConfig;
   hashPassword = serverModule.hashPassword;
   verifyPassword = serverModule.verifyPassword;
 
   const sharedModule = require('@jobswipe/shared');
   generateSecureToken = sharedModule.generateSecureToken;
   extractIpFromHeaders = sharedModule.extractIpFromHeaders;
-  
+
   console.log('✅ Auth utilities loaded successfully');
 } catch (error) {
   console.warn('⚠️  Failed to load auth utilities:', error);
@@ -283,27 +277,24 @@ async function registerHandler(
     };
     
     const session = await request.server.sessionService.createSession(sessionOptions);
-    
-    // Generate tokens
-    const accessTokenConfig = createAccessTokenConfig(
-      createBrandedId<UserId>(user.id),
-      user.email,
-      user.name,
-      user.role,
-      validatedData.source,
+
+    // Generate tokens using AuthService (HS256)
+    const accessTokenResult = await request.server.jwtService.createToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      sessionId: session.id,
+      expiresIn: '15m', // 15 minutes
+    });
+
+    const refreshToken = await request.server.jwtService.createRefreshToken(
+      user.id,
       session.id
     );
-    
-    const refreshTokenConfig = createRefreshTokenConfig(
-      createBrandedId<UserId>(user.id),
-      user.email,
-      validatedData.source,
-      session.id
-    );
-    
-    const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
-    const refreshToken = await request.server.jwtService.createToken(refreshTokenConfig);
-    
+
+    const accessToken = accessTokenResult.token;
+
     // Format user response
     const userResponse: AuthenticatedUser = {
       id: createBrandedId<UserId>(user.id),
@@ -316,7 +307,7 @@ async function registerHandler(
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-    
+
     return reply.status(201).send({
       success: true,
       user: userResponse,
@@ -324,8 +315,8 @@ async function registerHandler(
         accessToken,
         refreshToken,
         tokenType: 'Bearer' as const,
-        expiresIn: accessTokenConfig.expiresIn,
-        refreshExpiresIn: refreshTokenConfig.expiresIn,
+        expiresIn: accessTokenResult.expiresIn,
+        refreshExpiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
       },
       session,
     });
@@ -393,30 +384,27 @@ async function loginHandler(
     };
     
     const session = await request.server.sessionService.createSession(sessionOptions);
-    
-    // Generate tokens
-    const accessTokenConfig = createAccessTokenConfig(
-      createBrandedId<UserId>(user.id),
-      user.email,
-      user.name,
-      user.role,
-      validatedData.source,
+
+    // Generate tokens using AuthService (HS256)
+    const accessTokenResult = await request.server.jwtService.createToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      sessionId: session.id,
+      expiresIn: '15m', // 15 minutes
+    });
+
+    const refreshToken = await request.server.jwtService.createRefreshToken(
+      user.id,
       session.id
     );
-    
-    const refreshTokenConfig = createRefreshTokenConfig(
-      createBrandedId<UserId>(user.id),
-      user.email,
-      validatedData.source,
-      session.id
-    );
-    
-    const accessToken = await request.server.jwtService.createToken(accessTokenConfig);
-    const refreshToken = await request.server.jwtService.createToken(refreshTokenConfig);
-    
+
+    const accessToken = accessTokenResult.token;
+
     // Update user last login timestamp
     await updateLastLogin(user.id);
-    
+
     // Format user response
     const userResponse: AuthenticatedUser = {
       id: createBrandedId<UserId>(user.id),
@@ -430,7 +418,7 @@ async function loginHandler(
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
-    
+
     return reply.status(200).send({
       success: true,
       user: userResponse,
@@ -438,8 +426,8 @@ async function loginHandler(
         accessToken,
         refreshToken,
         tokenType: 'Bearer' as const,
-        expiresIn: accessTokenConfig.expiresIn,
-        refreshExpiresIn: refreshTokenConfig.expiresIn,
+        expiresIn: accessTokenResult.expiresIn,
+        refreshExpiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
       },
       session,
     });
@@ -484,25 +472,23 @@ async function refreshTokenHandler(
       });
     }
     
-    // Generate new access token
-    const accessTokenConfig = createAccessTokenConfig(
-      tokenResult.payload.sub,
-      user.email,
-      user.name,
-      user.role,
-      tokenResult.payload.source,
-      tokenResult.payload.sessionId
-    );
-    
-    const newAccessToken = await request.server.jwtService.createToken(accessTokenConfig);
-    
+    // Generate new access token using AuthService (HS256)
+    const accessTokenResult = await request.server.jwtService.createToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      sessionId: tokenResult.payload.sessionId,
+      expiresIn: '15m', // 15 minutes
+    });
+
     return reply.status(200).send({
       success: true,
       tokens: {
-        accessToken: newAccessToken,
+        accessToken: accessTokenResult.token,
         refreshToken,
         tokenType: 'Bearer' as const,
-        expiresIn: accessTokenConfig.expiresIn,
+        expiresIn: accessTokenResult.expiresIn,
         refreshExpiresIn: tokenResult.payload.exp - Math.floor(Date.now() / 1000),
       },
     });
@@ -1079,6 +1065,12 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         },
       },
     },
+    config: {
+      rateLimit: {
+        max: 3,                    // 3 registration attempts
+        timeWindow: '15 minutes'   // per 15 minutes (prevent spam)
+      }
+    }
   }, registerHandler);
   
   fastify.post('/login', {
@@ -1094,6 +1086,12 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         },
       },
     },
+    config: {
+      rateLimit: {
+        max: 5,                    // 5 login attempts
+        timeWindow: '15 minutes'   // per 15 minutes
+      }
+    }
   }, loginHandler);
   
   fastify.post('/refresh', {
@@ -1137,7 +1135,6 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
   fastify.post('/password/reset', {
     schema: {
       body: {
-        
         type: 'object',
         required: ['email', 'source'],
         properties: {
@@ -1146,6 +1143,12 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         },
       },
     },
+    config: {
+      rateLimit: {
+        max: 3,                    // 3 password reset attempts
+        timeWindow: '15 minutes'   // per 15 minutes (prevent enumeration)
+      }
+    }
   }, passwordResetHandler);
   
   fastify.post('/password/reset-complete', {
