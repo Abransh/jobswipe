@@ -1,5 +1,6 @@
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Metadata } from 'next';
+import { Toaster } from 'sonner';
 
 import '@/styles/globals.css';
 import { AuthProvider } from '@/components/providers/AuthProvider';
@@ -112,6 +113,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
             </div>
           </QueueStatusProvider>
         </AuthProvider>
+        <Toaster
+          position="top-right"
+          richColors
+          expand={false}
+          duration={4000}
+          closeButton
+        />
       </body>
     </html>
   );

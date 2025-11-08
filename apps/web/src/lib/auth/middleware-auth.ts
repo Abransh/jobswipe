@@ -374,14 +374,14 @@ export function getUserAgent(request: NextRequest): string | undefined {
 export function isProtectedRoute(pathname: string): boolean {
   const protectedRoutes = [
     '/dashboard',
-    '/profile', 
+    '/jobs',
+    '/profile',
     '/settings',
     '/applications',
     '/resumes',
-    '/jobs/saved',
     '/automation',
   ];
-  
+
   return protectedRoutes.some(route => pathname.startsWith(route));
 }
 
