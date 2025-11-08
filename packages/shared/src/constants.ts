@@ -43,9 +43,11 @@ export type Environment = typeof ENVIRONMENTS[keyof typeof ENVIRONMENTS];
 
 /**
  * JWT configuration
+ * Note: Uses HS256 (HMAC-SHA256) - symmetric signing with shared secret
+ * This provides secure, fast token generation without needing separate public/private keys
  */
 export const JWT_CONFIG = {
-  ALGORITHM: 'RS256',
+  ALGORITHM: 'HS256',
   ISSUER: 'jobswipe.com',
   AUDIENCE: 'jobswipe-api',
   ACCESS_TOKEN_EXPIRY: 15 * 60, // 15 minutes
