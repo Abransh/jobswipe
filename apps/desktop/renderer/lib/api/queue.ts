@@ -23,6 +23,21 @@ export interface JobApplicationRequest {
   };
 }
 
+// Alias for swipeRight - same as JobApplicationRequest
+export interface SwipeRightRequest {
+  jobId: string;
+  resumeId?: string;
+  coverLetter?: string;
+  priority?: number;
+  customFields?: Record<string, string>;
+  metadata: {
+    source: 'web' | 'mobile' | 'desktop';
+    deviceId?: string;
+    userAgent?: string;
+    ipAddress?: string;
+  };
+}
+
 export interface ApplicationStatus {
   id: string;
   jobId: string;
@@ -179,6 +194,19 @@ class QueueApiService {
       method: 'POST',
       body: JSON.stringify(requestWithMetadata),
     });
+  }
+
+  /**
+   * Swipe right (apply to job) - alias for apply()
+   * Used by job swipe interface
+   */
+  async swipeRight(request: SwipeRightRequest): Promise<ApiResponse<{
+    applicationId: string;
+    snapshotId: string;
+    status: string;
+    priority: string;
+  }>> {
+    return this.apply(request);
   }
 
   /**
@@ -350,6 +378,7 @@ export const queueApi = new QueueApiService();
 
 export type {
   JobApplicationRequest,
+  SwipeRightRequest,
   ApplicationStatus,
   QueueStats,
   ApiResponse,
