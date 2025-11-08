@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Any, Union
 
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
-from browser_use.controller.service import Controller
+from browser_use.tools.service import Controller
 
 # Import LLMs from langchain (required by browser-use)
 try:
