@@ -9,9 +9,11 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useResume } from '@/hooks/useResume';
 import { JobCard } from '@/components/jobs/JobCard';
 import { JobDetailModal } from '@/components/jobs/JobDetailModal/JobDetailModal';
 import { LoginPromptModal } from '@/components/auth/LoginPromptModal';
+import { ResumeUploadModal } from '@/components/resume/ResumeUploadModal';
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters } from '@/components/jobs/types/filters';
 import { jobsApi, generateDeviceId, calculatePriority } from '@/lib/api/jobs';
@@ -26,6 +28,7 @@ interface JobSwipeInterfaceProps {
 
 export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpdate }: JobSwipeInterfaceProps) {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { hasResume, isLoading: resumeLoading, refetch: refetchResumes } = useResume();
 
   const [swipeStats, setSwipeStats] = useState({
     totalSwipes: 0,
@@ -50,6 +53,11 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
   // Login prompt modal state
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [pendingJobId, setPendingJobId] = useState<string | null>(null);
+
+  // Resume upload modal state
+  const [isResumeUploadOpen, setIsResumeUploadOpen] = useState(false);
+  const [pendingResumeJobId, setPendingResumeJobId] = useState<string | null>(null);
+  const [pendingResumeJobTitle, setPendingResumeJobTitle] = useState<string | null>(null);
 
   // Update card stack when jobs change
   useEffect(() => {
@@ -130,6 +138,16 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
       setPendingJobId(jobId);
       sessionStorage.setItem('pending_swipe_job_id', jobId);
       setIsLoginPromptOpen(true);
+      return;
+    }
+
+    // Check if user has uploaded a resume
+    if (!resumeLoading && !hasResume) {
+      console.log('📄 [RESUME CHECK] User has no resume, showing upload prompt');
+      setPendingResumeJobId(jobId);
+      setPendingResumeJobTitle(job.title);
+      sessionStorage.setItem('pending_swipe_job_id', jobId);
+      setIsResumeUploadOpen(true);
       return;
     }
 
@@ -792,6 +810,37 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
           sessionStorage.removeItem('pending_swipe_job_id');
         }}
         jobTitle={pendingJobId ? jobs.find(j => j.id === pendingJobId)?.title : undefined}
+      />
+
+      {/* Resume Upload Modal */}
+      <ResumeUploadModal
+        isOpen={isResumeUploadOpen}
+        onClose={() => {
+          setIsResumeUploadOpen(false);
+          setPendingResumeJobId(null);
+          setPendingResumeJobTitle(null);
+          sessionStorage.removeItem('pending_swipe_job_id');
+        }}
+        onUploadSuccess={async (resumeId, resumeUrl) => {
+          console.log('✅ [RESUME UPLOADED] Resume uploaded successfully', { resumeId, resumeUrl });
+
+          // Refetch resumes to update hasResume state
+          await refetchResumes();
+
+          // Close modal
+          setIsResumeUploadOpen(false);
+
+          // Execute pending swipe if exists
+          if (pendingResumeJobId) {
+            console.log('🔄 [PENDING SWIPE] Executing pending swipe after resume upload');
+            setTimeout(() => {
+              handleSwipeRight(pendingResumeJobId);
+              setPendingResumeJobId(null);
+              setPendingResumeJobTitle(null);
+            }, 500);
+          }
+        }}
+        jobTitle={pendingResumeJobTitle || undefined}
       />
     </div>
   );
