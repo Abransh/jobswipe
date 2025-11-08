@@ -58,10 +58,24 @@ export function EnhancedSignInForm() {
           duration: 3000,
         });
 
-        // Small delay to show toast before redirect
-        setTimeout(() => {
+      if (response.success && response.user) {
+        addSecurityEvent('success', 'Authentication successful');
+
+        // Store device trust if selected
+        if (data.deviceTrust) {
+          localStorage.setItem('deviceTrusted', 'true');
+          localStorage.setItem('deviceTrustDate', new Date().toISOString());
+        }
+
+        // CRITICAL FIX: Use window.location.href for full page reload
+        // This ensures HTTP-only cookies are properly available to middleware
+        // router.push() doesn't reload the page, so middleware might not see new cookies
+        if (typeof window !== 'undefined') {
           window.location.href = callbackUrl;
-        }, 500);
+        } else {
+          // Fallback for SSR (shouldn't happen in client component)
+          router.push(callbackUrl);
+        }
       } else {
         console.error('❌ Login failed:', result);
         toast.error('Login failed', {
