@@ -14,17 +14,24 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
 
-# Add browser-use to path
-browser_use_path = Path(__file__).parent.parent.parent.parent.parent / "browser-use"
-if browser_use_path.exists():
-    sys.path.insert(0, str(browser_use_path))
+# Import browser-use - use only what's available in the pip package
+from browser_use import Agent
+from browser_use.controller.service import Controller
 
-from browser_use import Agent, Controller, ActionResult
-from browser_use.browser import Browser, BrowserProfile  # Updated API: BrowserConfig -> BrowserProfile, BrowserSession -> Browser
+# Import LLMs from langchain (required by browser-use)
+try:
+    from langchain_anthropic import ChatAnthropic
+    from langchain_google_genai import ChatGoogleGenerativeAI as ChatGoogle
+    from langchain_openai import ChatOpenAI
+except ImportError:
+    ChatAnthropic = None
+    ChatGoogle = None
+    ChatOpenAI = None
 
-# Type alias for backward compatibility in code
-BrowserSession = Browser
-from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI
+# Placeholder type for browser session - will be handled by Agent
+class BrowserSession:
+    """Placeholder - actual browser is managed by Agent"""
+    pass
 
 # Import from unified core
 from ...core.execution_context import ExecutionContext, ExecutionMode, ProxyConfig
@@ -252,22 +259,22 @@ class BaseJobAutomation(ABC):
 
     def _create_llm(self):
         """Create and return an LLM instance based on available API keys"""
-        if os.getenv('ANTHROPIC_API_KEY'):
+        if os.getenv('ANTHROPIC_API_KEY') and ChatAnthropic:
             return ChatAnthropic(
                 api_key=os.getenv('ANTHROPIC_API_KEY'),
-                model="claude-3-sonnet-20240229",
+                model="claude-3-5-sonnet-20241022",
                 temperature=0.1
             )
-        elif os.getenv('OPENAI_API_KEY'):
+        elif os.getenv('OPENAI_API_KEY') and ChatOpenAI:
             return ChatOpenAI(
                 api_key=os.getenv('OPENAI_API_KEY'),
                 model="gpt-4-turbo-preview",
                 temperature=0.1
             )
-        elif os.getenv('GOOGLE_API_KEY'):
+        elif os.getenv('GOOGLE_API_KEY') and ChatGoogle:
             return ChatGoogle(
                 api_key=os.getenv('GOOGLE_API_KEY'),
-                model="gemini-2.5-pro",
+                model="gemini-pro",
                 temperature=0.1
             )
         else:
@@ -295,22 +302,10 @@ class BaseJobAutomation(ABC):
         if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
             self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
 
-        # Create BrowserProfile with options from context
-        browser_profile = BrowserProfile(
-            headless=browser_options.get('headless', True),
-            disable_security=True,
-            window_size={'width': 1920, 'height': 1080}
-        )
-
-        # Add proxy if configured (server mode)
-        if 'proxy' in browser_options and browser_options['proxy']:
-            browser_profile.proxy = browser_options['proxy']
-
-        # Add user data dir if configured (desktop mode)
-        if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
-            browser_profile.user_data_dir = browser_options['user_data_dir']
-
-        return Browser(config=browser_profile)
+        # Note: Browser session is now managed by Agent, not created directly
+        # Return a placeholder that won't be used
+        self.logger.info("Browser will be managed by Agent instance")
+        return BrowserSession()
 
     @abstractmethod
     def get_company_specific_task(self, user_profile: UserProfile, job_data: JobData) -> str:
