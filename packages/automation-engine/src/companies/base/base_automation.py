@@ -18,6 +18,8 @@ from typing import Dict, List, Optional, Any, Union
 from browser_use import Agent
 from browser_use.tools.service import Controller
 from browser_use.browser.session import BrowserSession
+from browser_use.agent.views import ActionResult
+from pydantic import BaseModel, Field
 
 # Import LLMs from langchain (required by browser-use)
 try:
@@ -90,8 +92,12 @@ class BaseJobAutomation(ABC):
     def _setup_common_actions(self):
         """Setup common browser automation actions"""
 
-        @self.controller.action("Upload resume file to form")
-        async def upload_resume(file_path: str, browser_session: BrowserSession):
+        # Define parameter model for upload_resume
+        class UploadResumeParams(BaseModel):
+            file_path: str = Field(..., description="Path to the resume file to upload")
+
+        @self.controller.action("Upload resume file to form", param_model=UploadResumeParams)
+        async def upload_resume(params: UploadResumeParams, browser_session: BrowserSession):
             """Upload resume file to any file input element"""
             try:
                 page = await browser_session.get_current_page()
@@ -113,10 +119,10 @@ class BaseJobAutomation(ABC):
 
                     if count > 0:
                         try:
-                            await elements.first.set_input_files(file_path)
-                            self.logger.info(f"Successfully uploaded resume: {file_path}")
+                            await elements.first.set_input_files(params.file_path)
+                            self.logger.info(f"Successfully uploaded resume: {params.file_path}")
                             return ActionResult(
-                                extracted_content=f"Resume uploaded successfully: {file_path}"
+                                extracted_content=f"Resume uploaded successfully: {params.file_path}"
                             )
                         except Exception as e:
                             self.logger.warning(f"Failed to upload with selector {selector}: {e}")
