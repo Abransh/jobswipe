@@ -129,9 +129,11 @@ class QueueService {
   private isInitialized = false;
   private config: QueueConfig;
   private websocketService?: WebSocketService;
+  private fastify: FastifyInstance;
 
-  constructor(config: QueueConfig) {
+  constructor(config: QueueConfig, fastify: FastifyInstance) {
     this.config = config;
+    this.fastify = fastify;
     this.redisConnection = new Redis({
       ...config.redis,
       maxRetriesPerRequest: null,
@@ -327,58 +329,192 @@ class QueueService {
   }
 
   /**
-   * Process job application - main worker logic
+   * Process job application - main worker logic with subscription-based routing
    */
   private async processJobApplication(job: Job): Promise<any> {
-    const { userId, jobId, applicationId, companyAutomation, userProfile, jobData, options } = job.data;
+    const { userId, jobId, jobData, userProfile, priority, metadata } = job.data;
+    const applicationQueueId = userProfile?.preferences?.applicationId;
 
     try {
-      // Update progress
+      console.log(`🤖 Processing job application for user ${userId}`);
+      console.log(`   Job: ${jobData.title} at ${jobData.company}`);
+      console.log(`   Application Queue ID: ${applicationQueueId}`);
+
       await job.updateProgress(10);
 
-      console.log(`🤖 Processing job application ${applicationId} for user ${userId}`);
+      // =================================================================
+      // STEP 1: Get user's subscription plan
+      // =================================================================
+      const user = await this.fastify.db.user.findUnique({
+        where: { id: userId },
+        include: { subscription: true }
+      });
 
-      // Simulate automation processing (replace with actual automation service calls)
-      await job.updateProgress(30);
+      if (!user) {
+        throw new Error(`User not found: ${userId}`);
+      }
 
-      // Here you would call the actual automation service
-      // For now, we'll simulate processing time and success/failure
-      const processingTime = Math.random() * 10000 + 5000; // 5-15 seconds
+      const subscriptionPlan = user.subscription?.plan || 'FREE';
+      console.log(`   Subscription Plan: ${subscriptionPlan}`);
 
-      await new Promise(resolve => setTimeout(resolve, processingTime));
-      await job.updateProgress(80);
+      await job.updateProgress(20);
 
-      // Simulate success/failure (90% success rate)
-      const success = Math.random() > 0.1;
+      // =================================================================
+      // STEP 2: Route based on subscription plan
+      // =================================================================
 
-      await job.updateProgress(100);
+      if (subscriptionPlan === 'FREE') {
+        // FREE USER: Route to desktop processing
+        console.log(`✅ [FREE USER] Queuing for desktop processing`);
 
-      if (success) {
+        // Update ApplicationQueue status to QUEUED (desktop will claim it)
+        if (applicationQueueId) {
+          await this.fastify.db.applicationQueue.update({
+            where: { id: applicationQueueId },
+            data: {
+              status: 'QUEUED',
+              scheduledAt: new Date(),
+              updatedAt: new Date()
+            }
+          });
+        }
+
+        // Emit WebSocket event for desktop app
+        if (this.websocketService) {
+          this.websocketService.emitToUser(userId, 'job-queued-for-desktop', {
+            applicationId: applicationQueueId,
+            jobTitle: jobData.title,
+            company: jobData.company,
+            status: 'queued',
+            message: 'Job queued for desktop processing. Open desktop app to process.',
+            timestamp: new Date().toISOString()
+          });
+        }
+
+        await job.updateProgress(100);
+
         return {
           success: true,
-          applicationId,
-          status: 'COMPLETED',
-          message: 'Job application submitted successfully',
-          submittedAt: new Date().toISOString(),
+          applicationId: applicationQueueId,
+          status: 'QUEUED',
+          message: 'Application queued for desktop processing',
           executionMode: 'desktop',
-          processingTime: Math.round(processingTime)
+          queuedAt: new Date().toISOString(),
+          requiresDesktop: true
         };
+
       } else {
-        throw new Error('Automation failed: Unable to submit application');
+        // PAID USER: Process immediately on server
+        console.log(`🚀 [PAID USER - ${subscriptionPlan}] Processing on server`);
+
+        // Check if ServerAutomationService is available
+        if (!this.fastify.serverAutomationService) {
+          throw new Error('ServerAutomationService not initialized');
+        }
+
+        await job.updateProgress(30);
+
+        // Prepare automation request
+        const automationRequest = {
+          userId,
+          jobId,
+          applicationId: applicationQueueId,
+          companyAutomation: this.detectCompanyAutomation(jobData.url),
+          userProfile: {
+            firstName: userProfile.preferences.firstName || user.email.split('@')[0],
+            lastName: userProfile.preferences.lastName || 'User',
+            email: userProfile.preferences.email,
+            phone: userProfile.preferences.phone || '',
+            resumeUrl: userProfile.resumeUrl,
+            currentTitle: userProfile.preferences.currentTitle,
+            yearsExperience: userProfile.preferences.yearsExperience,
+            skills: userProfile.preferences.skills || [],
+            currentLocation: userProfile.preferences.currentLocation,
+            linkedinUrl: userProfile.preferences.linkedinUrl,
+            workAuthorization: userProfile.preferences.workAuthorization,
+            coverLetter: userProfile.coverLetter
+          },
+          jobData: {
+            id: jobId,
+            title: jobData.title,
+            company: jobData.company,
+            applyUrl: jobData.url,
+            location: jobData.location,
+            description: jobData.description,
+            requirements: jobData.requirements ? [jobData.requirements] : []
+          }
+        };
+
+        await job.updateProgress(40);
+
+        // Execute server automation
+        const result = await this.fastify.serverAutomationService.executeAutomation(
+          automationRequest,
+          job.id
+        );
+
+        await job.updateProgress(100);
+
+        console.log(`${result.success ? '✅' : '❌'} [SERVER] Completed: ${result.status}`);
+
+        return {
+          success: result.success,
+          applicationId: result.applicationId,
+          status: result.status,
+          message: result.success ? 'Application submitted successfully' : result.error,
+          confirmationNumber: result.confirmationNumber,
+          executionMode: 'server',
+          executionTime: result.executionTime,
+          companyAutomation: result.companyAutomation,
+          screenshots: result.screenshots,
+          steps: result.steps,
+          captchaEvents: result.captchaEvents,
+          processingTime: result.serverInfo.processingTime
+        };
       }
 
     } catch (error) {
-      console.error(`❌ Job application processing failed for ${applicationId}:`, error);
+      console.error(`❌ Job application processing failed:`, error);
+
+      // Update status to FAILED
+      if (applicationQueueId) {
+        await this.fastify.db.applicationQueue.update({
+          where: { id: applicationQueueId },
+          data: {
+            status: 'FAILED',
+            failedAt: new Date(),
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            updatedAt: new Date()
+          }
+        });
+      }
 
       return {
         success: false,
-        applicationId,
+        applicationId: applicationQueueId,
         status: 'FAILED',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
         failedAt: new Date().toISOString(),
-        executionMode: 'desktop'
+        executionMode: 'unknown'
       };
     }
+  }
+
+  /**
+   * Detect company automation type from URL
+   */
+  private detectCompanyAutomation(url: string): string {
+    const urlLower = url.toLowerCase();
+
+    if (urlLower.includes('linkedin.com')) return 'linkedin';
+    if (urlLower.includes('greenhouse.io')) return 'greenhouse';
+    if (urlLower.includes('lever.co')) return 'lever';
+    if (urlLower.includes('workday.com') || urlLower.includes('myworkdayjobs.com')) return 'workday';
+    if (urlLower.includes('indeed.com')) return 'indeed';
+    if (urlLower.includes('glassdoor.com')) return 'glassdoor';
+    if (urlLower.includes('ziprecruiter.com')) return 'ziprecruiter';
+
+    return 'generic';
   }
 
   /**
@@ -684,7 +820,7 @@ const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
   fastify.log.info('Initializing Queue Management Service...');
 
   // Create queue service
-  const queueService = new QueueService(config);
+  const queueService = new QueueService(config, fastify);
 
   try {
     // Initialize the service
