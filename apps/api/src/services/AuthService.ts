@@ -116,6 +116,16 @@ export class AuthService {
     if (this.jwtRefreshSecret.length < 32) {
       this.fastify.log.warn('⚠️  JWT_REFRESH_SECRET is shorter than 32 characters. Consider using a stronger secret.');
     }
+    if (!process.env.JWT_REFRESH_SECRET) {
+      throw new Error('CRITICAL: JWT_REFRESH_SECRET environment variable is required');
+    }
+
+    // Load configuration from environment (NO FALLBACKS)
+    this.jwtSecret = process.env.JWT_SECRET;
+    this.jwtRefreshSecret = process.env.JWT_REFRESH_SECRET;
+    this.defaultExpiresIn = process.env.JWT_EXPIRES_IN || '15m'; // 15 minutes (secure default)
+    this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d'; // 7 days (secure default)
+    this.saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
 
     this.fastify.log.info('✅ AuthService initialized securely with configuration:', {
       defaultExpiresIn: this.defaultExpiresIn,

@@ -12,12 +12,9 @@ if (typeof window !== 'undefined') {
 }
 
 // Server-only service exports
-export { ServerJwtTokenService } from './services/server-jwt-token.service';
-export { 
-  createJwtTokenService,
-  createRedisSessionService, 
+export {
+  createRedisSessionService,
   createSecurityMiddlewareService,
-  getDefaultJwtTokenService,
   getDefaultRedisSessionService
 } from './services/factory';
 
@@ -25,23 +22,6 @@ export {
 export { RedisSessionService } from './services/redis-session-stub.service';
 export { TokenExchangeService } from './services/token-exchange.service';
 // Note: security-middleware.service exports already included via browser.ts re-export
-
-// Server-only JWT utilities with crypto operations
-export {
-  createAccessTokenConfig,
-  createRefreshTokenConfig,
-  createDesktopTokenConfig,
-  createVerificationTokenConfig,
-  extractUserIdFromPayload,
-  extractSessionIdFromPayload,
-  isTokenExpired,
-  tokenNeedsRefresh,
-  getTokenExpirationTime,
-  getTokenIssuedTime,
-  isDesktopToken,
-  tokenHasPermission,
-  tokenHasFeature
-} from './services/jwt-token.service';
 
 // Server-safe password utilities (uses Node.js crypto)
 export {
