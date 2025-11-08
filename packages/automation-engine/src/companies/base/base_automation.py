@@ -203,6 +203,15 @@ class BaseJobAutomation(ABC):
         url_lower = url.lower()
         return any(pattern in url_lower for pattern in self.get_url_patterns())
 
+    async def apply(self, job_data: JobData, user_profile: UserProfile) -> dict:
+        """
+        Apply to job - called by automation engine
+        This is a wrapper that calls apply_to_job with correct parameter order
+        """
+        result = await self.apply_to_job(user_profile, job_data)
+        # Convert ApplicationResult to dict for engine
+        return result.to_dict() if hasattr(result, 'to_dict') else result.__dict__
+
     async def apply_to_job(self, user_profile: UserProfile, job_data: JobData) -> ApplicationResult:
         """
         Main method to apply to a job using AI-powered browser automation
