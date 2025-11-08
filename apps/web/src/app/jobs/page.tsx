@@ -1,14 +1,19 @@
 'use client';
 
 /**
- * Main Jobs Discovery Page
- * Multi-view interface with Swipe, List, and Grid modes
- * Location-based filtering and search capabilities
+ * Premium Jobs Discovery Page
+ * Apple-Level Minimal Aesthetic
+ *
+ * Design Principles:
+ * - 90% neutral, 10% primary
+ * - Minimal UI, maximum content
+ * - Professional & mature
+ * - Clean typography
  */
 
 import React, { useState, useCallback, Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-// Import icons will be replaced with inline SVGs to avoid type conflicts
+import { motion, AnimatePresence } from 'framer-motion';
 import { useJobs } from '@/hooks/useJobs';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -23,42 +28,12 @@ import { ProximityLocationFilter } from '@/components/jobs/JobDiscovery/Proximit
 import type { JobData } from '@/components/jobs/types/job';
 import type { JobFilters as JobFiltersType } from '@/components/jobs/types/filters';
 
-// Job data will be fetched from API
-
 type ViewMode = 'swipe' | 'list' | 'grid';
 
 function JobsPageContent() {
   const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  
-  // Stabilize auth loading state to prevent infinite loops
-  const [stableAuthLoading, setStableAuthLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  
-  // useEffect(() => {
-  //   // Only update loading state if it's been stable for a short period
-  //   const timer = setTimeout(() => {
-  //     setStableAuthLoading(authLoading);
-  //     if (!authLoading && !initialLoadComplete) {
-  //       setInitialLoadComplete(true);
-  //     }
-  //   }, 100);
-    
-  //   return () => clearTimeout(timer);
-  // }, [authLoading, initialLoadComplete]);
-  
-  // // Simple loading state without infinite loops (with stability check)
-  // if (stableAuthLoading && !initialLoadComplete) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-  //         <p className="text-gray-600">Loading JobSwipe...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-  
+  const { isAuthenticated } = useAuth();
+
   const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || 'swipe');
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
@@ -71,15 +46,13 @@ function JobsPageContent() {
     salaryMax: 300000,
     skills: []
   });
-  
-  // Enhanced application tracking state
+
   const [applicationStats, setApplicationStats] = useState({
     totalApplications: 0,
     todayApplications: 0,
     successRate: 0
   });
-  
-  // Use real job data from API
+
   const {
     jobs,
     loading,
@@ -97,20 +70,8 @@ function JobsPageContent() {
     autoFetch: true
   });
 
-  // Mobile touch/swipe support
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const [pullToRefresh, setPullToRefresh] = useState(false);
-  const mainContentRef = useRef<HTMLDivElement>(null);
-
-  // Proximity-based location filtering
-  const [expandedResults, setExpandedResults] = useState<any>(null);
-  const [showProximityExpansion, setShowProximityExpansion] = useState(false);
-
-
   const handleViewChange = useCallback((newView: ViewMode) => {
     setViewMode(newView);
-    // Update URL without page refresh
     const url = new URL(window.location.href);
     url.searchParams.set('view', newView);
     window.history.replaceState({}, '', url.toString());
@@ -118,7 +79,6 @@ function JobsPageContent() {
 
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
-    // Update URL
     const url = new URL(window.location.href);
     if (query) {
       url.searchParams.set('q', query);
@@ -130,354 +90,186 @@ function JobsPageContent() {
 
   const handleFiltersChange = useCallback((newFilters: JobFiltersType) => {
     setFilters(newFilters);
-    // Update URL with filter params
-    const url = new URL(window.location.href);
-    
-    if (newFilters.location) {
-      url.searchParams.set('location', newFilters.location);
-    } else {
-      url.searchParams.delete('location');
-    }
-    
-    if (newFilters.remote !== 'any') {
-      url.searchParams.set('remote', newFilters.remote);
-    } else {
-      url.searchParams.delete('remote');
-    }
-    
-    window.history.replaceState({}, '', url.toString());
-  }, []);
-
-  // Mobile touch/swipe handlers
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartY.current) return;
-    
-    const currentY = e.touches[0].clientY;
-    const deltaY = currentY - touchStartY.current;
-    
-    // Pull to refresh when at top of page and pulling down
-    if (window.scrollY === 0 && deltaY > 50 && !loading) {
-      setPullToRefresh(true);
-    }
-  }, [loading]);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartX.current || !touchStartY.current) return;
-
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaX = touchEndX - touchStartX.current;
-    const deltaY = touchEndY - touchStartY.current;
-
-    // Only process horizontal swipes (not vertical scrolling)
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-      const viewModes: ViewMode[] = ['swipe', 'list', 'grid'];
-      const currentIndex = viewModes.indexOf(viewMode);
-      
-      if (deltaX > 0 && currentIndex > 0) {
-        // Swipe right - previous view mode
-        handleViewChange(viewModes[currentIndex - 1]);
-      } else if (deltaX < 0 && currentIndex < viewModes.length - 1) {
-        // Swipe left - next view mode
-        handleViewChange(viewModes[currentIndex + 1]);
-      }
-    }
-
-    // Handle pull to refresh
-    if (pullToRefresh && Math.abs(deltaY) > Math.abs(deltaX)) {
-      refetch();
-      setPullToRefresh(false);
-    }
-
-    // Reset touch tracking
-    touchStartX.current = null;
-    touchStartY.current = null;
-    setPullToRefresh(false);
-  }, [viewMode, handleViewChange, pullToRefresh, refetch]);
-
-  // Proximity-based location handlers
-  const handleProximityLocationChange = useCallback((location: string) => {
-    setFilters(prev => ({ ...prev, location }));
-    setExpandedResults(null);
-    setShowProximityExpansion(false);
-  }, []);
-
-  const handleExpandSearch = useCallback((expandedData: any) => {
-    setExpandedResults(expandedData);
-    setShowProximityExpansion(true);
   }, []);
 
   return (
-    <div
-      className="min-h-screen bg-gray-50"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Pull to Refresh Indicator */}
-      {pullToRefresh && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white text-center py-2 text-sm">
-          Release to refresh jobs...
-        </div>
-      )}
-
-      {/* Simplified Header - Navigation is now in sidebar via layout */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Premium Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Job Count and Stats */}
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold text-gray-900">Discover Jobs</h1>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-500">
-                  {loading ? 'Loading...' : `${totalCount} ${totalCount === 1 ? 'job' : 'jobs'}`}
-                </span>
-                {applicationStats.totalApplications > 0 && (
-                  <div className="flex items-center space-x-1 px-2 py-1 bg-blue-50 rounded-full">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-xs font-medium text-blue-700">
-                      {applicationStats.totalApplications} applied
-                    </span>
-                  </div>
-                )}
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            {/* Left: Title & Count */}
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-title-3 sm:text-title-2 font-semibold text-gray-900 dark:text-white">
+                  Jobs
+                </h1>
+                <p className="text-caption text-gray-500 dark:text-gray-400">
+                  {loading ? 'Loading...' : `${totalCount.toLocaleString()} opportunities`}
+                </p>
               </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-lg mx-8">
-              <div className="relative">
-                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Right: Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Search */}
+              <div className="relative hidden sm:block">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search jobs, companies, skills..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-48 lg:w-64 h-9 pl-9 pr-3 text-subhead bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>
-            </div>
 
-            {/* View Controls */}
-            <div className="flex items-center space-x-2">
-              {/* Filters Toggle */}
-              <button
+              {/* Filters Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setShowFilters(!showFilters)}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`h-9 px-3 rounded-lg text-subhead font-medium transition-colors ${
                   showFilters
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-                title="Filters"
               >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4" />
-                </svg>
-              </button>
+                <span className="flex items-center gap-2">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4" />
+                  </svg>
+                  <span className="hidden sm:inline">Filters</span>
+                </span>
+              </motion.button>
 
-              {/* View Mode Selector */}
-              <div className="hidden sm:flex items-center bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => handleViewChange('swipe')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'swipe'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                  title="Swipe View"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => handleViewChange('list')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                  title="List View"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => handleViewChange('grid')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                  title="Grid View"
-                >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Mobile View Mode Indicator */}
-              <div className="sm:hidden flex items-center space-x-1 bg-gray-100 rounded-full px-3 py-1">
-                <span className="text-xs font-medium text-gray-600 capitalize">{viewMode}</span>
-                <div className="flex space-x-1">
-                  {['swipe', 'list', 'grid'].map((mode) => (
-                    <div
-                      key={mode}
-                      className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                        viewMode === mode ? 'bg-blue-600' : 'bg-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
+              {/* View Mode Toggle */}
+              <div className="hidden md:flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1 gap-1">
+                {[
+                  { mode: 'swipe', icon: 'M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11', title: 'Swipe' },
+                  { mode: 'list', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16', title: 'List' },
+                  { mode: 'grid', icon: 'M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z', title: 'Grid' }
+                ].map(({ mode, icon, title }) => (
+                  <motion.button
+                    key={mode}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleViewChange(mode as ViewMode)}
+                    className={`h-8 w-8 rounded-md flex items-center justify-center transition-all ${
+                      viewMode === mode
+                        ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-minimal'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                    title={title}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                    </svg>
+                  </motion.button>
+                ))}
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.header>
 
       {/* Filters Panel */}
-      {showFilters && (
-        <div className="bg-white border-b border-gray-200 sticky top-16 z-30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="space-y-4">
-              {/* Enhanced Proximity Location Filter */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Location & Proximity</h3>
-                <ProximityLocationFilter
-                  currentLocation={filters.location}
-                  filters={filters}
-                  onLocationChange={handleProximityLocationChange}
-                  onExpandSearch={handleExpandSearch}
-                  jobCount={jobs.length}
-                />
-              </div>
-
-              {/* Other Filters */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 overflow-hidden"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
               <JobFilters
                 filters={filters}
                 onFiltersChange={handleFiltersChange}
                 jobCount={jobs.length}
               />
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Expanded Search Results */}
-      {showProximityExpansion && expandedResults && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900">Expanded Search Results</h3>
-                <p className="text-sm text-blue-700">
-                  {expandedResults.suggestion || 'Found additional jobs in nearby cities'}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowProximityExpansion(false)}
-                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Nearby Cities Results */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {expandedResults.expandedResults?.map((cityResult: any) => (
-                <div key={cityResult.city} className="bg-white rounded-lg border border-blue-200 p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{cityResult.city}</h4>
-                    <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                      {cityResult.distance}km away
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {cityResult.jobs.length} jobs • {cityResult.totalCount} total available
-                  </p>
-                  
-                  {/* Sample Jobs */}
-                  <div className="space-y-2 mb-3">
-                    {cityResult.jobs.slice(0, 2).map((job: any, jobIndex: number) => (
-                      <div key={jobIndex} className="text-sm">
-                        <p className="font-medium text-gray-800 truncate">{job.title}</p>
-                        <p className="text-gray-600 text-xs">{job.company.name}</p>
-                      </div>
-                    ))}
-                    {cityResult.jobs.length > 2 && (
-                      <p className="text-xs text-blue-600">+{cityResult.jobs.length - 2} more jobs</p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handleProximityLocationChange(cityResult.city)}
-                    className="w-full px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                  >
-                    View Jobs in {cityResult.city}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <main 
-        ref={mainContentRef}
-        className="flex-1 relative"
-      >
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          /* Loading State */
-          <div className="flex-1 flex items-center justify-center p-8">
+          /* Premium Loading State */
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center py-20"
+          >
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
-              <p className="text-gray-600">Finding the best jobs for you...</p>
+              <div className="relative w-12 h-12 mx-auto mb-4">
+                <div className="absolute inset-0 rounded-full border-2 border-gray-200 dark:border-gray-800"></div>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent"
+                ></motion.div>
+              </div>
+              <p className="text-subhead text-gray-600 dark:text-gray-400">Finding opportunities...</p>
             </div>
-          </div>
+          </motion.div>
         ) : error ? (
-          /* Error State */
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center max-w-md mx-auto">
-              <div className="w-24 h-24 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          /* Premium Error State */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center py-20"
+          >
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-error-light dark:bg-error/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h3>
-              <p className="text-gray-600 mb-6">{error}</p>
-              <button
+              <h3 className="text-title-3 font-semibold text-gray-900 dark:text-white mb-2">
+                Something went wrong
+              </h3>
+              <p className="text-body text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   clearError();
                   refetch();
                 }}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="h-11 px-6 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-subhead shadow-card hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
               >
                 Try again
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
         ) : jobs.length > 0 ? (
-          <>
-            {/* Enhanced Job Discovery Views */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Job Discovery Views */}
             {viewMode === 'swipe' && (
-              <JobSwipeInterface 
+              <JobSwipeInterface
                 jobs={jobs}
                 searchQuery={searchQuery}
                 filters={filters}
                 onApplicationUpdate={(stats) => setApplicationStats(stats)}
                 fetchMoreJobs={async (offset: number, limit: number) => {
-                  console.log('🔄 Fetching more jobs from parent, offset:', offset, 'limit:', limit);
                   if (hasMore && !loading) {
                     await fetchMore();
                     return jobs.slice(offset, offset + limit);
@@ -486,42 +278,50 @@ function JobsPageContent() {
                 }}
               />
             )}
-            
+
             {viewMode === 'list' && (
-              <JobListInterface 
+              <JobListInterface
                 jobs={jobs}
                 searchQuery={searchQuery}
                 filters={filters}
                 onApplicationUpdate={(stats) => setApplicationStats(stats)}
               />
             )}
-            
+
             {viewMode === 'grid' && (
-              <JobGridInterface 
+              <JobGridInterface
                 jobs={jobs}
                 searchQuery={searchQuery}
                 filters={filters}
                 onApplicationUpdate={(stats) => setApplicationStats(stats)}
               />
             )}
-          </>
+          </motion.div>
         ) : (
-          /* Enhanced Empty State */
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center max-w-md mx-auto">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
+          /* Premium Empty State */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center py-20"
+          >
+            <div className="text-center max-w-md">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found in your area</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-title-3 font-semibold text-gray-900 dark:text-white mb-2">
+                No jobs found
+              </h3>
+              <p className="text-body text-gray-600 dark:text-gray-400 mb-6">
                 {searchQuery || Object.values(filters || {}).some(v => v && v !== 'any' && (!Array.isArray(v) || v.length > 0))
-                  ? 'Try expanding your search criteria or explore jobs in nearby cities like Turin or Brescia.'
-                  : 'New opportunities are added daily. Check back soon or set up job alerts!'}
+                  ? 'Try adjusting your filters or search criteria'
+                  : 'New opportunities are added daily. Check back soon!'}
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => {
                     setFilters({
                       location: '',
@@ -534,54 +334,49 @@ function JobsPageContent() {
                     });
                     setSearchQuery('');
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="h-11 px-6 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold text-subhead shadow-card hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
                 >
-                  Clear all filters
-                </button>
-                <button
+                  Clear filters
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setFilters(prev => ({ ...prev, remote: 'remote_only' }))}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="h-11 px-6 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-medium text-subhead hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   Show remote jobs
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </main>
 
-      {/* Mobile FAB for Filters and Applications */}
-      <div className="fixed bottom-6 right-6 sm:hidden">
-        <div className="flex flex-col space-y-3">
-          {/* Applications Button */}
-          {applicationStats.totalApplications > 0 && (
-            <a
-              href="/dashboard/applications"
-              className="relative p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+      {/* Mobile Search (Bottom Sheet) */}
+      <div className="sm:hidden">
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-4 safe-area-bottom"
+        >
+          <div className="relative">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-blue-600 bg-white rounded-full border border-blue-600">
-                {applicationStats.totalApplications}
-              </span>
-            </a>
-          )}
-          
-          {/* Filters Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`p-4 rounded-full shadow-lg transition-colors ${
-              showFilters 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white text-gray-600 border border-gray-300'
-            }`}
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100-4m0 4v2m0-6V4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-          </button>
-        </div>
+            <input
+              type="text"
+              placeholder="Search jobs..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full h-11 pl-10 pr-3 text-subhead bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -590,8 +385,11 @@ function JobsPageContent() {
 export default function JobsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-2 border-gray-200 dark:border-gray-800"></div>
+          <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+        </div>
       </div>
     }>
       <JobsPageContent />
