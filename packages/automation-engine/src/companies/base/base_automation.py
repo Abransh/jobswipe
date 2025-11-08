@@ -17,6 +17,7 @@ from typing import Dict, List, Optional, Any, Union
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
 from browser_use.tools.service import Controller
+from browser_use.browser.session import BrowserSession
 
 # Import LLMs from langchain (required by browser-use)
 try:
@@ -90,7 +91,7 @@ class BaseJobAutomation(ABC):
         """Setup common browser automation actions"""
 
         @self.controller.action("Upload resume file to form")
-        async def upload_resume(file_path: str, browser_session: Browser):
+        async def upload_resume(file_path: str, browser_session: BrowserSession):
             """Upload resume file to any file input element"""
             try:
                 page = await browser_session.get_current_page()

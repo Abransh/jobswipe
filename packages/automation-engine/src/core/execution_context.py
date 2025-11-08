@@ -178,4 +178,6 @@ class ExecutionContext:
 
     def log_error(self, message: str, **kwargs):
         """Log error message with context"""
-        self.logger.error(f"[{self.mode.value}] {message}", extra=kwargs)
+        # Extract exc_info if present (it's a logging parameter, not an extra field)
+        exc_info = kwargs.pop('exc_info', False)
+        self.logger.error(f"[{self.mode.value}] {message}", exc_info=exc_info, extra=kwargs)
