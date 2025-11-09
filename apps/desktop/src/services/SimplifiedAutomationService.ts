@@ -374,7 +374,7 @@ export class SimplifiedAutomationService extends EventEmitter {
         USER_LAST_NAME: data.userProfile.lastName,
         USER_EMAIL: data.userProfile.email,
         USER_PHONE: data.userProfile.phone,
-        USER_RESUME_URL: data.userProfile.resumeUrl || '',
+   //     USER_RESUME_URL: data.userProfile.resumeUrl || '',
         USER_RESUME_LOCAL_PATH: data.userProfile.resumeLocalPath || '',
         USER_CURRENT_TITLE: data.userProfile.currentTitle || '',
         USER_YEARS_EXPERIENCE: (data.userProfile.yearsExperience || 0).toString(),

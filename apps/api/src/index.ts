@@ -9,18 +9,25 @@
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
 
-// Load .env.local file
-const envPath = resolve(__dirname, '../.env.local');
-dotenvConfig({ path: envPath });
+// Load .env.local file from root directory (../../.env.local from apps/api)
+const rootEnvPath = resolve(__dirname, '../../../.env.local');
+dotenvConfig({ path: rootEnvPath });
 
-// Fallback to .env if .env.local doesn't exist
-dotenvConfig({ path: resolve(__dirname, '../.env') });
+// Fallback to app-specific .env.local
+const appEnvPath = resolve(__dirname, '../.env.local');
+dotenvConfig({ path: appEnvPath });
 
-console.log('🔧 Environment variables loaded from:', envPath);
+// Fallback to root .env
+dotenvConfig({ path: resolve(__dirname, '../../../.env') });
+
+console.log('🔧 Environment variables loaded from:', rootEnvPath);
 console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
 console.log('🔧 Database URL:', process.env.DATABASE_URL ? '[CONFIGURED]' : '[MISSING]');
 console.log('🔧 Redis URL:', process.env.REDIS_URL ? '[CONFIGURED]' : '[MISSING]');
 console.log('🔧 JWT Secret:', process.env.JWT_SECRET ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 GOOGLE_API_KEY:', process.env.GOOGLE_API_KEY ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 ANTHROPIC_API_KEY:', process.env.ANTHROPIC_API_KEY ? '[CONFIGURED]' : '[MISSING]');
+console.log('🔧 OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[CONFIGURED]' : '[MISSING]');
 
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';

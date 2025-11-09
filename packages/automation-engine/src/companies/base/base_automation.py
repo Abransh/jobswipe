@@ -14,6 +14,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Union
 
+# TEMPORARY: Hardcoded API key for testing
+
+
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
 from browser_use.tools.service import Controller
@@ -21,15 +24,19 @@ from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
 from pydantic import BaseModel, Field
 
-# Import LLMs from langchain (required by browser-use)
+# Import browser-use native LLMs (preferred over langchain)
 try:
-    from langchain_anthropic import ChatAnthropic
-    from langchain_google_genai import ChatGoogleGenerativeAI as ChatGoogle
-    from langchain_openai import ChatOpenAI
+    from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI
 except ImportError:
-    ChatAnthropic = None
-    ChatGoogle = None
-    ChatOpenAI = None
+    # Fallback to langchain if browser-use doesn't have native wrappers
+    try:
+        from langchain_anthropic import ChatAnthropic
+        from langchain_google_genai import ChatGoogleGenerativeAI as ChatGoogle
+        from langchain_openai import ChatOpenAI
+    except ImportError:
+        ChatAnthropic = None
+        ChatGoogle = None
+        ChatOpenAI = None
 
 # Note: BrowserSession is imported from browser_use.browser.session above
 
@@ -134,6 +141,9 @@ class BaseJobAutomation(ABC):
 
     def _create_llm(self):
         """Create and return an LLM instance based on available API keys"""
+        # Debug: Check which API keys are available
+        self.logger.debug(f"API Keys check - ANTHROPIC: {bool(os.getenv('ANTHROPIC_API_KEY'))}, OPENAI: {bool(os.getenv('OPENAI_API_KEY'))}, GOOGLE: {bool(os.getenv('GOOGLE_API_KEY'))}")
+
         if os.getenv('ANTHROPIC_API_KEY') and ChatAnthropic:
             return ChatAnthropic(
                 api_key=os.getenv('ANTHROPIC_API_KEY'),
@@ -149,7 +159,7 @@ class BaseJobAutomation(ABC):
         elif os.getenv('GOOGLE_API_KEY') and ChatGoogle:
             return ChatGoogle(
                 api_key=os.getenv('GOOGLE_API_KEY'),
-                model="gemini-2.5-pro",
+                model="gemini-2.0-flash-exp",
                 temperature=0.1
             )
         else:
@@ -203,11 +213,21 @@ class BaseJobAutomation(ABC):
         url_lower = url.lower()
         return any(pattern in url_lower for pattern in self.get_url_patterns())
 
-    async def apply(self, job_data: JobData, user_profile: UserProfile) -> dict:
+    async def apply(self, job_data, user_profile) -> dict:
         """
         Apply to job - called by automation engine
         This is a wrapper that calls apply_to_job with correct parameter order
+
+        Args:
+            job_data: Either JobData object or dict
+            user_profile: Either UserProfile object or dict
         """
+        # Convert dicts to objects if needed
+        if isinstance(job_data, dict):
+            job_data = JobData(**job_data)
+        if isinstance(user_profile, dict):
+            user_profile = UserProfile(**user_profile)
+
         result = await self.apply_to_job(user_profile, job_data)
         # Convert ApplicationResult to dict for engine
         return result.to_dict() if hasattr(result, 'to_dict') else result.__dict__

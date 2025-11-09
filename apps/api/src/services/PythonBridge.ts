@@ -281,10 +281,15 @@ export class PythonBridge extends EventEmitter {
       EXECUTION_MODE: 'server',
       DATA_SOURCE: 'bridge',
       
-      // API keys
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-      GOOGLE_API_KEY: process.env.GOOGLE_API_KEY,
+      // API keys (only pass if defined to avoid "undefined" string)
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || '',
+
+      // Debug: Log API key availability
+      ...(process.env.NODE_ENV === 'development' && {
+        _DEBUG_API_KEYS: `ANTHROPIC:${!!process.env.ANTHROPIC_API_KEY},OPENAI:${!!process.env.OPENAI_API_KEY},GOOGLE:${!!process.env.GOOGLE_API_KEY}`
+      }),
       
       // Automation configuration
       AUTOMATION_HEADLESS: (request.automationConfig.headless !== false).toString(),
@@ -322,7 +327,7 @@ export class PythonBridge extends EventEmitter {
       JOB_DESCRIPTION: request.jobData.description || '',
       
       // Resume handling
-      USER_RESUME_URL: request.userProfile.resumeUrl || '',
+  //    USER_RESUME_URL: request.userProfile.resumeUrl || '',
       USER_RESUME_LOCAL_PATH: request.userProfile.resumeLocalPath || '',
       
       // Cover letter and custom fields
