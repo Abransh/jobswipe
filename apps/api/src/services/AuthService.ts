@@ -23,6 +23,10 @@ export interface JWTPayload {
   status: string;
   iat: number; // Issued at
   exp: number; // Expires at
+  iss: string; // Issuer
+  aud: string; // Audience
+  type: string; // Token type (access, refresh)
+  source: string; // Auth source (email, google, etc.)
   jti?: string; // JWT ID
   sessionId?: string;
   deviceId?: string;
@@ -162,6 +166,10 @@ export class AuthService {
         status: request.status || 'active',
         iat: Math.floor(issuedAt.getTime() / 1000),
         exp: Math.floor(expiresAt.getTime() / 1000),
+        iss: 'jobswipe.com', // Issuer - must match frontend JWT_CONSTANTS.ISSUER
+        aud: 'jobswipe-api', // Audience - must match frontend JWT_CONSTANTS.AUDIENCE
+        type: 'access', // Token type - required by frontend middleware
+        source: 'email', // Auth source - required by frontend middleware
         jti: tokenId,
         sessionId: request.sessionId,
         deviceId: request.deviceId,
@@ -294,6 +302,9 @@ export class AuthService {
         sub: userId,
         userId: userId,
         type: 'refresh',
+        source: 'email', // Auth source - required by frontend middleware
+        iss: 'jobswipe.com', // Issuer - must match frontend JWT_CONSTANTS.ISSUER
+        aud: 'jobswipe-api', // Audience - must match frontend JWT_CONSTANTS.AUDIENCE
         deviceId: deviceId,
         jti: randomUUID(),
         iat: Math.floor(Date.now() / 1000),
