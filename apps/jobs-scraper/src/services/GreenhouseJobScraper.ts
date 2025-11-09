@@ -605,10 +605,7 @@ export class GreenhouseJobScraper {
 
     await this.prisma.jobPosting.upsert({
       where: {
-        greenhouseCompanyId_greenhouseJobId: {
-          greenhouseCompanyId,
-          greenhouseJobId,
-        },
+        externalId,
       },
       update: {
         title: details.title,
