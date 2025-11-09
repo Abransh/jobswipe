@@ -1,0 +1,30 @@
+{
+  "name": "@jobswipe/jobs-scraper",
+  "version": "1.0.0",
+  "description": "Internal job scraper for populating JobSwipe database",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "scrape:greenhouse": "ts-node src/scripts/scrape-greenhouse.ts",
+    "scrape:company": "ts-node src/scripts/scrape-greenhouse.ts",
+    "scrape:all": "ts-node src/scripts/scrape-all-companies.ts",
+    "test:greenhouse": "ts-node src/scripts/test-greenhouse.ts"
+  },
+  "dependencies": {
+    "@jobswipe/database": "*",
+    "axios": "^1.6.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "table": "^6.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

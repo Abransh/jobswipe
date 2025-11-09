@@ -96,6 +96,7 @@ model UserProfile {
   desiredSalaryMax      Int?
   preferredCurrency     String?
   willingToRelocate     Boolean?          @default(false)
+  needsVisaSponsorship  Boolean?          @default(false)
   profileVisibility     ProfileVisibility @default(PRIVATE)
   showEmail             Boolean           @default(false)
   showPhone             Boolean           @default(false)
@@ -589,6 +590,24 @@ model JobPosting {
   leftSwipeCount   Int                 @default(0)
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
+
+  // Greenhouse-specific fields for automation
+  greenhouseCompanyId   String?
+  greenhouseJobId       String?
+  applicationSchema     Json?
+  formMetadata          Json?
+
+  // Automation intelligence metrics
+  automationFeasibility String?  // 'high', 'medium', 'low'
+  estimatedSuccessRate  Int?     // 0-100
+  prefilledFieldCount   Int      @default(0)
+  aiRequiredFieldCount  Int      @default(0)
+  totalRequiredFields   Int      @default(0)
+
+  // Schema tracking
+  lastSchemaUpdate      DateTime?
+  schemaVersion         String?   @default("1.0")
+
   queueItems       ApplicationQueue[]
   applications     JobApplication[]
   company          Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -609,6 +628,9 @@ model JobPosting {
   @@index([qualityScore])
   @@index([title])
   @@index([description])
+  @@index([greenhouseCompanyId, greenhouseJobId])
+  @@index([automationFeasibility])
+  @@index([estimatedSuccessRate])
   @@map("job_postings")
 }
 
