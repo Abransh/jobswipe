@@ -14,7 +14,7 @@
     "test:greenhouse": "ts-node src/scripts/test-greenhouse.ts"
   },
   "dependencies": {
-    "@jobswipe/database": "*",
+    "@jobswipe/database": "workspace:*",
     "axios": "^1.6.2",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",

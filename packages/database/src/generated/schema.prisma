@@ -96,6 +96,7 @@ model UserProfile {
   desiredSalaryMax      Int?
   preferredCurrency     String?
   willingToRelocate     Boolean?          @default(false)
+  needsVisaSponsorship  Boolean?          @default(false)
   profileVisibility     ProfileVisibility @default(PRIVATE)
   showEmail             Boolean           @default(false)
   showPhone             Boolean           @default(false)
@@ -242,6 +243,8 @@ model ApplicationQueue {
   errorType        String?
   responseData     Json?
   desktopSessionId String?
+  claimedBy        String? // 'SERVER' or 'DESKTOP' - prevents duplicate processing
+  claimedAt        DateTime? // When the job was claimed for processing
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   application      JobApplication? @relation(fields: [applicationId], references: [id])
@@ -537,17 +540,17 @@ model CompanyReview {
 }
 
 model JobPosting {
-  id               String              @id @default(uuid())
+  id               String      @id @default(uuid())
   title            String
   description      String
   requirements     String?
   benefits         String?
-  type             JobType             @default(FULL_TIME)
-  level            JobLevel            @default(MID)
+  type             JobType     @default(FULL_TIME)
+  level            JobLevel    @default(MID)
   department       String?
-  category         JobCategory         @default(OTHER)
-  remote           Boolean             @default(false)
-  remoteType       RemoteType          @default(ONSITE)
+  category         JobCategory @default(OTHER)
+  remote           Boolean     @default(false)
+  remoteType       RemoteType  @default(ONSITE)
   location         String?
   timeZone         String?
   city             String?
@@ -556,7 +559,7 @@ model JobPosting {
   coordinates      Json?
   salaryMin        Int?
   salaryMax        Int?
-  currency         String?             @default("USD")
+  currency         String?     @default("USD")
   salaryType       SalaryType?
   equity           String?
   bonus            String?
@@ -565,36 +568,55 @@ model JobPosting {
   education        String?
   languages        String[]
   companyId        String
-  externalId       String?
-  source           JobSource           @default(MANUAL)
+  externalId       String?     @unique
+  source           JobSource   @default(MANUAL)
   sourceUrl        String?
   applyUrl         String?
   keywords         String[]
   tags             String[]
   qualityScore     Float?
-  isVerified       Boolean             @default(false)
+  isVerified       Boolean     @default(false)
   verifiedAt       DateTime?
-  status           JobStatus           @default(ACTIVE)
-  isActive         Boolean             @default(true)
-  isFeatured       Boolean             @default(false)
-  isUrgent         Boolean             @default(false)
+  status           JobStatus   @default(ACTIVE)
+  isActive         Boolean     @default(true)
+  isFeatured       Boolean     @default(false)
+  isUrgent         Boolean     @default(false)
   postedAt         DateTime?
   expiresAt        DateTime?
   lastScrapedAt    DateTime?
-  viewCount        Int                 @default(0)
-  applicationCount Int                 @default(0)
-  rightSwipeCount  Int                 @default(0)
-  leftSwipeCount   Int                 @default(0)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  queueItems       ApplicationQueue[]
-  applications     JobApplication[]
-  company          Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  snapshots        JobSnapshot[]
-  enhancements     ResumeEnhancement[]
-  savedBy          SavedJob[]
-  swipes           UserJobSwipe[]
+  viewCount        Int         @default(0)
+  applicationCount Int         @default(0)
+  rightSwipeCount  Int         @default(0)
+  leftSwipeCount   Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
+  // Greenhouse-specific fields for automation
+  greenhouseCompanyId String?
+  greenhouseJobId     String?
+  applicationSchema   Json?
+  formMetadata        Json?
+
+  // Automation intelligence metrics
+  automationFeasibility String? // 'high', 'medium', 'low'
+  estimatedSuccessRate  Int? // 0-100
+  prefilledFieldCount   Int     @default(0)
+  aiRequiredFieldCount  Int     @default(0)
+  totalRequiredFields   Int     @default(0)
+
+  // Schema tracking
+  lastSchemaUpdate DateTime?
+  schemaVersion    String?   @default("1.0")
+
+  queueItems   ApplicationQueue[]
+  applications JobApplication[]
+  company      Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  snapshots    JobSnapshot[]
+  enhancements ResumeEnhancement[]
+  savedBy      SavedJob[]
+  swipes       UserJobSwipe[]
+
+  @@unique([greenhouseCompanyId, greenhouseJobId])
   @@index([companyId])
   @@index([type, level])
   @@index([remote, remoteType])
@@ -607,6 +629,9 @@ model JobPosting {
   @@index([qualityScore])
   @@index([title])
   @@index([description])
+  @@index([greenhouseCompanyId, greenhouseJobId])
+  @@index([automationFeasibility])
+  @@index([estimatedSuccessRate])
   @@map("job_postings")
 }
 
