@@ -568,7 +568,7 @@ model JobPosting {
   education        String?
   languages        String[]
   companyId        String
-  externalId       String?
+  externalId       String?             @unique
   source           JobSource           @default(MANUAL)
   sourceUrl        String?
   applyUrl         String?
@@ -616,6 +616,7 @@ model JobPosting {
   savedBy          SavedJob[]
   swipes           UserJobSwipe[]
 
+  @@unique([greenhouseCompanyId, greenhouseJobId])
   @@index([companyId])
   @@index([type, level])
   @@index([remote, remoteType])
