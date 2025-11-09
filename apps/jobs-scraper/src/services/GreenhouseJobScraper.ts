@@ -601,9 +601,15 @@ export class GreenhouseJobScraper {
   ) {
     const externalId = `greenhouse_${details.internal_job_id}`;
     const greenhouseCompanyId = details.absolute_url.split('/')[3]; // Extract from URL
+    const greenhouseJobId = details.id.toString();
 
     await this.prisma.jobPosting.upsert({
-      where: { externalId },
+      where: {
+        greenhouseCompanyId_greenhouseJobId: {
+          greenhouseCompanyId,
+          greenhouseJobId,
+        },
+      },
       update: {
         title: details.title,
         description: this.stripHtml(details.content || ''),
@@ -614,7 +620,7 @@ export class GreenhouseJobScraper {
 
         // Greenhouse-specific fields
         greenhouseCompanyId,
-        greenhouseJobId: details.id.toString(),
+        greenhouseJobId,
         applicationSchema: applicationSchema as any,
 
         // Automation metrics
@@ -642,7 +648,7 @@ export class GreenhouseJobScraper {
 
         // Greenhouse-specific fields
         greenhouseCompanyId,
-        greenhouseJobId: details.id.toString(),
+        greenhouseJobId,
         applicationSchema: applicationSchema as any,
 
         // Automation metrics
