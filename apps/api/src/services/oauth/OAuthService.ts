@@ -16,9 +16,9 @@ import {
   OAuthProviderTokens,
   OAuthAccountInfo,
   AccountLinkingStatus,
-  OAuthError,
-  OAuthErrorCode,
-  createOAuthError,
+  AuthError,
+  AuthErrorCode,
+  createAuthError,
   LinkedInOAuthProfile,
 } from '@jobswipe/shared';
 import { OAuthStateManager } from './OAuthStateManager';
@@ -152,8 +152,8 @@ export class OAuthService {
       };
     } catch (error) {
       this.fastify.log.error('Failed to initiate OAuth flow:', error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to initiate OAuth flow',
         500
       );
@@ -271,7 +271,7 @@ export class OAuthService {
           : AccountLinkingStatus.EXISTING_USER,
       };
     } catch (error) {
-      if (error instanceof OAuthError) {
+      if (error instanceof AuthError) {
         this.fastify.log.warn('OAuth callback failed with known error:', error);
         return {
           success: false,
@@ -284,7 +284,7 @@ export class OAuthService {
       return {
         success: false,
         error: 'OAuth authentication failed',
-        errorCode: OAuthErrorCode.INTERNAL_ERROR,
+        errorCode: AuthErrorCode.INTERNAL_ERROR,
       };
     }
   }
@@ -310,8 +310,8 @@ export class OAuthService {
     try {
       // Check if email is verified
       if (!profile.emailVerified && provider !== OAuthProvider.GITHUB) {
-        throw createOAuthError(
-          OAuthErrorCode.EMAIL_NOT_VERIFIED,
+        throw createAuthError(
+          AuthErrorCode.EMAIL_NOT_VERIFIED,
           'Email address is not verified by OAuth provider',
           403
         );
@@ -356,13 +356,13 @@ export class OAuthService {
         );
       }
     } catch (error) {
-      if (error instanceof OAuthError) {
+      if (error instanceof AuthError) {
         throw error;
       }
 
       this.fastify.log.error('Failed to create/link OAuth account:', error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to create or link account',
         500
       );
@@ -774,13 +774,13 @@ export class OAuthService {
       });
 
       if (!user) {
-        throw createOAuthError(OAuthErrorCode.NOT_FOUND, 'User not found', 404);
+        throw createAuthError(AuthErrorCode.NOT_FOUND, 'User not found', 404);
       }
 
       // Prevent unlinking if it's the only auth method
       if (!user.passwordHash && user.accounts.length === 1) {
-        throw createOAuthError(
-          OAuthErrorCode.PASSWORD_REQUIRED,
+        throw createAuthError(
+          AuthErrorCode.PASSWORD_REQUIRED,
           'Cannot unlink last authentication method. Set a password first.',
           400
         );
@@ -814,13 +814,13 @@ export class OAuthService {
 
       return true;
     } catch (error) {
-      if (error instanceof OAuthError) {
+      if (error instanceof AuthError) {
         throw error;
       }
 
       this.fastify.log.error('Failed to unlink OAuth provider:', error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to unlink OAuth provider',
         500
       );
@@ -838,8 +838,8 @@ export class OAuthService {
     const strategy = this.strategies.get(provider);
 
     if (!strategy) {
-      throw createOAuthError(
-        OAuthErrorCode.PROVIDER_NOT_CONFIGURED,
+      throw createAuthError(
+        AuthErrorCode.PROVIDER_NOT_CONFIGURED,
         `OAuth provider ${provider} is not configured`,
         400
       );
@@ -853,16 +853,16 @@ export class OAuthService {
    */
   private mapProviderErrorToCode(providerError: string): string {
     const errorMap: Record<string, string> = {
-      'access_denied': OAuthErrorCode.ACCESS_DENIED,
-      'invalid_request': OAuthErrorCode.INVALID_REQUEST,
-      'unauthorized_client': OAuthErrorCode.PROVIDER_ERROR,
-      'unsupported_response_type': OAuthErrorCode.PROVIDER_ERROR,
-      'invalid_scope': OAuthErrorCode.PROVIDER_ERROR,
-      'server_error': OAuthErrorCode.PROVIDER_ERROR,
-      'temporarily_unavailable': OAuthErrorCode.PROVIDER_ERROR,
+      'access_denied': AuthErrorCode.ACCESS_DENIED,
+      'invalid_request': AuthErrorCode.INVALID_REQUEST,
+      'unauthorized_client': AuthErrorCode.PROVIDER_ERROR,
+      'unsupported_response_type': AuthErrorCode.PROVIDER_ERROR,
+      'invalid_scope': AuthErrorCode.PROVIDER_ERROR,
+      'server_error': AuthErrorCode.PROVIDER_ERROR,
+      'temporarily_unavailable': AuthErrorCode.PROVIDER_ERROR,
     };
 
-    return errorMap[providerError] || OAuthErrorCode.PROVIDER_ERROR;
+    return errorMap[providerError] || AuthErrorCode.PROVIDER_ERROR;
   }
 
   /**

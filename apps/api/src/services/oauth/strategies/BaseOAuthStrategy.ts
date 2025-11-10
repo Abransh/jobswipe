@@ -15,9 +15,9 @@ import {
   OAuthProviderTokens,
   OAuthAuthorizationResponse,
   OAuthCallbackResponse,
-  OAuthError,
-  OAuthErrorCode,
-  createOAuthError,
+  AuthError,
+  AuthErrorCode,
+  createAuthError,
 } from '@jobswipe/shared';
 
 // =============================================================================
@@ -172,8 +172,8 @@ export abstract class BaseOAuthStrategy {
       return url.toString();
     } catch (error) {
       this.fastify.log.error(`Failed to generate authorization URL for ${this.getProviderName()}:`, error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to generate authorization URL',
         500,
         { provider: this.getProviderName() }
@@ -209,8 +209,8 @@ export abstract class BaseOAuthStrategy {
 
       // Validate token response
       if (!tokenData.access_token) {
-        throw createOAuthError(
-          OAuthErrorCode.PROVIDER_ERROR,
+        throw createAuthError(
+          AuthErrorCode.PROVIDER_ERROR,
           'No access token received from provider',
           502,
           { provider: this.getProviderName() }
@@ -238,8 +238,8 @@ export abstract class BaseOAuthStrategy {
           data: error.response?.data,
         });
 
-        throw createOAuthError(
-          OAuthErrorCode.PROVIDER_ERROR,
+        throw createAuthError(
+          AuthErrorCode.PROVIDER_ERROR,
           `Failed to exchange code for tokens: ${error.response?.data?.error_description || error.message}`,
           502,
           {
@@ -288,8 +288,8 @@ export abstract class BaseOAuthStrategy {
           data: error.response?.data,
         });
 
-        throw createOAuthError(
-          OAuthErrorCode.PROVIDER_ERROR,
+        throw createAuthError(
+          AuthErrorCode.PROVIDER_ERROR,
           `Failed to fetch user profile: ${error.message}`,
           502,
           {
@@ -333,8 +333,8 @@ export abstract class BaseOAuthStrategy {
       const tokenData = response.data;
 
       if (!tokenData.access_token) {
-        throw createOAuthError(
-          OAuthErrorCode.TOKEN_REFRESH_FAILED,
+        throw createAuthError(
+          AuthErrorCode.TOKEN_REFRESH_FAILED,
           'No access token received when refreshing',
           502
         );
@@ -361,8 +361,8 @@ export abstract class BaseOAuthStrategy {
           data: error.response?.data,
         });
 
-        throw createOAuthError(
-          OAuthErrorCode.TOKEN_REFRESH_FAILED,
+        throw createAuthError(
+          AuthErrorCode.TOKEN_REFRESH_FAILED,
           `Failed to refresh access token: ${error.message}`,
           502,
           {
