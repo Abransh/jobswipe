@@ -100,15 +100,11 @@ export { TokenExchangeService } from './services/token-exchange.service';
 export { ServerJwtTokenService } from './services/server-jwt-token.service';
 
 // Factory functions for server-only services
-export { 
-  createRedisSessionService, 
+export {
+  createRedisSessionService,
   createSecurityMiddlewareService,
-  getDefaultJwtTokenService,
   getDefaultRedisSessionService
 } from './services/factory';
-
-// Safe factory function (with environment guards)
-export { createJwtTokenService } from './services/jwt-token.service';
 
 // Export types (always safe to export)
 export type { SecurityMiddlewareService } from './services/factory';

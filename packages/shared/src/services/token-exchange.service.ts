@@ -5,16 +5,18 @@
  * @author JobSwipe Team
  */
 
-import { 
-  TokenExchangeRequest, 
-  TokenExchangeResponse, 
-  UserId, 
-  SessionId, 
+import {
+  TokenExchangeRequest,
+  TokenExchangeResponse,
+  UserId,
+  SessionId,
   TokenId,
   createBrandedId
 } from '../types/auth';
 import { createAuthError, AuthErrorCode } from '../types/auth';
-import { JwtTokenService, createDesktopTokenConfig } from './jwt-token.service';
+// TEMP: Commented out until jwt-token.service.ts is available
+// import { JwtTokenService, createDesktopTokenConfig } from './jwt-token.service';
+import { ServerJwtTokenService } from './server-jwt-token.service';
 import { RedisSessionService } from './redis-session-stub.service';
 import { generateSecureToken, createSecureHash } from '../utils/security';
 import { addDays } from '../utils/datetime';
