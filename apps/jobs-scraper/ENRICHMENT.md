@@ -2,7 +2,16 @@
 
 ## Overview
 
-The Greenhouse scraper now includes **optional AI-powered enrichment** that extracts structured data from unstructured job descriptions using Claude API.
+The Greenhouse scraper now includes **optional AI-powered enrichment** that extracts structured data from unstructured job descriptions using **Gemini** or **Claude** APIs.
+
+### Supported LLM Providers
+
+| Provider | Model | Speed | Cost | Recommended |
+|----------|-------|-------|------|-------------|
+| **Gemini** | gemini-2.0-flash-exp | ⚡️ Very Fast | 💰 Free (15 RPM) | ✅ **Yes** |
+| Claude | claude-3-haiku | 🚀 Fast | 💵 ~$0.50/1000 jobs | Alternative |
+
+**Default**: Gemini (free and fast)
 
 ### What Gets Extracted
 
@@ -42,12 +51,14 @@ Job Description (HTML)
     ↓
 [Strip HTML tags]
     ↓
-[Send to Claude API with extraction prompt]
+[Send to LLM (Gemini or Claude) with extraction prompt]
     ↓
 [Parse JSON response]
     ↓
 [Save to database]
 ```
+
+The system automatically chooses the LLM provider based on your configuration.
 
 ### Example
 
@@ -121,7 +132,42 @@ INSERT INTO job_postings (
 
 ## Setup
 
-### 1. Get Claude API Key
+### Option A: Using Gemini (Recommended - Free & Fast)
+
+#### 1. Get Google API Key
+
+1. Go to https://aistudio.google.com/apikey
+2. Sign in with your Google account
+3. Click "Create API Key"
+4. Copy the API key
+
+#### 2. Configure Environment
+
+Add to your `.env` file:
+
+```bash
+# Use Gemini (default)
+LLM_PROVIDER="gemini"
+GOOGLE_API_KEY="your-google-api-key-here"
+
+# Enable enrichment
+ENABLE_JOB_ENRICHMENT=true
+```
+
+#### 3. Install Dependencies
+
+```bash
+cd apps/jobs-scraper
+pnpm install
+```
+
+This will install `@google/generative-ai`.
+
+---
+
+### Option B: Using Claude (Alternative - Paid)
+
+#### 1. Get Claude API Key
 
 1. Go to https://console.anthropic.com/
 2. Sign up or log in
@@ -129,19 +175,20 @@ INSERT INTO job_postings (
 4. Create a new API key
 5. Copy the key (starts with `sk-ant-...`)
 
-### 2. Configure Environment
+#### 2. Configure Environment
 
 Add to your `.env` file:
 
 ```bash
-# Required for enrichment
+# Use Claude
+LLM_PROVIDER="claude"
 ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
-# Enable enrichment (optional - defaults to false)
+# Enable enrichment
 ENABLE_JOB_ENRICHMENT=true
 ```
 
-### 3. Install Dependencies
+#### 3. Install Dependencies
 
 ```bash
 cd apps/jobs-scraper
@@ -191,33 +238,41 @@ npm run scrape:company anthropic
 
 ## Cost Analysis
 
-### API Usage per Job
+### Gemini (Recommended)
 
-- **Model**: Claude 3 Haiku (fastest, cheapest)
-- **Input tokens**: ~800 tokens (job description)
-- **Output tokens**: ~200 tokens (structured JSON)
-- **Total**: ~1000 tokens per job
+- **Model**: gemini-2.0-flash-exp
+- **Pricing**: **FREE** (up to 15 requests per minute)
+- **Input**: ~800 tokens (job description)
+- **Output**: ~200 tokens (structured JSON)
+- **Cost per job**: **$0** ✅
+- **Cost for 1000 jobs**: **$0** ✅
 
-### Pricing (as of Nov 2024)
+**Rate Limit**: 15 requests/minute (900/hour) - Perfect for job scraping!
 
-- **Claude 3 Haiku**: $0.25 per million input tokens, $1.25 per million output tokens
-- **Cost per job**: ~$0.00045 (less than half a cent)
+### Claude (Alternative)
+
+- **Model**: claude-3-haiku-20240307
+- **Pricing**: $0.25 per million input tokens, $1.25 per million output tokens
+- **Cost per job**: ~$0.00045
 - **Cost for 100 jobs**: ~$0.045 (4.5 cents)
 - **Cost for 1000 jobs**: ~$0.45
 
 ### Example: Anthropic (283 jobs)
 
-- **Without enrichment**: Free, ~5 minutes
-- **With enrichment**: ~$0.13, ~10-15 minutes
+| Provider | Cost | Time |
+|----------|------|------|
+| No enrichment | Free | ~5 minutes |
+| **Gemini enrichment** | **FREE** ✅ | ~10-15 minutes |
+| Claude enrichment | ~$0.13 | ~10-15 minutes |
 
 ## Performance Impact
 
-| Metric | Without Enrichment | With Enrichment |
-|--------|-------------------|-----------------|
-| Time per job | 1-2 seconds | 3-4 seconds |
-| API calls per job | 2 (Greenhouse) | 3 (Greenhouse + Claude) |
-| Database writes | Same | Same + enriched fields |
-| Total time (100 jobs) | ~3 minutes | ~6 minutes |
+| Metric | Without Enrichment | With Gemini | With Claude |
+|--------|-------------------|-------------|-------------|
+| Time per job | 1-2 seconds | 3-4 seconds | 3-4 seconds |
+| API calls per job | 2 (Greenhouse) | 3 (Greenhouse + Gemini) | 3 (Greenhouse + Claude) |
+| Cost per 1000 jobs | $0 | **$0** ✅ | ~$0.45 |
+| Rate limit | N/A | 15 RPM (free) | Depends on plan |
 
 ## Confidence Scoring
 
@@ -362,13 +417,26 @@ WHERE formMetadata->'benefits' @> '["unlimited PTO"]'::jsonb;
 
 ## Troubleshooting
 
-### Error: "ANTHROPIC_API_KEY is required"
+### Error: "GOOGLE_API_KEY is required when using Gemini"
 
-**Cause**: Enrichment enabled but no API key set.
+**Cause**: Using Gemini but no API key set.
+
+**Fix**:
+```bash
+export GOOGLE_API_KEY="your-google-api-key"
+# Or add to .env file
+```
+
+Get API key: https://aistudio.google.com/apikey
+
+### Error: "ANTHROPIC_API_KEY is required when using Claude"
+
+**Cause**: Using Claude but no API key set.
 
 **Fix**:
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
+export LLM_PROVIDER="claude"
 # Or add to .env file
 ```
 
@@ -376,10 +444,26 @@ export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
 **Cause**: Invalid API key or network issue.
 
-**Fix**:
+**Fix for Gemini**:
+1. Verify API key at https://aistudio.google.com/apikey
+2. Check quota/rate limits in Google AI Studio
+3. Ensure GOOGLE_API_KEY is set correctly
+
+**Fix for Claude**:
 1. Check API key is correct
-2. Test API key: `curl https://api.anthropic.com/v1/messages -H "x-api-key: $ANTHROPIC_API_KEY"`
+2. Test: `curl https://api.anthropic.com/v1/messages -H "x-api-key: $ANTHROPIC_API_KEY"`
 3. Check network connectivity
+
+### Rate Limit Errors (Gemini)
+
+**Error**: "429 Too Many Requests"
+
+**Cause**: Exceeded 15 requests per minute (free tier).
+
+**Fix**:
+1. Scraper automatically respects rate limits with delays
+2. If scraping many jobs, expect slower processing
+3. Consider using smaller batches
 
 ### Enrichment seems inaccurate
 
@@ -396,9 +480,11 @@ export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
 1. **Only works with Greenhouse**: Currently integrated only with Greenhouse scraper
 2. **English-only**: Best results with English job descriptions
-3. **API rate limits**: Claude API has rate limits (check your plan)
+3. **API rate limits**:
+   - Gemini: 15 requests/minute (free tier)
+   - Claude: Depends on your plan
 4. **Not perfect**: AI extraction can miss or misinterpret information
-5. **Costs money**: ~$0.50 per 1000 jobs (very affordable but not free)
+5. **Free tier limits**: Gemini free tier has monthly request quotas
 
 ## Future Enhancements
 
