@@ -8,7 +8,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   BuildingOfficeIcon,
   UserGroupIcon,
   ClockIcon,
@@ -19,6 +19,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+import { prepareJobDescriptionHTML } from '@/lib/utils/htmlUtils';
 
 // Types
 import type { JobSwipeDetailsProps } from '../types/jobSwipe';
@@ -186,7 +187,7 @@ export function JobSwipeDetails({
                   '[&>strong]:font-semibold'
                 )}
                 dangerouslySetInnerHTML={{
-                  __html: job.description || 'Join our team and make an impact in this exciting role. We\'re looking for someone passionate about their craft and eager to grow with our company.'
+                  __html: prepareJobDescriptionHTML(job.description)
                 }}
               />
             </motion.section>
