@@ -50,7 +50,7 @@ export function JobCardContent({
   };
 
   // Generate skill tags (limit to most relevant)
-  const getTopSkills = (skills: string[], maxSkills: number = 3): string[] => {
+  const getTopSkills = (skills: string[], maxSkills: number = 6): string[] => {
     return skills.slice(0, maxSkills);
   };
 

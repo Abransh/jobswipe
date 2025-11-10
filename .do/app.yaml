@@ -1,0 +1,100 @@
+# .do/app.yaml
+name: jobswipe-production
+region: nyc
+
+# API Service
+services:
+  - name: api
+    github:
+      repo: Abransh/jobswipe
+      branch: main
+      deploy_on_push: true
+
+    source_dir: /apps/api
+
+    build_command: |
+      cd /workspace/jobswipe
+      npm install -g pnpm
+      pnpm install --frozen-lockfile
+      cd apps/api
+      pnpm run build:production
+
+    run_command: |
+      cd apps/api
+      node dist/index.js
+
+    environment_slug: node-js
+
+    instance_count: 1
+    instance_size_slug: basic-xs  # $12/month
+
+    http_port: 8080
+
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+    routes:
+      - path: /
+
+    envs:
+      - key: NODE_ENV
+        value: production
+
+      - key: API_PORT
+        value: "8080"
+
+      - key: API_HOST
+        value: "0.0.0.0"
+
+      # Add all other environment variables from .env.production
+      # These will be added via Dashboard for security
+
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: REDIS_URL
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: JWT_SECRET
+        scope: RUN_TIME
+        type: SECRET
+
+# Web App Service
+  - name: web
+    github:
+      repo: Abransh/jobswipe
+      branch: main
+      deploy_on_push: true
+
+    source_dir: /apps/web
+
+    build_command: |
+      cd /workspace/jobswipe
+      npm install -g pnpm
+      pnpm install --frozen-lockfile
+      cd apps/web
+      pnpm run build
+
+    environment_slug: node-js
+
+    instance_count: 1
+    instance_size_slug: basic-xs  # $12/month
+
+    http_port: 3000
+
+    routes:
+      - path: /
+
+    envs:
+      - key: NODE_ENV
+        value: production
+
+      - key: NEXT_PUBLIC_API_URL
+        value: "${api.PUBLIC_URL}"

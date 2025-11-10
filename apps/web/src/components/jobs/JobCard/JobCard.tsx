@@ -330,7 +330,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
           )}
         </div>
 
-        {/* Key Requirements (First 3) */}
+        {/* Key Requirements - Enhanced Display (4 items) */}
         {job.requirements && (
           <div className="space-y-2">
             <h4 className="text-subhead font-medium text-gray-700 dark:text-gray-300">
@@ -338,37 +338,73 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
             </h4>
             <div className="space-y-1.5">
               {job.requirements
-                .split(/[•\n\r]/)
-                .filter(req => req.trim().length > 0)
-                .slice(0, 3)
+                .split(/[•\n\r-]/)
+                .map(req => req.trim())
+                .filter(req => req.length > 10 && req.length < 150) // Filter meaningful requirements
+                .slice(0, 4) // Show 4 key requirements
                 .map((requirement, index) => (
-                  <div
+                  <motion.div
                     key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: index * 0.08,
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
                     className="flex items-start gap-2 text-footnote text-gray-600 dark:text-gray-400"
                   >
-                    <svg className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="flex-1">{requirement.trim()}</span>
-                  </div>
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="h-4 w-4 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="flex-1 leading-snug">{requirement}</span>
+                  </motion.div>
                 ))}
             </div>
           </div>
         )}
 
-        {/* Skills (First 4 + more indicator) */}
+        {/* Skills - Enhanced Display (5-6 visible skills + more indicator) */}
         {job.skills && job.skills.length > 0 && (
-          <div className="flex items-center flex-wrap gap-2">
-            {job.skills.slice(0, 4).map((skill, index) => (
-              <Badge key={index} size="sm" variant="outline">
-                {skill}
-              </Badge>
-            ))}
-            {job.skills.length > 4 && (
-              <Badge size="sm" variant="outline">
-                +{job.skills.length - 4} more
-              </Badge>
-            )}
+          <div className="space-y-2">
+            <h4 className="text-subhead font-medium text-gray-700 dark:text-gray-300">
+              Required Skills
+            </h4>
+            <div className="flex items-center flex-wrap gap-2">
+              {job.skills.slice(0, 6).map((skill, index) => (
+                <motion.div
+                  key={`${skill}-${index}`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.2,
+                    delay: index * 0.05,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                >
+                  <Badge
+                    size="sm"
+                    variant="outline"
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 transition-all duration-quick cursor-default"
+                  >
+                    {skill}
+                  </Badge>
+                </motion.div>
+              ))}
+              {job.skills.length > 6 && (
+                <Badge
+                  size="sm"
+                  variant="default"
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
+                >
+                  +{job.skills.length - 6} more
+                </Badge>
+              )}
+            </div>
           </div>
         )}
 
