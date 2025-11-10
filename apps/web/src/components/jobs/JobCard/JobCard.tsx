@@ -63,26 +63,64 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
     return null;
   }, [job.salaryMin, job.salaryMax]);
 
-  // Format experience display
+  // Format experience display - Enhanced extraction
   const formatExperience = useCallback(() => {
-    if (job.experienceYears) {
+    // Priority 1: Use experienceYears field
+    if (job.experienceYears !== undefined && job.experienceYears !== null) {
       if (job.experienceYears === 0) return 'Entry Level';
       if (job.experienceYears === 1) return '1 year';
       return `${job.experienceYears}+ years`;
     }
 
-    // Fallback: try to extract from requirements
+    // Priority 2: Extract from requirements field
     if (job.requirements) {
-      const expMatch = job.requirements.match(/(\d+)\+?\s*(years?|yrs?)/i);
-      if (expMatch) {
-        const years = parseInt(expMatch[1]);
-        if (years === 1) return '1 year';
-        return `${years}+ years`;
+      // Match patterns: "5+ years", "5-7 years", "5 years", "5yrs"
+      const patterns = [
+        /(\d+)\+\s*(?:years?|yrs?)/i,           // "5+ years"
+        /(\d+)-(\d+)\s*(?:years?|yrs?)/i,       // "5-7 years"
+        /(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?experience/i  // "5 years experience"
+      ];
+
+      for (const pattern of patterns) {
+        const match = job.requirements.match(pattern);
+        if (match) {
+          const years = parseInt(match[1]);
+          if (years === 0) return 'Entry Level';
+          if (years === 1) return '1 year';
+          return `${years}+ years`;
+        }
       }
     }
 
+    // Priority 3: Extract from skills array (rare but possible)
+    if (job.skills && job.skills.length > 0) {
+      const expSkill = job.skills.find(skill => /\d+\+?\s*(?:years?|yrs?)/i.test(skill));
+      if (expSkill) {
+        const match = expSkill.match(/(\d+)\+?\s*(?:years?|yrs?)/i);
+        if (match) {
+          const years = parseInt(match[1]);
+          if (years === 1) return '1 year';
+          return `${years}+ years`;
+        }
+      }
+    }
+
+    // Priority 4: Infer from job level
+    if (job.level) {
+      const levelMap: Record<string, string> = {
+        'ENTRY': 'Entry Level',
+        'JUNIOR': '0-2 years',
+        'MID': '2-5 years',
+        'SENIOR': '5+ years',
+        'LEAD': '7+ years',
+        'PRINCIPAL': '10+ years',
+        'DIRECTOR': '10+ years'
+      };
+      return levelMap[job.level] || null;
+    }
+
     return null;
-  }, [job.experienceYears, job.requirements]);
+  }, [job.experienceYears, job.requirements, job.skills, job.level]);
 
   // Handle interactions
   const handleSave = useCallback(() => {

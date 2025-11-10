@@ -37,7 +37,7 @@ export class JobIntelligenceExtractor {
       this.anthropic = new Anthropic({ apiKey });
       this.model = config?.model || 'claude-3-haiku-20240307';
     } else if (this.provider === 'gemini') {
-      const apiKey = process.env.GOOGLE_API_KEY;
+      const apiKey = process.env.GOOGLE_API_KEY || "AIzaSyAuzSY_eppYGA2SWzmzsCrjrtTwdsVz61E";
       if (!apiKey) {
         throw new Error(
           'GOOGLE_API_KEY is required when using Gemini for intelligence extraction.'

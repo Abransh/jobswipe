@@ -733,53 +733,57 @@ async function createServer(): Promise<FastifyInstance> {
   const routes = await loadRoutes();
   
   if (routes) {
-    try {
-      // Enterprise authentication routes
-      server.log.info('Registering enterprise authentication routes...');
-      await server.register(async function (fastify) {
-        await routes.registerAuthRoutes(fastify);
-      }, { prefix: `${apiPrefix}/auth` });
+    // Enterprise authentication routes
+    server.log.info('Registering enterprise authentication routes...');
+    await server.register(async function (fastify) {
+      await routes.registerAuthRoutes(fastify);
+    }, { prefix: `${apiPrefix}/auth` });
 
-      // Enterprise OAuth routes
+    // Enterprise OAuth routes (only if OAuthService is available)
+    if (server.oauthService) {
       server.log.info('Registering enterprise OAuth routes...');
       await server.register(async function (fastify) {
         await routes.registerOAuthRoutes(fastify);
       }, { prefix: `${apiPrefix}/auth` });
-
-      // Enterprise token exchange routes
-      server.log.info('Registering enterprise token exchange routes...');
-      await server.register(routes.tokenExchangeRoutes, { prefix: `${apiPrefix}/token-exchange` });
-
-      // Enterprise queue management routes
-      server.log.info('Registering enterprise queue management routes...');
-      await server.register(async function (fastify) {
-        await routes.registerQueueRoutes(fastify);
-      }, { prefix: `${apiPrefix}/queue` });
-
-      // Enterprise jobs routes
-      server.log.info('Registering enterprise jobs routes...');
-      await server.register(routes.jobsRoutes, { prefix: apiPrefix });
-
-      // Enterprise automation routes
-      server.log.info('Registering enterprise automation routes...');
-      await server.register(routes.automationRoutes, { prefix: apiPrefix });
-
-      // Enterprise onboarding routes
-      server.log.info('Registering enterprise onboarding routes...');
-      await server.register(async function (fastify) {
-        await routes.registerOnboardingRoutes(fastify);
-      }, { prefix: apiPrefix });
-
-      // Enterprise resume routes
-      server.log.info('Registering enterprise resume routes...');
-    //  await server.register(routes.resumeRoutes, { prefix: apiPrefix });
-
-      server.log.info('✅ Enterprise routes registered successfully');
-    } catch (error) {
-      server.log.warn('Enterprise routes failed to load, registering basic routes');
-      server.log.error(error);
-      await registerBasicRoutes(server, apiPrefix);
+    } else {
+      server.log.warn('⚠️  Skipping OAuth routes - OAuthService not available');
     }
+
+    // Enterprise token exchange routes
+    server.log.info('Registering enterprise token exchange routes...');
+    await server.register(routes.tokenExchangeRoutes, { prefix: `${apiPrefix}/token-exchange` });
+
+    // Enterprise queue management routes
+    server.log.info('Registering enterprise queue management routes...');
+    await server.register(async function (fastify) {
+      await routes.registerQueueRoutes(fastify);
+    }, { prefix: `${apiPrefix}/queue` });
+
+    // Enterprise jobs routes
+    server.log.info('Registering enterprise jobs routes...');
+    await server.register(routes.jobsRoutes, { prefix: apiPrefix });
+
+    // Enterprise automation routes
+    server.log.info('Registering enterprise automation routes...');
+    await server.register(routes.automationRoutes, { prefix: apiPrefix });
+
+    // Enterprise onboarding routes
+    server.log.info('Registering enterprise onboarding routes...');
+    await server.register(async function (fastify) {
+      await routes.registerOnboardingRoutes(fastify);
+    }, { prefix: apiPrefix });
+
+    // Enterprise desktop routes
+    server.log.info('Registering enterprise desktop routes...');
+    await server.register(async function (fastify) {
+      await routes.registerDesktopRoutes(fastify);
+    }, { prefix: apiPrefix });
+
+    // Enterprise resume routes
+    server.log.info('Registering enterprise resume routes...');
+  //  await server.register(routes.resumeRoutes, { prefix: apiPrefix });
+
+    server.log.info('✅ Enterprise routes registered successfully');
   } else {
     server.log.warn('Enterprise routes not available, using basic authentication');
     await registerBasicRoutes(server, apiPrefix);
