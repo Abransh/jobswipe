@@ -161,7 +161,7 @@ export interface AutomationMetrics {
 // ============================================================================
 
 /**
- * Structured data extracted from job descriptions using LLM
+ * Structured data extracted from job descriptions using LLM (salary, benefits, visa)
  */
 export interface EnrichedJobData {
   salary?: {
@@ -205,6 +205,128 @@ export interface EnrichedJobData {
     confidence: number;
     model: string;
   };
+}
+
+// ============================================================================
+// JOB INTELLIGENCE EXTRACTION (COMPREHENSIVE DATA)
+// ============================================================================
+
+/**
+ * Comprehensive job intelligence extracted via AI from job description
+ * This includes requirements, skills, experience, keywords, tags, etc.
+ */
+export interface JobIntelligenceData {
+  // Requirements extraction
+  requirements: {
+    bulletPoints: string[];  // Formatted bullet points
+    summary: string;         // One-sentence summary
+  };
+
+  // Experience and level
+  experience: {
+    yearsMin?: number;      // Minimum years required
+    yearsMax?: number;      // Maximum years (if range given)
+    level: 'ENTRY' | 'MID' | 'SENIOR' | 'LEAD' | 'PRINCIPAL';
+  };
+
+  // Skills extraction
+  skills: {
+    required: string[];     // Must-have skills
+    preferred: string[];    // Nice-to-have skills
+  };
+
+  // Education requirements
+  education: {
+    required: 'NONE' | 'HIGH_SCHOOL' | 'BACHELORS' | 'MASTERS' | 'PHD';
+    field?: string;         // e.g., "Computer Science"
+    details?: string;       // Full requirement text
+  };
+
+  // Languages
+  languages: string[];      // Spoken languages (default: ["English"])
+
+  // Remote work policy
+  remoteType: 'REMOTE' | 'HYBRID' | 'ONSITE';
+
+  // Job categorization
+  category: 'ENGINEERING' | 'DESIGN' | 'PRODUCT' | 'SALES' | 'MARKETING' |
+            'OPERATIONS' | 'FINANCE' | 'HR' | 'LEGAL' | 'DATA_SCIENCE' |
+            'CUSTOMER_SUCCESS' | 'OTHER';
+
+  // Search and filtering
+  keywords: string[];       // 10-15 searchable keywords
+  tags: string[];          // 5-10 filtering tags
+
+  // Confidence scores
+  confidence: {
+    overall: number;        // 0-100
+    requirements: number;
+    skills: number;
+    experience: number;
+  };
+
+  // Metadata
+  metadata: {
+    extractedAt: string;
+    model: string;
+    processingTime?: number; // milliseconds
+  };
+}
+
+/**
+ * Direct data extracted from Greenhouse API (no AI needed)
+ */
+export interface DirectAPIData {
+  department?: string;      // From API departments array
+  location: string;         // Full location string
+  city?: string;           // Parsed from location
+  state?: string;          // Parsed from location
+  country?: string;        // Parsed from location
+  jobType?: 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP';
+  remote: boolean;         // Parsed from location string
+}
+
+/**
+ * Complete job data ready for database insertion
+ */
+export interface CompleteJobData {
+  // Basic info
+  title: string;
+  description: string;
+
+  // From direct API extraction
+  department?: string;
+  location?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  remote: boolean;
+
+  // From AI intelligence extraction
+  requirements?: string;
+  experienceYears?: number;
+  level: import('@jobswipe/database').JobLevel;
+  category: import('@jobswipe/database').JobCategory;
+  remoteType: import('@jobswipe/database').RemoteType;
+  skills: string[];
+  education?: string;
+  languages: string[];
+  keywords: string[];
+  tags: string[];
+
+  // From enrichment (salary, benefits)
+  salaryMin?: number;
+  salaryMax?: number;
+  currency?: string;
+  salaryType?: import('@jobswipe/database').SalaryType;
+  equity?: string;
+  bonus?: string;
+
+  // Metadata
+  qualityScore?: number;
+
+  // JSON fields
+  formMetadata?: any;
 }
 
 // ============================================================================

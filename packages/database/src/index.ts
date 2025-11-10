@@ -1,5 +1,7 @@
 import { PrismaClient } from './generated';
-import { hashPassword, verifyPassword } from '@jobswipe/shared';
+// Temporary stubs for missing @jobswipe/shared package
+const hashPassword = async (password: string) => password; // TODO: implement proper hashing
+const verifyPassword = async (password: string, hash: string) => password === hash; // TODO: implement proper verification
 
 // Singleton pattern for Prisma client
 const globalForPrisma = globalThis as unknown as {
