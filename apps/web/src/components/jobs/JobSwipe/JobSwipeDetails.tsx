@@ -175,9 +175,20 @@ export function JobSwipeDetails({
                 <BuildingOfficeIcon className="w-5 h-5" />
                 About the Role
               </h3>
-              <p className={styles.jobDescription}>
-                {job.description || 'Join our team and make an impact in this exciting role. We\'re looking for someone passionate about their craft and eager to grow with our company.'}
-              </p>
+              <div
+                className={cn(
+                  styles.jobDescription,
+                  'prose prose-sm max-w-none',
+                  '[&>h2]:text-base [&>h2]:font-semibold [&>h2]:mt-3 [&>h2]:mb-2',
+                  '[&>h3]:text-sm [&>h3]:font-semibold [&>h3]:mt-2 [&>h3]:mb-1',
+                  '[&>p]:mb-2 [&>p]:leading-relaxed',
+                  '[&>ul]:mb-2 [&>ul]:ml-4 [&>li]:mb-1',
+                  '[&>strong]:font-semibold'
+                )}
+                dangerouslySetInnerHTML={{
+                  __html: job.description || 'Join our team and make an impact in this exciting role. We\'re looking for someone passionate about their craft and eager to grow with our company.'
+                }}
+              />
             </motion.section>
 
             {/* Requirements */}
