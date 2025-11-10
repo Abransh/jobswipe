@@ -63,6 +63,27 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
     return null;
   }, [job.salaryMin, job.salaryMax]);
 
+  // Format experience display
+  const formatExperience = useCallback(() => {
+    if (job.experienceYears) {
+      if (job.experienceYears === 0) return 'Entry Level';
+      if (job.experienceYears === 1) return '1 year';
+      return `${job.experienceYears}+ years`;
+    }
+
+    // Fallback: try to extract from requirements
+    if (job.requirements) {
+      const expMatch = job.requirements.match(/(\d+)\+?\s*(years?|yrs?)/i);
+      if (expMatch) {
+        const years = parseInt(expMatch[1]);
+        if (years === 1) return '1 year';
+        return `${years}+ years`;
+      }
+    }
+
+    return null;
+  }, [job.experienceYears, job.requirements]);
+
   // Handle interactions
   const handleSave = useCallback(() => {
     setIsSaved(!isSaved);
@@ -313,27 +334,69 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
           </div>
         )}
 
-        {/* Footer: Salary + Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
-          {/* Salary */}
-          <div>
+        {/* Footer: Info Grid + Actions */}
+        <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+          {/* Information Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Salary Box */}
             {formatSalary() ? (
-              <div className="space-y-0.5">
-                <p className="text-caption text-gray-500 dark:text-gray-400">
-                  Salary
-                </p>
-                <p className="text-callout font-semibold text-gray-900 dark:text-white">
-                  {formatSalary()}
-                </p>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-100 dark:bg-green-950/30 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-caption text-gray-500 dark:text-gray-400">Salary</p>
+                  <p className="text-footnote font-semibold text-gray-900 dark:text-white truncate">
+                    {formatSalary()}
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="space-y-0.5">
-                <p className="text-caption text-gray-500 dark:text-gray-400">
-                  Posted
-                </p>
-                <p className="text-callout font-medium text-gray-700 dark:text-gray-300">
-                  {job.postedAt ? new Date(job.postedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recently'}
-                </p>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-caption text-gray-500 dark:text-gray-400">Posted</p>
+                  <p className="text-footnote font-medium text-gray-700 dark:text-gray-300 truncate">
+                    {job.postedAt ? new Date(job.postedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recently'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Experience Box */}
+            {formatExperience() ? (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/30 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-caption text-gray-500 dark:text-gray-400">Experience</p>
+                  <p className="text-footnote font-semibold text-gray-900 dark:text-white truncate">
+                    {formatExperience()}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-caption text-gray-500 dark:text-gray-400">Level</p>
+                  <p className="text-footnote font-medium text-gray-700 dark:text-gray-300 truncate">
+                    {job.level}
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -346,12 +409,12 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
                 e.stopPropagation();
                 handleSave();
               }}
-              className="h-10 w-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-quick active:scale-95 flex items-center justify-center"
+              className="flex-1 h-10 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-quick active:scale-95 flex items-center justify-center gap-2"
               aria-label={isSaved ? 'Unsave job' : 'Save job'}
             >
               <svg
                 className={cn(
-                  'h-5 w-5 transition-colors',
+                  'h-4 w-4 transition-colors',
                   isSaved ? 'text-primary fill-current' : 'text-gray-500 dark:text-gray-400'
                 )}
                 fill={isSaved ? 'currentColor' : 'none'}
@@ -365,6 +428,9 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
                   d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
                 />
               </svg>
+              <span className="text-subhead font-medium text-gray-700 dark:text-gray-300">
+                {isSaved ? 'Saved' : 'Save'}
+              </span>
             </button>
 
             {/* Apply Button (or Swipe Right) */}
@@ -375,7 +441,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
                   handleApply();
                 }}
                 disabled={isApplying}
-                className="h-10 px-6 rounded-lg bg-primary text-white hover:bg-primary/90 transition-all duration-quick active:scale-95 flex items-center gap-2 font-medium text-subhead shadow-card disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 h-10 rounded-lg bg-primary text-white hover:bg-primary/90 transition-all duration-quick active:scale-95 flex items-center justify-center gap-2 font-semibold text-subhead shadow-card disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isApplying ? (
                   <>
@@ -387,7 +453,7 @@ export const JobCard = forwardRef<HTMLDivElement, JobCardProps>(({
                   </>
                 ) : (
                   <>
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Apply</span>
