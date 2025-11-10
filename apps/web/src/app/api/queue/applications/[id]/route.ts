@@ -64,44 +64,47 @@ export async function GET(
     }
 
     // Format the response
+    // Type assertion needed due to Prisma client type inference with complex includes
+    const appData = application as any;
+
     const response = {
       success: true,
       data: {
-        id: application.id,
-        status: application.status,
-        priority: application.priority,
-        attempts: application.attempts,
-        maxAttempts: application.maxAttempts,
-        scheduledAt: application.scheduledAt,
-        startedAt: application.startedAt,
-        completedAt: application.completedAt,
-        failedAt: application.failedAt,
-        errorMessage: application.errorMessage,
-        errorType: application.errorType,
-        success: application.success,
-        requiresCaptcha: application.requiresCaptcha,
-        captchaSolved: application.captchaSolved,
-        claimedBy: application.claimedBy,
-        createdAt: application.createdAt,
-        updatedAt: application.updatedAt,
+        id: appData.id,
+        status: appData.status,
+        priority: appData.priority,
+        attempts: appData.attempts,
+        maxAttempts: appData.maxAttempts,
+        scheduledAt: appData.scheduledAt,
+        startedAt: appData.startedAt,
+        completedAt: appData.completedAt,
+        failedAt: appData.failedAt,
+        errorMessage: appData.errorMessage,
+        errorType: appData.errorType,
+        success: appData.success,
+        requiresCaptcha: appData.requiresCaptcha,
+        captchaSolved: appData.captchaSolved,
+        claimedBy: appData.claimedBy,
+        createdAt: appData.createdAt,
+        updatedAt: appData.updatedAt,
         job: {
-          id: application.jobPosting.id,
-          title: application.jobPosting.title,
-          description: application.jobPosting.description,
-          type: application.jobPosting.type,
-          level: application.jobPosting.level,
-          location: application.jobPosting.location,
-          remote: application.jobPosting.remote,
-          remoteType: application.jobPosting.remoteType,
-          salaryMin: application.jobPosting.salaryMin,
-          salaryMax: application.jobPosting.salaryMax,
-          currency: application.jobPosting.currency,
-          applyUrl: application.jobPosting.applyUrl,
-          company: application.jobPosting.company
+          id: appData.jobPosting.id,
+          title: appData.jobPosting.title,
+          description: appData.jobPosting.description,
+          type: appData.jobPosting.type,
+          level: appData.jobPosting.level,
+          location: appData.jobPosting.location,
+          remote: appData.jobPosting.remote,
+          remoteType: appData.jobPosting.remoteType,
+          salaryMin: appData.jobPosting.salaryMin,
+          salaryMax: appData.jobPosting.salaryMax,
+          currency: appData.jobPosting.currency,
+          applyUrl: appData.jobPosting.applyUrl,
+          company: appData.jobPosting.company
         },
-        jobApplication: application.application,
-        automationLogs: application.automationLogs,
-        jobSnapshot: application.jobSnapshot
+        jobApplication: appData.application,
+        automationLogs: appData.automationLogs,
+        jobSnapshot: appData.jobSnapshot || null
       }
     };
 
