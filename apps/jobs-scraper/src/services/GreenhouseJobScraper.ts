@@ -9,7 +9,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { PrismaClient, SalaryType } from '@jobswipe/database';
+import { PrismaClient, SalaryType } from '@/../../packages/database/src/generated';;
 import {
   GreenhouseJobListing,
   GreenhouseJobDetails,

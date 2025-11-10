@@ -38,7 +38,7 @@ export class JobDescriptionEnrichment {
       this.anthropic = new Anthropic({ apiKey });
       this.model = config?.model || 'claude-3-haiku-20240307';
     } else if (this.provider === 'gemini') {
-      const apiKey = process.env.GOOGLE_API_KEY;
+      const apiKey = process.env.GOOGLE_API_KEY  ;
       if (!apiKey) {
         throw new Error(
           'GOOGLE_API_KEY is required when using Gemini. ' +
@@ -46,7 +46,7 @@ export class JobDescriptionEnrichment {
         );
       }
       this.gemini = new GoogleGenerativeAI(apiKey);
-      this.model = config?.model || 'gemini-2.0-flash-exp';
+      this.model = config?.model || 'gemini-2.5-pro';
     } else {
       throw new Error(`Unsupported LLM provider: ${this.provider}`);
     }
