@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Briefcase, MapPin, Clock, DollarSign, Building, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { prepareJobDescriptionHTML } from '@/lib/utils/htmlUtils';
 import type { JobData } from '../types/job';
 
 export interface JobDetailModalProps {
@@ -227,7 +228,7 @@ export function JobDetailModal({
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Description</h3>
                 <div
                   className="prose prose-sm max-w-none text-gray-700 leading-relaxed [&>h2]:text-lg [&>h2]:font-semibold [&>h2]:text-gray-900 [&>h2]:mt-4 [&>h2]:mb-2 [&>h3]:text-base [&>h3]:font-semibold [&>h3]:text-gray-900 [&>h3]:mt-3 [&>h3]:mb-2 [&>p]:mb-3 [&>p]:text-gray-700 [&>ul]:mb-3 [&>ul]:ml-4 [&>li]:mb-1 [&>strong]:font-semibold [&>strong]:text-gray-900"
-                  dangerouslySetInnerHTML={{ __html: job.description }}
+                  dangerouslySetInnerHTML={{ __html: prepareJobDescriptionHTML(job.description) }}
                 />
               </div>
 
