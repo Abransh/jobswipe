@@ -41,6 +41,9 @@ export {
 // Authentication types and utilities
 export * from './types/auth';
 
+// OAuth types and schemas
+export * from './types/oauth.types';
+
 // Export context for React apps (explicit exports to avoid conflicts)
 export { 
   useAuth, 
