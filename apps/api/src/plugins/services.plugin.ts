@@ -13,6 +13,7 @@ import { ServerAutomationService } from '../services/ServerAutomationService';
 import { AutomationLimits } from '../services/AutomationLimits';
 import { ProxyRotator } from '../services/ProxyRotator';
 import { AuthService, createAuthService } from '../services/AuthService';
+import { OAuthService } from '../services/oauth/OAuthService';
 
 // Import server services conditionally
 let RedisSessionService: any = null;
@@ -524,6 +525,59 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   }
 
   // =============================================================================
+  // OAUTH SERVICE
+  // =============================================================================
+
+  fastify.log.info('Initializing OAuth Service...');
+
+  let oauthService: OAuthService;
+  try {
+    // Create OAuthService (requires database and jwtService)
+    if (!db) {
+      throw new Error('Database is required for OAuth Service');
+    }
+
+    oauthService = new OAuthService(fastify, db, jwtService);
+
+    serviceRegistry.register(
+      'oauth',
+      oauthService,
+      async () => {
+        try {
+          const enabledProviders = oauthService.getEnabledProviders();
+          return {
+            status: 'healthy',
+            details: {
+              enabledProviders: enabledProviders.length,
+              providers: enabledProviders,
+              googleConfigured: !!process.env.GOOGLE_CLIENT_ID,
+              githubConfigured: !!process.env.GITHUB_CLIENT_ID,
+              linkedinConfigured: !!process.env.LINKEDIN_CLIENT_ID,
+            }
+          };
+        } catch (error) {
+          return {
+            status: 'unhealthy',
+            details: {
+              error: error instanceof Error ? error.message : 'Health check failed'
+            }
+          };
+        }
+      }
+    );
+
+    fastify.log.info('✅ OAuth Service initialized successfully');
+    fastify.log.info(`   Enabled providers: ${oauthService.getEnabledProviders().join(', ')}`);
+  } catch (error) {
+    fastify.log.error('❌ Failed to initialize OAuth Service:', error);
+    fastify.log.warn('⚠️  OAuth authentication will not be available');
+
+    // OAuth is optional - don't fail startup if it's not configured
+    // Create a null service that will be checked in routes
+    oauthService = null as any;
+  }
+
+  // =============================================================================
   // REGISTER SERVICES WITH FASTIFY
   // =============================================================================
 
@@ -532,13 +586,16 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.decorate('sessionService', sessionService);
   fastify.decorate('securityService', securityService);
   fastify.decorate('serviceRegistry', serviceRegistry);
-  
+
   // Decorate automation services
   fastify.decorate('automationService', automationService);
   fastify.decorate('proxyRotator', serviceRegistry.get('proxyRotator'));
   fastify.decorate('serverAutomationService', serviceRegistry.get('serverAutomation'));
   fastify.decorate('automationLimits', serviceRegistry.get('automationLimits'));
-  
+
+  // Decorate OAuth service (optional - may be null if not configured)
+  fastify.decorate('oauthService', oauthService);
+
   // Database decorator is registered by database.plugin.ts
 
   // Add service health check endpoint
@@ -642,6 +699,8 @@ declare module 'fastify' {
     proxyRotator: ProxyRotator;
     serverAutomationService: ServerAutomationService;
     automationLimits: AutomationLimits;
+    // OAuth service
+    oauthService?: OAuthService; // Optional - may not be configured
   }
 }
 

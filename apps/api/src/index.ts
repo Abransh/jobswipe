@@ -61,6 +61,9 @@ async function loadRoutes() {
     const { registerDesktopRoutes } = await import('./routes/desktop.routes');
     console.log('Desktop routes loaded successfully');
 
+    const { registerOAuthRoutes } = await import('./routes/oauth.routes');
+    console.log('OAuth routes loaded successfully');
+
    // const resumeRoutes = await import('./routes/resumes.routes');
     console.log('Resume routes loaded successfully');
 
@@ -71,7 +74,8 @@ async function loadRoutes() {
       jobsRoutes: jobsRoutes.default,
       automationRoutes: automationRoutes.automationRoutes,
       registerOnboardingRoutes,
-      registerDesktopRoutes
+      registerDesktopRoutes,
+      registerOAuthRoutes
      // resumeRoutes: resumeRoutes.default
     };
   } catch (error) {
@@ -546,6 +550,7 @@ async function createServer(): Promise<FastifyInstance> {
         produces: ['application/json'],
         tags: [
           { name: 'Authentication', description: 'User authentication endpoints' },
+          { name: 'OAuth', description: 'OAuth 2.0 authentication with Google, GitHub, LinkedIn' },
           { name: 'Users', description: 'User management endpoints' },
           { name: 'Jobs', description: 'Job management endpoints' },
           { name: 'Applications', description: 'Job application endpoints' },
@@ -733,6 +738,12 @@ async function createServer(): Promise<FastifyInstance> {
       server.log.info('Registering enterprise authentication routes...');
       await server.register(async function (fastify) {
         await routes.registerAuthRoutes(fastify);
+      }, { prefix: `${apiPrefix}/auth` });
+
+      // Enterprise OAuth routes
+      server.log.info('Registering enterprise OAuth routes...');
+      await server.register(async function (fastify) {
+        await routes.registerOAuthRoutes(fastify);
       }, { prefix: `${apiPrefix}/auth` });
 
       // Enterprise token exchange routes
