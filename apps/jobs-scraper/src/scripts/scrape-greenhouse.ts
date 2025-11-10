@@ -6,6 +6,7 @@
  * Usage:
  *   npm run scrape:company anthropic
  *   npm run scrape:company openai
+ *   ENABLE_JOB_ENRICHMENT=true npm run scrape:company anthropic  # With AI enrichment
  */
 
 import { GreenhouseJobScraper } from '../services/GreenhouseJobScraper';
@@ -20,10 +21,15 @@ async function main() {
     console.log('\nExample:');
     console.log('  npm run scrape:company anthropic');
     console.log('  npm run scrape:company openai');
+    console.log('\nWith AI enrichment (extracts salary, visa, benefits):');
+    console.log('  ENABLE_JOB_ENRICHMENT=true npm run scrape:company anthropic');
     process.exit(1);
   }
 
-  const scraper = new GreenhouseJobScraper();
+  // Check if enrichment is enabled via environment variable
+  const enableEnrichment = process.env.ENABLE_JOB_ENRICHMENT === 'true';
+
+  const scraper = new GreenhouseJobScraper({ enableEnrichment });
 
   try {
     // Test connection first

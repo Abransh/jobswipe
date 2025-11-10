@@ -22,15 +22,20 @@ import {
   AnswerStrategy,
   ScraperConfig,
   ScraperResult,
+  EnrichedJobData,
 } from '../types/greenhouse.types';
+import { JobDescriptionEnrichment } from './JobDescriptionEnrichment';
 
 export class GreenhouseJobScraper {
   private prisma: PrismaClient;
   private httpClient: AxiosInstance;
+  private enrichment?: JobDescriptionEnrichment;
+  private enableEnrichment: boolean;
   private readonly baseUrl = 'https://boards-api.greenhouse.io/v1/boards';
 
-  constructor() {
+  constructor(config?: { enableEnrichment?: boolean }) {
     this.prisma = new PrismaClient();
+    this.enableEnrichment = config?.enableEnrichment ?? false;
 
     this.httpClient = axios.create({
       timeout: 30000,
@@ -39,6 +44,17 @@ export class GreenhouseJobScraper {
         'User-Agent': 'JobSwipe-Scraper/1.0 (Job Aggregation)',
       },
     });
+
+    // Initialize enrichment service if enabled
+    if (this.enableEnrichment) {
+      try {
+        this.enrichment = new JobDescriptionEnrichment();
+        console.log('🤖 AI enrichment enabled (using Claude API)');
+      } catch (error) {
+        console.warn('⚠️  Failed to initialize enrichment service:', error);
+        this.enableEnrichment = false;
+      }
+    }
   }
 
   // ==========================================================================
@@ -216,15 +232,32 @@ export class GreenhouseJobScraper {
     // 1. Fetch detailed job info with questions
     const details = await this.fetchJobDetails(companyId, listing.id);
 
-    // 2. Extract and classify form fields
+    // 2. Enrich job description with LLM (if enabled)
+    let enrichedData: EnrichedJobData | undefined;
+    if (this.enableEnrichment && this.enrichment && details.content) {
+      enrichedData = await this.enrichment.enrichJobDescription(
+        details.title,
+        details.content,
+        companyId
+      );
+
+      if (enrichedData.salary?.min || enrichedData.salary?.max) {
+        console.log(`   💰 Salary: ${enrichedData.salary.currency ?? '$'}${enrichedData.salary.min}-${enrichedData.salary.max}`);
+      }
+      if (enrichedData.visaSponsorship) {
+        console.log(`   🛂 Visa: ${enrichedData.visaSponsorship.available ? 'Available' : 'Not Available'}`);
+      }
+    }
+
+    // 3. Extract and classify form fields
     const classifiedFields = this.classifyFormFields(
       details.questions || []
     );
 
-    // 3. Calculate automation metrics
+    // 4. Calculate automation metrics
     const metrics = this.calculateAutomationMetrics(classifiedFields);
 
-    // 4. Build application schema
+    // 5. Build application schema
     const applicationSchema = this.buildApplicationSchema(
       details,
       companyId,
@@ -232,11 +265,11 @@ export class GreenhouseJobScraper {
       metrics
     );
 
-    // 5. Find or create company
+    // 6. Find or create company
     const company = await this.upsertCompany(companyId, details);
 
-    // 6. Upsert job posting to database
-    await this.upsertJobPosting(company.id, details, applicationSchema, metrics);
+    // 7. Upsert job posting to database
+    await this.upsertJobPosting(company.id, details, applicationSchema, metrics, enrichedData);
 
     console.log(
       `   📊 Success Rate: ${metrics.estimatedSuccessRate}% (${metrics.automationFeasibility})`
@@ -591,17 +624,38 @@ export class GreenhouseJobScraper {
   }
 
   /**
-   * Upsert job posting to database with full schema
+   * Upsert job posting to database with full schema and enriched data
    */
   private async upsertJobPosting(
     companyId: string,
     details: GreenhouseJobDetails,
     applicationSchema: ApplicationSchema,
-    metrics: AutomationMetrics
+    metrics: AutomationMetrics,
+    enrichedData?: EnrichedJobData
   ) {
     const externalId = `greenhouse_${details.internal_job_id}`;
     const greenhouseCompanyId = details.absolute_url.split('/')[3]; // Extract from URL
     const greenhouseJobId = details.id.toString();
+
+    // Prepare enriched fields (if available)
+    const enrichedFields = enrichedData
+      ? {
+          salaryMin: enrichedData.salary?.min,
+          salaryMax: enrichedData.salary?.max,
+          currency: enrichedData.salary?.currency,
+          salaryType: enrichedData.salary?.period === 'yearly' ? 'YEARLY' : undefined,
+          equity: enrichedData.salary?.equity,
+          bonus: enrichedData.salary?.bonus,
+          // Store visa and remote info in formMetadata for now
+          formMetadata: {
+            visaSponsorship: enrichedData.visaSponsorship,
+            remote: enrichedData.remote,
+            benefits: enrichedData.benefits,
+            requirements: enrichedData.requirements,
+            enrichmentMetadata: enrichedData.metadata,
+          } as any,
+        }
+      : {};
 
     await this.prisma.jobPosting.upsert({
       where: {
@@ -626,6 +680,9 @@ export class GreenhouseJobScraper {
         prefilledFieldCount: metrics.prefilledFieldCount,
         aiRequiredFieldCount: metrics.aiRequiredFieldCount,
         totalRequiredFields: metrics.totalRequiredFields,
+
+        // Enriched data from LLM
+        ...enrichedFields,
 
         // Timestamps
         lastSchemaUpdate: new Date(),
@@ -654,6 +711,9 @@ export class GreenhouseJobScraper {
         prefilledFieldCount: metrics.prefilledFieldCount,
         aiRequiredFieldCount: metrics.aiRequiredFieldCount,
         totalRequiredFields: metrics.totalRequiredFields,
+
+        // Enriched data from LLM
+        ...enrichedFields,
 
         // Timestamps
         lastSchemaUpdate: new Date(),
