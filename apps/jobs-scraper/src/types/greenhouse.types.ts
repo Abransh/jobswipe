@@ -157,6 +157,57 @@ export interface AutomationMetrics {
 }
 
 // ============================================================================
+// JOB DESCRIPTION ENRICHMENT (LLM-EXTRACTED DATA)
+// ============================================================================
+
+/**
+ * Structured data extracted from job descriptions using LLM
+ */
+export interface EnrichedJobData {
+  salary?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+    period?: 'yearly' | 'hourly' | 'monthly';
+    equity?: string;
+    bonus?: string;
+  };
+
+  visaSponsorship?: {
+    available: boolean;
+    details?: string;
+    restrictions?: string[];
+  };
+
+  remote?: {
+    type: 'remote' | 'hybrid' | 'onsite';
+    flexibility?: string;
+    restrictions?: string[];
+  };
+
+  benefits?: string[];
+
+  requirements?: {
+    education?: string[];
+    experience?: {
+      years?: number;
+      level?: string;
+    };
+    skills?: {
+      required?: string[];
+      preferred?: string[];
+    };
+    languages?: string[];
+  };
+
+  metadata?: {
+    extractedAt: string;
+    confidence: number;
+    model: string;
+  };
+}
+
+// ============================================================================
 // SCRAPER CONFIGURATION
 // ============================================================================
 
@@ -170,6 +221,7 @@ export interface ScraperConfig {
     maxRetries: number;
     retryDelay: number;
   };
+  enableEnrichment?: boolean; // Enable LLM-based description parsing
 }
 
 export interface ScraperResult {
