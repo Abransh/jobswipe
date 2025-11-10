@@ -193,6 +193,7 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   desiredSalaryMax: 'desiredSalaryMax',
   preferredCurrency: 'preferredCurrency',
   willingToRelocate: 'willingToRelocate',
+  needsVisaSponsorship: 'needsVisaSponsorship',
   profileVisibility: 'profileVisibility',
   showEmail: 'showEmail',
   showPhone: 'showPhone',
@@ -311,6 +312,8 @@ exports.Prisma.ApplicationQueueScalarFieldEnum = {
   errorType: 'errorType',
   responseData: 'responseData',
   desktopSessionId: 'desktopSessionId',
+  claimedBy: 'claimedBy',
+  claimedAt: 'claimedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -583,7 +586,18 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   rightSwipeCount: 'rightSwipeCount',
   leftSwipeCount: 'leftSwipeCount',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  greenhouseCompanyId: 'greenhouseCompanyId',
+  greenhouseJobId: 'greenhouseJobId',
+  applicationSchema: 'applicationSchema',
+  formMetadata: 'formMetadata',
+  automationFeasibility: 'automationFeasibility',
+  estimatedSuccessRate: 'estimatedSuccessRate',
+  prefilledFieldCount: 'prefilledFieldCount',
+  aiRequiredFieldCount: 'aiRequiredFieldCount',
+  totalRequiredFields: 'totalRequiredFields',
+  lastSchemaUpdate: 'lastSchemaUpdate',
+  schemaVersion: 'schemaVersion'
 };
 
 exports.Prisma.JobSnapshotScalarFieldEnum = {
@@ -1012,7 +1026,8 @@ exports.Prisma.ApplicationQueueOrderByRelevanceFieldEnum = {
   coverLetter: 'coverLetter',
   errorMessage: 'errorMessage',
   errorType: 'errorType',
-  desktopSessionId: 'desktopSessionId'
+  desktopSessionId: 'desktopSessionId',
+  claimedBy: 'claimedBy'
 };
 
 exports.Prisma.AutomationLogOrderByRelevanceFieldEnum = {
@@ -1167,7 +1182,11 @@ exports.Prisma.JobPostingOrderByRelevanceFieldEnum = {
   sourceUrl: 'sourceUrl',
   applyUrl: 'applyUrl',
   keywords: 'keywords',
-  tags: 'tags'
+  tags: 'tags',
+  greenhouseCompanyId: 'greenhouseCompanyId',
+  greenhouseJobId: 'greenhouseJobId',
+  automationFeasibility: 'automationFeasibility',
+  schemaVersion: 'schemaVersion'
 };
 
 exports.Prisma.JobSnapshotOrderByRelevanceFieldEnum = {

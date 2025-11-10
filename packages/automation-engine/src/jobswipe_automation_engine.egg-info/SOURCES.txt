@@ -1,0 +1,15 @@
+README.md
+setup.py
+src/core/__init__.py
+src/core/automation_engine.py
+src/core/execution_context.py
+src/core/proxy_manager.py
+src/integrations/__init__.py
+src/integrations/desktop_integration.py
+src/integrations/server_integration.py
+src/jobswipe_automation_engine.egg-info/PKG-INFO
+src/jobswipe_automation_engine.egg-info/SOURCES.txt
+src/jobswipe_automation_engine.egg-info/dependency_links.txt
+src/jobswipe_automation_engine.egg-info/entry_points.txt
+src/jobswipe_automation_engine.egg-info/requires.txt
+src/jobswipe_automation_engine.egg-info/top_level.txt

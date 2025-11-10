@@ -40,7 +40,7 @@ async def main():
             "last_name": os.getenv('USER_LAST_NAME'),
             "email": os.getenv('USER_EMAIL'),
             "phone": os.getenv('USER_PHONE'),
-            "resume_url": os.getenv('USER_RESUME_URL'),
+          #  "resume_url": os.getenv('USER_RESUME_URL'),
             "current_title": os.getenv('USER_CURRENT_TITLE'),
             "years_experience": int(os.getenv('USER_YEARS_EXPERIENCE', '0')) or None,
             "skills": json.loads(os.getenv('USER_SKILLS', '[]')),

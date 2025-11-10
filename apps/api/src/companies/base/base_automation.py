@@ -16,6 +16,11 @@ from typing import Dict, List, Optional, Any, Union
 # Add browser-use to path
 sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent / "browser-use"))
 
+# The above code is importing classes and modules related to browser usage, such as `Agent`,
+# `Controller`, `ActionResult`, `BrowserConfig`, `BrowserSession`, `ChatAnthropic`, `ChatGoogle`, and
+# `ChatOpenAI`. It seems to be setting up a framework or environment for interacting with browsers and
+# potentially conducting automated tasks or interactions with websites using different chat services
+# like Anthropic, Google, and OpenAI.
 from browser_use import Agent, Controller, ActionResult
 from browser_use.browser import BrowserConfig, BrowserSession
 from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI

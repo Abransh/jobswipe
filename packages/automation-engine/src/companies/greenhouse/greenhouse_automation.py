@@ -230,9 +230,10 @@ Successfully submit the job application and provide confirmation of submission.
         if not user_profile.phone.strip():
             errors.append("Phone number is required")
 
-        # Check resume availability
+        # Check resume availability (optional - log warning if missing)
         if not user_profile.get_resume_path():
-            errors.append("Resume file path is required for Greenhouse applications")
+            self.logger.warning("No resume provided - application may fail at resume upload step")
+            # errors.append("Resume file path is required for Greenhouse applications")
         elif user_profile.resume_local_path:
             resume_path = Path(user_profile.resume_local_path)
             if not resume_path.exists():

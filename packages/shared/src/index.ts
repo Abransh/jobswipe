@@ -41,6 +41,55 @@ export {
 // Authentication types and utilities
 export * from './types/auth';
 
+// OAuth types and schemas (explicit exports to avoid naming conflicts)
+export {
+  // Enums
+  OAuthProvider,
+  OAuthSource,
+  AccountLinkingStatus,
+  OAuthErrorCode,
+
+  // Zod Schemas
+  OAuthProviderSchema,
+  OAuthSourceSchema,
+  OAuthAuthorizationRequestSchema,
+  OAuthCallbackRequestSchema,
+  LinkOAuthAccountRequestSchema,
+  UnlinkOAuthAccountRequestSchema,
+  LinkedInProfileSyncRequestSchema,
+
+  // Interfaces
+  type BaseOAuthProfile,
+  type GoogleOAuthProfile,
+  type GitHubOAuthProfile,
+  type LinkedInOAuthProfile,
+  type LinkedInPosition,
+  type LinkedInEducation,
+  type LinkedInSkill,
+  type LinkedInCertification,
+  type LinkedInLanguage,
+  type OAuthProviderTokens,
+  type OAuthState,
+  type CreateOAuthStateRequest,
+  type OAuthAuthorizationRequest,
+  type OAuthAuthorizationResponse,
+  type OAuthCallbackRequest,
+  type OAuthCallbackResponse,
+  type LinkOAuthAccountRequest,
+  type UnlinkOAuthAccountRequest,
+  type OAuthAccountInfo,
+  type RefreshOAuthTokenRequest,
+  type RefreshOAuthTokenResponse,
+  type LinkedInProfileSyncRequest,
+  type LinkedInProfileSyncResponse,
+
+  // Utility functions
+  isSupportedProvider,
+  getProviderDisplayName,
+  getProviderIcon,
+  createOAuthError,
+} from './types/oauth.types';
+
 // Export context for React apps (explicit exports to avoid conflicts)
 export { 
   useAuth, 
@@ -105,6 +154,9 @@ export {
   createSecurityMiddlewareService,
   getDefaultRedisSessionService
 } from './services/factory';
+
+// Safe factory function (with environment guards) - commented out due to type issues
+// export { createJwtTokenService } from './services/jwt-token.service';
 
 // Export types (always safe to export)
 export type { SecurityMiddlewareService } from './services/factory';

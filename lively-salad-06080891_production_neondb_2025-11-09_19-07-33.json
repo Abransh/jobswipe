@@ -1,0 +1,4 @@
+[{
+  "indexname": "job_postings_externalId_key",
+  "indexdef": "CREATE UNIQUE INDEX \"job_postings_externalId_key\" ON public.job_postings USING btree (\"externalId\")"
+}]

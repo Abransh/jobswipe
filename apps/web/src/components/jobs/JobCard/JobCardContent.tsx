@@ -50,7 +50,7 @@ export function JobCardContent({
   };
 
   // Generate skill tags (limit to most relevant)
-  const getTopSkills = (skills: string[], maxSkills: number = 3): string[] => {
+  const getTopSkills = (skills: string[], maxSkills: number = 6): string[] => {
     return skills.slice(0, maxSkills);
   };
 
@@ -140,26 +140,30 @@ export function JobCardContent({
         </p>
       </div>
 
-      {/* Skills Tags */}
+      {/* Skills Tags - Enhanced Display */}
       {job.skills && job.skills.length > 0 && (
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-gray-500 font-medium">Skills:</span>
-          <div className="flex flex-wrap gap-1">
+        <div className="space-y-2">
+          <span className="text-xs text-gray-700 font-semibold">Required Skills:</span>
+          <div className="flex flex-wrap gap-2">
             {getTopSkills(job.skills).map((skill, index) => (
               <motion.span
-                key={skill}
-                className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md font-medium"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
+                key={`${skill}-${index}`}
+                className="inline-flex items-center bg-white border border-gray-300 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm hover:border-primary hover:bg-primary/5 transition-all duration-200"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                  delay: index * 0.05,
+                  duration: 0.2,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
               >
                 {skill}
               </motion.span>
             ))}
-            
-            {job.skills.length > 3 && (
-              <span className="text-xs text-gray-500 self-center">
-                +{job.skills.length - 3} more
+
+            {job.skills.length > 6 && (
+              <span className="inline-flex items-center bg-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-lg font-medium">
+                +{job.skills.length - 6} more
               </span>
             )}
           </div>
