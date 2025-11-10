@@ -14,9 +14,9 @@ import {
   OAuthSource,
   OAuthState,
   CreateOAuthStateRequest,
-  OAuthError,
-  OAuthErrorCode,
-  createOAuthError,
+  AuthError,
+  AuthErrorCode,
+  createAuthError,
 } from '@jobswipe/shared';
 
 // =============================================================================
@@ -111,8 +111,8 @@ export class OAuthStateManager {
       };
     } catch (error) {
       this.fastify.log.error('Failed to create OAuth state:', error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to create OAuth state',
         500
       );
@@ -128,7 +128,7 @@ export class OAuthStateManager {
    * @param stateToken State token from OAuth callback
    * @param provider OAuth provider
    * @returns Validated OAuth state
-   * @throws OAuthError if state is invalid or expired
+   * @throws AuthError if state is invalid or expired
    */
   async validateAndConsumeState(
     stateToken: string,
@@ -146,8 +146,8 @@ export class OAuthStateManager {
           provider,
         });
 
-        throw createOAuthError(
-          OAuthErrorCode.INVALID_STATE,
+        throw createAuthError(
+          AuthErrorCode.INVALID_STATE,
           'Invalid or expired OAuth state token',
           403
         );
@@ -160,8 +160,8 @@ export class OAuthStateManager {
           actual: oauthState.provider,
         });
 
-        throw createOAuthError(
-          OAuthErrorCode.INVALID_STATE,
+        throw createAuthError(
+          AuthErrorCode.INVALID_STATE,
           'OAuth provider mismatch',
           403
         );
@@ -177,8 +177,8 @@ export class OAuthStateManager {
         // Delete expired state
         await this.deleteState(oauthState.state);
 
-        throw createOAuthError(
-          OAuthErrorCode.STATE_EXPIRED,
+        throw createAuthError(
+          AuthErrorCode.STATE_EXPIRED,
           'OAuth state has expired - please try again',
           403
         );
@@ -205,13 +205,13 @@ export class OAuthStateManager {
         expiresAt: oauthState.expiresAt,
       };
     } catch (error) {
-      if (error instanceof OAuthError) {
+      if (error instanceof AuthError) {
         throw error;
       }
 
       this.fastify.log.error('Failed to validate OAuth state:', error);
-      throw createOAuthError(
-        OAuthErrorCode.INTERNAL_ERROR,
+      throw createAuthError(
+        AuthErrorCode.INTERNAL_ERROR,
         'Failed to validate OAuth state',
         500
       );

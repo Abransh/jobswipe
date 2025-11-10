@@ -36,6 +36,7 @@ import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import cookie from '@fastify/cookie';
 // Import route handlers (ensure they exist first)
 async function loadRoutes() {
   try {
@@ -490,6 +491,12 @@ async function createServer(): Promise<FastifyInstance> {
       'X-Rate-Limit-Reset'
     ],
     maxAge: isDevelopment ? 86400 : 3600, // 24h in dev, 1h in prod
+  });
+
+  // Cookie support for OAuth and authentication
+  await server.register(cookie, {
+    secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET, // Use JWT_SECRET as fallback
+    parseOptions: {}
   });
 
   // Rate limiting

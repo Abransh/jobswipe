@@ -537,7 +537,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       throw new Error('Database is required for OAuth Service');
     }
 
-    oauthService = new OAuthService(fastify, db, jwtService);
+    oauthService = new OAuthService(fastify);
 
     serviceRegistry.register(
       'oauth',
