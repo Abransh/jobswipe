@@ -9,7 +9,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { PrismaClient } from '@jobswipe/database';
+import { PrismaClient, SalaryType } from '@jobswipe/database';
 import {
   GreenhouseJobListing,
   GreenhouseJobDetails,
@@ -643,7 +643,7 @@ export class GreenhouseJobScraper {
           salaryMin: enrichedData.salary?.min,
           salaryMax: enrichedData.salary?.max,
           currency: enrichedData.salary?.currency,
-          salaryType: enrichedData.salary?.period === 'yearly' ? 'YEARLY' : undefined,
+          salaryType: this.mapPeriodToSalaryType(enrichedData.salary?.period),
           equity: enrichedData.salary?.equity,
           bonus: enrichedData.salary?.bonus,
           // Store visa and remote info in formMetadata for now
@@ -732,5 +732,22 @@ export class GreenhouseJobScraper {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Map LLM period string to Prisma SalaryType enum
+   */
+  private mapPeriodToSalaryType(period?: string): SalaryType | undefined {
+    if (!period) return undefined;
+
+    const mapping: Record<string, SalaryType> = {
+      yearly: SalaryType.ANNUAL,
+      hourly: SalaryType.HOURLY,
+      monthly: SalaryType.MONTHLY,
+      daily: SalaryType.DAILY,
+      weekly: SalaryType.WEEKLY,
+    };
+
+    return mapping[period.toLowerCase()];
   }
 }
