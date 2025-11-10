@@ -52,8 +52,7 @@ export async function GET(
         automationLogs: {
           orderBy: { createdAt: 'desc' },
           take: 50 // Last 50 logs
-        },
-        jobSnapshot: true
+        }
       }
     });
 
