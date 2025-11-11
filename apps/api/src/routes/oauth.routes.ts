@@ -126,7 +126,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/:provider',
     {
       schema: {
-        description: 'Start OAuth authentication with specified provider',
         tags: ['OAuth'],
         params: {
           type: 'object',
@@ -222,7 +221,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/:provider/callback',
     {
       schema: {
-        description: 'Handle OAuth provider callback with authorization code',
         tags: ['OAuth'],
         params: {
           type: 'object',
@@ -319,7 +317,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/link',
     {
       schema: {
-        description: 'Link an OAuth provider to the currently authenticated user',
         tags: ['OAuth'],
         security: [{ Bearer: [] }],
         body: {
@@ -378,7 +375,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/unlink',
     {
       schema: {
-        description: 'Remove OAuth provider link from user account',
         tags: ['OAuth'],
         security: [{ Bearer: [] }],
         body: {
@@ -448,7 +444,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/accounts',
     {
       schema: {
-        description: 'Get all OAuth providers linked to the user account',
         tags: ['OAuth'],
         security: [{ Bearer: [] }],
         response: {
@@ -505,7 +500,6 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
     '/oauth/providers',
     {
       schema: {
-        description: 'Get list of all enabled OAuth authentication providers',
         tags: ['OAuth'],
         response: {
           200: {

@@ -195,7 +195,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             success: false,
             error: 'Automation service not available',
             details: { serviceStatus: 'unavailable' }
-          */};
+          });
         }
 
         // Check if ServerAutomationService is available for server execution
@@ -211,12 +211,11 @@ export async function automationRoutes(fastify: FastifyInstance) {
           automationId: result.id,
           status: result.status,
           executionMode: automationData.options.execution_mode
-        */};
+        });
 
         // Emit WebSocket event for real-time updates
         if (fastify.websocket) {
-          fastify.websocket.emit('automation-queued', {
-            userId,
+          fastify.websocket.emitToUser(userId, 'automation-queued', {
             applicationId,
             automationId: result.id,
             status: 'queued',
@@ -224,7 +223,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             jobTitle: jobData.title,
             company: jobData.company,
             timestamp: new Date().toISOString()
-          */};
+          });
         }
 
         reply.send({
@@ -233,7 +232,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           status: result.status,
           executionMode: automationData.options.execution_mode,
           message: `Automation queued for ${executionMode} execution`
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('❌ Automation trigger failed:', error);
@@ -258,7 +257,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             applicationId: (request.body as any)?.applicationId,
             timestamp: new Date().toISOString()
           }
-        */};
+        });
       }
     }
   });
@@ -296,7 +295,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           }
         }
       },
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -305,12 +304,12 @@ export async function automationRoutes(fastify: FastifyInstance) {
             userId: z.string(),
             queuePosition: z.number().optional(),
             estimatedTime: z.number().optional()
-          */}
-        */},
+          })
+        }),
         400: z.object({
           success: z.boolean(),
           error: z.string()
-        */}
+        })
       }
     },
     preHandler: fastify.auth,
@@ -323,7 +322,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           return reply.code(403).send({
             success: false,
             error: 'Access denied'
-          */};
+          });
         }
 
         // Create application queue entry
@@ -332,7 +331,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           jobData,
           userProfile,
           options: options || {}
-        */};
+        });
 
         // Get queue position estimate
         const queueStats = await fastify.automationService.getQueueStats();
@@ -346,14 +345,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
             queuePosition: queueStats.pending + 1,
             estimatedTime: queueStats.averageProcessingTime * (queueStats.pending + 1)
           }
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Automation execution failed:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -391,7 +390,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           }
         }
       },
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -407,25 +406,25 @@ export async function automationRoutes(fastify: FastifyInstance) {
                 stepName: z.string(),
                 success: z.boolean(),
                 timestamp: z.string()
-              */}),
+              })),
               proxyUsed: z.string().optional(),
               serverInfo: z.object({
                 serverId: z.string(),
                 executionMode: z.string()
-              */}
-            */}
-          */}
-        */},
+              })
+            })
+          })
+        }),
         400: z.object({
           success: z.boolean(),
           error: z.string()
-        */},
+        }),
         403: z.object({
           success: z.boolean(),
           error: z.string(),
           upgradeRequired: z.boolean(),
           suggestedAction: z.string().optional()
-        */}
+        })
       }
     },
     preHandler: fastify.auth,
@@ -439,7 +438,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             success: false,
             error: 'Access denied',
             upgradeRequired: false
-          */};
+          });
         }
 
         // Check if user can use server automation
@@ -450,7 +449,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             error: eligibility.reason || 'Server automation not available',
             upgradeRequired: eligibility.upgradeRequired,
             suggestedAction: eligibility.suggestedAction
-          */};
+          });
         }
 
         // Execute server automation directly
@@ -479,7 +478,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
             userId,
             result
           }
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Server automation execution failed:', error);
@@ -487,7 +486,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error',
           upgradeRequired: false
-        */};
+        });
       }
     }
   });
@@ -499,7 +498,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get user automation limits and server eligibility',
       tags: ['automation'],
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -510,8 +509,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
             plan: z.string(),
             upgradeRequired: z.boolean(),
             suggestedAction: z.string().optional()
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth,
@@ -533,14 +532,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
             upgradeRequired: eligibility.upgradeRequired,
             suggestedAction: eligibility.suggestedAction
           }
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get automation limits:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -552,7 +551,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get proxy rotation statistics',
       tags: ['automation', 'admin'],
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -563,8 +562,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
             failedRequests: z.number(),
             averageResponseTime: z.number(),
             costToday: z.number()
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth && fastify.requireRole ? [fastify.auth, fastify.requireRole('admin')] : [],
@@ -575,14 +574,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         reply.send({
           success: true,
           data: stats
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get proxy stats:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -597,7 +596,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
       params: z.object({
         applicationId: z.string()
       }),
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -607,8 +606,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
             result: AutomationResultSchema.optional(),
             queuePosition: z.number().optional(),
             estimatedTime: z.number().optional()
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth,
@@ -624,20 +623,20 @@ export async function automationRoutes(fastify: FastifyInstance) {
           return reply.code(403).send({
             success: false,
             error: 'Access denied'
-          */};
+          });
         }
 
         reply.send({
           success: true,
           data: applicationStatus
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get automation status:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -649,7 +648,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get automation queue statistics',
       tags: ['automation'],
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -659,8 +658,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
             failed: z.number(),
             averageProcessingTime: z.number(),
             supportedCompanies: z.array(z.string())
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth,
@@ -671,14 +670,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         reply.send({
           success: true,
           data: queueStats
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get queue status:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -695,7 +694,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
         offset: z.number().optional().default(0),
         status: z.enum(['all', 'PENDING', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED', 'RETRYING', 'PAUSED', 'REQUIRES_CAPTCHA']).optional().default('all')
       }),
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -708,11 +707,11 @@ export async function automationRoutes(fastify: FastifyInstance) {
               appliedAt: z.string(),
               confirmationNumber: z.string().optional(),
               error: z.string().optional()
-            */}),
+            })),
             total: z.number(),
             hasMore: z.boolean()
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth,
@@ -732,14 +731,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         reply.send({
           success: true,
           data: history
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get automation history:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -754,14 +753,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
       params: z.object({
         applicationId: z.string()
       }),
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
             cancelled: z.boolean(),
             refunded: z.boolean().optional()
-          */}
-        */}
+          })
+        })
       }
     },
     preHandler: fastify.auth,
@@ -777,14 +776,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         reply.send({
           success: true,
           data: result
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to cancel automation:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -796,14 +795,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get list of supported companies for automation',
       tags: ['automation'],
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
             companies: z.record(z.array(z.string())),
             totalSupported: z.number()
-          */}
-        */}
+          })
+        })
       }
     },
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -816,14 +815,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
             companies: supportedCompanies,
             totalSupported: Object.keys(supportedCompanies).length
           }
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get supported companies:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
@@ -835,7 +834,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
     schema: {
       description: 'Get automation system health status',
       tags: ['automation', 'health'],
-      // response: {
+      response: {
         200: z.object({
           success: z.boolean(),
           data: z.object({
@@ -845,15 +844,15 @@ export async function automationRoutes(fastify: FastifyInstance) {
               pending: z.number(),
               processing: z.number(),
               failed: z.number()
-            */},
+            }),
             systemInfo: z.object({
               uptime: z.number(),
               memoryUsage: z.number(),
               supportedCompanies: z.array(z.string())
-            */},
+            }),
             issues: z.array(z.string()).optional()
-          */}
-        */}
+          })
+        })
       }
     },
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -863,14 +862,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         reply.send({
           success: true,
           data: healthStatus
-        */};
+        });
 
       } catch (error) {
         fastify.log.error('Failed to get automation health:', error);
         reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
-        */};
+        });
       }
     }
   });
