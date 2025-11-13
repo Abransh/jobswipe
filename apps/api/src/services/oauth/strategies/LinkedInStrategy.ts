@@ -139,8 +139,8 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
     try {
       this.fastify.log.info('Fetching full LinkedIn profile with extended data');
 
-      // Fetch basic profile
-      const basicProfile = await this.getUserProfile(accessToken);
+      // Fetch basic profile (parseUserProfile returns LinkedInOAuthProfile with sub field)
+      const basicProfile = await this.getUserProfile(accessToken) as LinkedInOAuthProfile;
 
       // Fetch extended profile data in parallel
       const [positions, educations, skills] = await Promise.allSettled([
