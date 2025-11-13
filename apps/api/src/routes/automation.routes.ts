@@ -269,8 +269,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
         });
 
         if (fastify.websocket) {
-          fastify.websocket.emit('automation-queued', {
-            userId,
+          fastify.websocket.emitToUser(userId, 'automation-queued', {
             applicationId,
             automationId: result.id,
             status: 'queued',
