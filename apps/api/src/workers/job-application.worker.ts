@@ -130,7 +130,6 @@ export class JobApplicationWorker {
       password: config.redis.password,
       db: config.redis.db || 1, // Use queue DB
       maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
       lazyConnect: true,
     });
 
@@ -148,8 +147,8 @@ export class JobApplicationWorker {
         concurrency: config.processing.concurrency,
         stalledInterval: config.processing.stalledInterval,
         maxStalledCount: config.processing.maxStalledCount,
-        removeOnComplete: 100,
-        removeOnFail: 50,
+        removeOnComplete: { count: 100 }, // BullMQ v5 API: KeepJobs object
+        removeOnFail: { count: 50 }, // BullMQ v5 API: KeepJobs object
       }
     );
 
@@ -161,8 +160,8 @@ export class JobApplicationWorker {
         concurrency: Math.min(config.processing.concurrency, 2), // Limit priority concurrency
         stalledInterval: config.processing.stalledInterval,
         maxStalledCount: config.processing.maxStalledCount,
-        removeOnComplete: 100,
-        removeOnFail: 50,
+        removeOnComplete: { count: 100 }, // BullMQ v5 API: KeepJobs object
+        removeOnFail: { count: 50 }, // BullMQ v5 API: KeepJobs object
       }
     );
 
@@ -189,8 +188,10 @@ export class JobApplicationWorker {
     });
 
     this.applicationWorker.on('progress', (job, progress) => {
-      console.log(`📈 Job ${job.id} progress: ${progress}%`);
-      this.emitJobProgress(job.id!, progress);
+      // BullMQ progress can be number or object - convert to number for emitJobProgress
+      const progressValue = typeof progress === 'number' ? progress : 0;
+      console.log(`📈 Job ${job.id} progress: ${progressValue}%`);
+      this.emitJobProgress(job.id!, progressValue);
     });
 
     this.applicationWorker.on('stalled', (jobId) => {
@@ -643,10 +644,18 @@ export class JobApplicationWorker {
    * Get worker statistics
    */
   async getStats() {
-    const [appWorkerStats, priorityWorkerStats] = await Promise.all([
-      this.applicationWorker.getMetrics(),
-      this.priorityWorker.getMetrics(),
-    ]);
+    // BullMQ v5 Worker doesn't have getMetrics() - provide basic worker info
+    const appWorkerStats = {
+      name: this.applicationWorker.name,
+      concurrency: this.config.processing.concurrency,
+      isRunning: this.applicationWorker.isRunning(),
+    };
+
+    const priorityWorkerStats = {
+      name: this.priorityWorker.name,
+      concurrency: Math.min(this.config.processing.concurrency, 2),
+      isRunning: this.priorityWorker.isRunning(),
+    };
 
     return {
       workers: {
