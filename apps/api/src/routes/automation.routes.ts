@@ -1,7 +1,7 @@
-/**
+ /**
  * @fileoverview Automation API Routes
  * @description Simplified automation endpoints for the new Python-based system
- * @version 1.0.0
+ * @version 1.0.1
  * @author JobSwipe Team
  */
 
@@ -9,9 +9,43 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { QueueStatus } from '@jobswipe/database';
 
-// =============================================================================
-// SCHEMAS & VALIDATION
-// =============================================================================
+// -----------------------------------------------------------------------------
+// Type Augmentation for Fastify decorations used in handlers
+// -----------------------------------------------------------------------------
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    automationService: any;
+    serverAutomationService?: any;
+    websocket?: { emit: (event: string, payload: any) => void };
+    auth?: any;
+    requireRole?: (role: string) => any;
+    automationLimits: {
+      checkServerEligibility: (userId: string) => Promise<{
+        allowed: boolean;
+        remainingServerApplications: number;
+        upgradeRequired: boolean;
+        suggestedAction?: string;
+        reason?: string;
+      }>;
+      getUserStats: (userId: string) => {
+        serverApplicationsUsed: number;
+        serverApplicationsLimit: number;
+        plan: string;
+      } | null;
+      recordServerApplication: (userId: string) => Promise<void>;
+    };
+    proxyRotator?: { getUsageStats: () => any };
+    generateId: () => string;
+  }
+  interface FastifyRequest {
+    user?: { id: string; role?: string };
+  }
+}
+
+// -----------------------------------------------------------------------------
+// SCHEMAS & VALIDATION (Zod)
+// -----------------------------------------------------------------------------
 
 const JobDataSchema = z.object({
   id: z.string(),
@@ -27,7 +61,7 @@ const UserProfileSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string().email(),
-  phone: z.string(),
+  phone: z.string().optional(),
   resumeUrl: z.string().optional(),
   resumeLocalPath: z.string().optional(),
   currentTitle: z.string().optional(),
@@ -44,20 +78,21 @@ const ExecuteAutomationRequestSchema = z.object({
   userId: z.string(),
   jobData: JobDataSchema,
   userProfile: UserProfileSchema,
-  options: z.object({
-    headless: z.boolean().optional(),
-    timeout: z.number().optional(),
-    maxRetries: z.number().optional()
-  }).optional()
+  options: z
+    .object({
+      headless: z.boolean().optional(),
+      timeout: z.number().optional(),
+      maxRetries: z.number().optional()
+    })
+    .optional()
 });
 
 const TriggerAutomationSchema = z.object({
   applicationId: z.string(),
   userId: z.string(),
-  jobId: z.string(),
+  jobId: z.string().optional(),
   jobData: JobDataSchema,
   userProfile: z.object({
-    id: z.string(),
     firstName: z.string(),
     lastName: z.string(),
     email: z.string().email(),
@@ -82,33 +117,38 @@ const AutomationResultSchema = z.object({
   executionTime: z.number(),
   companyAutomation: z.string(),
   status: z.string(),
-  steps: z.array(z.object({
-    stepName: z.string(),
-    action: z.string(),
-    success: z.boolean(),
-    timestamp: z.string(),
-    durationMs: z.number().optional(),
-    errorMessage: z.string().optional()
-  })),
-  screenshots: z.array(z.string()),
-  captchaEvents: z.array(z.object({
-    captchaType: z.string(),
-    detectedAt: z.string(),
-    resolved: z.boolean(),
-    resolutionMethod: z.string().optional()
-  }))
+  steps: z.array(
+    z.object({
+      stepName: z.string(),
+      action: z.string().optional(),
+      success: z.boolean(),
+      timestamp: z.string(),
+      durationMs: z.number().optional(),
+      errorMessage: z.string().optional()
+    })
+  ),
+  screenshots: z.array(z.string()).optional().default([]),
+  captchaEvents: z
+    .array(
+      z.object({
+        captchaType: z.string(),
+        detectedAt: z.string(),
+        resolved: z.boolean(),
+        resolutionMethod: z.string().optional()
+      })
+    )
+    .optional()
+    .default([])
 });
 
-// =============================================================================
-// ROUTE HANDLERS
-// =============================================================================
+// -----------------------------------------------------------------------------
+// ROUTE REGISTRATION
+// -----------------------------------------------------------------------------
 
 export async function automationRoutes(fastify: FastifyInstance) {
-  
-  /**
-   * Trigger automation from Next.js swipe-right action
-   * This endpoint is called by the Next.js API route after saving job application to database
-   */
+  // ---------------------------------------------------------------------------
+  // POST /automation/trigger
+  // ---------------------------------------------------------------------------
   fastify.post('/automation/trigger', {
     schema: {
       description: 'Trigger job application automation from web interface',
@@ -127,7 +167,9 @@ export async function automationRoutes(fastify: FastifyInstance) {
               id: { type: 'string' },
               title: { type: 'string' },
               company: { type: 'string' },
-              applyUrl: { type: 'string', format: 'uri' }
+              applyUrl: { type: 'string', format: 'uri' },
+              location: { type: 'string' },
+              description: { type: 'string' }
             }
           },
           userProfile: {
@@ -136,18 +178,35 @@ export async function automationRoutes(fastify: FastifyInstance) {
             properties: {
               firstName: { type: 'string' },
               lastName: { type: 'string' },
-              email: { type: 'string', format: 'email' }
+              email: { type: 'string', format: 'email' },
+              phone: { type: 'string' },
+              resumeUrl: { type: 'string' },
+              currentTitle: { type: 'string' },
+              yearsExperience: { type: 'number' },
+              skills: { type: 'array', items: { type: 'string' } },
+              location: { type: 'string' },
+              workAuthorization: { type: 'string' },
+              linkedinUrl: { type: 'string' }
             }
           },
-          executionMode: { type: 'string', enum: ['server', 'desktop'] }
+          executionMode: { type: 'string', enum: ['server', 'desktop'] },
+          priority: { type: 'number' }
         }
       }
     },
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = 
-          request.body as z.infer<typeof TriggerAutomationSchema>;
-        
+        const parse = TriggerAutomationSchema.safeParse(request.body);
+        if (!parse.success) {
+          return reply.code(400).send({
+            success: false,
+            error: 'Validation failed',
+            details: parse.error.flatten()
+          });
+        }
+
+        const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = parse.data;
+
         fastify.log.info('🤖 Automation trigger received:', {
           applicationId,
           userId,
@@ -157,7 +216,6 @@ export async function automationRoutes(fastify: FastifyInstance) {
           executionMode
         });
 
-        // Transform data for AutomationService
         const automationData = {
           userId,
           jobData: {
@@ -183,12 +241,11 @@ export async function automationRoutes(fastify: FastifyInstance) {
           },
           options: {
             execution_mode: executionMode,
-            priority: priority || 5,
+            priority: priority ?? 5,
             application_id: applicationId
           }
-        };
+        } as any;
 
-        // Check if AutomationService is available
         if (!fastify.automationService) {
           fastify.log.error('❌ AutomationService not available');
           return reply.code(503).send({
@@ -198,22 +255,19 @@ export async function automationRoutes(fastify: FastifyInstance) {
           });
         }
 
-        // Check if ServerAutomationService is available for server execution
         if (executionMode === 'server' && !fastify.serverAutomationService) {
           fastify.log.warn('⚠️ ServerAutomationService not available, queuing for desktop');
           automationData.options.execution_mode = 'desktop';
         }
 
-        // Queue the automation
         const result = await fastify.automationService.queueApplication(automationData);
-        
+
         fastify.log.info('✅ Automation queued successfully:', {
           automationId: result.id,
           status: result.status,
           executionMode: automationData.options.execution_mode
         });
 
-        // Emit WebSocket event for real-time updates
         if (fastify.websocket) {
           fastify.websocket.emitToUser(userId, 'automation-queued', {
             applicationId,
@@ -226,30 +280,27 @@ export async function automationRoutes(fastify: FastifyInstance) {
           });
         }
 
-        reply.send({
+        return reply.send({
           success: true,
           automationId: result.id,
           status: result.status,
           executionMode: automationData.options.execution_mode,
-          message: `Automation queued for ${executionMode} execution`
+          message: `Automation queued for ${automationData.options.execution_mode} execution`
         });
-
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error('❌ Automation trigger failed:', error);
-        
-        // Determine error type for better client handling
         let errorCode = 'AUTOMATION_ERROR';
         let statusCode = 500;
-        
+
         if (error instanceof z.ZodError) {
           errorCode = 'VALIDATION_ERROR';
           statusCode = 400;
-        } else if (error.message?.includes('not available')) {
+        } else if (error?.message?.includes('not available')) {
           errorCode = 'SERVICE_UNAVAILABLE';
           statusCode = 503;
         }
-        
-        reply.code(statusCode).send({
+
+        return reply.code(statusCode).send({
           success: false,
           error: error instanceof Error ? error.message : 'Failed to trigger automation',
           details: {
@@ -262,9 +313,9 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Execute automation for a job application (unified endpoint)
-   */
+  // ---------------------------------------------------------------------------
+  // POST /automation/execute
+  // ---------------------------------------------------------------------------
   fastify.post('/automation/execute', {
     schema: {
       description: 'Execute job application automation',
@@ -294,38 +345,22 @@ export async function automationRoutes(fastify: FastifyInstance) {
             }
           }
         }
-      },
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            applicationId: z.string(),
-            jobId: z.string(),
-            userId: z.string(),
-            queuePosition: z.number().optional(),
-            estimatedTime: z.number().optional()
-          })
-        }),
-        400: z.object({
-          success: z.boolean(),
-          error: z.string()
-        })
       }
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { userId, jobData, userProfile, options } = request.body as z.infer<typeof ExecuteAutomationRequestSchema>;
-        
-        // Validate user owns this request
-        if (request.user.id !== userId) {
-          return reply.code(403).send({
-            success: false,
-            error: 'Access denied'
-          });
+        const parse = ExecuteAutomationRequestSchema.safeParse(request.body);
+        if (!parse.success) {
+          return reply.code(400).send({ success: false, error: 'Validation failed' });
         }
 
-        // Create application queue entry
+        const { userId, jobData, userProfile, options } = parse.data;
+
+        if (request.user?.id !== userId) {
+          return reply.code(403).send({ success: false, error: 'Access denied' });
+        }
+
         const applicationId = await fastify.automationService.queueApplication({
           userId,
           jobData,
@@ -333,23 +368,21 @@ export async function automationRoutes(fastify: FastifyInstance) {
           options: options || {}
         });
 
-        // Get queue position estimate
         const queueStats = await fastify.automationService.getQueueStats();
-        
-        reply.send({
+
+        return reply.send({
           success: true,
           data: {
             applicationId,
             jobId: jobData.id,
             userId,
-            queuePosition: queueStats.pending + 1,
-            estimatedTime: queueStats.averageProcessingTime * (queueStats.pending + 1)
+            queuePosition: (queueStats?.pending ?? 0) + 1,
+            estimatedTime: (queueStats?.averageProcessingTime ?? 0) * ((queueStats?.pending ?? 0) + 1)
           }
         });
-
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error('Automation execution failed:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -357,9 +390,9 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Execute automation directly on server (for demo users)
-   */
+  // ---------------------------------------------------------------------------
+  // POST /automation/server-execute
+  // ---------------------------------------------------------------------------
   fastify.post('/automation/server-execute', {
     schema: {
       description: 'Execute job application automation directly on server',
@@ -389,59 +422,22 @@ export async function automationRoutes(fastify: FastifyInstance) {
             }
           }
         }
-      },
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            applicationId: z.string(),
-            jobId: z.string(),
-            userId: z.string(),
-            result: z.object({
-              success: z.boolean(),
-              confirmationNumber: z.string().optional(),
-              executionTime: z.number(),
-              status: z.string(),
-              steps: z.array(z.object({
-                stepName: z.string(),
-                success: z.boolean(),
-                timestamp: z.string()
-              })),
-              proxyUsed: z.string().optional(),
-              serverInfo: z.object({
-                serverId: z.string(),
-                executionMode: z.string()
-              })
-            })
-          })
-        }),
-        400: z.object({
-          success: z.boolean(),
-          error: z.string()
-        }),
-        403: z.object({
-          success: z.boolean(),
-          error: z.string(),
-          upgradeRequired: z.boolean(),
-          suggestedAction: z.string().optional()
-        })
       }
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { userId, jobData, userProfile, options } = request.body as z.infer<typeof ExecuteAutomationRequestSchema>;
-        
-        // Validate user owns this request
-        if (request.user.id !== userId) {
-          return reply.code(403).send({
-            success: false,
-            error: 'Access denied',
-            upgradeRequired: false
-          });
+        const parse = ExecuteAutomationRequestSchema.safeParse(request.body);
+        if (!parse.success) {
+          return reply.code(400).send({ success: false, error: 'Validation failed' });
         }
 
-        // Check if user can use server automation
+        const { userId, jobData, userProfile, options } = parse.data;
+
+        if (request.user?.id !== userId) {
+          return reply.code(403).send({ success: false, error: 'Access denied', upgradeRequired: false });
+        }
+
         const eligibility = await fastify.automationLimits.checkServerEligibility(userId);
         if (!eligibility.allowed) {
           return reply.code(403).send({
@@ -452,9 +448,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           });
         }
 
-        // Execute server automation directly
         const applicationId = fastify.generateId();
-        
         const serverRequest = {
           userId,
           jobId: jobData.id,
@@ -465,24 +459,16 @@ export async function automationRoutes(fastify: FastifyInstance) {
           options: options || {}
         };
 
-        const result = await fastify.serverAutomationService.executeAutomation(serverRequest);
-        
-        // Record usage
+        const result = await fastify.serverAutomationService!.executeAutomation(serverRequest);
         await fastify.automationLimits.recordServerApplication(userId);
 
-        reply.send({
+        return reply.send({
           success: true,
-          data: {
-            applicationId,
-            jobId: jobData.id,
-            userId,
-            result
-          }
+          data: { applicationId, jobId: jobData.id, userId, result }
         });
-
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error('Server automation execution failed:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error',
           upgradeRequired: false
@@ -491,37 +477,22 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get user automation limits and eligibility
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/limits
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/limits', {
     schema: {
       description: 'Get user automation limits and server eligibility',
-      tags: ['automation'],
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            canUseServerAutomation: z.boolean(),
-            remainingServerApplications: z.number(),
-            serverApplicationsUsed: z.number(),
-            serverApplicationsLimit: z.number(),
-            plan: z.string(),
-            upgradeRequired: z.boolean(),
-            suggestedAction: z.string().optional()
-          })
-        })
-      }
+      tags: ['automation']
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const userId = request.user.id;
-        
+        const userId = request.user!.id;
         const eligibility = await fastify.automationLimits.checkServerEligibility(userId);
         const userStats = fastify.automationLimits.getUserStats(userId);
 
-        reply.send({
+        return reply.send({
           success: true,
           data: {
             canUseServerAutomation: eligibility.allowed,
@@ -533,10 +504,9 @@ export async function automationRoutes(fastify: FastifyInstance) {
             suggestedAction: eligibility.suggestedAction
           }
         });
-
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error('Failed to get automation limits:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -544,41 +514,22 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get proxy status and statistics
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/proxy-stats
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/proxy-stats', {
     schema: {
       description: 'Get proxy rotation statistics',
-      tags: ['automation', 'admin'],
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            totalProxies: z.number(),
-            activeProxies: z.number(),
-            averageSuccessRate: z.number(),
-            totalRequests: z.number(),
-            failedRequests: z.number(),
-            averageResponseTime: z.number(),
-            costToday: z.number()
-          })
-        })
-      }
+      tags: ['automation', 'admin']
     },
     preHandler: fastify.auth && fastify.requireRole ? [fastify.auth, fastify.requireRole('admin')] : [],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const stats = fastify.proxyRotator.getUsageStats();
-        
-        reply.send({
-          success: true,
-          data: stats
-        });
-
-      } catch (error) {
+        const stats = fastify.proxyRotator?.getUsageStats() ?? {};
+        return reply.send({ success: true, data: stats });
+      } catch (error: any) {
         fastify.log.error('Failed to get proxy stats:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -586,54 +537,28 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get automation status
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/status/:applicationId
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/status/:applicationId', {
     schema: {
       description: 'Get status of job application automation',
-      tags: ['automation'],
-      params: z.object({
-        applicationId: z.string()
-      }),
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            applicationId: z.string(),
-            status: z.nativeEnum(QueueStatus),
-            progress: z.number(),
-            result: AutomationResultSchema.optional(),
-            queuePosition: z.number().optional(),
-            estimatedTime: z.number().optional()
-          })
-        })
-      }
+      tags: ['automation']
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const { applicationId } = request.params as { applicationId: string };
-        
-        // Get application status
         const applicationStatus = await fastify.automationService.getApplicationStatus(applicationId);
-        
-        // Verify user ownership
-        if (applicationStatus.userId !== request.user.id) {
-          return reply.code(403).send({
-            success: false,
-            error: 'Access denied'
-          });
+
+        if (applicationStatus.userId !== request.user!.id) {
+          return reply.code(403).send({ success: false, error: 'Access denied' });
         }
 
-        reply.send({
-          success: true,
-          data: applicationStatus
-        });
-
-      } catch (error) {
+        return reply.send({ success: true, data: applicationStatus });
+      } catch (error: any) {
         fastify.log.error('Failed to get automation status:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -641,40 +566,22 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get automation queue status
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/queue
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/queue', {
     schema: {
       description: 'Get automation queue statistics',
-      tags: ['automation'],
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            pending: z.number(),
-            processing: z.number(),
-            completed: z.number(),
-            failed: z.number(),
-            averageProcessingTime: z.number(),
-            supportedCompanies: z.array(z.string())
-          })
-        })
-      }
+      tags: ['automation']
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const queueStats = await fastify.automationService.getQueueStats();
-        
-        reply.send({
-          success: true,
-          data: queueStats
-        });
-
-      } catch (error) {
+        return reply.send({ success: true, data: queueStats });
+      } catch (error: any) {
         fastify.log.error('Failed to get queue status:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -682,60 +589,43 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get user's automation history
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/history
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/history', {
     schema: {
       description: 'Get user automation history',
-      tags: ['automation'],
-      querystring: z.object({
-        limit: z.number().optional().default(50),
-        offset: z.number().optional().default(0),
-        status: z.enum(['all', 'PENDING', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED', 'RETRYING', 'PAUSED', 'REQUIRES_CAPTCHA']).optional().default('all')
-      }),
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            applications: z.array(z.object({
-              applicationId: z.string(),
-              jobId: z.string(),
-              jobTitle: z.string(),
-              company: z.string(),
-              status: z.string(),
-              appliedAt: z.string(),
-              confirmationNumber: z.string().optional(),
-              error: z.string().optional()
-            })),
-            total: z.number(),
-            hasMore: z.boolean()
-          })
-        })
-      }
+      tags: ['automation']
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { limit, offset, status } = request.query as {
-          limit: number;
-          offset: number;
-          status: 'all' | 'completed' | 'failed';
+        const { limit = 50, offset = 0, status = 'all' } = request.query as {
+          limit?: number;
+          offset?: number;
+          status?:
+            | 'all'
+            | 'PENDING'
+            | 'QUEUED'
+            | 'PROCESSING'
+            | 'COMPLETED'
+            | 'FAILED'
+            | 'CANCELLED'
+            | 'RETRYING'
+            | 'PAUSED'
+            | 'REQUIRES_CAPTCHA';
         };
-        
-        const history = await fastify.automationService.getUserAutomationHistory(
-          request.user.id,
-          { limit, offset, status }
-        );
-        
-        reply.send({
-          success: true,
-          data: history
+
+        const history = await fastify.automationService.getUserAutomationHistory(request.user!.id, {
+          limit,
+          offset,
+          status
         });
 
-      } catch (error) {
+        return reply.send({ success: true, data: history });
+      } catch (error: any) {
         fastify.log.error('Failed to get automation history:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -743,44 +633,23 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Cancel automation
-   */
+  // ---------------------------------------------------------------------------
+  // DELETE /automation/:applicationId
+  // ---------------------------------------------------------------------------
   fastify.delete('/automation/:applicationId', {
     schema: {
       description: 'Cancel a queued or running automation',
-      tags: ['automation'],
-      params: z.object({
-        applicationId: z.string()
-      }),
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            cancelled: z.boolean(),
-            refunded: z.boolean().optional()
-          })
-        })
-      }
+      tags: ['automation']
     },
     preHandler: fastify.auth,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const { applicationId } = request.params as { applicationId: string };
-        
-        const result = await fastify.automationService.cancelApplication(
-          applicationId,
-          request.user.id
-        );
-        
-        reply.send({
-          success: true,
-          data: result
-        });
-
-      } catch (error) {
+        const result = await fastify.automationService.cancelApplication(applicationId, request.user!.id);
+        return reply.send({ success: true, data: result });
+      } catch (error: any) {
         fastify.log.error('Failed to cancel automation:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -788,38 +657,27 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Get supported companies and their URL patterns
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/companies
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/companies', {
     schema: {
       description: 'Get list of supported companies for automation',
-      tags: ['automation'],
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
-            companies: z.record(z.array(z.string())),
-            totalSupported: z.number()
-          })
-        })
-      }
+      tags: ['automation']
     },
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+    handler: async (_request: FastifyRequest, reply: FastifyReply) => {
       try {
         const supportedCompanies = await fastify.automationService.getSupportedCompanies();
-        
-        reply.send({
+        return reply.send({
           success: true,
           data: {
             companies: supportedCompanies,
-            totalSupported: Object.keys(supportedCompanies).length
+            totalSupported: Object.keys(supportedCompanies || {}).length
           }
         });
-
-      } catch (error) {
+      } catch (error: any) {
         fastify.log.error('Failed to get supported companies:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
@@ -827,24 +685,23 @@ export async function automationRoutes(fastify: FastifyInstance) {
     }
   });
 
-  /**
-   * Health check for automation system
-   */
+  // ---------------------------------------------------------------------------
+  // GET /automation/health
+  // ---------------------------------------------------------------------------
   fastify.get('/automation/health', {
     schema: {
       description: 'Get automation system health status',
-      tags: ['automation', 'health'],
-      response: {
-        200: z.object({
-          success: z.boolean(),
-          data: z.object({
+      tags: ['automation', 'health']
+    },
+    handler: async (_request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const healthStatus = await fastify.automationService.getHealthStatus();
+        // Optionally validate with Zod to enforce shape
+        const parsed = z
+          .object({
             status: z.enum(['healthy', 'degraded', 'unhealthy']),
             activeProcesses: z.number(),
-            queueHealth: z.object({
-              pending: z.number(),
-              processing: z.number(),
-              failed: z.number()
-            }),
+            queueHealth: z.object({ pending: z.number(), processing: z.number(), failed: z.number() }),
             systemInfo: z.object({
               uptime: z.number(),
               memoryUsage: z.number(),
@@ -852,21 +709,12 @@ export async function automationRoutes(fastify: FastifyInstance) {
             }),
             issues: z.array(z.string()).optional()
           })
-        })
-      }
-    },
-    handler: async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        const healthStatus = await fastify.automationService.getHealthStatus();
-        
-        reply.send({
-          success: true,
-          data: healthStatus
-        });
+          .safeParse(healthStatus);
 
-      } catch (error) {
+        return reply.send({ success: true, data: parsed.success ? parsed.data : healthStatus });
+      } catch (error: any) {
         fastify.log.error('Failed to get automation health:', error);
-        reply.code(500).send({
+        return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
         });
