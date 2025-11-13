@@ -147,7 +147,7 @@ export class OAuthStateManager {
         });
 
         throw createAuthError(
-          AuthErrorCode.INVALID_STATE,
+          AuthErrorCode.INVALID_REQUEST,
           'Invalid or expired OAuth state token',
           403
         );
@@ -161,7 +161,7 @@ export class OAuthStateManager {
         });
 
         throw createAuthError(
-          AuthErrorCode.INVALID_STATE,
+          AuthErrorCode.INVALID_REQUEST,
           'OAuth provider mismatch',
           403
         );
@@ -178,7 +178,7 @@ export class OAuthStateManager {
         await this.deleteState(oauthState.state);
 
         throw createAuthError(
-          AuthErrorCode.STATE_EXPIRED,
+          AuthErrorCode.TOKEN_EXPIRED,
           'OAuth state has expired - please try again',
           403
         );

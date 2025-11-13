@@ -425,10 +425,11 @@ class TokenExchangeService {
 // =============================================================================
 
 export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
-  const jwtService = fastify.jwtService as ServerJwtTokenService;
+  // jwtService can be AuthService or ServerJwtTokenService - both implement createToken()
+  const jwtService = fastify.jwtService as any;
   const sessionService = fastify.sessionService as RedisSessionService;
   const securityService = fastify.security;
-  
+
   const tokenExchangeService = TokenExchangeService.getInstance(jwtService, sessionService);
 
   /**
