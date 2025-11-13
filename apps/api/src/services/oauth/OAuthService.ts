@@ -94,11 +94,11 @@ export class OAuthService {
     this.githubStrategy = new GitHubStrategy(fastify);
     this.linkedinStrategy = new LinkedInStrategy(fastify);
 
-    // Map strategies
-    this.strategies = new Map([
-      [OAuthProvider.GOOGLE, this.googleStrategy],
-      [OAuthProvider.GITHUB, this.githubStrategy],
-      [OAuthProvider.LINKEDIN, this.linkedinStrategy],
+    // Map strategies - explicit type casting to BaseOAuthStrategy for type compatibility
+    this.strategies = new Map<OAuthProvider, BaseOAuthStrategy>([
+      [OAuthProvider.GOOGLE, this.googleStrategy as BaseOAuthStrategy],
+      [OAuthProvider.GITHUB, this.githubStrategy as BaseOAuthStrategy],
+      [OAuthProvider.LINKEDIN, this.linkedinStrategy as BaseOAuthStrategy],
     ]);
 
     this.fastify.log.info('✅ OAuthService initialized with all providers');
@@ -693,11 +693,11 @@ export class OAuthService {
     source: OAuthSource
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      // Use existing AuthService to generate tokens
-      const authService = this.fastify.authService || this.fastify.jwtService;
+      // Use jwtService to generate tokens (registered as jwtService in services.plugin.ts)
+      const authService = this.fastify.jwtService;
 
       if (!authService) {
-        throw new Error('AuthService not available');
+        throw new Error('JWT Service not available');
       }
 
       // Generate access token
@@ -780,7 +780,7 @@ export class OAuthService {
       // Prevent unlinking if it's the only auth method
       if (!user.passwordHash && user.accounts.length === 1) {
         throw createAuthError(
-          AuthErrorCode.PASSWORD_REQUIRED,
+          AuthErrorCode.INVALID_REQUEST,
           'Cannot unlink last authentication method. Set a password first.',
           400
         );
@@ -839,9 +839,9 @@ export class OAuthService {
 
     if (!strategy) {
       throw createAuthError(
-        AuthErrorCode.PROVIDER_NOT_CONFIGURED,
+        AuthErrorCode.INTERNAL_ERROR,
         `OAuth provider ${provider} is not configured`,
-        400
+        500
       );
     }
 
@@ -853,16 +853,16 @@ export class OAuthService {
    */
   private mapProviderErrorToCode(providerError: string): string {
     const errorMap: Record<string, string> = {
-      'access_denied': AuthErrorCode.ACCESS_DENIED,
+      'access_denied': AuthErrorCode.PERMISSION_DENIED,
       'invalid_request': AuthErrorCode.INVALID_REQUEST,
-      'unauthorized_client': AuthErrorCode.PROVIDER_ERROR,
-      'unsupported_response_type': AuthErrorCode.PROVIDER_ERROR,
-      'invalid_scope': AuthErrorCode.PROVIDER_ERROR,
-      'server_error': AuthErrorCode.PROVIDER_ERROR,
-      'temporarily_unavailable': AuthErrorCode.PROVIDER_ERROR,
+      'unauthorized_client': AuthErrorCode.INTERNAL_ERROR,
+      'unsupported_response_type': AuthErrorCode.INTERNAL_ERROR,
+      'invalid_scope': AuthErrorCode.INTERNAL_ERROR,
+      'server_error': AuthErrorCode.INTERNAL_ERROR,
+      'temporarily_unavailable': AuthErrorCode.INTERNAL_ERROR,
     };
 
-    return errorMap[providerError] || AuthErrorCode.PROVIDER_ERROR;
+    return errorMap[providerError] || AuthErrorCode.INTERNAL_ERROR;
   }
 
   /**
