@@ -100,6 +100,8 @@ interface AuthenticatedRequest extends FastifyRequest {
     email: string;
     role: string;
     status: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }
 
