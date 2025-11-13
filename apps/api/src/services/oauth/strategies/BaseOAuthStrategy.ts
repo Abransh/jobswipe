@@ -210,7 +210,7 @@ export abstract class BaseOAuthStrategy {
       // Validate token response
       if (!tokenData.access_token) {
         throw createAuthError(
-          AuthErrorCode.PROVIDER_ERROR,
+          AuthErrorCode.INTERNAL_ERROR,
           'No access token received from provider',
           502,
           { provider: this.getProviderName() }
@@ -239,7 +239,7 @@ export abstract class BaseOAuthStrategy {
         });
 
         throw createAuthError(
-          AuthErrorCode.PROVIDER_ERROR,
+          AuthErrorCode.INTERNAL_ERROR,
           `Failed to exchange code for tokens: ${error.response?.data?.error_description || error.message}`,
           502,
           {
@@ -289,7 +289,7 @@ export abstract class BaseOAuthStrategy {
         });
 
         throw createAuthError(
-          AuthErrorCode.PROVIDER_ERROR,
+          AuthErrorCode.INTERNAL_ERROR,
           `Failed to fetch user profile: ${error.message}`,
           502,
           {
@@ -334,7 +334,7 @@ export abstract class BaseOAuthStrategy {
 
       if (!tokenData.access_token) {
         throw createAuthError(
-          AuthErrorCode.TOKEN_REFRESH_FAILED,
+          AuthErrorCode.TOKEN_INVALID,
           'No access token received when refreshing',
           502
         );
@@ -362,7 +362,7 @@ export abstract class BaseOAuthStrategy {
         });
 
         throw createAuthError(
-          AuthErrorCode.TOKEN_REFRESH_FAILED,
+          AuthErrorCode.TOKEN_INVALID,
           `Failed to refresh access token: ${error.message}`,
           502,
           {
