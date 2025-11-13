@@ -3,7 +3,12 @@ import { z } from 'zod';
 
 interface AuthRequest extends FastifyRequest {
   user?: {
-    userId: string;
+    id: string;
+    email: string;
+    role: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
     [key: string]: any;
   };
 }
@@ -29,7 +34,12 @@ async function authMiddleware(request: AuthRequest, reply: FastifyReply): Promis
     }
 
     request.user = {
-      userId: tokenResult.payload.sub,
+      id: tokenResult.payload.sub || tokenResult.payload.userId,
+      email: tokenResult.payload.email,
+      role: tokenResult.payload.role,
+      status: tokenResult.payload.status,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       ...tokenResult.payload,
     };
   } catch (error) {
@@ -94,7 +104,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
       const user = (request as any).user;
 
       const userData = await server.db.user.findUnique({
-        where: { id: user.userId },
+        where: { id: user.id },
         include: {
           profile: true
         }
@@ -163,7 +173,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
       const { currentStep, completedSteps, progress, data } = validation.data;
 
       await server.db.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: {
           onboardingStep: currentStep,
           onboardingProgress: progress,
@@ -200,9 +210,9 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
         }
 
         await server.db.userProfile.upsert({
-          where: { userId: user.userId },
+          where: { userId: user.id },
           create: {
-            userId: user.userId,
+            userId: user.id,
             ...profileData
           },
           update: profileData
@@ -241,9 +251,9 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
         }
 
         await server.db.userProfile.upsert({
-          where: { userId: user.userId },
+          where: { userId: user.id },
           create: {
-            userId: user.userId,
+            userId: user.id,
             ...workAuthData
           },
           update: workAuthData
@@ -282,7 +292,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
       const { data } = validation.data;
 
       await server.db.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: {
           onboardingCompleted: true,
           onboardingProgress: 100,
@@ -309,9 +319,9 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
       };
 
       await server.db.userProfile.upsert({
-        where: { userId: user.userId },
+        where: { userId: user.id },
         create: {
-          userId: user.userId,
+          userId: user.id,
           ...profileData
         },
         update: profileData
@@ -338,7 +348,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
       const user = (request as any).user;
 
       await server.db.user.update({
-        where: { id: user.userId },
+        where: { id: user.id },
         data: {
           onboardingCompleted: true,
           onboardingProgress: 0,
