@@ -251,7 +251,11 @@ export class AutomationService extends EventEmitter {
    */
   async getUserAutomationHistory(
     userId: string,
-    options: { limit: number; offset: number; status: 'all' | 'completed' | 'failed' }
+    options: {
+      limit: number;
+      offset: number;
+      status: 'all' | 'PENDING' | 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'RETRYING' | 'PAUSED' | 'REQUIRES_CAPTCHA'
+    }
   ): Promise<{
     applications: Array<{
       applicationId: string;
@@ -271,9 +275,14 @@ export class AutomationService extends EventEmitter {
       .concat(Array.from(this.queue.values()))
       .filter(app => app.userId === userId)
       .filter(app => {
-        if (options.status === 'completed') return app.status === 'completed';
-        if (options.status === 'failed') return app.status === 'failed';
-        return true;
+        if (options.status === 'all') return true;
+        // Map status values (case-insensitive comparison)
+        const appStatus = app.status.toUpperCase();
+        const filterStatus = options.status.toUpperCase();
+        if (filterStatus === 'COMPLETED') return appStatus === 'COMPLETED';
+        if (filterStatus === 'FAILED') return appStatus === 'FAILED';
+        // For other specific statuses, match exactly
+        return appStatus === filterStatus;
       })
       .sort((a, b) => (b.queuedAt.getTime() - a.queuedAt.getTime()));
 
@@ -569,15 +578,19 @@ export class AutomationService extends EventEmitter {
     };
   }
 
-  private detectCompanyAutomation(url: string): string | null {
+  /**
+   * Detect which company automation to use based on the job URL
+   * @public Method made public for use in automation routes
+   */
+  public detectCompanyAutomation(url: string): string | null {
     const urlLower = url.toLowerCase();
-    
+
     for (const [company, patterns] of this.supportedCompanies.entries()) {
       if (patterns.some(pattern => urlLower.includes(pattern))) {
         return company;
       }
     }
-    
+
     return null;
   }
 
