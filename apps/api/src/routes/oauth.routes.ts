@@ -5,6 +5,8 @@
  * @author JobSwipe Team
  */
 
+import type {} from '@fastify/cookie';
+import type {} from '@fastify/swagger';
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import {
