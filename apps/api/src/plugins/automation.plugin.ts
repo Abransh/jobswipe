@@ -7,21 +7,18 @@
 
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
-import { AutomationService } from '../services/AutomationService';
 import { automationRoutes } from '../routes/automation.routes';
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    automationService: AutomationService;
-  }
-}
+// Type declaration removed - already declared in services.plugin.ts
 
 async function automationPlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
-  // Initialize the automation service
-  const automationService = new AutomationService(fastify);
-  
-  // Register the service as a decorator
-  fastify.decorate('automationService', automationService);
+  // Use the automation service already created and decorated by services.plugin.ts
+  const automationService = fastify.automationService;
+
+  // Verify service is available
+  if (!automationService) {
+    throw new Error('AutomationService not available. Ensure services plugin is loaded first.');
+  }
   
   // Setup event listeners for logging
   automationService.on('application-queued', (application) => {
@@ -54,7 +51,7 @@ async function automationPlugin(fastify: FastifyInstance, options: FastifyPlugin
   });
 }
 
-export default fp(automationPlugin, {
+export default fp(automationPlugin as any, {
   name: 'automation',
-  dependencies: ['auth'] // Ensure auth plugin is loaded first
+  dependencies: ['services'] // Ensure services plugin is loaded first
 });

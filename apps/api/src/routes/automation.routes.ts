@@ -11,31 +11,22 @@ import { QueueStatus } from '@jobswipe/database';
 
 // -----------------------------------------------------------------------------
 // Type Augmentation for Fastify decorations used in handlers
+// Note: Main service types are declared in services.plugin.ts
+// Only declare types that are NOT in services.plugin.ts
 // -----------------------------------------------------------------------------
 
 declare module 'fastify' {
   interface FastifyInstance {
-    automationService: any;
-    serverAutomationService?: any;
-    websocket?: { emit: (event: string, payload: any) => void };
+    // These are already declared in their respective plugins:
+    // - automationService (services.plugin.ts)
+    // - serverAutomationService (services.plugin.ts)
+    // - proxyRotator (services.plugin.ts)
+    // - automationLimits (services.plugin.ts)
+    // - websocket (websocket.plugin.ts)
+
+    // Additional decorations only used in routes
     auth?: any;
     requireRole?: (role: string) => any;
-    automationLimits: {
-      checkServerEligibility: (userId: string) => Promise<{
-        allowed: boolean;
-        remainingServerApplications: number;
-        upgradeRequired: boolean;
-        suggestedAction?: string;
-        reason?: string;
-      }>;
-      getUserStats: (userId: string) => {
-        serverApplicationsUsed: number;
-        serverApplicationsLimit: number;
-        plan: string;
-      } | null;
-      recordServerApplication: (userId: string) => Promise<void>;
-    };
-    proxyRotator?: { getUsageStats: () => any };
     generateId: () => string;
   }
   interface FastifyRequest {
