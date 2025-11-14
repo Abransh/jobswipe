@@ -115,11 +115,16 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
 
       try {
         const decoded = jwt.verify(token, jwtSecret) as any;
+        // Create AuthenticatedUser with all required fields
         request.user = {
           id: decoded.sub || decoded.userId,
           email: decoded.email,
+          name: decoded.name,
           role: decoded.role || 'user',
-          status: decoded.status || 'active',
+          status: 'active',
+          profile: {},
+          createdAt: new Date(),
+          updatedAt: new Date(),
         };
       } catch (jwtError) {
         return reply.code(401).send({
