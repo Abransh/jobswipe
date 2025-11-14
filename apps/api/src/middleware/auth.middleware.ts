@@ -82,7 +82,10 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
         );
       }
 
-      const payload = tokenResult.payload;
+      // The payload from verifyToken is correctly typed as JwtPayload
+      // However, JWT serialization means branded types come back as plain strings
+      // We need to treat them as branded types for TypeScript
+      const payload = tokenResult.payload as JwtPayload;
 
       // Check token type restrictions
       if (options.allowedTokenTypes && !options.allowedTokenTypes.includes(payload.type)) {
@@ -120,6 +123,7 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
       }
 
       // Create authenticated user object
+      // Note: payload.sub is already typed as UserId from JwtPayload
       const user: AuthenticatedUser = {
         id: payload.sub,
         email: payload.email,
