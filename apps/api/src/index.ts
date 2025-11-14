@@ -40,9 +40,17 @@ import cookie from '@fastify/cookie';
 // Import route handlers (ensure they exist first)
 async function loadRoutes() {
   try {
-    console.log('Loading enterprise authentication routes...');
-    const { registerAuthRoutes } = await import('./routes/auth.routes');
-    console.log('Auth routes loaded successfully');
+    // Feature flag for unified authentication system
+    const USE_UNIFIED_AUTH = process.env.USE_UNIFIED_AUTH === 'true';
+
+    console.log(`Loading authentication routes (unified: ${USE_UNIFIED_AUTH})...`);
+
+    // Load appropriate authentication routes based on feature flag
+    const { registerAuthRoutes } = USE_UNIFIED_AUTH
+      ? await import('./routes/auth.unified.routes')
+      : await import('./routes/auth.routes');
+
+    console.log(`Auth routes loaded successfully (${USE_UNIFIED_AUTH ? 'UNIFIED' : 'LEGACY'})`);
     
     const tokenExchangeRoutes = await import('./routes/token-exchange.routes');
     console.log('Token exchange routes loaded successfully');
