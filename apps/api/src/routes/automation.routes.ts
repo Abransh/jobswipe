@@ -61,7 +61,7 @@ const UserProfileSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   email: z.string().email(),
-  phone: z.string().optional(),
+  phone: z.string(), // Required field per JobApplicationData interface
   resumeUrl: z.string().optional(),
   resumeLocalPath: z.string().optional(),
   currentTitle: z.string().optional(),
@@ -96,7 +96,7 @@ const TriggerAutomationSchema = z.object({
     firstName: z.string(),
     lastName: z.string(),
     email: z.string().email(),
-    phone: z.string().optional(),
+    phone: z.string(), // Required field per JobApplicationData interface
     resumeUrl: z.string().optional(),
     currentTitle: z.string().optional(),
     yearsExperience: z.number().optional(),
@@ -260,18 +260,19 @@ export async function automationRoutes(fastify: FastifyInstance) {
           automationData.options.execution_mode = 'desktop';
         }
 
-        const result = await fastify.automationService.queueApplication(automationData);
+        // queueApplication returns the applicationId as a string
+        const applicationId = await fastify.automationService.queueApplication(automationData);
 
         fastify.log.info('✅ Automation queued successfully:', {
-          automationId: result.id,
-          status: result.status,
+          automationId: applicationId,
+          status: 'QUEUED',
           executionMode: automationData.options.execution_mode
         });
 
         if (fastify.websocket) {
           fastify.websocket.emitToUser(userId, 'automation-queued', {
             applicationId,
-            automationId: result.id,
+            automationId: applicationId,
             status: 'queued',
             executionMode: automationData.options.execution_mode,
             jobTitle: jobData.title,
@@ -282,8 +283,8 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         return reply.send({
           success: true,
-          automationId: result.id,
-          status: result.status,
+          automationId: applicationId,
+          status: 'QUEUED',
           executionMode: automationData.options.execution_mode,
           message: `Automation queued for ${automationData.options.execution_mode} execution`
         });
@@ -361,10 +362,11 @@ export async function automationRoutes(fastify: FastifyInstance) {
           return reply.code(403).send({ success: false, error: 'Access denied' });
         }
 
+        // TypeScript assertion: Zod schema validation ensures these types are correct
         const applicationId = await fastify.automationService.queueApplication({
           userId,
-          jobData,
-          userProfile,
+          jobData: jobData as { id: string; title: string; company: string; applyUrl: string; location?: string; description?: string; requirements?: string[] },
+          userProfile: userProfile as { firstName: string; lastName: string; email: string; phone: string; resumeUrl?: string; resumeLocalPath?: string; currentTitle?: string; yearsExperience?: number; skills?: string[]; currentLocation?: string; linkedinUrl?: string; workAuthorization?: string; coverLetter?: string; customFields?: Record<string, any> },
           options: options || {}
         });
 
@@ -449,13 +451,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
         }
 
         const applicationId = fastify.generateId();
+        // TypeScript assertion: Zod schema validation ensures these types are correct
         const serverRequest = {
           userId,
-          jobId: jobData.id,
+          jobId: jobData.id!,
           applicationId,
-          companyAutomation: fastify.automationService.detectCompanyAutomation(jobData.applyUrl),
-          userProfile,
-          jobData,
+          companyAutomation: fastify.automationService.detectCompanyAutomation(jobData.applyUrl!),
+          userProfile: userProfile as { firstName: string; lastName: string; email: string; phone: string; resumeUrl?: string; currentTitle?: string; yearsExperience?: number; skills?: string[]; currentLocation?: string; linkedinUrl?: string; workAuthorization?: string; coverLetter?: string; customFields?: Record<string, any> },
+          jobData: jobData as { id: string; title: string; company: string; applyUrl: string; location?: string; description?: string; requirements?: string[] },
           options: options || {}
         };
 

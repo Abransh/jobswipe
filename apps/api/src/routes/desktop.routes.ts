@@ -8,6 +8,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { QueueStatus } from '@jobswipe/database';
+import { AuthenticatedUser } from '@jobswipe/shared';
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -37,13 +38,12 @@ const CompleteApplicationSchema = z.object({
 // TYPES
 // =============================================================================
 
+/**
+ * Authenticated request type using the shared AuthenticatedUser interface
+ * This matches the user type defined in auth.middleware.ts
+ */
 interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-    status: string;
-  };
+  user?: AuthenticatedUser;
 }
 
 interface ClaimApplicationRequest {
@@ -97,11 +97,16 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
         });
       }
 
+      // Create AuthenticatedUser from JwtPayload
       request.user = {
-        id: verification.payload.sub || verification.payload.userId,
+        id: verification.payload.sub,
         email: verification.payload.email,
-        role: verification.payload.role || 'user',
-        status: verification.payload.status || 'active',
+        name: verification.payload.name,
+        role: verification.payload.role,
+        status: 'active', // Status not in JWT payload, default to active
+        profile: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     } else {
       // Fallback to basic JWT verification
