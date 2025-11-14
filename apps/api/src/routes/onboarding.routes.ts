@@ -1,9 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { UserId } from '@jobswipe/shared';
 
 interface AuthRequest extends FastifyRequest {
   user?: {
-    id: string;
+    id: UserId;
     email: string;
     role: string;
     status: string;
@@ -34,7 +35,7 @@ async function authMiddleware(request: AuthRequest, reply: FastifyReply): Promis
     }
 
     request.user = {
-      id: tokenResult.payload.sub || tokenResult.payload.userId,
+      id: (tokenResult.payload.sub || tokenResult.payload.userId) as UserId,
       email: tokenResult.payload.email,
       role: tokenResult.payload.role,
       status: tokenResult.payload.status,
