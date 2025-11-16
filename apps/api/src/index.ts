@@ -67,7 +67,7 @@ async function loadRoutes() {
     const { registerOnboardingRoutes } = await import('./routes/onboarding.routes');
     console.log('Onboarding routes loaded successfully');
 
-    const { registerDesktopRoutes } = await import('./routes/desktop.routes');
+    //const { registerDesktopRoutes } = await import('./routes/desktop.routes');
     console.log('Desktop routes loaded successfully');
 
     const { registerOAuthRoutes } = await import('./routes/oauth.routes');
@@ -83,7 +83,7 @@ async function loadRoutes() {
       jobsRoutes: jobsRoutes.default,
       automationRoutes: automationRoutes.automationRoutes,
       registerOnboardingRoutes,
-      registerDesktopRoutes,
+     // registerDesktopRoutes,
       registerOAuthRoutes
      // resumeRoutes: resumeRoutes.default
     };
@@ -791,7 +791,7 @@ async function createServer(): Promise<FastifyInstance> {
     // Enterprise desktop routes
     server.log.info('Registering enterprise desktop routes...');
     await server.register(async function (fastify) {
-      await routes.registerDesktopRoutes(fastify);
+      //await routes.registerDesktopRoutes(fastify);
     }, { prefix: apiPrefix });
 
     // Enterprise resume routes
