@@ -47,7 +47,7 @@ declare module 'fastify' {
 
 export default fastifyPlugin(advancedSecurityPlugin as any, {
   name: 'advanced-security',
-  fastify: '4.x',
+  fastify: '5.x',
 });
 
 export type { AdvancedSecurityService };
@@ -825,7 +825,7 @@ export type { AdvancedSecurityService };
 
 // export default fastifyPlugin(advancedSecurityPlugin as any, {
 //   name: 'advanced-security',
-//   fastify: '4.x',
+//   fastify: '5.x',
 // });
 
 // export type {

@@ -710,7 +710,7 @@ declare module 'fastify' {
 
 export default fastifyPlugin(servicesPlugin as any, {
   name: 'services',
-  fastify: '4.x',
+  fastify: '5.x',
 });
 
 export type { ServicesConfig, ServiceHealth, ServiceRegistry };
