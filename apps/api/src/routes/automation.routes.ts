@@ -30,7 +30,7 @@ declare module 'fastify' {
     generateId: () => string;
   }
   interface FastifyRequest {
-    user?: { id: string; role?: string };
+    // user is already declared in auth.middleware.ts as AuthenticatedUser
   }
 }
 
@@ -252,18 +252,18 @@ export async function automationRoutes(fastify: FastifyInstance) {
         }
 
         // queueApplication returns the applicationId as a string
-        const applicationId = await fastify.automationService.queueApplication(automationData);
+        const queuedApplicationId = await fastify.automationService.queueApplication(automationData);
 
         fastify.log.info('✅ Automation queued successfully:', {
-          automationId: applicationId,
+          automationId: queuedApplicationId,
           status: 'QUEUED',
           executionMode: automationData.options.execution_mode
         });
 
         if (fastify.websocket) {
           fastify.websocket.emitToUser(userId, 'automation-queued', {
-            applicationId,
-            automationId: applicationId,
+            applicationId: queuedApplicationId,
+            automationId: queuedApplicationId,
             status: 'queued',
             executionMode: automationData.options.execution_mode,
             jobTitle: jobData.title,
@@ -274,7 +274,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         return reply.send({
           success: true,
-          automationId: applicationId,
+          automationId: queuedApplicationId,
           status: 'QUEUED',
           executionMode: automationData.options.execution_mode,
           message: `Automation queued for ${automationData.options.execution_mode} execution`

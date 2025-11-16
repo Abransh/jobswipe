@@ -431,7 +431,7 @@
 //       return reply.status(400).send({
 //         success: false,
 //         error: 'Validation failed',
-//         errorCode: AuthErrorCode.VALIDATION_ERROR,
+//         errorCode: AuthErrorCode.INVALID_REQUEST,
 //         details: error.errors,
 //       });
 //     }
@@ -594,7 +594,7 @@
 //       return reply.status(400).send({
 //         success: false,
 //         error: 'Validation failed',
-//         errorCode: AuthErrorCode.VALIDATION_ERROR,
+//         errorCode: AuthErrorCode.INVALID_REQUEST,
 //         details: error.errors,
 //       });
 //     }

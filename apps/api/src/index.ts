@@ -502,7 +502,7 @@ async function createServer(): Promise<FastifyInstance> {
   });
 
   // Cookie support for OAuth and authentication
-  await server.register(cookie, {
+  await server.register(cookie as any, {
     secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET, // Use JWT_SECRET as fallback
     parseOptions: {}
   });
