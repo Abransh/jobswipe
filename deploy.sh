@@ -210,7 +210,10 @@ install_dependencies() {
     print_header "Installing Dependencies"
 
     print_step "Installing root dependencies..."
-    pnpm install --frozen-lockfile
+    # Use --ignore-scripts to skip husky and other prepare scripts
+    # Use --prod=false to install devDependencies even when NODE_ENV=production
+    # (we need devDependencies for building TypeScript, etc.)
+    pnpm install --frozen-lockfile --ignore-scripts --prod=false
 
     print_success "Dependencies installed successfully"
 }
