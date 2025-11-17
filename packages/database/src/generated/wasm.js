@@ -148,6 +148,8 @@ exports.Prisma.UserScalarFieldEnum = {
   userAgent: 'userAgent',
   timezone: 'timezone',
   locale: 'locale',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -263,6 +265,18 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   identifier: 'identifier',
   token: 'token',
   expires: 'expires'
+};
+
+exports.Prisma.OAuthStateScalarFieldEnum = {
+  id: 'id',
+  state: 'state',
+  codeVerifier: 'codeVerifier',
+  provider: 'provider',
+  redirectUri: 'redirectUri',
+  source: 'source',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.UserJobSwipeScalarFieldEnum = {
@@ -714,6 +728,18 @@ exports.Prisma.ResumeScalarFieldEnum = {
   completeness: 'completeness',
   readabilityScore: 'readabilityScore',
   keywordMatch: 'keywordMatch',
+  s3Key: 's3Key',
+  s3Bucket: 's3Bucket',
+  s3Region: 's3Region',
+  originalFileName: 'originalFileName',
+  processingStatus: 'processingStatus',
+  processingError: 'processingError',
+  lastParsedAt: 'lastParsedAt',
+  rawText: 'rawText',
+  markdownContent: 'markdownContent',
+  hasRMSMetadata: 'hasRMSMetadata',
+  rmsVersion: 'rmsVersion',
+  rmsSchemaUrl: 'rmsSchemaUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -925,7 +951,9 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   timezone: 'timezone',
-  locale: 'locale'
+  locale: 'locale',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider'
 };
 
 exports.Prisma.JsonNullValueFilter = {
@@ -1003,6 +1031,15 @@ exports.Prisma.SessionOrderByRelevanceFieldEnum = {
 exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
   identifier: 'identifier',
   token: 'token'
+};
+
+exports.Prisma.OAuthStateOrderByRelevanceFieldEnum = {
+  id: 'id',
+  state: 'state',
+  codeVerifier: 'codeVerifier',
+  provider: 'provider',
+  redirectUri: 'redirectUri',
+  source: 'source'
 };
 
 exports.Prisma.UserJobSwipeOrderByRelevanceFieldEnum = {
@@ -1252,7 +1289,16 @@ exports.Prisma.ResumeOrderByRelevanceFieldEnum = {
   docxUrl: 'docxUrl',
   htmlUrl: 'htmlUrl',
   parentResumeId: 'parentResumeId',
-  shareToken: 'shareToken'
+  shareToken: 'shareToken',
+  s3Key: 's3Key',
+  s3Bucket: 's3Bucket',
+  s3Region: 's3Region',
+  originalFileName: 'originalFileName',
+  processingError: 'processingError',
+  rawText: 'rawText',
+  markdownContent: 'markdownContent',
+  rmsVersion: 'rmsVersion',
+  rmsSchemaUrl: 'rmsSchemaUrl'
 };
 
 exports.Prisma.ResumeEnhancementOrderByRelevanceFieldEnum = {
@@ -1645,6 +1691,16 @@ exports.ResumeVisibility = exports.$Enums.ResumeVisibility = {
   SHARED_LINK: 'SHARED_LINK'
 };
 
+exports.ProcessingStatus = exports.$Enums.ProcessingStatus = {
+  PENDING: 'PENDING',
+  PARSING: 'PARSING',
+  PARSED: 'PARSED',
+  ENHANCING: 'ENHANCING',
+  ENHANCED: 'ENHANCED',
+  FAILED: 'FAILED',
+  ERROR: 'ERROR'
+};
+
 exports.EnhancementType = exports.$Enums.EnhancementType = {
   KEYWORD_OPTIMIZATION: 'KEYWORD_OPTIMIZATION',
   ATS_OPTIMIZATION: 'ATS_OPTIMIZATION',
@@ -1832,6 +1888,7 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken',
+  OAuthState: 'OAuthState',
   UserJobSwipe: 'UserJobSwipe',
   ApplicationQueue: 'ApplicationQueue',
   AutomationLog: 'AutomationLog',
