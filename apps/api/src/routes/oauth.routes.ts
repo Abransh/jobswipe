@@ -172,10 +172,10 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           });
         }
 
-        fastify.log.info('OAuth flow initiated', {
+        fastify.log.info({
           provider,
           source: query.source,
-        });
+        }, 'OAuth flow initiated');
 
         // Generate authorization URL
         const authResponse = await oauthService.initiateOAuthFlow({
@@ -196,9 +196,9 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         });
 
         // Redirect to OAuth provider
-        return reply.redirect(302, authResponse.authorizationUrl);
+        return reply.redirect(authResponse.authorizationUrl, 302);
       } catch (error: any) {
-        fastify.log.error('OAuth initiation failed:', error);
+        fastify.log.error({err: error, msg: 'OAuth initiation failed:'});
 
         const source = (request.query as any).source || OAuthSource.WEB;
         const redirectUrl = getOAuthRedirectUrl(
@@ -207,7 +207,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           error.code || 'INITIATION_FAILED'
         );
 
-        return reply.redirect(302, redirectUrl);
+        return reply.redirect(redirectUrl, 302);
       }
     }
   );
@@ -258,11 +258,11 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           });
         }
 
-        fastify.log.info('OAuth callback received', {
+        fastify.log.info( {
           provider,
           hasCode: !!query.code,
           hasError: !!query.error,
-        });
+        }, 'OAuth callback received',);
 
         // Handle OAuth callback
         const result = await oauthService.handleOAuthCallback({
@@ -284,7 +284,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
             result.errorCode || 'OAUTH_FAILED'
           );
 
-          return reply.redirect(302, redirectUrl);
+          return reply.code(302).redirect(redirectUrl);
         }
 
         // OAuth successful - set auth cookies
@@ -294,9 +294,9 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
 
         // Redirect to frontend with success
         const redirectUrl = getOAuthRedirectUrl(OAuthSource.WEB, true);
-        return reply.redirect(302, redirectUrl);
+        return reply.redirect(redirectUrl, 302);
       } catch (error: any) {
-        fastify.log.error('OAuth callback failed:', error);
+        fastify.log.error({err: error, msg: 'OAuth callback failed:'});
 
         const redirectUrl = getOAuthRedirectUrl(
           OAuthSource.WEB,
@@ -304,7 +304,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           'CALLBACK_FAILED'
         );
 
-        return reply.redirect(302, redirectUrl);
+        return reply.redirect(redirectUrl, 302);
       }
     }
   );
@@ -344,6 +344,14 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
               provider: { type: 'string' },
             },
           },
+           500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              message: { type: 'string' },
+              provider: { type: 'string' },
+            },
+          },
         },
       },
       // @ts-ignore - Add auth middleware
@@ -358,7 +366,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           message: 'Account linking via OAuth callback flow - use /oauth/:provider with authenticated session',
         });
       } catch (error) {
-        fastify.log.error('OAuth link failed:', error);
+        fastify.log.error({err: error, msg: 'OAuth link failed:'});
         return reply.code(500).send({
           success: false,
           error: 'Failed to link OAuth provider',
@@ -416,10 +424,10 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         // Unlink OAuth provider
         await oauthService.unlinkOAuthProvider(userId, body.provider);
 
-        fastify.log.info('OAuth provider unlinked', {
+        fastify.log.info( {
           userId,
           provider: body.provider,
-        });
+        }, 'OAuth provider unlinked');
 
         return reply.send({
           success: true,
@@ -427,7 +435,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           provider: body.provider,
         });
       } catch (error: any) {
-        fastify.log.error('OAuth unlink failed:', error);
+        fastify.log.error({err: error, msg:'OAuth unlink failed:'});
 
         return reply.code(error.statusCode || 500).send({
           success: false,
@@ -467,6 +475,24 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
               },
             },
           },
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              accounts: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    provider: { type: 'string' },
+                    providerAccountId: { type: 'string' },
+                    linkedAt: { type: 'string', format: 'date-time' },
+                    isPrimary: { type: 'boolean' },
+                  },
+                },
+              },
+            },
+          },
         },
       },
       // @ts-ignore - Add auth middleware
@@ -484,7 +510,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           accounts,
         });
       } catch (error) {
-        fastify.log.error('Failed to fetch linked accounts:', error);
+        fastify.log.error( {err: error, msg: 'Failed to fetch linked accounts:'});
 
         return reply.code(500).send({
           success: false,
@@ -522,6 +548,28 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
               },
             },
           },
+
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              providers: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    displayName: { type: 'string' },
+                    icon: { type: 'string' },
+                    enabled: { type: 'boolean' },
+                  },
+                },
+              },
+            },
+          },
+
+
+          
         },
       },
     },
@@ -541,7 +589,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
           providers,
         });
       } catch (error) {
-        fastify.log.error('Failed to fetch OAuth providers:', error);
+        fastify.log.error( {err: error, msg: 'Failed to fetch OAuth providers:'});
 
         return reply.code(500).send({
           success: false,

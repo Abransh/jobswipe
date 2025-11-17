@@ -316,8 +316,9 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     fastify.log.info('   Algorithm: HS256 (HMAC-SHA256)');
     fastify.log.info('   Compatible with Next.js middleware');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize JWT Authentication Service:', error);
-    fastify.log.error('Error details:', {
+    fastify.log.error({err: error, msg: '❌ Failed to initialize JWT Authentication Service:'});
+    fastify.log.error({
+      msg: 'Error details:',
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
@@ -337,7 +338,8 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       throw new Error('createRedisSessionService not available');
     }
 
-    fastify.log.info('Creating Redis session service with config:', {
+    fastify.log.info({
+      msg: 'Creating Redis session service with config:',
       redis: { ...config.redis, password: config.redis.password ? '[REDACTED]' : undefined },
       session: config.session,
     });
@@ -357,8 +359,9 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
     fastify.log.info('✅ Redis Session Service initialized successfully');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize Redis Session Service:', error);
-    fastify.log.error('Error details:', {
+    fastify.log.error({err: error, msg: '❌ Failed to initialize Redis Session Service:'});
+    fastify.log.error({
+      msg: 'Error details:',
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
     });
@@ -392,7 +395,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 
     fastify.log.info('✅ Security Middleware Service initialized successfully');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize Security Middleware Service:', error);
+    fastify.log.error({err: error, msg: '❌ Failed to initialize Security Middleware Service:'} );
     throw new Error(`Security service initialization failed: ${error}`);
   }
 
@@ -441,7 +444,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       
       fastify.log.info('✅ Database Service initialized successfully');
     } catch (error) {
-      fastify.log.warn('⚠️  Database connection test failed:', error);
+      fastify.log.warn({err: error, msg:'⚠️  Database connection test failed:'});
       
       // Register database service as unhealthy but still available
       serviceRegistry.register(
@@ -463,7 +466,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         await db.$disconnect();
         fastify.log.info('Database connection closed');
       } catch (error) {
-        fastify.log.error('Error closing database connection:', error);
+        fastify.log.error({err: error, msg:'Error closing database connection:'});
       }
     });
   }
@@ -520,7 +523,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     
     fastify.log.info('✅ Automation Services initialized successfully');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize Automation Services:', error);
+    fastify.log.error({err: error, msg:'❌ Failed to initialize Automation Services:'});
     throw new Error(`Automation services initialization failed: ${error}`);
   }
 
@@ -569,7 +572,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     fastify.log.info('✅ OAuth Service initialized successfully');
     fastify.log.info(`   Enabled providers: ${oauthService.getEnabledProviders().join(', ')}`);
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize OAuth Service:', error);
+    fastify.log.error({err: error, msg:'❌ Failed to initialize OAuth Service:'});
     fastify.log.warn('⚠️  OAuth authentication will not be available');
 
     // OAuth is optional - don't fail startup if it's not configured
@@ -605,6 +608,22 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       tags: ['Health'],
       response: {
         200: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            services: { type: 'object' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            services: { type: 'object' },
+          },
+        },
+        503: {
           type: 'object',
           properties: {
             status: { type: 'string' },
@@ -649,6 +668,13 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       tags: ['Health'],
       response: {
         200: {
+          type: 'object',
+          properties: {
+            timestamp: { type: 'string' },
+            metrics: { type: 'object' },
+          },
+        },
+        500: {
           type: 'object',
           properties: {
             timestamp: { type: 'string' },

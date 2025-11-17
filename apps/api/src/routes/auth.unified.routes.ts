@@ -436,7 +436,7 @@ async function registerHandler(
       });
     }
 
-    request.server.log.error('Registration failed:', error);
+    request.server.log.error({err: error, msg: 'Registration failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Registration failed',
@@ -599,7 +599,7 @@ async function loginHandler(
       });
     }
 
-    request.server.log.error('Login failed:', error);
+    request.server.log.error({err: error, msg: 'Login failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Login failed',
@@ -656,7 +656,7 @@ async function verifyEmailHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Email verification failed:', error);
+    request.server.log.error({err: error, msg: 'Email verification failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Email verification failed',
@@ -719,7 +719,7 @@ async function resendVerificationHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Resend verification failed:', error);
+    request.server.log.error({err: error, msg: 'Resend verification failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Failed to resend verification email',
@@ -788,7 +788,7 @@ async function refreshTokenHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Token refresh failed:', error);
+    request.server.log.error({err: error, msg: 'Token refresh failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Token refresh failed',
@@ -860,7 +860,7 @@ async function passwordResetHandler(
       });
     }
 
-    request.server.log.error('Password reset failed:', error);
+    request.server.log.error({err: error, msg: 'Password reset failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Password reset failed',
@@ -982,7 +982,7 @@ async function passwordResetCompleteHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Password reset completion failed:', error);
+    request.server.log.error({err: error, msg: 'Password reset completion failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Password reset completion failed',
@@ -1062,7 +1062,7 @@ async function passwordChangeHandler(
       });
     }
 
-    request.server.log.error('Password change failed:', error);
+    request.server.log.error({err: error, msg: 'Password change failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Password change failed',
@@ -1088,7 +1088,7 @@ async function logoutHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Logout failed:', error);
+    request.server.log.error({err: error, msg: 'Logout failed:'});
     return reply.status(500).send({
       success: false,
       message: 'Logout failed',
@@ -1117,7 +1117,7 @@ async function profileHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Profile fetch failed:', error);
+    request.server.log.error({err: error, msg: 'Profile fetch failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Failed to get profile',
@@ -1161,7 +1161,7 @@ async function checkEmailHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Email check failed:', error);
+    request.server.log.error({err: error, msg: 'Email check failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Failed to check email availability',
@@ -1215,7 +1215,7 @@ async function tokenExchangeInitiateHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Token exchange initiation failed:', error);
+    request.server.log.error({err: error, msg: 'Token exchange initiation failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Token exchange initiation failed',
@@ -1350,7 +1350,7 @@ async function tokenExchangeCompleteHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Token exchange completion failed:', error);
+    request.server.log.error({err: error, msg: 'Token exchange completion failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Token exchange completion failed',
@@ -1417,7 +1417,7 @@ async function authMiddleware(
     request.sessionId = tokenResult.payload.sessionId;
 
   } catch (error) {
-    request.server.log.error('Auth middleware failed:', error);
+    request.server.log.error({err: error, msg: 'Auth middleware failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Authentication failed',
@@ -1448,7 +1448,7 @@ async function securityMiddleware(
     }
 
   } catch (error) {
-    request.server.log.error('Security middleware failed:', error);
+    request.server.log.error({err: error, msg: 'Security middleware failed:'});
     return reply.status(500).send({
       success: false,
       error: 'Security check failed',

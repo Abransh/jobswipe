@@ -114,7 +114,7 @@ export class GitHubStrategy extends BaseOAuthStrategy {
 
       return profile;
     } catch (error) {
-      this.fastify.log.error('Failed to parse GitHub profile:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to parse GitHub profile:'});
       throw new Error('Failed to parse GitHub user profile');
     }
   }
@@ -152,9 +152,9 @@ export class GitHubStrategy extends BaseOAuthStrategy {
       );
 
       if (primaryVerifiedEmail) {
-        this.fastify.log.info('Found primary verified GitHub email', {
+        this.fastify.log.info({
           email: primaryVerifiedEmail.email,
-        });
+        }, 'Found primary verified GitHub email');
 
         return {
           email: primaryVerifiedEmail.email,
@@ -167,9 +167,9 @@ export class GitHubStrategy extends BaseOAuthStrategy {
       const verifiedEmail = emails.find((email: any) => email.verified);
 
       if (verifiedEmail) {
-        this.fastify.log.info('Found verified GitHub email (not primary)', {
+        this.fastify.log.info( {
           email: verifiedEmail.email,
-        });
+        }, 'Found verified GitHub email (not primary)');
 
         return {
           email: verifiedEmail.email,
@@ -182,7 +182,7 @@ export class GitHubStrategy extends BaseOAuthStrategy {
       this.fastify.log.warn('No verified email found for GitHub user');
       return null;
     } catch (error: any) {
-      this.fastify.log.error('Failed to fetch GitHub user emails:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to fetch GitHub user emails:'});
       // Don't fail the entire OAuth flow if email fetch fails
       return null;
     }
@@ -210,16 +210,16 @@ export class GitHubStrategy extends BaseOAuthStrategy {
 
       // Validate that we have an email
       if (!profile.email) {
-        this.fastify.log.warn('GitHub user has no email available', {
+        this.fastify.log.warn( {
           userId: profile.id,
           login: (profile as GitHubOAuthProfile).login,
-        });
+        }, 'GitHub user has no email available');
         throw new Error('GitHub user has no email address available');
       }
 
       return profile as GitHubOAuthProfile;
     } catch (error) {
-      this.fastify.log.error('Failed to get complete GitHub user profile:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to get complete GitHub user profile:'});
       throw error;
     }
   }
@@ -232,7 +232,7 @@ export class GitHubStrategy extends BaseOAuthStrategy {
    */
   async getUserRepositories(accessToken: string, username: string): Promise<any[]> {
     try {
-      this.fastify.log.debug('Fetching GitHub user repositories', { username });
+      this.fastify.log.debug({ username }, 'Fetching GitHub user repositories');
 
       const response = await this.httpClient.get(
         `https://api.github.com/users/${username}/repos`,
@@ -250,7 +250,7 @@ export class GitHubStrategy extends BaseOAuthStrategy {
 
       return response.data;
     } catch (error) {
-      this.fastify.log.error('Failed to fetch GitHub repositories:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to fetch GitHub repositories:'});
       return [];
     }
   }

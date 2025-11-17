@@ -566,7 +566,7 @@ async function passwordResetHandler(
     return reply.status(200).send(response);
 
   } catch (error) {
-    request.server.log.error('Password reset error:', error);
+    request.server.log.error({err: error, msg: 'Password reset error:'});
     return reply.status(500).send({
       success: false,
       message: 'Password reset failed',
@@ -697,7 +697,7 @@ async function passwordResetCompleteHandler(
     });
 
   } catch (error) {
-    request.server.log.error('Password reset completion error:', error);
+    request.server.log.error({err: error, msg: 'Password reset completion error:'});
     return reply.status(500).send({
       success: false,
       message: 'Password reset completion failed',

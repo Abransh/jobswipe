@@ -198,14 +198,14 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = parse.data;
 
-        fastify.log.info('🤖 Automation trigger received:', {
+        fastify.log.info({
           applicationId,
           userId,
           jobId,
           jobTitle: jobData.title,
           company: jobData.company,
           executionMode
-        });
+        }, '🤖 Automation trigger received:');
 
         const automationData = {
           userId,
@@ -254,11 +254,11 @@ export async function automationRoutes(fastify: FastifyInstance) {
         // queueApplication returns the applicationId as a string
         const queuedApplicationId = await fastify.automationService.queueApplication(automationData);
 
-        fastify.log.info('✅ Automation queued successfully:', {
+        fastify.log.info({
           automationId: queuedApplicationId,
           status: 'QUEUED',
           executionMode: automationData.options.execution_mode
-        });
+        }, '✅ Automation queued successfully:');
 
         if (fastify.websocket) {
           fastify.websocket.emitToUser(userId, 'automation-queued', {
@@ -280,7 +280,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           message: `Automation queued for ${automationData.options.execution_mode} execution`
         });
       } catch (error: any) {
-        fastify.log.error('❌ Automation trigger failed:', error);
+        fastify.log.error({err: error, msg: '❌ Automation trigger failed:'});
         let errorCode = 'AUTOMATION_ERROR';
         let statusCode = 500;
 
@@ -374,7 +374,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           }
         });
       } catch (error: any) {
-        fastify.log.error('Automation execution failed:', error);
+        fastify.log.error({err: error, msg: 'Automation execution failed:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -461,7 +461,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           data: { applicationId, jobId: jobData.id, userId, result }
         });
       } catch (error: any) {
-        fastify.log.error('Server automation execution failed:', error);
+        fastify.log.error({err: error, msg: 'Server automation execution failed:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error',
@@ -499,7 +499,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           }
         });
       } catch (error: any) {
-        fastify.log.error('Failed to get automation limits:', error);
+        fastify.log.error({err: error, msg: 'Failed to get automation limits:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -522,7 +522,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
         const stats = fastify.proxyRotator?.getUsageStats() ?? {};
         return reply.send({ success: true, data: stats });
       } catch (error: any) {
-        fastify.log.error('Failed to get proxy stats:', error);
+        fastify.log.error({err: error, msg: 'Failed to get proxy stats:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -551,7 +551,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         return reply.send({ success: true, data: applicationStatus });
       } catch (error: any) {
-        fastify.log.error('Failed to get automation status:', error);
+        fastify.log.error({err: error, msg: 'Failed to get automation status:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -574,7 +574,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
         const queueStats = await fastify.automationService.getQueueStats();
         return reply.send({ success: true, data: queueStats });
       } catch (error: any) {
-        fastify.log.error('Failed to get queue status:', error);
+        fastify.log.error({err: error, msg: 'Failed to get queue status:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -618,7 +618,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         return reply.send({ success: true, data: history });
       } catch (error: any) {
-        fastify.log.error('Failed to get automation history:', error);
+        fastify.log.error({err: error, msg: 'Failed to get automation history:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -642,7 +642,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
         const result = await fastify.automationService.cancelApplication(applicationId, request.user!.id);
         return reply.send({ success: true, data: result });
       } catch (error: any) {
-        fastify.log.error('Failed to cancel automation:', error);
+        fastify.log.error({err: error, msg: 'Failed to cancel automation:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -670,7 +670,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
           }
         });
       } catch (error: any) {
-        fastify.log.error('Failed to get supported companies:', error);
+        fastify.log.error({err: error, msg: 'Failed to get supported companies:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'
@@ -707,7 +707,7 @@ export async function automationRoutes(fastify: FastifyInstance) {
 
         return reply.send({ success: true, data: parsed.success ? parsed.data : healthStatus });
       } catch (error: any) {
-        fastify.log.error('Failed to get automation health:', error);
+        fastify.log.error({err: error, msg: 'Failed to get automation health:'});
         return reply.code(500).send({
           success: false,
           error: error instanceof Error ? error.message : 'Internal server error'

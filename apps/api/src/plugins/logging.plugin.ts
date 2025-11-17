@@ -671,7 +671,7 @@ async function loggingPlugin(fastify: FastifyInstance, options: any) {
     const context = (request as any).logContext || loggingService.createContext(request);
     
     // Log the error
-    loggingService.logError(error, context, {
+    loggingService.logError(error as Error, context, {
       url: request.url,
       method: request.method,
       body: request.body,
@@ -680,7 +680,7 @@ async function loggingPlugin(fastify: FastifyInstance, options: any) {
     });
 
     // Classify error for response
-    const classification = ERROR_CLASSIFICATIONS[(error as any).code || error.name] || {
+    const classification = ERROR_CLASSIFICATIONS[(error as any).code || (error as Error).name] || {
       type: ErrorType.INTERNAL,
       severity: ErrorSeverity.MEDIUM,
       retryable: false,
@@ -694,10 +694,12 @@ async function loggingPlugin(fastify: FastifyInstance, options: any) {
                        classification.type === ErrorType.RATE_LIMIT ? 429 : 500);
 
     // Send user-friendly error response
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const errorName = error instanceof Error ? error.name : 'UnknownError';
     return reply.code(statusCode).send({
       success: false,
-      error: loggingService['generateUserMessage'](classification.type, error.message),
-      code: (error as any).code || error.name,
+      error: loggingService['generateUserMessage'](classification.type, errorMessage),
+      code: (error as any).code || errorName,
       requestId: context.requestId,
       timestamp: new Date().toISOString(),
       retryable: classification.retryable,

@@ -163,15 +163,15 @@ export abstract class BaseOAuthStrategy {
         url.searchParams.append(key, value);
       });
 
-      this.fastify.log.info(`Generated ${this.getProviderName()} OAuth authorization URL`, {
+      this.fastify.log.info( {
         provider: this.getProviderName(),
         state: options.state,
         scopes: this.config.scopes,
-      });
+      }, `Generated ${this.getProviderName()} OAuth authorization URL`,);
 
       return url.toString();
     } catch (error) {
-      this.fastify.log.error(`Failed to generate authorization URL for ${this.getProviderName()}:`, error);
+      this.fastify.log.error({ err: error, msg: `Failed to generate authorization URL for ${this.getProviderName()}:`});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to generate authorization URL',
@@ -233,10 +233,10 @@ export abstract class BaseOAuthStrategy {
       };
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        this.fastify.log.error(`Token exchange failed for ${this.getProviderName()}:`, {
+        this.fastify.log.error({
           status: error.response?.status,
           data: error.response?.data,
-        });
+        }, `Token exchange failed for ${this.getProviderName()}:`, );
 
         throw createAuthError(
           AuthErrorCode.INTERNAL_ERROR,
@@ -274,19 +274,19 @@ export abstract class BaseOAuthStrategy {
       // Parse and normalize profile using provider-specific logic
       const profile = await this.parseUserProfile(rawProfile);
 
-      this.fastify.log.info(`Successfully fetched user profile from ${this.getProviderName()}`, {
+      this.fastify.log.info( {
         provider: this.getProviderName(),
         userId: profile.id,
         email: profile.email,
-      });
+      }, `Successfully fetched user profile from ${this.getProviderName()}`);
 
       return profile;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        this.fastify.log.error(`Failed to fetch user profile from ${this.getProviderName()}:`, {
+        this.fastify.log.error({
           status: error.response?.status,
           data: error.response?.data,
-        });
+        }, `Failed to fetch user profile from ${this.getProviderName()}:`);
 
         throw createAuthError(
           AuthErrorCode.INTERNAL_ERROR,
@@ -356,10 +356,10 @@ export abstract class BaseOAuthStrategy {
       };
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        this.fastify.log.error(`Failed to refresh access token for ${this.getProviderName()}:`, {
+        this.fastify.log.error( {
           status: error.response?.status,
           data: error.response?.data,
-        });
+        }, `Failed to refresh access token for ${this.getProviderName()}:`,);
 
         throw createAuthError(
           AuthErrorCode.TOKEN_INVALID,

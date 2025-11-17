@@ -86,14 +86,14 @@ async function triggerAutomation(
   try {
     const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = request.body;
 
-    request.log.info('🤖 Automation trigger received:', {
+    request.log.info( {
       applicationId,
       userId,
       jobId,
       jobTitle: jobData.title,
       company: jobData.company,
       executionMode
-    });
+    }, '🤖 Automation trigger received:',);
 
     // Check if automation service is available
     if (!request.server.automationService) {
@@ -137,11 +137,11 @@ async function triggerAutomation(
       automationData.options
     );
 
-    request.log.info('✅ Automation executed successfully:', {
+    request.log.info( {
       applicationId,
       status: result.status,
       executionMode: result.executionMode
-    });
+    }, '✅ Automation executed successfully:');
 
     return reply.send({
       success: true,
@@ -155,7 +155,7 @@ async function triggerAutomation(
     });
 
   } catch (error) {
-    request.log.error('❌ Automation execution failed:', error);
+    request.log.error({err: error, msg: '❌ Automation execution failed:'});
 
     return reply.code(500).send({
       success: false,
@@ -212,7 +212,7 @@ async function getAutomationStatus(
     });
 
   } catch (error) {
-    request.log.error('❌ Failed to get automation status:', error);
+    request.log.error({err: error, msg:'❌ Failed to get automation status:'});
 
     return reply.code(500).send({
       success: false,
@@ -256,7 +256,7 @@ async function cancelAutomation(
     // Cancel the job
     await job.remove();
 
-    request.log.info('🚫 Automation cancelled:', { applicationId });
+    request.log.info({ applicationId }, '🚫 Automation cancelled:');
 
     return reply.send({
       success: true,
@@ -268,7 +268,7 @@ async function cancelAutomation(
     });
 
   } catch (error) {
-    request.log.error('❌ Failed to cancel automation:', error);
+    request.log.error({err: error, msg: '❌ Failed to cancel automation:'});
 
     return reply.code(500).send({
       success: false,

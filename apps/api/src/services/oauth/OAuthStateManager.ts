@@ -91,12 +91,12 @@ export class OAuthStateManager {
         },
       });
 
-      this.fastify.log.info('Created OAuth state', {
+      this.fastify.log.info( {
         provider: request.provider,
         source: request.source,
         stateId: oauthState.id,
         expiresAt: expiresAt.toISOString(),
-      });
+      }, 'Created OAuth state');
 
       return {
         id: oauthState.id,
@@ -110,7 +110,7 @@ export class OAuthStateManager {
         expiresAt: oauthState.expiresAt,
       };
     } catch (error) {
-      this.fastify.log.error('Failed to create OAuth state:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to create OAuth state:'});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to create OAuth state',
@@ -141,10 +141,10 @@ export class OAuthStateManager {
       });
 
       if (!oauthState) {
-        this.fastify.log.warn('Invalid OAuth state token - not found', {
+        this.fastify.log.warn( {
           state: stateToken.substring(0, 8) + '...',
           provider,
-        });
+        }, 'Invalid OAuth state token - not found');
 
         throw createAuthError(
           AuthErrorCode.INVALID_REQUEST,
@@ -155,10 +155,10 @@ export class OAuthStateManager {
 
       // Verify provider matches
       if (oauthState.provider !== provider) {
-        this.fastify.log.warn('OAuth state provider mismatch', {
+        this.fastify.log.warn({
           expected: provider,
           actual: oauthState.provider,
-        });
+        }, 'OAuth state provider mismatch');
 
         throw createAuthError(
           AuthErrorCode.INVALID_REQUEST,
@@ -169,10 +169,10 @@ export class OAuthStateManager {
 
       // Check if state has expired
       if (oauthState.expiresAt < new Date()) {
-        this.fastify.log.warn('OAuth state has expired', {
+        this.fastify.log.warn({
           stateId: oauthState.id,
           expiresAt: oauthState.expiresAt.toISOString(),
-        });
+        }, 'OAuth state has expired');
 
         // Delete expired state
         await this.deleteState(oauthState.state);
@@ -187,11 +187,11 @@ export class OAuthStateManager {
       // Delete state (one-time use) - CRITICAL for security
       await this.deleteState(oauthState.state);
 
-      this.fastify.log.info('Successfully validated and consumed OAuth state', {
+      this.fastify.log.info( {
         stateId: oauthState.id,
         provider: oauthState.provider,
         source: oauthState.source,
-      });
+      },'Successfully validated and consumed OAuth state');
 
       return {
         id: oauthState.id,
@@ -209,7 +209,7 @@ export class OAuthStateManager {
         throw error;
       }
 
-      this.fastify.log.error('Failed to validate OAuth state:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to validate OAuth state:'});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to validate OAuth state',
@@ -232,12 +232,12 @@ export class OAuthStateManager {
         where: { state: stateToken },
       });
 
-      this.fastify.log.debug('Deleted OAuth state', {
+      this.fastify.log.debug({
         state: stateToken.substring(0, 8) + '...',
-      });
+      }, 'Deleted OAuth state');
     } catch (error) {
       // Ignore deletion errors (state might already be deleted)
-      this.fastify.log.debug('Failed to delete OAuth state (might not exist):', error);
+      this.fastify.log.debug({err: error, msg: 'Failed to delete OAuth state (might not exist):'});
     }
   }
 
@@ -265,7 +265,7 @@ export class OAuthStateManager {
 
       return result.count;
     } catch (error) {
-      this.fastify.log.error('Failed to cleanup expired OAuth states:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to cleanup expired OAuth states:'});
       return 0;
     }
   }
@@ -276,13 +276,13 @@ export class OAuthStateManager {
   private startCleanupTask(): void {
     this.cleanupInterval = setInterval(() => {
       this.cleanupExpiredStates().catch((error) => {
-        this.fastify.log.error('OAuth state cleanup task failed:', error);
+        this.fastify.log.error({err: error, msg: 'OAuth state cleanup task failed:'});
       });
     }, CLEANUP_INTERVAL_MS);
 
-    this.fastify.log.info('Started OAuth state cleanup task', {
+    this.fastify.log.info( {
       intervalMs: CLEANUP_INTERVAL_MS,
-    });
+    }, 'Started OAuth state cleanup task');
   }
 
   /**

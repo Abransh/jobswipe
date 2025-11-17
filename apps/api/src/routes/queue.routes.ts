@@ -206,7 +206,7 @@ async function createJobSnapshot(fastify: FastifyInstance, jobPosting: any, appl
     
     return snapshot;
   } catch (error) {
-    fastify.log.error('Failed to create job snapshot:', error);
+    fastify.log.error({err: error, msg: 'Failed to create job snapshot:'});
     throw new Error('Failed to create job snapshot');
   }
 }
@@ -284,10 +284,10 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
       }
       
       request.user = {
-        id: (verification.payload.sub || verification.payload.userId) as UserId,
+        id: (verification.payload.sub || (verification.payload as any).userId) as UserId,
         email: verification.payload.email,
         role: verification.payload.role || 'user',
-        status: verification.payload.status || 'active',
+        status: (verification.payload as any).status || 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -312,7 +312,7 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
       };
     }
   } catch (error) {
-    request.server.log.error('Authentication error:', error);
+    request.server.log.error({err: error, msg:'Authentication error:'});
     return reply.code(401).send({
       success: false,
       error: 'Authentication failed',
@@ -1117,7 +1117,7 @@ async function getApplicationsHandler(request: AuthenticatedRequest, reply: Fast
       });
     }
     
-    request.server.log.error('Get applications error:', error);
+    request.server.log.error({err: error, msg:'Get applications error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1175,7 +1175,7 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
           automationStatus = await request.server.automationService.getApplicationStatus(automationApplicationId);
         }
       } catch (error) {
-        request.server.log.warn('Failed to get automation status:', error);
+        request.server.log.warn({err: error, msg:'Failed to get automation status:'});
       }
     }
 
@@ -1260,7 +1260,7 @@ async function getApplicationHandler(request: AuthenticatedRequest, reply: Fasti
     });
     
   } catch (error) {
-    request.server.log.error('Get application error:', error);
+    request.server.log.error({err: error, msg:'Get application error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1315,7 +1315,7 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
               }
             }
           } catch (error) {
-            request.server.log.warn('Failed to cancel automation:', error);
+            request.server.log.warn({err: error, msg:'Failed to cancel automation:'});
           }
         }
         break;
@@ -1379,7 +1379,7 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
       });
     }
     
-    request.server.log.error('Application action error:', error);
+    request.server.log.error({err: error, msg:'Application action error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1441,7 +1441,7 @@ async function queuePositionHandler(request: AuthenticatedRequest, reply: Fastif
     });
 
   } catch (error) {
-    request.server.log.error('Queue position error:', error);
+    request.server.log.error({err: error, msg:'Queue position error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1502,7 +1502,7 @@ async function queuePositionUpdateHandler(request: AuthenticatedRequest, reply: 
     });
 
   } catch (error) {
-    request.server.log.error('Queue position update error:', error);
+    request.server.log.error({err: error, msg:'Queue position update error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1650,7 +1650,7 @@ async function progressUpdateHandler(request: AuthenticatedRequest, reply: Fasti
     });
 
   } catch (error) {
-    request.server.log.error('Progress update error:', error);
+    request.server.log.error({err: error, msg:'Progress update error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',
@@ -1699,7 +1699,7 @@ async function getQueueStatsHandler(request: AuthenticatedRequest, reply: Fastif
       try {
         automationServiceStats = await request.server.automationService.getQueueStats();
       } catch (error) {
-        request.server.log.warn('Failed to get automation service stats:', error);
+        request.server.log.warn({err: error, msg: 'Failed to get automation service stats:'});
       }
     }
     
@@ -1731,7 +1731,7 @@ async function getQueueStatsHandler(request: AuthenticatedRequest, reply: Fastif
     });
     
   } catch (error) {
-    request.server.log.error('Get queue stats error:', error);
+    request.server.log.error({err: error, msg:'Get queue stats error:'});
     return reply.code(500).send({
       success: false,
       error: 'Internal server error',

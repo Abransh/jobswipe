@@ -143,10 +143,10 @@ export class WebSocketService extends EventEmitter {
       this.isRunning = true;
       this.stats.startedAt = new Date();
 
-      this.fastify.log.info('WebSocket server started successfully', {
+      this.fastify.log.info( {
         port: this.config.port,
         compression: this.config.enableCompression,
-      });
+      }, 'WebSocket server started successfully');
 
       this.emit('server-started', {
         port: this.config.port,
@@ -154,7 +154,7 @@ export class WebSocketService extends EventEmitter {
       });
 
     } catch (error) {
-      this.fastify.log.error('Failed to start WebSocket server:', error);
+      this.fastify.log.error({err: error, msg : 'Failed to start WebSocket server:'});
       throw error;
     }
   }
@@ -212,7 +212,7 @@ export class WebSocketService extends EventEmitter {
     });
 
     this.wss.on('error', (error) => {
-      this.fastify.log.error('WebSocket server error:', error);
+      this.fastify.log.error({err: error, msg : 'WebSocket server error:'});
       this.emit('server-error', error);
     });
 
@@ -303,7 +303,7 @@ export class WebSocketService extends EventEmitter {
         await this.handleIncomingMessage(client, message);
         this.stats.messagesReceived++;
       } catch (error) {
-        this.fastify.log.error(`Error handling message from ${connectionId}:`, error);
+        this.fastify.log.error({err: error, msg : `Error handling message from ${connectionId}:`});
         this.sendErrorToClient(client, 'Invalid message format');
       }
     });
@@ -316,7 +316,7 @@ export class WebSocketService extends EventEmitter {
 
     // Handle connection errors
     socket.on('error', (error) => {
-      this.fastify.log.error(`WebSocket connection error for ${connectionId}:`, error);
+      this.fastify.log.error({err: error, msg : `WebSocket connection error for ${connectionId}:`});
       this.removeClient(connectionId);
     });
 
@@ -336,12 +336,12 @@ export class WebSocketService extends EventEmitter {
   private async handleIncomingMessage(client: WebSocketClient, message: any): Promise<void> {
     const { type, event, data } = message;
 
-    this.fastify.log.debug('Received WebSocket message', {
+    this.fastify.log.debug( {
       connectionId: client.connectionId,
       type,
       event,
       authenticated: client.authenticated,
-    });
+    }, 'Received WebSocket message');
 
     switch (type) {
       case 'auth':
@@ -390,7 +390,7 @@ export class WebSocketService extends EventEmitter {
         }
 
         // Update client with user information
-        client.userId = verification.payload.userId;
+        client.userId = (verification.payload as any).userId;
         client.deviceType = deviceType || 'web';
         client.deviceId = deviceId;
         client.authenticated = true;
@@ -417,11 +417,11 @@ export class WebSocketService extends EventEmitter {
           timestamp: new Date(),
         });
 
-        this.fastify.log.info('WebSocket client authenticated', {
+        this.fastify.log.info( {
           connectionId: client.connectionId,
           userId: client.userId,
           deviceType: client.deviceType,
-        });
+        }, 'WebSocket client authenticated');
 
         this.emit('client-authenticated', {
           connectionId: client.connectionId,
@@ -435,7 +435,7 @@ export class WebSocketService extends EventEmitter {
       }
 
     } catch (error) {
-      this.fastify.log.error('Authentication error:', error);
+      this.fastify.log.error({err: error, msg: 'Authentication error:'});
       this.sendAuthenticationError(client, 'Authentication failed');
     }
   }
@@ -559,11 +559,11 @@ export class WebSocketService extends EventEmitter {
 
     await this.sendToUser(update.userId, message);
 
-    this.fastify.log.debug('Application status update sent', {
+    this.fastify.log.debug( {
       applicationId: update.applicationId,
       userId: update.userId,
       status: update.status,
-    });
+    }, 'Application status update sent');
   }
 
   /**
@@ -581,11 +581,11 @@ export class WebSocketService extends EventEmitter {
 
     await this.sendToUser(update.userId, message);
 
-    this.fastify.log.debug('Automation progress update sent', {
+    this.fastify.log.debug( {
       applicationId: update.applicationId,
       userId: update.userId,
       progress: update.progress,
-    });
+    }, 'Automation progress update sent');
   }
 
   /**
@@ -639,11 +639,11 @@ export class WebSocketService extends EventEmitter {
       this.sendToClient(client, message);
     }
 
-    this.fastify.log.debug('Message broadcasted to all clients', {
+    this.fastify.log.debug( {
       clientCount: authenticatedClients.length,
       messageType: message.type,
       event: message.event,
-    });
+    }, 'Message broadcasted to all clients');
   }
 
   /**
@@ -652,7 +652,7 @@ export class WebSocketService extends EventEmitter {
   async sendToUser(userId: string, message: WebSocketMessage): Promise<void> {
     const userConnections = this.userConnections.get(userId);
     if (!userConnections || userConnections.size === 0) {
-      this.fastify.log.debug('No active connections for user', { userId });
+      this.fastify.log.debug({ userId }, 'No active connections for user');
       return;
     }
 
@@ -678,7 +678,7 @@ export class WebSocketService extends EventEmitter {
         client.socket.send(messageStr);
         this.stats.messagesSent++;
       } catch (error) {
-        this.fastify.log.error(`Failed to send message to client ${client.connectionId}:`, error);
+        this.fastify.log.error({err: error, msg: `Failed to send message to client ${client.connectionId}:`});
         this.removeClient(client.connectionId);
       }
     }
@@ -841,7 +841,7 @@ export class WebSocketService extends EventEmitter {
       });
 
     } catch (error) {
-      this.fastify.log.error('Error getting application status:', error);
+      this.fastify.log.error({err: error, msg: 'Error getting application status:'});
       this.sendErrorToClient(client, 'Failed to get application status');
     }
   }
@@ -882,7 +882,7 @@ export class WebSocketService extends EventEmitter {
       });
 
     } catch (error) {
-      this.fastify.log.error('Error getting queue position:', error);
+      this.fastify.log.error({err: error, msg: 'Error getting queue position:'});
       this.sendErrorToClient(client, 'Failed to get queue position');
     }
   }
