@@ -738,7 +738,7 @@ class QueueService {
       case 'delayed':
         return QueueStatus.PENDING;
       case 'active':
-        return QueueStatus.RUNNING;
+        return QueueStatus.PROCESSING;
       case 'completed':
         return QueueStatus.COMPLETED;
       case 'failed':
