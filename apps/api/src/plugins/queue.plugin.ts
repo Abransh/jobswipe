@@ -837,7 +837,7 @@ const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
 
     fastify.log.info('✅ Queue Management Service initialized successfully');
   } catch (error) {
-    fastify.log.error('❌ Failed to initialize Queue Management Service:', error);
+    fastify.log.error({err: error, msg:'❌ Failed to initialize Queue Management Service:'});
     throw error;
   }
 
@@ -907,6 +907,20 @@ const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
             timestamp: { type: 'string' },
             stats: { type: 'object' },
           },
+        },
+        500: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+            timestamp: { type: "string" }
+          }
+        },
+        503: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+            timestamp: { type: "string" }
+          }
         },
       },
     },

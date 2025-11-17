@@ -115,10 +115,10 @@ export class OAuthService {
    */
   async initiateOAuthFlow(request: OAuthInitiationRequest): Promise<OAuthAuthorizationResponse> {
     try {
-      this.fastify.log.info('Initiating OAuth flow', {
+      this.fastify.log.info( {
         provider: request.provider,
         source: request.source,
-      });
+      }, 'Initiating OAuth flow');
 
       // Get OAuth strategy
       const strategy = this.getStrategy(request.provider);
@@ -140,10 +140,10 @@ export class OAuthService {
         source: request.source,
       });
 
-      this.fastify.log.info('OAuth authorization URL generated', {
+      this.fastify.log.info( {
         provider: request.provider,
         stateId: oauthState.id,
-      });
+      }, 'OAuth authorization URL generated');
 
       return {
         authorizationUrl,
@@ -151,7 +151,7 @@ export class OAuthService {
         codeVerifier: oauthState.codeVerifier,
       };
     } catch (error) {
-      this.fastify.log.error('Failed to initiate OAuth flow:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to initiate OAuth flow:'});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to initiate OAuth flow',
@@ -171,18 +171,18 @@ export class OAuthService {
    */
   async handleOAuthCallback(request: OAuthCallbackRequest): Promise<OAuthCallbackResponse> {
     try {
-      this.fastify.log.info('Handling OAuth callback', {
+      this.fastify.log.info( {
         provider: request.provider,
         hasCode: !!request.code,
         hasError: !!request.error,
-      });
+      }, 'Handling OAuth callback');
 
       // Check for OAuth provider errors
       if (request.error) {
-        this.fastify.log.warn('OAuth provider returned error', {
+        this.fastify.log.warn( {
           error: request.error,
           description: request.errorDescription,
-        });
+        }, 'OAuth provider returned error');
 
         return {
           success: false,
@@ -242,11 +242,11 @@ export class OAuthService {
         source: oauthState.source,
       });
 
-      this.fastify.log.info('OAuth callback completed successfully', {
+      this.fastify.log.info( {
         userId: accountResult.user.id,
         provider: request.provider,
         isNewUser: accountResult.isNewUser,
-      });
+      }, 'OAuth callback completed successfully');
 
       return {
         success: true,
@@ -272,7 +272,7 @@ export class OAuthService {
       };
     } catch (error) {
       if (error instanceof AuthError) {
-        this.fastify.log.warn('OAuth callback failed with known error:', error);
+        this.fastify.log.warn({err: error, msg: 'OAuth callback failed with known error:'});
         return {
           success: false,
           error: error.message,
@@ -280,7 +280,7 @@ export class OAuthService {
         };
       }
 
-      this.fastify.log.error('OAuth callback failed with unexpected error:', error);
+      this.fastify.log.error({err: error, msg: 'OAuth callback failed with unexpected error:'});
       return {
         success: false,
         error: 'OAuth authentication failed',
@@ -360,7 +360,7 @@ export class OAuthService {
         throw error;
       }
 
-      this.fastify.log.error('Failed to create/link OAuth account:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to create/link OAuth account:'});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to create or link account',
@@ -380,10 +380,10 @@ export class OAuthService {
     source: OAuthSource
   ): Promise<OAuthAccountCreationResult> {
     try {
-      this.fastify.log.info('Creating new OAuth user', {
+      this.fastify.log.info( {
         provider,
         email: profile.email,
-      });
+      }, 'Creating new OAuth user');
 
       // Create user with OAuth account in transaction
       const user = await this.fastify.db.user.create({
@@ -449,11 +449,11 @@ export class OAuthService {
         );
       }
 
-      this.fastify.log.info('New OAuth user created successfully', {
+      this.fastify.log.info( {
         userId: user.id,
         provider,
         profileSynced,
-      });
+      }, 'New OAuth user created successfully');
 
       return {
         user,
@@ -462,7 +462,7 @@ export class OAuthService {
         profileSynced,
       };
     } catch (error) {
-      this.fastify.log.error('Failed to create new OAuth user:', error);
+      this.fastify.log.error({ err: error, msg: 'Failed to create new OAuth user:'});
       throw error;
     }
   }
@@ -478,10 +478,10 @@ export class OAuthService {
     rawTokens: OAuthProviderTokens
   ): Promise<OAuthAccountCreationResult> {
     try {
-      this.fastify.log.info('Linking OAuth provider to existing user', {
+      this.fastify.log.info( {
         userId: user.id,
         provider,
-      });
+      }, 'Linking OAuth provider to existing user');
 
       // Check if provider already linked
       const existingAccount = user.accounts.find((acc: any) => acc.provider === provider);
@@ -564,11 +564,11 @@ export class OAuthService {
         );
       }
 
-      this.fastify.log.info('OAuth provider linked successfully', {
+      this.fastify.log.info( {
         userId: user.id,
         provider,
         profileSynced,
-      });
+      }, 'OAuth provider linked successfully');
 
       return {
         user: updatedUser,
@@ -577,7 +577,7 @@ export class OAuthService {
         profileSynced,
       };
     } catch (error) {
-      this.fastify.log.error('Failed to link OAuth provider:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to link OAuth provider:'});
       throw error;
     }
   }
@@ -602,12 +602,12 @@ export class OAuthService {
         return false;
       }
 
-      this.fastify.log.info('Syncing LinkedIn profile', {
+      this.fastify.log.info( {
         userId,
         hasPositions: !!profile.positions?.length,
         hasSkills: !!profile.skills?.length,
         hasEducation: !!profile.educations?.length,
-      });
+      }, 'Syncing LinkedIn profile',);
 
       // Calculate current position
       const currentPosition = profile.positions?.find(p => p.isCurrent) || profile.positions?.[0];
@@ -635,16 +635,16 @@ export class OAuthService {
         },
       });
 
-      this.fastify.log.info('LinkedIn profile synced successfully', {
+      this.fastify.log.info( {
         userId,
         yearsOfExperience,
         experienceLevel,
         skillsCount: skills.length,
-      });
+      }, 'LinkedIn profile synced successfully',);
 
       return true;
     } catch (error) {
-      this.fastify.log.error('Failed to sync LinkedIn profile:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to sync LinkedIn profile:'});
       return false;
     }
   }
@@ -717,7 +717,7 @@ export class OAuthService {
         refreshToken,
       };
     } catch (error) {
-      this.fastify.log.error('Failed to generate JWT tokens:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to generate JWT tokens:'});
       throw error;
     }
   }
@@ -755,7 +755,7 @@ export class OAuthService {
         isPrimary: user?.primaryAuthProvider === account.provider,
       }));
     } catch (error) {
-      this.fastify.log.error('Failed to get linked accounts:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to get linked accounts:'});
       throw error;
     }
   }
@@ -765,7 +765,7 @@ export class OAuthService {
    */
   async unlinkOAuthProvider(userId: string, provider: OAuthProvider): Promise<boolean> {
     try {
-      this.fastify.log.info('Unlinking OAuth provider', { userId, provider });
+      this.fastify.log.info({ userId, provider }, 'Unlinking OAuth provider');
 
       // Check if user has password (can't unlink if no other auth method)
       const user = await this.fastify.db.user.findUnique({
@@ -810,7 +810,7 @@ export class OAuthService {
       // Log audit event
       await this.logOAuthEvent('oauth_unlink', userId, provider);
 
-      this.fastify.log.info('OAuth provider unlinked successfully', { userId, provider });
+      this.fastify.log.info( { userId, provider }, 'OAuth provider unlinked successfully');
 
       return true;
     } catch (error) {
@@ -818,7 +818,7 @@ export class OAuthService {
         throw error;
       }
 
-      this.fastify.log.error('Failed to unlink OAuth provider:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to unlink OAuth provider:'});
       throw createAuthError(
         AuthErrorCode.INTERNAL_ERROR,
         'Failed to unlink OAuth provider',
@@ -886,7 +886,7 @@ export class OAuthService {
         },
       });
     } catch (error) {
-      this.fastify.log.warn('Failed to log OAuth audit event:', error);
+      this.fastify.log.warn({err: error, msg : 'Failed to log OAuth audit event:'});
       // Don't fail the OAuth flow if audit logging fails
     }
   }

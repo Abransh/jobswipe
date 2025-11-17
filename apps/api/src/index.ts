@@ -814,7 +814,7 @@ async function createServer(): Promise<FastifyInstance> {
     
     // Use logging service if available
     if (server.logging && (request as any).logContext) {
-      server.logging.logError(error, (request as any).logContext, {
+      server.logging.logError(error as Error, (request as any).logContext, {
         url: request.url,
         method: request.method,
         body: request.body,
@@ -823,8 +823,8 @@ async function createServer(): Promise<FastifyInstance> {
       });
     } else {
       server.log.error({
-        error: error.message,
-        stack: error.stack,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
         request: {
           method: request.method,
           url: request.url,
@@ -836,18 +836,18 @@ async function createServer(): Promise<FastifyInstance> {
     }
 
     // Validation errors
-    if (error.validation) {
+    if (error && typeof error === 'object' && 'validation' in error) {
       return reply.code(400).send({
         error: 'Validation Error',
         message: 'Invalid request data',
-        details: error.validation,
+        details: (error as any).validation,
         statusCode: 400,
         timestamp: new Date().toISOString(),
       });
     }
 
     // Rate limit errors
-    if (error.statusCode === 429) {
+    if (error && typeof error === 'object' && 'statusCode' in error && (error as any).statusCode === 429) {
       return reply.code(429).send({
         error: 'Too Many Requests',
         message: 'Rate limit exceeded',
@@ -857,7 +857,7 @@ async function createServer(): Promise<FastifyInstance> {
     }
 
     // Authentication errors
-    if (error.statusCode === 401) {
+    if (error && typeof error === 'object' && 'statusCode' in error && (error as any).statusCode === 401) {
       return reply.code(401).send({
         error: 'Unauthorized',
         message: 'Authentication required',
@@ -867,7 +867,7 @@ async function createServer(): Promise<FastifyInstance> {
     }
 
     // Authorization errors
-    if (error.statusCode === 403) {
+    if (error && typeof error === 'object' && 'statusCode' in error && (error as any).statusCode === 403) {
       return reply.code(403).send({
         error: 'Forbidden',
         message: 'Insufficient permissions',
@@ -877,7 +877,7 @@ async function createServer(): Promise<FastifyInstance> {
     }
 
     // Not found errors
-    if (error.statusCode === 404) {
+    if (error && typeof error === 'object' && 'statusCode' in error && (error as any).statusCode === 404) {
       return reply.code(404).send({
         error: 'Not Found',
         message: 'Resource not found',
@@ -887,13 +887,15 @@ async function createServer(): Promise<FastifyInstance> {
     }
 
     // Internal server errors
-    const statusCode = error.statusCode || 500;
+    const statusCode = (error && typeof error === 'object' && 'statusCode' in error) ? (error as any).statusCode : 500;
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return reply.code(statusCode).send({
       error: 'Internal Server Error',
-      message: isDev ? error.message : 'An unexpected error occurred',
+      message: isDev ? errorMessage : 'An unexpected error occurred',
       statusCode,
       timestamp: new Date().toISOString(),
-      ...(isDev && { stack: error.stack }),
+      ...(isDev && errorStack && { stack: errorStack }),
     });
   });
 

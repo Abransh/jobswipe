@@ -192,7 +192,8 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
       // Check for suspicious activity
       if (await isSuspiciousActivity(request, payload)) {
         authContext.isSuspicious = true;
-        request.server.log.warn('Suspicious activity detected', {
+        request.server.log.warn({
+          msg: 'Suspicious activity detected',
           userId: user.id,
           ipAddress: request.ipAddress,
           userAgent: request.headers['user-agent'],
@@ -201,7 +202,7 @@ export function createAuthMiddleware(options: AuthMiddlewareOptions = {}) {
       }
 
     } catch (error) {
-      request.server.log.error('Authentication middleware error:', error);
+      request.server.log.error({ err: error, msg: 'Authentication middleware error' });
       
       if (error instanceof Error && error.message.includes('AUTH_')) {
         // This is an auth error, pass it through

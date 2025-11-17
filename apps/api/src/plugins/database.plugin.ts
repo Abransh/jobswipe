@@ -104,16 +104,16 @@ class DatabaseManager {
       await this.testConnection();
       this.connectionChecked = true;
 
-      this.fastify.log.info('✅ Database connection established successfully', {
+      this.fastify.log.info({
         environment: envConfig.nodeEnv,
         databaseUrl: process.env.DATABASE_URL ? '***configured***' : 'not set'
-      });
+      }, '✅ Database connection established successfully');
 
       // Setup cleanup on app close
       this.fastify.addHook('onClose', this.cleanup.bind(this));
 
     } catch (error) {
-      this.fastify.log.error('❌ Failed to establish database connection:', error);
+      this.fastify.log.error({err: error, msg: '❌ Failed to establish database connection:'});
 
       // CRITICAL: In production, database connection failure is fatal
       if (envConfig.nodeEnv === 'production') {
@@ -138,7 +138,7 @@ class DatabaseManager {
       await db.$queryRaw`SELECT 1 as test`;
       this.fastify.log.debug('Database connection test successful');
     } catch (error) {
-      this.fastify.log.error('Database connection test failed:', error);
+      this.fastify.log.error({err: error, msg: 'Database connection test failed:'});
       throw error;
     }
   }
@@ -197,7 +197,7 @@ class DatabaseManager {
     try {
       return await db.$transaction(callback);
     } catch (error) {
-      this.fastify.log.error('Database transaction failed:', error);
+      this.fastify.log.error({err: error, msg:'Database transaction failed:'});
       throw error;
     }
   }
@@ -211,7 +211,7 @@ class DatabaseManager {
         await db.$disconnect();
         this.fastify.log.info('Database connections closed');
       } catch (error) {
-        this.fastify.log.error('Error closing database connections:', error);
+        this.fastify.log.error({err: error, msg:'Error closing database connections:'});
       }
     }
   }
@@ -250,7 +250,7 @@ class DatabaseService {
       return user;
 
     } catch (error) {
-      this.fastify.log.error('Error retrieving user:', error);
+      this.fastify.log.error({err: error, msg:'Error retrieving user:'});
       throw new Error(`Failed to retrieve user: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -269,7 +269,7 @@ class DatabaseService {
       return result;
 
     } catch (error) {
-      this.fastify.log.error('Query execution failed:', error);
+      this.fastify.log.error({err: error, msg:'Query execution failed:'});
       throw error;
     }
   }
@@ -311,15 +311,15 @@ const databasePlugin: FastifyPluginAsync<DatabasePluginOptions> = async (
     // In production, initialize() will already throw - this catch won't be reached
     // unless there's an unexpected error. Re-throw to prevent server startup.
     if (envConfig.nodeEnv === 'production') {
-      fastify.log.fatal('CRITICAL: Database initialization failed in production', { error: errorMessage });
+      fastify.log.fatal({ error: errorMessage }, 'CRITICAL: Database initialization failed in production');
       throw error;
     }
 
     // In development, log the error and continue without database
-    fastify.log.warn('⚠️  Database initialization failed in development mode - continuing without database', {
+    fastify.log.warn({
       error: errorMessage,
       warning: 'Database operations will fail until database is properly configured'
-    });
+    }, '⚠️  Database initialization failed in development mode - continuing without database');
   }
 
   // Create database service

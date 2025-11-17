@@ -131,14 +131,14 @@ export class AuthService {
     this.refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d'; // 7 days (secure default)
     this.saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12');
 
-    this.fastify.log.info('✅ AuthService initialized securely with configuration:', {
+    this.fastify.log.info( {
       defaultExpiresIn: this.defaultExpiresIn,
       refreshExpiresIn: this.refreshExpiresIn,
       saltRounds: this.saltRounds,
       jwtSecretLength: this.jwtSecret.length,
       refreshSecretLength: this.jwtRefreshSecret.length,
       environment: process.env.NODE_ENV || 'development'
-    });
+    }, '✅ AuthService initialized securely with configuration:',);
   }
 
   // =============================================================================
@@ -182,13 +182,13 @@ export class AuthService {
         algorithm: 'HS256',
       });
 
-      this.fastify.log.info('JWT token created successfully', {
+      this.fastify.log.info( {
         tokenId,
         userId: request.userId,
         email: request.email,
         expiresAt: expiresAt.toISOString(),
         deviceId: request.deviceId,
-      });
+      }, 'JWT token created successfully',);
 
       return {
         token,
@@ -199,7 +199,7 @@ export class AuthService {
       };
 
     } catch (error) {
-      this.fastify.log.error('Failed to create JWT token:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to create JWT token:'});
       throw new Error('Token creation failed');
     }
   }
@@ -252,17 +252,17 @@ export class AuthService {
             };
           }
         } catch (dbError) {
-          this.fastify.log.warn('Could not verify user status from database:', dbError);
+          this.fastify.log.warn({err: dbError, msg: 'Could not verify user status from database:'});
           // Continue with token validation if DB is unavailable
         }
       }
 
-      this.fastify.log.debug('JWT token verified successfully', {
+      this.fastify.log.debug( {
         tokenId: payload.jti,
         userId: payload.sub,
         email: payload.email,
         expiresAt: new Date(payload.exp * 1000).toISOString(),
-      });
+      }, 'JWT token verified successfully');
 
       return {
         valid: true,
@@ -271,9 +271,9 @@ export class AuthService {
 
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        this.fastify.log.warn('JWT token expired:', {
+        this.fastify.log.warn({
           expiredAt: error.expiredAt,
-        });
+        }, 'JWT token expired:');
         return {
           valid: false,
           error: 'Token expired',
@@ -282,14 +282,14 @@ export class AuthService {
       }
 
       if (error instanceof jwt.JsonWebTokenError) {
-        this.fastify.log.warn('JWT token validation failed:', error.message);
+        this.fastify.log.warn({err: error.message, msg: 'JWT token validation failed:'});
         return {
           valid: false,
           error: 'Invalid token',
         };
       }
 
-      this.fastify.log.error('Unexpected error during token verification:', error);
+      this.fastify.log.error({err: error}, 'Unexpected error during token verification:');
       return {
         valid: false,
         error: 'Token verification failed',
@@ -319,17 +319,17 @@ export class AuthService {
         algorithm: 'HS256',
       });
 
-      this.fastify.log.info('Refresh token created successfully', {
+      this.fastify.log.info( {
         userId,
         deviceId,
         tokenId: payload.jti,
         expiresAt: new Date(payload.exp * 1000).toISOString(),
-      });
+      }, 'Refresh token created successfully', );
 
       return refreshToken;
 
     } catch (error) {
-      this.fastify.log.error('Failed to create refresh token:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to create refresh token:'});
       throw new Error('Refresh token creation failed');
     }
   }
@@ -381,11 +381,11 @@ export class AuthService {
       }
 
       if (error instanceof jwt.JsonWebTokenError) {
-        this.fastify.log.warn('Invalid refresh token:', error.message);
+        this.fastify.log.warn({ err: error.message, msg: 'Invalid refresh token:'});
         throw new Error('Invalid refresh token');
       }
 
-      this.fastify.log.error('Refresh token verification failed:', error);
+      this.fastify.log.error({ err: error, msg:'Refresh token verification failed:'});
       throw new Error('Refresh token verification failed');
     }
   }
@@ -405,14 +405,14 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(password, this.saltRounds);
 
-      this.fastify.log.debug('Password hashed successfully', {
+      this.fastify.log.debug({
         saltRounds: this.saltRounds,
-      });
+      }, 'Password hashed successfully');
 
       return hashedPassword;
 
     } catch (error) {
-      this.fastify.log.error('Password hashing failed:', error);
+      this.fastify.log.error({ err: error, msg:'Password hashing failed:'});
       throw new Error('Password hashing failed');
     }
   }
@@ -428,14 +428,14 @@ export class AuthService {
 
       const isValid = await bcrypt.compare(password, hashedPassword);
 
-      this.fastify.log.debug('Password verification completed', {
+      this.fastify.log.debug({
         isValid,
-      });
+      }, 'Password verification completed');
 
       return isValid;
 
     } catch (error) {
-      this.fastify.log.error('Password verification failed:', error);
+      this.fastify.log.error({err: error, msg: 'Password verification failed:'});
       return false;
     }
   }

@@ -49,7 +49,7 @@ export class GoogleStrategy extends BaseOAuthStrategy {
 
     // Initialize OpenID Connect client
     this.initializeOpenIDClient().catch((error) => {
-      this.fastify.log.error('Failed to initialize Google OpenID client:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to initialize Google OpenID client:'});
     });
   }
 
@@ -132,7 +132,7 @@ export class GoogleStrategy extends BaseOAuthStrategy {
         hd: rawProfile.hd, // Hosted domain for Google Workspace
       };
     } catch (error) {
-      this.fastify.log.error('Failed to parse Google profile:', error);
+      this.fastify.log.error({err: error, msg:'Failed to parse Google profile:'});
       throw new Error('Failed to parse Google user profile');
     }
   }
@@ -151,12 +151,12 @@ export class GoogleStrategy extends BaseOAuthStrategy {
       // Discover Google's OpenID Connect configuration
       const googleIssuer = await Issuer.discover(GOOGLE_DISCOVERY_URL);
 
-      this.fastify.log.info('Google OpenID Connect issuer discovered', {
+      this.fastify.log.info( {
         issuer: googleIssuer.issuer,
         authorizationEndpoint: googleIssuer.metadata.authorization_endpoint,
         tokenEndpoint: googleIssuer.metadata.token_endpoint,
         userinfoEndpoint: googleIssuer.metadata.userinfo_endpoint,
-      });
+      }, 'Google OpenID Connect issuer discovered',);
 
       // Create OpenID Connect client
       this.openidClient = new googleIssuer.Client({
@@ -168,7 +168,7 @@ export class GoogleStrategy extends BaseOAuthStrategy {
 
       this.fastify.log.info('Google OpenID Connect client initialized successfully');
     } catch (error) {
-      this.fastify.log.error('Failed to initialize Google OpenID Connect client:', error);
+      this.fastify.log.error({err: error, msg:'Failed to initialize Google OpenID Connect client:'});
       throw error;
     }
   }
@@ -192,19 +192,19 @@ export class GoogleStrategy extends BaseOAuthStrategy {
       if (idToken && this.openidClient) {
         try {
           const claims = await this.openidClient.userinfo(accessToken);
-          this.fastify.log.debug('OpenID Connect claims received', {
+          this.fastify.log.debug( {
             sub: claims.sub,
             email: claims.email,
-          });
+          }, 'OpenID Connect claims received');
         } catch (error) {
-          this.fastify.log.warn('Failed to verify ID token:', error);
+          this.fastify.log.warn({err: error, msg:'Failed to verify ID token:'});
           // Continue with profile from UserInfo endpoint
         }
       }
 
       return profile as GoogleOAuthProfile;
     } catch (error) {
-      this.fastify.log.error('Failed to get Google user profile with OpenID:', error);
+      this.fastify.log.error({err: error, msg:'Failed to get Google user profile with OpenID:'});
       throw error;
     }
   }
@@ -223,14 +223,14 @@ export class GoogleStrategy extends BaseOAuthStrategy {
       const tokenSet = new TokenSet({ id_token: idToken });
       const claims = tokenSet.claims();
 
-      this.fastify.log.debug('ID token verified and decoded', {
+      this.fastify.log.debug( {
         sub: claims.sub,
         email: claims.email,
-      });
+      }, 'ID token verified and decoded');
 
       return claims;
     } catch (error) {
-      this.fastify.log.error('Failed to verify Google ID token:', error);
+      this.fastify.log.error({err: error, msg:'Failed to verify Google ID token:'});
       throw error;
     }
   }

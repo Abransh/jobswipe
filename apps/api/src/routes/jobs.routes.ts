@@ -220,7 +220,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       });
 
     } catch (error) {
-      fastify.log.error('❌ Error fetching jobs:', error);
+      fastify.log.error({err: error, msg: '❌ Error fetching jobs:'});
       reply.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch jobs',
@@ -251,7 +251,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       });
 
     } catch (error) {
-      fastify.log.error('❌ Error fetching proximity jobs:', error);
+      fastify.log.error({err: error, msg: '❌ Error fetching proximity jobs:'});
       reply.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch proximity jobs',
@@ -274,7 +274,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           limit = 100,
         } = params || {};
 
-        fastify.log.info('📥 Manual job sync requested:', { location, keywords, sources, limit });
+        fastify.log.info({ msg: '📥 Manual job sync requested:', location, keywords, sources, limit });
 
         // TODO: Implement actual job scraping and syncing logic
         // For now, return success response
@@ -306,7 +306,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
         });
       }
     } catch (error) {
-      fastify.log.error('❌ Error in job management:', error);
+      fastify.log.error({err: error, msg: '❌ Error in job management:'});
       reply.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Internal server error',
@@ -320,7 +320,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       const searchParams = request.body as any;
       const userId = request.headers['x-user-id'] as string;
       
-      fastify.log.info('🔍 Advanced job search requested:', searchParams);
+      fastify.log.info({ msg: '🔍 Advanced job search requested', searchParams });
 
       // Enhanced search parameters
       const searchOptions = {
@@ -371,7 +371,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       });
 
     } catch (error) {
-      fastify.log.error('❌ Error in advanced search:', error);
+      fastify.log.error({err: error, msg: '❌ Error in advanced search:'});
       reply.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Advanced search failed',
@@ -409,7 +409,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       });
 
     } catch (error) {
-      fastify.log.error('❌ Error fetching job details:', error);
+      fastify.log.error({err: error, msg: '❌ Error fetching job details:'});
       reply.status(500).send({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch job details',
@@ -467,6 +467,51 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           },
         },
         201: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' },
+            correlationId: { type: 'string' },
+          },
+        },
+        409: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' },
+            correlationId: { type: 'string' },
+          },
+        },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' },
+            correlationId: { type: 'string' },
+          },
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' },
+            correlationId: { type: 'string' },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: { type: 'object' },
+            correlationId: { type: 'string' },
+          },
+        },
+        410: {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
@@ -1017,6 +1062,20 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
             data: { type: 'object' },
           },
         },
+        500: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: { type: 'object' },
+          },
+        },
+        400: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            data: { type: 'object' },
+          },
+        },
       },
     },
   }, async (request, reply) => {
@@ -1024,7 +1083,8 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       const query = request.query as any;
       const user = getAuthenticatedUser(request);
 
-      fastify.log.info('📱 Job recommendations requested', {
+      fastify.log.info({
+        msg: '📱 Job recommendations requested',
         userId: user.id,
         filters: query,
       });
@@ -1177,7 +1237,8 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
         },
       }));
 
-      fastify.log.info('📱 Job recommendations retrieved successfully', {
+      fastify.log.info({
+        msg: '📱 Job recommendations retrieved successfully',
         userId: user.id,
         totalJobs: totalCount,
         returnedJobs: formattedJobs.length,
@@ -1210,7 +1271,7 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
       });
 
     } catch (error) {
-      fastify.log.error('❌ Error fetching job recommendations:', error);
+      fastify.log.error({err: error, msg: '❌ Error fetching job recommendations:'});
       return reply.code(500).send({
         success: false,
         error: 'Failed to fetch job recommendations',

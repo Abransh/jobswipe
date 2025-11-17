@@ -525,7 +525,7 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
 
       reply.send(result);
     } catch (error) {
-      fastify.log.error('Token exchange initiation failed:', error);
+      fastify.log.error({err: error, msg: 'Token exchange initiation failed:'});
       
       if (error instanceof Error && error.message.includes('rate limit')) {
         reply.code(429);
@@ -632,7 +632,7 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
 
       reply.send(result);
     } catch (error) {
-      fastify.log.error('Token exchange completion failed:', error);
+      fastify.log.error({err: error, msg:'Token exchange completion failed:'});
       
       if (error instanceof Error && error.message.includes('rate limit')) {
         reply.code(429);
@@ -692,7 +692,7 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
         expiresAt: result.expiresAt?.toISOString(),
       });
     } catch (error) {
-      fastify.log.error('Token exchange verification failed:', error);
+      fastify.log.error({err: error, msg:'Token exchange verification failed:'});
       reply.send({ valid: false });
     }
   });
@@ -735,7 +735,7 @@ export default async function tokenExchangeRoutes(fastify: FastifyInstance) {
         message: 'Token exchange cancelled',
       });
     } catch (error) {
-      fastify.log.error('Token exchange cancellation failed:', error);
+      fastify.log.error({err: error, msg:'Token exchange cancellation failed:'});
       reply.code(400).send({
         success: false,
         error: error instanceof Error ? error.message : 'Cancellation failed',

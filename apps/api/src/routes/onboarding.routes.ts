@@ -35,7 +35,7 @@ async function authMiddleware(request: AuthRequest, reply: FastifyReply): Promis
     }
 
     request.user = {
-      id: (tokenResult.payload.sub || tokenResult.payload.userId) as UserId,
+      id: (tokenResult.payload.sub || (tokenResult.payload as any).userId) as UserId,
       email: tokenResult.payload.email,
       role: tokenResult.payload.role,
       status: tokenResult.payload.status,

@@ -121,7 +121,7 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
 
       return profile;
     } catch (error) {
-      this.fastify.log.error('Failed to parse LinkedIn profile:', error);
+      this.fastify.log.error({err: error, msg: 'Failed to parse LinkedIn profile:'});
       throw new Error('Failed to parse LinkedIn user profile');
     }
   }
@@ -160,16 +160,16 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
       // Extract headline and summary if available
       await this.enrichProfileData(fullProfile, accessToken);
 
-      this.fastify.log.info('Successfully fetched full LinkedIn profile', {
+      this.fastify.log.info( {
         userId: fullProfile.id,
         positionsCount: fullProfile.positions?.length || 0,
         educationsCount: fullProfile.educations?.length || 0,
         skillsCount: fullProfile.skills?.length || 0,
-      });
+      }, 'Successfully fetched full LinkedIn profile');
 
       return fullProfile;
     } catch (error) {
-      this.fastify.log.error('Failed to fetch full LinkedIn profile:', error);
+      this.fastify.log.error({err: error, msg:'Failed to fetch full LinkedIn profile:'});
       // Return basic profile if extended data fetch fails
       return await this.getUserProfile(accessToken) as LinkedInOAuthProfile;
     }
@@ -217,9 +217,9 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
 
       return positions;
     } catch (error: any) {
-      this.fastify.log.warn('Failed to fetch LinkedIn positions (may require additional scopes):', {
+      this.fastify.log.warn({
         status: error.response?.status,
-      });
+      }, 'Failed to fetch LinkedIn positions (may require additional scopes):');
       return [];
     }
   }
@@ -257,9 +257,9 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
 
       return educations;
     } catch (error: any) {
-      this.fastify.log.warn('Failed to fetch LinkedIn education (may require additional scopes):', {
+      this.fastify.log.warn( {
         status: error.response?.status,
-      });
+      }, 'Failed to fetch LinkedIn education (may require additional scopes):');
       return [];
     }
   }
@@ -289,9 +289,9 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
 
       return skills;
     } catch (error: any) {
-      this.fastify.log.warn('Failed to fetch LinkedIn skills (may require additional scopes):', {
+      this.fastify.log.warn( {
         status: error.response?.status,
-      });
+      }, 'Failed to fetch LinkedIn skills (may require additional scopes):');
       return [];
     }
   }
@@ -325,7 +325,7 @@ export class LinkedInStrategy extends BaseOAuthStrategy {
         profile.summary = response.data.summary;
       }
     } catch (error) {
-      this.fastify.log.debug('Could not fetch LinkedIn headline/summary:', error);
+      this.fastify.log.debug({err: error, msg:'Could not fetch LinkedIn headline/summary:'});
       // Non-critical, continue without this data
     }
   }
