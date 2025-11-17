@@ -7037,7 +7037,7 @@ snapshots:
       content-disposition: 0.5.4
       fastify-plugin: 5.1.0
       fastq: 1.19.1
-      glob: 11.0.3
+      glob: 11.1.0
 
   '@fastify/swagger-ui@1.10.2':
     dependencies:
