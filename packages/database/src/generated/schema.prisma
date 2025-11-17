@@ -35,6 +35,8 @@ model User {
   userAgent             String?
   timezone              String?
   locale                String?            @default("en")
+  oauthProviders        String[]           @default([]) // Track linked OAuth providers
+  primaryAuthProvider   String? // 'email' | 'google' | 'github' | 'linkedin'
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   accounts              Account[]
@@ -185,6 +187,23 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model OAuthState {
+  id           String   @id @default(uuid())
+  state        String   @unique
+  codeVerifier String? // PKCE code verifier for enhanced security
+  provider     String // 'google' | 'github' | 'linkedin'
+  redirectUri  String // Where to redirect after OAuth
+  source       String // 'web' | 'desktop' | 'mobile'
+  metadata     Json? // Additional data (deviceId, etc.)
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime // State expires after 10 minutes
+
+  @@index([state])
+  @@index([expiresAt])
+  @@index([provider])
+  @@map("oauth_states")
 }
 
 model UserJobSwipe {
