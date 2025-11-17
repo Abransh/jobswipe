@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Any, Union
 
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
-from browser_use.tools.service import Controller
+from browser_use.controller.service import Controller
 from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
 from pydantic import BaseModel, Field
@@ -177,7 +177,7 @@ class BaseJobAutomation(ABC):
         browser_options = self.context.get_browser_launch_options()
 
         self.logger.info(f"Creating browser session for {self.context.mode.value} mode")
-        self.logger.info(f"Headless: {browser_options.get('headless', True)}")
+        self.logger.info(f"Headless: {browser_options.get('headless', False)}")
 
         # Log proxy info if present (server mode)
         if 'proxy' in browser_options and browser_options['proxy']:
