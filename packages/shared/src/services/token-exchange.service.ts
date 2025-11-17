@@ -14,8 +14,7 @@ import {
   createBrandedId
 } from '../types/auth';
 import { createAuthError, AuthErrorCode } from '../types/auth';
-// TEMP: Commented out until jwt-token.service.ts is available
-// import { JwtTokenService, createDesktopTokenConfig } from './jwt-token.service';
+import { JwtTokenService, createDesktopTokenConfig } from './jwt-token-helper';
 import { ServerJwtTokenService } from './server-jwt-token.service';
 import { RedisSessionService } from './redis-session-stub.service';
 import { generateSecureToken, createSecureHash } from '../utils/security';

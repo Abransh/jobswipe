@@ -26,6 +26,7 @@
     "noImplicitThis": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "useUnknownInCatchVariables": false,
     "paths": {
       "@jobswipe/shared": ["../../packages/shared/dist/index"],
       "@jobswipe/shared/server": ["../../packages/shared/dist/server"],
