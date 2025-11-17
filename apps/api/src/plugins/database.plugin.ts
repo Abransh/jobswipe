@@ -420,5 +420,5 @@ const databasePlugin: FastifyPluginAsync<DatabasePluginOptions> = async (
 
 export default fastifyPlugin(databasePlugin as any, {
   name: 'database',
-  fastify: '4.x'
+  fastify: '5.x'
 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest, AuthError } from '@/lib/api/auth';
-import { db } from '@jobswipe/database';
+import { db, QueueStatus } from '@jobswipe/database';
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,12 +52,12 @@ export async function GET(request: NextRequest) {
 
     // Calculate status breakdown from queue
     const statusBreakdown = {
-      pending: queueItems.filter(q => q.status === 'PENDING').length,
-      queued: queueItems.filter(q => q.status === 'QUEUED').length,
-      processing: queueItems.filter(q => q.status === 'PROCESSING').length,
-      completed: queueItems.filter(q => q.status === 'COMPLETED').length,
-      failed: queueItems.filter(q => q.status === 'FAILED').length,
-      cancelled: queueItems.filter(q => q.status === 'CANCELLED').length
+      pending: queueItems.filter(q => q.status === QueueStatus.PENDING).length,
+      queued: queueItems.filter(q => q.status === QueueStatus.QUEUED).length,
+      processing: queueItems.filter(q => q.status === QueueStatus.PROCESSING).length,
+      completed: queueItems.filter(q => q.status === QueueStatus.COMPLETED).length,
+      failed: queueItems.filter(q => q.status === QueueStatus.FAILED).length,
+      cancelled: queueItems.filter(q => q.status === QueueStatus.CANCELLED).length
     };
 
     // Format recent applications

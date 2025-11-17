@@ -67,6 +67,9 @@ export function EnhancedSignUpForm() {
         password: data.password,
         firstName: data.firstName,
         lastName: data.lastName,
+        source: 'web' as const, // AuthSource.WEB
+        termsAccepted: data.termsAccepted,
+        privacyAccepted: data.termsAccepted, // Using termsAccepted for both (form has single checkbox)
       });
 
       if (result.success) {

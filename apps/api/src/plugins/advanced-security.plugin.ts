@@ -8,19 +8,49 @@
 import { FastifyInstance } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 
+// =============================================================================
+// INTERFACES & TYPES
+// =============================================================================
+
+interface AdvancedSecurityService {
+  getHealthStatus: () => { status: string; features: string };
+}
+
+// =============================================================================
+// PLUGIN IMPLEMENTATION
+// =============================================================================
+
 async function advancedSecurityPlugin(fastify: FastifyInstance, options: any): Promise<void> {
   fastify.log.info('Advanced Security Plugin initialized (minimal mode)');
-  
+
   // Placeholder for advanced security features
-  fastify.decorate('advancedSecurity', {
+  const securityService: AdvancedSecurityService = {
     getHealthStatus: () => ({ status: 'healthy', features: 'minimal' })
-  });
+  };
+
+  fastify.decorate('advancedSecurity', securityService);
 }
+
+// =============================================================================
+// TYPE DECLARATIONS
+// =============================================================================
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    advancedSecurity: AdvancedSecurityService;
+  }
+}
+
+// =============================================================================
+// EXPORTS
+// =============================================================================
 
 export default fastifyPlugin(advancedSecurityPlugin as any, {
   name: 'advanced-security',
-  fastify: '4.x',
+  fastify: '5.x',
 });
+
+export type { AdvancedSecurityService };
 
 // import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 // import fastifyPlugin from 'fastify-plugin';
@@ -795,7 +825,7 @@ export default fastifyPlugin(advancedSecurityPlugin as any, {
 
 // export default fastifyPlugin(advancedSecurityPlugin as any, {
 //   name: 'advanced-security',
-//   fastify: '4.x',
+//   fastify: '5.x',
 // });
 
 // export type {

@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QrCode, Smartphone, Monitor, Shield, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,10 +40,10 @@ interface TokenExchangeResult {
 }
 
 // =============================================================================
-// DESKTOP AUTH PORTAL COMPONENT
+// DESKTOP AUTH PORTAL CONTENT (with useSearchParams)
 // =============================================================================
 
-export default function DesktopAuthPortal() {
+function DesktopAuthPortalContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const searchParams = useSearchParams();
   
@@ -417,5 +417,26 @@ export default function DesktopAuthPortal() {
         </div>
       </div>
     </div>
+  );
+}
+
+// =============================================================================
+// MAIN PAGE COMPONENT (with Suspense boundary)
+// =============================================================================
+
+export default function DesktopAuthPortal() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <span className="text-gray-600">Loading authentication portal...</span>
+          </div>
+        </div>
+      }
+    >
+      <DesktopAuthPortalContent />
+    </Suspense>
   );
 }

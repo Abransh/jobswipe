@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Any, Union
 
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
-from browser_use.tools.service import Controller
+from browser_use.controller.service import Controller
 from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
 from pydantic import BaseModel, Field
@@ -170,27 +170,38 @@ class BaseJobAutomation(ABC):
         Create and return a browser session using ExecutionContext
 
         UNIFIED VERSION: ExecutionContext handles SERVER vs DESKTOP differences
-        - SERVER mode: headless=True, with proxy rotation
-        - DESKTOP mode: headless=False, with user's browser profile, no proxy
+        - SERVER mode: headless=False (visible), with proxy rotation
+        - DESKTOP mode: headless=False (visible), with user's browser profile, no proxy
         """
         # Get browser options from context (automatically configured for mode)
         browser_options = self.context.get_browser_launch_options()
 
         self.logger.info(f"Creating browser session for {self.context.mode.value} mode")
-        self.logger.info(f"Headless: {browser_options.get('headless', True)}")
+        self.logger.info(f"Headless: {browser_options.get('headless', False)}")
 
-        # Log proxy info if present (server mode)
-        if 'proxy' in browser_options and browser_options['proxy']:
-            self.logger.info(f"✅ Using proxy: {browser_options['proxy'].get('server', 'unknown')}")
+        # Create BrowserProfile with headless setting from execution context
+        from browser_use.browser import BrowserProfile
 
-        # Log browser profile if present (desktop mode)
+        browser_profile = BrowserProfile(
+            headless=browser_options.get('headless', False),
+            args=browser_options.get('args', []),
+        )
+
+        # Add user_data_dir if present (desktop mode)
         if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
+            browser_profile.user_data_dir = browser_options['user_data_dir']
             self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
 
-        # Note: Browser session is now managed by Agent, not created directly
-        # Return a placeholder that won't be used
-        self.logger.info("Browser will be managed by Agent instance")
-        return BrowserSession()
+        # Add proxy if present (server mode)
+        #if 'proxy' in browser_options and browser_options['proxy']:
+         #   browser_profile.proxy = browser_options['proxy']
+          #  self.logger.info(f"✅ Using proxy: {browser_options['proxy'].get('server', 'unknown')}")
+
+        # Create BrowserSession with the configured profile
+        browser_session = BrowserSession(browser_profile=browser_profile)
+
+        self.logger.info(f"Browser session created with headless={browser_profile.headless}")
+        return browser_session
 
     @abstractmethod
     def get_company_specific_task(self, user_profile: UserProfile, job_data: JobData) -> str:

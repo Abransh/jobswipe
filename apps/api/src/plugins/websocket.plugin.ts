@@ -583,7 +583,7 @@ const websocketPlugin = async (
 // =============================================================================
 
 export default fp(websocketPlugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'websocket',
   dependencies: ['services'], // Ensure services plugin loads before WebSocket
 });

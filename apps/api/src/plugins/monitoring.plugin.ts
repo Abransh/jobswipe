@@ -818,7 +818,7 @@ declare module 'fastify' {
 
 export default fastifyPlugin(monitoringPlugin as any, {
   name: 'monitoring',
-  fastify: '4.x',
+  fastify: '5.x',
 });
 
 export type {

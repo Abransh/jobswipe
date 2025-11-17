@@ -683,7 +683,7 @@ export function JobSwipeInterface({ jobs, searchQuery, filters, onApplicationUpd
             transition={{ delay: 1.5 }}
             className="fixed bottom-6 left-4 right-4 z-40 pointer-events-none"
           >
-            <div className="max-w-md mx-auto bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl p-6 shadow-premium border border-gray-200 dark:border-gray-800">
+            <div className="max-w-md ml-6 bg-white dark:bg-gray-900 backdrop-blur-xl rounded-2xl p-6 shadow-premium border border-gray-200 dark:border-gray-800">
               <h4 className="text-headline font-semibold text-gray-900 dark:text-white mb-4 text-center">
                 👆 How to JobSwipe
               </h4>

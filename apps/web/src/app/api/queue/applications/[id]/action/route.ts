@@ -112,7 +112,7 @@ export async function POST(
         updatedApplication = await db.applicationQueue.update({
           where: { id: applicationId },
           data: {
-            priority: 10, // Set highest priority
+            priority: 'IMMEDIATE', // Set highest priority
             scheduledAt: new Date(), // Move to front of queue
             updatedAt: new Date()
           },

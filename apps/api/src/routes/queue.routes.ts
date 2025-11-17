@@ -9,6 +9,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
 import { QueueStatus } from '@jobswipe/database';
+import { UserId } from '@jobswipe/shared';
 
 // =============================================================================
 // HELPER FUNCTIONS
@@ -96,10 +97,12 @@ interface JobApplicationRequest {
 
 interface AuthenticatedRequest extends FastifyRequest {
   user?: {
-    id: string;
+    id: UserId;
     email: string;
     role: string;
     status: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
 }
 
@@ -281,10 +284,12 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
       }
       
       request.user = {
-        id: verification.payload.sub || verification.payload.userId,
+        id: (verification.payload.sub || verification.payload.userId) as UserId,
         email: verification.payload.email,
         role: verification.payload.role || 'user',
         status: verification.payload.status || 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     } else {
       // Fallback basic token validation
@@ -298,10 +303,12 @@ async function authenticateUser(request: AuthenticatedRequest, reply: FastifyRep
       
       // Mock user for basic mode
       request.user = {
-        id: 'basic-user-id',
+        id: 'basic-user-id' as UserId,
         email: 'user@example.com',
         role: 'user',
         status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
     }
   } catch (error) {

@@ -1,4 +1,5 @@
-import { Inter, JetBrains_Mono } from 'next/font/google';
+// TEMP: Commented out Google Fonts for offline build
+// import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
@@ -7,22 +8,23 @@ import { AuthProvider } from '@/components/providers/AuthProvider';
 import { QueueStatusProvider } from '@/providers/QueueStatusProvider';
 
 
+// TEMP: Using system fonts for offline build
 // Premium font loading with SF Pro Display-inspired weights
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-  // Load all weights for premium typography system
-  weight: ['200', '300', '400', '500', '600', '700'],
-  // Enable variable font for smoother weights
-  preload: true,
-});
+// const inter = Inter({
+//   subsets: ['latin'],
+//   variable: '--font-inter',
+//   display: 'swap',
+//   // Load all weights for premium typography system
+//   weight: ['200', '300', '400', '500', '600', '700'],
+//   // Enable variable font for smoother weights
+//   preload: true,
+// });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
-  display: 'swap',
-});
+// const jetbrainsMono = JetBrains_Mono({
+//   subsets: ['latin'],
+//   variable: '--font-jetbrains-mono',
+//   display: 'swap',
+// });
 
 export const metadata: Metadata = {
   title: {
@@ -104,7 +106,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning>
       <head />
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-background font-sans antialiased`}
+        className="min-h-screen bg-background font-sans antialiased"
+        style={{
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        }}
       >
         <AuthProvider>
           <QueueStatusProvider>

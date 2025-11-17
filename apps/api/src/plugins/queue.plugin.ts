@@ -953,7 +953,7 @@ declare module 'fastify' {
 
 export default fastifyPlugin(queuePlugin as any, {
   name: 'queue',
-  fastify: '4.x',
+  fastify: '5.x',
   dependencies: ['services'], // Depends on services plugin for Redis
 });
 

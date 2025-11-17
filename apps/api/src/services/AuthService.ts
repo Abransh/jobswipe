@@ -10,32 +10,27 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { FastifyInstance } from 'fastify';
+import {
+  JwtPayload,
+  TokenType,
+  AuthSource,
+  UserId,
+  SessionId,
+  TokenId,
+  createBrandedId,
+} from '@jobswipe/shared';
 
 // =============================================================================
 // INTERFACES & TYPES
 // =============================================================================
 
-export interface JWTPayload {
-  sub: string; // User ID (subject)
-  userId: string; // Alias for sub
-  email: string;
-  role: string;
-  status: string;
-  iat: number; // Issued at
-  exp: number; // Expires at
-  iss: string; // Issuer
-  aud: string; // Audience
-  type: string; // Token type (access, refresh)
-  source: string; // Auth source (email, google, etc.)
-  jti?: string; // JWT ID
-  sessionId?: string;
-  deviceId?: string;
-  deviceType?: string;
-}
-
+/**
+ * Token verification result
+ * Note: Uses the correct JwtPayload from @jobswipe/shared package
+ */
 export interface TokenVerificationResult {
   valid: boolean;
-  payload?: JWTPayload;
+  payload?: JwtPayload;
   error?: string;
   expired?: boolean;
 }
@@ -43,11 +38,16 @@ export interface TokenVerificationResult {
 export interface CreateTokenRequest {
   userId: string;
   email: string;
+  name?: string;
   role?: string;
   status?: string;
   sessionId?: string;
   deviceId?: string;
   deviceType?: string;
+  tokenType?: TokenType;
+  source?: AuthSource;
+  permissions?: string[];
+  features?: string[];
   expiresIn?: string | number;
 }
 
@@ -150,7 +150,7 @@ export class AuthService {
    */
   async createToken(request: CreateTokenRequest): Promise<CreateTokenResult> {
     try {
-      const tokenId = randomUUID();
+      const tokenId = randomUUID() as TokenId;
       const issuedAt = new Date();
       const expiresIn = typeof request.expiresIn === 'string'
         ? this.parseExpiration(request.expiresIn)
@@ -158,25 +158,27 @@ export class AuthService {
 
       const expiresAt = new Date(Date.now() + expiresIn * 1000);
 
-      const payload: JWTPayload = {
-        sub: request.userId,
-        userId: request.userId,
+      // Create properly typed JwtPayload with branded types
+      const payload: JwtPayload = {
+        sub: createBrandedId<UserId>(request.userId),
         email: request.email,
+        name: request.name,
         role: request.role || 'user',
-        status: request.status || 'active',
         iat: Math.floor(issuedAt.getTime() / 1000),
         exp: Math.floor(expiresAt.getTime() / 1000),
         iss: 'jobswipe.com', // Issuer - must match frontend JWT_CONSTANTS.ISSUER
         aud: 'jobswipe-api', // Audience - must match frontend JWT_CONSTANTS.AUDIENCE
-        type: 'access', // Token type - required by frontend middleware
-        source: 'email', // Auth source - required by frontend middleware
         jti: tokenId,
-        sessionId: request.sessionId,
+        type: request.tokenType || TokenType.ACCESS,
+        source: request.source || AuthSource.WEB,
+        sessionId: request.sessionId as SessionId | undefined,
+        permissions: request.permissions || [],
+        features: request.features || [],
         deviceId: request.deviceId,
-        deviceType: request.deviceType,
+        deviceName: request.deviceType, // Map deviceType to deviceName
       };
 
-      const token = jwt.sign(payload, this.jwtSecret, {
+      const token = jwt.sign(payload as any, this.jwtSecret, {
         algorithm: 'HS256',
       });
 
@@ -216,10 +218,10 @@ export class AuthService {
 
       const payload = jwt.verify(token, this.jwtSecret, {
         algorithms: ['HS256'],
-      }) as JWTPayload;
+      }) as JwtPayload;
 
       // Additional validation
-      if (!payload.sub || !payload.userId || !payload.email) {
+      if (!payload.sub || !payload.email) {
         return {
           valid: false,
           error: 'Invalid token payload - missing required fields',
@@ -229,8 +231,10 @@ export class AuthService {
       // Check if user still exists and is active
       if (this.fastify.db) {
         try {
+          // Extract user ID from branded type
+          const userId = payload.sub as string;
           const user = await this.fastify.db.user.findUnique({
-            where: { id: payload.userId },
+            where: { id: userId },
             select: { id: true, email: true, status: true },
           });
 
@@ -255,7 +259,7 @@ export class AuthService {
 
       this.fastify.log.debug('JWT token verified successfully', {
         tokenId: payload.jti,
-        userId: payload.userId,
+        userId: payload.sub,
         email: payload.email,
         expiresAt: new Date(payload.exp * 1000).toISOString(),
       });
@@ -443,21 +447,21 @@ export class AuthService {
   /**
    * Extract authentication context from a verified JWT payload
    */
-  createAuthContext(payload: JWTPayload): AuthContext {
+  createAuthContext(payload: JwtPayload): AuthContext {
     return {
       user: {
-        id: payload.userId,
+        id: payload.sub as string,
         email: payload.email,
         role: payload.role,
-        status: payload.status,
+        status: 'active', // Status from payload no longer exists in JwtPayload
       },
       session: {
-        id: payload.sessionId || 'unknown',
+        id: payload.sessionId as string || 'unknown',
         deviceId: payload.deviceId,
-        deviceType: payload.deviceType,
+        deviceType: payload.deviceName,
       },
       token: {
-        jti: payload.jti || 'unknown',
+        jti: payload.jti as string || 'unknown',
         iat: payload.iat,
         exp: payload.exp,
       },

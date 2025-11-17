@@ -723,7 +723,7 @@ declare module 'fastify' {
 
 export default fastifyPlugin(loggingPlugin as any, {
   name: 'logging',
-  fastify: '4.x',
+  fastify: '5.x',
 });
 
 export type {

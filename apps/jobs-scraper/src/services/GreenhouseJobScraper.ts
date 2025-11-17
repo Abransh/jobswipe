@@ -9,7 +9,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { PrismaClient } from '@jobswipe/database';
+import { PrismaClient, SalaryType } from '@/../../packages/database/src/generated';;
 import {
   GreenhouseJobListing,
   GreenhouseJobDetails,
@@ -22,15 +22,25 @@ import {
   AnswerStrategy,
   ScraperConfig,
   ScraperResult,
+  EnrichedJobData,
+  JobIntelligenceData,
+  CompleteJobData,
 } from '../types/greenhouse.types';
+import { JobDescriptionEnrichment } from './JobDescriptionEnrichment';
+import { JobIntelligenceExtractor } from './JobIntelligenceExtractor';
+import { mergeJobData } from '../utils/dataTransformers';
 
 export class GreenhouseJobScraper {
   private prisma: PrismaClient;
   private httpClient: AxiosInstance;
+  private enrichment?: JobDescriptionEnrichment;
+  private intelligence: JobIntelligenceExtractor;
+  private enableEnrichment: boolean;
   private readonly baseUrl = 'https://boards-api.greenhouse.io/v1/boards';
 
-  constructor() {
+  constructor(config?: { enableEnrichment?: boolean }) {
     this.prisma = new PrismaClient();
+    this.enableEnrichment = config?.enableEnrichment ?? false;
 
     this.httpClient = axios.create({
       timeout: 30000,
@@ -39,6 +49,25 @@ export class GreenhouseJobScraper {
         'User-Agent': 'JobSwipe-Scraper/1.0 (Job Aggregation)',
       },
     });
+
+    // Initialize intelligence extractor (ALWAYS enabled)
+    try {
+      this.intelligence = new JobIntelligenceExtractor();
+      console.log('🧠 Job intelligence extraction enabled');
+    } catch (error) {
+      throw new Error(`Failed to initialize intelligence extractor: ${error}`);
+    }
+
+    // Initialize optional enrichment service (salary, visa, benefits)
+    if (this.enableEnrichment) {
+      try {
+        this.enrichment = new JobDescriptionEnrichment();
+        console.log('💰 Salary/benefits enrichment enabled');
+      } catch (error) {
+        console.warn('⚠️  Failed to initialize enrichment service:', error);
+        this.enableEnrichment = false;
+      }
+    }
   }
 
   // ==========================================================================
@@ -207,7 +236,7 @@ export class GreenhouseJobScraper {
   }
 
   /**
-   * Process a single job - main orchestration method
+   * Process a single job - main orchestration method with comprehensive intelligence extraction
    */
   private async processJob(
     companyId: string,
@@ -216,15 +245,55 @@ export class GreenhouseJobScraper {
     // 1. Fetch detailed job info with questions
     const details = await this.fetchJobDetails(companyId, listing.id);
 
-    // 2. Extract and classify form fields
+    // 2. Extract direct data from API (department, location)
+    const directData = this.intelligence.extractDirectData(details);
+
+    // 3. Extract job intelligence from description (requirements, skills, experience, etc.)
+    const intelligenceData = await this.intelligence.extract(
+      details.title,
+      details.content || '',
+      directData
+    );
+
+    // Log extracted intelligence
+    console.log(`   🎯 Level: ${intelligenceData.experience.level} | Years: ${intelligenceData.experience.yearsMin || 'N/A'}`);
+    console.log(`   💼 Skills: ${intelligenceData.skills.required.slice(0, 3).join(', ')}${intelligenceData.skills.required.length > 3 ? '...' : ''}`);
+
+    // 4. Optional: Enrich with salary/benefits data (if enabled)
+    let enrichedData: EnrichedJobData | undefined;
+    if (this.enableEnrichment && this.enrichment && details.content) {
+      enrichedData = await this.enrichment.enrichJobDescription(
+        details.title,
+        details.content,
+        companyId
+      );
+
+      if (enrichedData.salary?.min || enrichedData.salary?.max) {
+        console.log(`   💰 Salary: ${enrichedData.salary.currency ?? '$'}${enrichedData.salary.min}-${enrichedData.salary.max}`);
+      }
+      if (enrichedData.visaSponsorship) {
+        console.log(`   🛂 Visa: ${enrichedData.visaSponsorship.available ? 'Available' : 'Not Available'}`);
+      }
+    }
+
+    // 5. Merge all data into complete job data
+    const completeJobData = mergeJobData(
+      details.title,
+      this.stripHtml(details.content || ''),
+      directData,
+      intelligenceData,
+      enrichedData
+    );
+
+    // 6. Extract and classify form fields (for automation)
     const classifiedFields = this.classifyFormFields(
       details.questions || []
     );
 
-    // 3. Calculate automation metrics
+    // 7. Calculate automation metrics
     const metrics = this.calculateAutomationMetrics(classifiedFields);
 
-    // 4. Build application schema
+    // 8. Build application schema
     const applicationSchema = this.buildApplicationSchema(
       details,
       companyId,
@@ -232,17 +301,23 @@ export class GreenhouseJobScraper {
       metrics
     );
 
-    // 5. Find or create company
+    // 9. Find or create company
     const company = await this.upsertCompany(companyId, details);
 
-    // 6. Upsert job posting to database
-    await this.upsertJobPosting(company.id, details, applicationSchema, metrics);
+    // 10. Upsert job posting to database with ALL extracted data
+    await this.upsertJobPosting(
+      company.id,
+      details,
+      completeJobData,
+      applicationSchema,
+      metrics
+    );
 
     console.log(
-      `   📊 Success Rate: ${metrics.estimatedSuccessRate}% (${metrics.automationFeasibility})`
+      `   📊 Automation: ${metrics.estimatedSuccessRate}% | Quality: ${Math.round((completeJobData.qualityScore || 0) * 100)}%`
     );
     console.log(
-      `   🤖 Pre-filled: ${metrics.prefilledFieldCount}/${metrics.totalRequiredFields} | AI: ${metrics.aiRequiredFieldCount}`
+      `   🏷️  Tags: ${completeJobData.tags.slice(0, 5).join(', ')}`
     );
   }
 
@@ -591,11 +666,12 @@ export class GreenhouseJobScraper {
   }
 
   /**
-   * Upsert job posting to database with full schema
+   * Upsert job posting to database with full schema and intelligence-extracted data
    */
   private async upsertJobPosting(
     companyId: string,
     details: GreenhouseJobDetails,
+    completeJobData: CompleteJobData,
     applicationSchema: ApplicationSchema,
     metrics: AutomationMetrics
   ) {
@@ -608,12 +684,18 @@ export class GreenhouseJobScraper {
         externalId,
       },
       update: {
-        title: details.title,
-        description: this.stripHtml(details.content || ''),
-        location: details.location.name,
+        title: completeJobData.title,
+        description: completeJobData.description,
+        location: completeJobData.location,
         sourceUrl: details.absolute_url,
         applyUrl: details.absolute_url,
         source: 'COMPANY_WEBSITE',
+
+        // Location data (parsed from API)
+        city: completeJobData.city,
+        state: completeJobData.state,
+        country: completeJobData.country,
+        remote: completeJobData.remote,
 
         // Greenhouse-specific fields
         greenhouseCompanyId,
@@ -626,6 +708,31 @@ export class GreenhouseJobScraper {
         prefilledFieldCount: metrics.prefilledFieldCount,
         aiRequiredFieldCount: metrics.aiRequiredFieldCount,
         totalRequiredFields: metrics.totalRequiredFields,
+
+        // Intelligence-extracted fields
+        department: completeJobData.department,
+        requirements: completeJobData.requirements,
+        experienceYears: completeJobData.experienceYears,
+        level: completeJobData.level,
+        category: completeJobData.category,
+        remoteType: completeJobData.remoteType,
+        skills: completeJobData.skills,
+        education: completeJobData.education,
+        languages: completeJobData.languages,
+        keywords: completeJobData.keywords,
+        tags: completeJobData.tags,
+
+        // Enrichment fields (salary, visa, benefits)
+        salaryMin: completeJobData.salaryMin,
+        salaryMax: completeJobData.salaryMax,
+        currency: completeJobData.currency,
+        salaryType: completeJobData.salaryType,
+        equity: completeJobData.equity,
+        bonus: completeJobData.bonus,
+
+        // Quality score and metadata
+        qualityScore: completeJobData.qualityScore,
+        formMetadata: completeJobData.formMetadata as any,
 
         // Timestamps
         lastSchemaUpdate: new Date(),
@@ -633,15 +740,21 @@ export class GreenhouseJobScraper {
         updatedAt: new Date(),
       },
       create: {
-        title: details.title,
-        description: this.stripHtml(details.content || ''),
-        location: details.location.name,
+        title: completeJobData.title,
+        description: completeJobData.description,
+        location: completeJobData.location,
         sourceUrl: details.absolute_url,
         applyUrl: details.absolute_url,
         companyId,
         externalId,
         source: 'COMPANY_WEBSITE',
         status: 'ACTIVE',
+
+        // Location data (parsed from API)
+        city: completeJobData.city,
+        state: completeJobData.state,
+        country: completeJobData.country,
+        remote: completeJobData.remote,
 
         // Greenhouse-specific fields
         greenhouseCompanyId,
@@ -654,6 +767,31 @@ export class GreenhouseJobScraper {
         prefilledFieldCount: metrics.prefilledFieldCount,
         aiRequiredFieldCount: metrics.aiRequiredFieldCount,
         totalRequiredFields: metrics.totalRequiredFields,
+
+        // Intelligence-extracted fields
+        department: completeJobData.department,
+        requirements: completeJobData.requirements,
+        experienceYears: completeJobData.experienceYears,
+        level: completeJobData.level,
+        category: completeJobData.category,
+        remoteType: completeJobData.remoteType,
+        skills: completeJobData.skills,
+        education: completeJobData.education,
+        languages: completeJobData.languages,
+        keywords: completeJobData.keywords,
+        tags: completeJobData.tags,
+
+        // Enrichment fields (salary, visa, benefits)
+        salaryMin: completeJobData.salaryMin,
+        salaryMax: completeJobData.salaryMax,
+        currency: completeJobData.currency,
+        salaryType: completeJobData.salaryType,
+        equity: completeJobData.equity,
+        bonus: completeJobData.bonus,
+
+        // Quality score and metadata
+        qualityScore: completeJobData.qualityScore,
+        formMetadata: completeJobData.formMetadata as any,
 
         // Timestamps
         lastSchemaUpdate: new Date(),
@@ -672,5 +810,22 @@ export class GreenhouseJobScraper {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Map LLM period string to Prisma SalaryType enum
+   */
+  private mapPeriodToSalaryType(period?: string): SalaryType | undefined {
+    if (!period) return undefined;
+
+    const mapping: Record<string, SalaryType> = {
+      yearly: SalaryType.ANNUAL,
+      hourly: SalaryType.HOURLY,
+      monthly: SalaryType.MONTHLY,
+      daily: SalaryType.DAILY,
+      weekly: SalaryType.WEEKLY,
+    };
+
+    return mapping[period.toLowerCase()];
   }
 }
