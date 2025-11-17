@@ -19,12 +19,13 @@ services:
       - key: NPM_CONFIG_PRODUCTION
         value: "false"
 
-    # Simple build command that works with monorepo
+    # Monorepo build command - builds API and all its dependencies
     build_command: |
       npm install -g pnpm@latest
-      pnpm install --frozen-lockfile
-      cd apps/api
-      pnpm run build:production
+      pnpm install --frozen-lockfile --ignore-scripts --prod=false
+      cd packages/database && pnpm run db:generate && cd ../..
+      pnpm --filter ...@jobswipe/api build
+      pnpm --filter @jobswipe/api build
 
     # Run the compiled API
     run_command: |
