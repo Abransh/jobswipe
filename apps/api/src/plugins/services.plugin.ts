@@ -623,6 +623,14 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
             services: { type: 'object' },
           },
         },
+        503: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            services: { type: 'object' },
+          },
+        },
       },
     },
   }, async (request, reply) => {
@@ -660,6 +668,13 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       tags: ['Health'],
       response: {
         200: {
+          type: 'object',
+          properties: {
+            timestamp: { type: 'string' },
+            metrics: { type: 'object' },
+          },
+        },
+        500: {
           type: 'object',
           properties: {
             timestamp: { type: 'string' },

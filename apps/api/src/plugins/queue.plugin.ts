@@ -874,6 +874,14 @@ const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
             queue: { type: 'object' },
           },
         },
+        503: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            queue: { type: 'object' },
+          },
+        },
       },
     },
   }, async (request, reply) => {

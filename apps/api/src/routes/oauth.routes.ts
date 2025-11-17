@@ -284,7 +284,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
             result.errorCode || 'OAUTH_FAILED'
           );
 
-          return reply.redirect(302, redirectUrl);
+          return reply.code(302).redirect(redirectUrl);
         }
 
         // OAuth successful - set auth cookies
@@ -548,6 +548,26 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
               },
             },
           },
+
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              providers: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    displayName: { type: 'string' },
+                    icon: { type: 'string' },
+                    enabled: { type: 'boolean' },
+                  },
+                },
+              },
+            },
+          },
+
 
           
         },
