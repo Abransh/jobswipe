@@ -19,10 +19,12 @@ services:
       - key: NPM_CONFIG_PRODUCTION
         value: "false"
 
+      - key: NPM_CONFIG_IGNORE_SCRIPTS
+        value: "true"
+
     # Monorepo build command - builds API and all its dependencies
+    # Note: Buildpack already runs pnpm install with NPM_CONFIG_IGNORE_SCRIPTS=true
     build_command: |
-      npm install -g pnpm@latest
-      pnpm install --frozen-lockfile --ignore-scripts --prod=false
       cd packages/database && pnpm run db:generate && cd ../..
       pnpm --filter @jobswipe/shared build
       pnpm --filter @jobswipe/database build
