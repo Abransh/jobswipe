@@ -1,0 +1,57 @@
+name: jobswipe-api
+region: nyc
+
+services:
+  - name: api
+    github:
+      repo: Abransh/jobswipe
+      branch: main
+      deploy_on_push: true
+
+    # IMPORTANT: Point to the API directory
+    source_dir: /
+
+    # Use pnpm for package management
+    envs:
+      - key: NODE_ENV
+        value: production
+
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+
+    # Simple build command that works with monorepo
+    build_command: |
+      npm install -g pnpm@latest
+      pnpm install --frozen-lockfile
+      cd apps/api
+      pnpm run build:production
+
+    # Run the compiled API
+    run_command: |
+      cd apps/api
+      node dist/index.js
+
+    # Node.js environment
+    environment_slug: node-js
+
+    # Instance configuration
+    instance_count: 1
+    instance_size_slug: basic-xs
+
+    # Health check
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 60
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+    # HTTP configuration
+    http_port: 8080
+
+    routes:
+      - path: /
+
+    # Add all your environment variables here
+    # (They will be added via Dashboard for security)

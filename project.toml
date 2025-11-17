@@ -1,0 +1,9 @@
+[build]
+builder = "paketobuildpacks/builder:base"
+
+[[build.buildpacks]]
+uri = "gcr.io/paketo-buildpacks/nodejs"
+
+[build.env]
+BP_NODE_VERSION = "20.*"
+BP_NPM_VERSION = "10.*"
