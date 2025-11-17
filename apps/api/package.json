@@ -44,6 +44,7 @@
     "@jobswipe/database": "workspace:*",
     "@jobswipe/shared": "workspace:*",
     "@socket.io/redis-adapter": "^8.2.1",
+    "@upstash/redis": "^1.35.6",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.4.2",
