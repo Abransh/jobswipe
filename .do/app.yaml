@@ -24,7 +24,8 @@ services:
       npm install -g pnpm@latest
       pnpm install --frozen-lockfile --ignore-scripts --prod=false
       cd packages/database && pnpm run db:generate && cd ../..
-      pnpm --filter ...@jobswipe/api build
+      pnpm --filter @jobswipe/shared build
+      pnpm --filter @jobswipe/database build
       pnpm --filter @jobswipe/api build
 
     # Run the compiled API

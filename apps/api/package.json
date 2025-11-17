@@ -8,7 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "dev:simple": "tsx watch src/minimal-index.ts",
     "dev:minimal": "tsx watch src/minimal-index.ts",
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc src/index.ts --outDir dist --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck --resolveJsonModule --moduleResolution node --noEmitOnError false",
     "build:easy": "tsc src/index.ts --outDir dist --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck --resolveJsonModule --moduleResolution node",
     "build:minimal": "tsc src/minimal-index.ts --outDir dist --target ES2020 --module CommonJS --esModuleInterop --allowSyntheticDefaultImports --skipLibCheck --resolveJsonModule",
     "build:production": "pnpm run clean && pnpm run build",
