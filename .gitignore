@@ -33,9 +33,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Package lock files (choose one strategy)
+# IMPORTANT: pnpm-lock.yaml MUST be committed for production!
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+# pnpm-lock.yaml  <- Removed from gitignore - needed for DO deployment
 
 # =============================================================================
 # Build Outputs & Distribution
