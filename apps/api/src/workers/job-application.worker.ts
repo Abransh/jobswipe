@@ -7,8 +7,10 @@
 
 import { Job, Worker, WorkerOptions } from 'bullmq';
 import { FastifyInstance } from 'fastify';
+import { randomUUID } from 'crypto';
 import { bullmqConnection } from '../config/redis.config';
 import { JOB_APPLICATION_QUEUE_NAME, JobApplicationData } from '../queues/job-application.queue';
+import type { WebSocketMessage } from '../services/WebSocketService';
 
 /**
  * Error classification for retry logic
@@ -123,7 +125,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
 
         // Notify desktop via WebSocket
         if (fastify.websocket) {
-          await fastify.websocket.sendToUser(userId, {
+          const message: WebSocketMessage = {
             type: 'desktop-job-available',
             event: 'job-queued-for-desktop',
             data: {
@@ -132,9 +134,11 @@ export function createJobProcessor(fastify: FastifyInstance) {
               company: jobData.company,
               jobId: jobData.id,
             },
-            messageId: fastify.generateId(),
+            messageId: randomUUID(),
             timestamp: new Date(),
-          });
+            userId,
+          };
+          await fastify.websocket.sendToUser(userId, message);
         }
 
         // Return early - desktop will handle processing
