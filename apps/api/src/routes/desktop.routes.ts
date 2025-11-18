@@ -181,7 +181,7 @@ async function claimApplicationHandler(
         success: false,
         error: 'Invalid request data',
         errorCode: 'VALIDATION_ERROR',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 
@@ -295,7 +295,7 @@ async function updateProgressHandler(
         success: false,
         error: 'Invalid request data',
         errorCode: 'VALIDATION_ERROR',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 
@@ -404,7 +404,7 @@ async function completeApplicationHandler(
         success: false,
         error: 'Invalid request data',
         errorCode: 'VALIDATION_ERROR',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 

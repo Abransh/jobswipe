@@ -41,7 +41,7 @@ const JWTConfigSchema = z.object({
 const ServerConfigSchema = z.object({
   port: z.coerce.number().min(1).max(65535).default(3001),
   host: z.string().default('0.0.0.0'),
-  corsOrigin: z.string().transform(val => val.split(',')).default('http://localhost:3000'),
+  corsOrigin: z.string().transform(val => val.split(',')).default(() => ['http://localhost:3000']),
   corsCredentials: z.coerce.boolean().default(true),
 });
 
@@ -102,7 +102,7 @@ const QueueConfigSchema = z.object({
 
 const WebSocketConfigSchema = z.object({
   enabled: z.coerce.boolean().default(true),
-  corsOrigin: z.string().transform(val => val.split(',')).default('http://localhost:3000'),
+  corsOrigin: z.string().transform(val => val.split(',')).default(() => ['http://localhost:3000']),
   path: z.string().default('/socket.io'),
   transports: z.string().transform(val => {
     try {
@@ -276,7 +276,7 @@ export function validateEnvironment() {
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error('❌ Environment validation failed:');
-      error.errors.forEach(err => {
+      error.issues.forEach(err => {
         console.error(`  - ${err.path.join('.')}: ${err.message}`);
       });
 
