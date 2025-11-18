@@ -19,6 +19,7 @@ declare module 'fastify' {
 
     // Queue
     jobQueue?: Queue;
+    verifyJWT: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
 
     // Services
     // Note: websocket type is declared in websocket.plugin.ts
