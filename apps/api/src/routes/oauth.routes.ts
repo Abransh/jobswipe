@@ -180,7 +180,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         // Generate authorization URL
         const authResponse = await oauthService.initiateOAuthFlow({
           provider: provider as OAuthProvider,
-          source: query.source,
+          source: query.source as OAuthSource,
           redirectUri: query.redirect,
           deviceId: query.deviceId,
           deviceName: query.deviceName,
@@ -422,7 +422,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         const userId = request.user.id;
 
         // Unlink OAuth provider
-        await oauthService.unlinkOAuthProvider(userId, body.provider);
+        await oauthService.unlinkOAuthProvider(userId, body.provider as OAuthProvider);
 
         fastify.log.info( {
           userId,
