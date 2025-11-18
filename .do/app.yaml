@@ -5,7 +5,7 @@ services:
   - name: api
     github:
       repo: Abransh/jobswipe
-      branch: main
+      branch: claude/cto-devops-session-011CUzABPmxtuEi4JBcQW51X
       deploy_on_push: true
 
     # IMPORTANT: Point to the API directory
