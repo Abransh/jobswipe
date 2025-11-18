@@ -81,7 +81,10 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
 
     queueEvents.on('completed', ({ jobId, returnvalue }) => {
       fastify.log.info(
-        { jobId, success: returnvalue?.success },
+        {
+          jobId,
+          success: typeof returnvalue === 'object' && returnvalue !== null ? (returnvalue as any).success : undefined
+        },
         '✅ Job completed'
       );
     });
@@ -148,17 +151,18 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
     // =========================================================================
     fastify.get('/health/queue', async (request, reply) => {
       try {
-        const [jobCounts, isPaused, isReady] = await Promise.all([
+        const [jobCounts, isPaused] = await Promise.all([
           queue.getJobCounts(),
           queue.isPaused(),
-          queue.isReady(),
         ]);
 
+        // Check if queue is operational by attempting to get job counts
+        const isHealthy = jobCounts !== null && !isPaused;
+
         const health = {
-          status: isReady ? 'healthy' : 'unhealthy',
+          status: isHealthy ? 'healthy' : 'degraded',
           queue: {
             name: JOB_APPLICATION_QUEUE_NAME,
-            ready: isReady,
             paused: isPaused,
             counts: jobCounts,
           },
