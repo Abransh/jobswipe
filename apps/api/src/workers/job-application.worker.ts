@@ -25,7 +25,6 @@ function classifyError(error: any): string {
   if (errorMessage.includes('not found') || errorMessage.includes('404')) return 'NOT_FOUND';
 
   return 'UNKNOWN_ERROR';
-}
 
 /**
  * Create job processor function
@@ -388,4 +387,4 @@ export function createJobApplicationWorker(fastify: FastifyInstance): Worker<Job
   });
 
   return worker;
-}
+  }
