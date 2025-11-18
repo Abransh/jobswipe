@@ -321,7 +321,7 @@ export class AutomationService extends EventEmitter {
     });
 
     if (!application) {
-      throw new Error(\`Application not found: \${applicationId}\`);
+      throw new Error(`Application not found: \${applicationId}`);
     }
 
     // Get queue position from BullMQ if still queued
@@ -495,7 +495,7 @@ export class AutomationService extends EventEmitter {
     const failureRate = totalProcessed > 0 ? queueStats.failed / totalProcessed : 0;
 
     if (failureRate > 0.1 && totalProcessed > 10) {
-      issues.push(\`High failure rate detected (\${(failureRate * 100).toFixed(1)}%)\`);
+      issues.push(`High failure rate detected (\${(failureRate * 100).toFixed(1)}%)`);
     }
 
     let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
@@ -620,7 +620,7 @@ export class AutomationService extends EventEmitter {
     });
 
     if (!application) {
-      throw new Error(\`Application not found: \${applicationId}\`);
+      throw new Error(`Application not found: \${applicationId}`);
     }
 
     const jobData = application.jobData as any;

@@ -296,7 +296,7 @@ export default async function desktopRoutes(fastify: FastifyInstance) {
 
       fastify.log.info(
         { applicationId, userId, success },
-        \`✅ Desktop application completed: \${success ? 'SUCCESS' : 'FAILED'}\`
+        `✅ Desktop application completed: \${success ? 'SUCCESS' : 'FAILED'}`
       );
 
       // Remove from BullMQ queue if still there
