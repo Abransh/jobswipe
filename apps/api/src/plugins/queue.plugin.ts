@@ -16,8 +16,11 @@ import { Queue, QueueEvents } from 'bullmq';
 import { bullmqConnection } from '../config/redis.config';
 import {
   createJobApplicationQueue,
+  createDeadLetterQueue,
   JOB_APPLICATION_QUEUE_NAME,
-  JobApplicationData
+  JOB_APPLICATION_DLQ_NAME,
+  JobApplicationData,
+  DeadLetterJobData
 } from '../queues/job-application.queue';
 import { createJobApplicationWorker } from '../workers/job-application.worker';
 
@@ -28,8 +31,10 @@ import { createJobApplicationWorker } from '../workers/job-application.worker';
 declare module 'fastify' {
   interface FastifyInstance {
     jobQueue: Queue<JobApplicationData>;
+    deadLetterQueue: Queue<DeadLetterJobData>; // Dead Letter Queue
     jobWorker: ReturnType<typeof createJobApplicationWorker>;
     queueEvents: QueueEvents;
+    dlqEvents: QueueEvents; // DLQ events
   }
 }
 
@@ -42,15 +47,27 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
 
   try {
     // =========================================================================
-    // STEP 1: Create Queue
+    // STEP 1: Create Dead Letter Queue (DLQ) first
     // =========================================================================
-    const queue = createJobApplicationQueue();
-    fastify.log.info(`✅ Queue '${JOB_APPLICATION_QUEUE_NAME}' created`);
+    fastify.log.info('🔧 Creating Dead Letter Queue...');
+    const dlq = createDeadLetterQueue();
+    fastify.log.info(`✅ Dead Letter Queue '${JOB_APPLICATION_DLQ_NAME}' created`);
 
     // =========================================================================
-    // STEP 2: Create Queue Events for monitoring
+    // STEP 2: Create Main Queue with DLQ integration
+    // =========================================================================
+    fastify.log.info('🔧 Creating Job Application Queue...');
+    const queue = createJobApplicationQueue(dlq);
+    fastify.log.info(`✅ Queue '${JOB_APPLICATION_QUEUE_NAME}' created with DLQ integration`);
+
+    // =========================================================================
+    // STEP 3: Create Queue Events for monitoring
     // =========================================================================
     const queueEvents = new QueueEvents(JOB_APPLICATION_QUEUE_NAME, {
+      connection: bullmqConnection,
+    });
+
+    const dlqEvents = new QueueEvents(JOB_APPLICATION_DLQ_NAME, {
       connection: bullmqConnection,
     });
 
@@ -86,8 +103,22 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
 
     fastify.log.info('✅ Queue events listener created');
 
+    // DLQ event listeners
+    dlqEvents.on('added', ({ jobId }) => {
+      fastify.log.warn({ jobId }, '💀 Job added to Dead Letter Queue');
+    });
+
+    dlqEvents.on('failed', ({ jobId, failedReason }) => {
+      fastify.log.error(
+        { jobId, error: failedReason },
+        '❌ DLQ job failed (critical - requires manual intervention)'
+      );
+    });
+
+    fastify.log.info('✅ DLQ events listener created');
+
     // =========================================================================
-    // STEP 3: Create Worker (only if not in web-only mode)
+    // STEP 4: Create Worker (only if not in web-only mode)
     // =========================================================================
     const isWorkerEnabled = process.env.QUEUE_WORKER_ENABLED !== 'false';
     let worker = null;
@@ -100,18 +131,20 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
     }
 
     // =========================================================================
-    // STEP 4: Decorate Fastify instance
+    // STEP 5: Decorate Fastify instance
     // =========================================================================
     fastify.decorate('jobQueue', queue);
+    fastify.decorate('deadLetterQueue', dlq);
     fastify.decorate('queueEvents', queueEvents);
+    fastify.decorate('dlqEvents', dlqEvents);
     if (worker) {
       fastify.decorate('jobWorker', worker);
     }
 
-    fastify.log.info('✅ Queue decorators added to Fastify instance');
+    fastify.log.info('✅ Queue and DLQ decorators added to Fastify instance');
 
     // =========================================================================
-    // STEP 5: Health check endpoint
+    // STEP 6: Health check endpoint
     // =========================================================================
     fastify.get('/health/queue', async (request, reply) => {
       try {

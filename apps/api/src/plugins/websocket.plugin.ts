@@ -345,21 +345,45 @@ const websocketPlugin = async (
           }
 
           // Update database to mark job as claimed by desktop
+          // ATOMIC UPDATE: Use updateMany with conditional WHERE to prevent race conditions
           if (fastify.db) {
-            await fastify.db.applicationQueue.update({
-              where: { id: applicationId },
+            const claimTime = new Date();
+
+            // Only claim jobs that are in WAITING_FOR_DESKTOP status and not yet claimed
+            const result = await fastify.db.applicationQueue.updateMany({
+              where: {
+                id: applicationId,
+                status: 'WAITING_FOR_DESKTOP', // Only claim jobs waiting for desktop
+                OR: [
+                  { claimedBy: null },           // Not yet claimed
+                  { claimedBy: { equals: null } } // Explicitly null
+                ]
+              },
               data: {
                 claimedBy: 'DESKTOP',
-                claimedAt: new Date(),
+                claimedAt: claimTime,
                 status: 'PROCESSING',
               },
             });
 
-            log.info(`✅ Job ${applicationId} claimed by desktop app ${socket.id}`);
+            // Check if the claim was successful (count > 0 means we claimed it)
+            if (result.count === 0) {
+              // Job was already claimed by another desktop client or wrong status
+              log.warn(`⚠️ Job ${applicationId} already claimed or invalid status (socket: ${socket.id})`);
+
+              socket.emit('queue-job-already-claimed', {
+                applicationId,
+                message: 'Job was already claimed by another desktop client',
+                timestamp: new Date().toISOString(),
+              });
+              return;
+            }
+
+            log.info(`✅ Job ${applicationId} atomically claimed by desktop app ${socket.id}`);
 
             socket.emit('queue-job-claim-confirmed', {
               applicationId,
-              claimedAt: new Date().toISOString(),
+              claimedAt: claimTime.toISOString(),
             });
           }
         } catch (error) {

@@ -36,7 +36,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
   return async (job: Job<JobApplicationData>) => {
     const { applicationId, userId, jobData, userProfile, executionMode, options } = job.data;
 
-    const correlationId = \`job-\${applicationId}-attempt-\${job.attemptsMade + 1}\`;
+    const correlationId = `job-${applicationId}-attempt-${job.attemptsMade + 1}`;
     const startTime = Date.now();
 
     fastify.log.info(
@@ -145,7 +145,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
           message: 'Job queued for desktop execution - waiting for desktop to claim',
         };
       } else {
-        throw new Error(\`Unknown execution mode: \${executionMode}\`);
+        throw new Error(`Unknown execution mode: ${executionMode}`);
       }
 
       // STEP 3: Update database with SUCCESS results
@@ -295,7 +295,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
           {
             correlationId,
             applicationId,
-            nextRetryIn: \`\${nextRetryDelay / 1000}s\`,
+            nextRetryIn: `${nextRetryDelay / 1000}s`,
             attempt: job.attemptsMade + 1,
           },
           '🔄 Job will retry'

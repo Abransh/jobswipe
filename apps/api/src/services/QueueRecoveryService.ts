@@ -42,7 +42,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.info(
         { jobCount: pendingJobs.length },
-        \`Found \${pendingJobs.length} pending server jobs to restore\`
+        `Found \${pendingJobs.length} pending server jobs to restore`
       );
 
       // =================================================================
@@ -90,7 +90,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.info(
         { restoredCount, skippedCount, failedCount },
-        \`✅ Queue recovery complete. Restored: \${restoredCount}, Skipped: \${skippedCount}, Failed: \${failedCount}\`
+        `✅ Queue recovery complete. Restored: \${restoredCount}, Skipped: \${skippedCount}, Failed: \${failedCount}`
       );
     } catch (error) {
       this.fastify.log.error({ error }, '❌ Queue recovery failed');
@@ -136,7 +136,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.warn(
         { count: staleJobs.length },
-        \`Found \${staleJobs.length} stale jobs to reset\`
+        `Found \${staleJobs.length} stale jobs to reset`
       );
 
       // Reset stale jobs
@@ -165,7 +165,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.info(
         { count: staleJobs.length },
-        \`✅ Reset \${staleJobs.length} stale jobs\`
+        `✅ Reset \${staleJobs.length} stale jobs`
       );
     } catch (error) {
       this.fastify.log.error({ error }, '❌ Failed to reset stale jobs');
@@ -197,7 +197,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.info(
         { count: allBullMQJobs.length },
-        \`Found \${allBullMQJobs.length} jobs in BullMQ\`
+        `Found \${allBullMQJobs.length} jobs in BullMQ`
       );
 
       let orphanedCount = 0;
@@ -224,7 +224,7 @@ export class QueueRecoveryService {
 
       this.fastify.log.info(
         { orphanedCount },
-        \`✅ Cleaned up \${orphanedCount} orphaned BullMQ jobs\`
+        `✅ Cleaned up \${orphanedCount} orphaned BullMQ jobs`
       );
     } catch (error) {
       this.fastify.log.error({ error }, '❌ Failed to clean up orphaned jobs');
