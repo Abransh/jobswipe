@@ -291,15 +291,13 @@ export class AutomationService extends EventEmitter {
 
       // Notify via WebSocket if available
       if (this.fastify.websocket) {
-        await this.fastify.websocket.sendToUser(data.userId, {
+        this.fastify.websocket.emitToUser(data.userId, 'desktop-job-available', {
           type: 'desktop-job-available',
           event: 'job-queued-for-desktop',
-          data: {
-            applicationId: dbRecord.id,
-            jobTitle: data.jobData.title,
-            company: data.jobData.company,
-            jobId: data.jobData.id,
-          },
+          applicationId: dbRecord.id,
+          jobTitle: data.jobData.title,
+          company: data.jobData.company,
+          jobId: data.jobData.id,
           messageId: this.generateId(),
           timestamp: new Date(),
         });

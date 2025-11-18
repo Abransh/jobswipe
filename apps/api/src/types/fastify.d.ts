@@ -7,7 +7,6 @@ import '@fastify/cookie';
 import '@fastify/swagger';
 import { Queue } from 'bullmq';
 import type { PrismaClient } from '@prisma/client';
-import type { WebSocketService } from '../services/WebSocketService';
 import type { JWTService } from '../services/JWTService';
 import type { AutomationService } from '../services/AutomationService';
 import type { ServerAutomationService } from '../services/ServerAutomationService';
@@ -22,7 +21,7 @@ declare module 'fastify' {
     jobQueue?: Queue;
 
     // Services
-    websocket?: WebSocketService;
+    // Note: websocket type is declared in websocket.plugin.ts
     jwtService?: JWTService;
     automationService: AutomationService;
     serverAutomationService?: ServerAutomationService;
