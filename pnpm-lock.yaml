@@ -384,9 +384,6 @@ importers:
       '@jobswipe/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@prisma/client':
-        specifier: ^5.22.0
-        version: 5.22.0(prisma@6.19.0(typescript@5.9.3))
       '@radix-ui/react-avatar':
         specifier: ^1.0.4
         version: 1.1.11(@types/react-dom@18.3.7(@types/react@18.3.26))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -466,6 +463,9 @@ importers:
         specifier: ^3.22.4
         version: 3.25.76
     devDependencies:
+      '@prisma/client':
+        specifier: ^6.19.0
+        version: 6.19.0(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3)
       '@types/bcryptjs':
         specifier: ^2.4.6
         version: 2.4.6
@@ -490,6 +490,9 @@ importers:
       postcss:
         specifier: ^8.4.31
         version: 8.5.6
+      prisma:
+        specifier: ^6.19.0
+        version: 6.19.0(typescript@5.9.3)
       tailwindcss:
         specifier: ^3.3.5
         version: 3.4.18(tsx@4.20.6)(yaml@2.8.1)
@@ -1529,15 +1532,6 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
-
-  '@prisma/client@5.22.0':
-    resolution: {integrity: sha512-M0SVXfyHnQREBKxCgyo7sffrKttwE6R8PMq330MIUF0pTwjUhLbW84pFDlf06B27XyCR++VtjugEnIHdr07SVA==}
-    engines: {node: '>=16.13'}
-    peerDependencies:
-      prisma: '*'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
 
   '@prisma/client@6.19.0':
     resolution: {integrity: sha512-QXFT+N/bva/QI2qoXmjBzL7D6aliPffIwP+81AdTGq0FXDoLxLkWivGMawG8iM5B9BKfxLIXxfWWAF6wbuJU6g==}
@@ -7506,10 +7500,6 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
-
-  '@prisma/client@5.22.0(prisma@6.19.0(typescript@5.9.3))':
-    optionalDependencies:
-      prisma: 6.19.0(typescript@5.9.3)
 
   '@prisma/client@6.19.0(prisma@6.19.0(typescript@5.9.3))(typescript@5.9.3)':
     optionalDependencies:
