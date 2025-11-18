@@ -245,7 +245,9 @@ export class AutomationService extends EventEmitter {
         }
       );
 
-      const queuePosition = await job.getPosition();
+      // Note: BullMQ v5 does not support job.getPosition() method
+      // Queue position can be calculated using Queue.getWaiting() if needed
+      const queuePosition = undefined;
 
       this.fastify.log.info(
         { ...logContext, applicationId: dbRecord.id, jobId: job.id, queuePosition },
@@ -332,8 +334,11 @@ export class AutomationService extends EventEmitter {
       try {
         const job = await this.fastify.jobQueue?.getJob(applicationId);
         if (job) {
-          queuePosition = await job.getPosition();
-          estimatedTime = queuePosition * 2 * 60 * 1000; // Estimate 2 min per job
+          // Note: BullMQ v5 does not support job.getPosition() method
+          // Position tracking would need to be implemented using Queue.getWaiting()
+          // For now, we'll leave queuePosition as undefined
+          queuePosition = undefined;
+          // estimatedTime = queuePosition * 2 * 60 * 1000; // Estimate 2 min per job
         }
       } catch (error) {
         this.fastify.log.debug({ applicationId, error }, 'Could not get queue position');

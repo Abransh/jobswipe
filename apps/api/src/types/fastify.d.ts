@@ -5,8 +5,30 @@
 
 import '@fastify/cookie';
 import '@fastify/swagger';
+import { Queue } from 'bullmq';
+import type { PrismaClient } from '@prisma/client';
+import type { WebSocketService } from '../services/WebSocketService';
+import type { JWTService } from '../services/JWTService';
+import type { AutomationService } from '../services/AutomationService';
+import type { ServerAutomationService } from '../services/ServerAutomationService';
+import type { AutomationLimits } from '../services/AutomationLimits';
 
 declare module 'fastify' {
+  interface FastifyInstance {
+    // Database
+    db: PrismaClient;
+
+    // Queue
+    jobQueue?: Queue;
+
+    // Services
+    websocket?: WebSocketService;
+    jwtService?: JWTService;
+    automationService: AutomationService;
+    serverAutomationService?: ServerAutomationService;
+    automationLimits: AutomationLimits;
+  }
+
   interface FastifyReply {
     setCookie(
       name: string,
