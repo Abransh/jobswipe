@@ -772,50 +772,41 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
       });
     } else {
       // PAID users: Add to BullMQ for server execution
-      // Transform data to match BullMQ JobData format
+      // Transform data to match BullMQ JobApplicationData format
       const queueJobData = {
-      jobId: data.jobId,
-      userId: user.id,
-      jobData: {
-        title: result.jobPosting.title,
-        company: result.jobPosting.company.name,
-        url: result.jobPosting.applyUrl || result.jobPosting.sourceUrl || '',
-        description: result.jobPosting.description,
-        requirements: result.jobPosting.requirements || '',
-        salary: result.jobPosting.salaryMin && result.jobPosting.salaryMax ? {
-          min: result.jobPosting.salaryMin,
-          max: result.jobPosting.salaryMax,
-          currency: result.jobPosting.currency || 'USD'
-        } : undefined,
-        location: result.jobPosting.location || `${result.jobPosting.city}, ${result.jobPosting.state}`,
-        remote: result.jobPosting.remote,
-        type: result.jobPosting.type.toString(),
-        level: result.jobPosting.level.toString(),
-      },
-      userProfile: {
-        resumeUrl: result.userProfile?.resumeUrl,
-        coverLetter: data.coverLetter,
-        preferences: {
+        applicationId: result.applicationId,
+        userId: user.id,
+        jobData: {
+          id: data.jobId,
+          title: result.jobPosting.title,
+          company: result.jobPosting.company.name,
+          applyUrl: result.jobPosting.applyUrl || result.jobPosting.sourceUrl || '',
+          location: result.jobPosting.location || `${result.jobPosting.city}, ${result.jobPosting.state}`,
+          description: result.jobPosting.description,
+          requirements: result.jobPosting.requirements ? [result.jobPosting.requirements] : [],
+        },
+        userProfile: {
           firstName: result.userProfile?.firstName || user.email.split('@')[0],
           lastName: result.userProfile?.lastName || 'User',
           email: user.email,
           phone: result.userProfile?.phone || '',
+          resumeUrl: result.userProfile?.resumeUrl,
           currentTitle: result.userProfile?.currentTitle,
           yearsExperience: result.userProfile?.yearsExperience,
           skills: result.userProfile?.skills || [],
           currentLocation: result.userProfile?.currentLocation || result.jobPosting.location,
           linkedinUrl: result.userProfile?.linkedinUrl,
           workAuthorization: result.userProfile?.workAuthorization,
-          applicationId: result.queueEntry.id,
+          coverLetter: data.coverLetter,
+        },
+        executionMode: 'server' as const,
+        options: {
+          priority: data.priority,
+          headless: true,
+          timeout: 900000, // 15 minutes
+          maxRetries: 3,
         }
-      },
-      priority: data.priority,
-      metadata: {
-        source: data.metadata.source,
-        deviceId: data.metadata.deviceId,
-        timestamp: new Date().toISOString(),
-      }
-    };
+      };
 
     // Add job to BullMQ queue with proper error handling
     try {
