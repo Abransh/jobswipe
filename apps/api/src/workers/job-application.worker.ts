@@ -126,20 +126,16 @@ export function createJobProcessor(fastify: FastifyInstance) {
 
         // Notify desktop via WebSocket
         if (fastify.websocket) {
-          const message: WebSocketMessage = {
+          fastify.websocket.emitToUser(userId, 'desktop-job-available', {
             type: 'desktop-job-available',
             event: 'job-queued-for-desktop',
-            data: {
-              applicationId,
-              jobTitle: jobData.title,
-              company: jobData.company,
-              jobId: jobData.id,
-            },
+            applicationId,
+            jobTitle: jobData.title,
+            company: jobData.company,
+            jobId: jobData.id,
             messageId: randomUUID(),
             timestamp: new Date(),
-            userId,
-          };
-          await fastify.websocket.sendToUser(userId, message);
+          });
         }
 
         // Return early - desktop will handle processing
@@ -192,7 +188,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
 
       // Notify user via WebSocket
       if (fastify.websocket) {
-        await fastify.websocket.sendApplicationStatusUpdate({
+        fastify.websocket.emitToApplication(applicationId, 'application-status-update', {
           applicationId,
           jobId: jobData.id,
           userId,
@@ -271,7 +267,7 @@ export function createJobProcessor(fastify: FastifyInstance) {
 
         // Notify user via WebSocket
         if (fastify.websocket) {
-          await fastify.websocket.sendApplicationStatusUpdate({
+          fastify.websocket.emitToApplication(applicationId, 'application-status-update', {
             applicationId,
             jobId: jobData.id,
             userId,

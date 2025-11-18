@@ -744,7 +744,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
 
       // Jump to desktop WebSocket push section
       // (handled after this block)
-    } else if (!request.server.queueService) {
+    } else if (!request.server.jobQueue) {
       request.server.log.error({
         ...enhancedLogContext,
         event: 'queue_service_unavailable',
@@ -820,7 +820,20 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
     // Add job to BullMQ queue with proper error handling
     try {
       const isPriority = data.priority >= 8;
-      queueJobId = await request.server.queueService.addJobApplication(queueJobData, isPriority);
+      const job = await request.server.jobQueue!.add(
+        'job-application',
+        queueJobData,
+        {
+          jobId: result.applicationId,
+          priority: isPriority ? 1 : 5,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 5000
+          }
+        }
+      );
+      queueJobId = job.id as string;
 
       request.server.log.info({
         ...enhancedLogContext,

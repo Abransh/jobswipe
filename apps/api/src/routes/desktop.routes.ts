@@ -228,15 +228,13 @@ export default async function desktopRoutes(fastify: FastifyInstance) {
 
       // Emit progress via WebSocket
       if (fastify.websocket) {
-        await fastify.websocket.sendToUser(userId, {
+        fastify.websocket.emitToApplication(applicationId, 'application-progress', {
           type: 'automation-progress',
           event: 'application-progress',
-          data: {
-            applicationId,
-            progress,
-            currentStep,
-            message,
-          },
+          applicationId,
+          progress,
+          currentStep,
+          message,
           messageId: randomUUID(),
           timestamp: new Date(),
         });
@@ -317,7 +315,7 @@ export default async function desktopRoutes(fastify: FastifyInstance) {
 
       // Notify via WebSocket
       if (fastify.websocket) {
-        await fastify.websocket.sendApplicationStatusUpdate({
+        fastify.websocket.emitToApplication(applicationId, 'application-status-update', {
           applicationId,
           jobId: '',
           userId,
