@@ -19,6 +19,9 @@ services:
       - key: NPM_CONFIG_PRODUCTION
         value: "false"
 
+      - key: PNPM_CONFIG_PROD
+        value: "false"
+
       - key: NPM_CONFIG_IGNORE_SCRIPTS
         value: "true"
 
