@@ -32,13 +32,20 @@ export class QueueRecoveryService {
       // =================================================================
       // STEP 2: Find jobs that should be in queue but might not be
       // =================================================================
+      // const pendingJobs = await this.fastify.db.applicationQueue.findMany({
+      //   where: {
+      //     status: { in: ['QUEUED', 'PENDING'] },
+      //     executionMode: 'server', // Only re-queue server jobs
+      //   },
+      //   orderBy: [{ priority: 'desc' }, { scheduledAt: 'asc' }],
+      // });
       const pendingJobs = await this.fastify.db.applicationQueue.findMany({
-        where: {
-          status: { in: ['QUEUED', 'PENDING'] },
-          executionMode: 'server', // Only re-queue server jobs
-        },
-        orderBy: [{ priority: 'desc' }, { scheduledAt: 'asc' }],
-      });
+    where: {
+      status: 'QUEUED', // ✅ Only server jobs (desktop jobs use QUEUED_FOR_DESKTOP)
+      claimedBy: null,  // ✅ Only unclaimed jobs
+    },
+    orderBy: [{ priority: 'desc' }, { scheduledAt: 'asc' }],
+  });
 
       this.fastify.log.info(
         { jobCount: pendingJobs.length },
@@ -70,7 +77,7 @@ export class QueueRecoveryService {
               userId: job.userId,
               jobData: job.jobData,
               userProfile: job.userProfile,
-              executionMode: job.executionMode?.toLowerCase(),
+              executionMode: 'server',
               options: job.automationConfig || {},
             },
             {

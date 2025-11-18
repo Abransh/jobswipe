@@ -25,7 +25,7 @@ CREATE UNIQUE INDEX "oauth_states_state_key" ON "oauth_states"("state");
 CREATE INDEX "oauth_states_state_idx" ON "oauth_states"("state");
 
 -- CreateIndex
-CREATE INDEX "oauth_states_expires_at_idx" ON "oauth_states"("expires_at");
+CREATE INDEX "oauth_states_expires_at_idx" ON "oauth_states"("expiresAt");
 
 -- CreateIndex
 CREATE INDEX "oauth_states_provider_idx" ON "oauth_states"("provider");

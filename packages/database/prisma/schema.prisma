@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../src/generated"
-  previewFeatures = ["fullTextSearch", "postgresqlExtensions", "views", "relationJoins"]
+  previewFeatures = ["fullTextSearchPostgres", "postgresqlExtensions", "relationJoins", "views"]
 }
 
 datasource db {
@@ -10,35 +10,33 @@ datasource db {
 }
 
 model User {
-  id                    String                      @id @default(uuid())
-  email                 String                      @unique
+  id                    String             @id @default(uuid())
+  email                 String             @unique
   passwordHash          String?
   name                  String?
   avatar                String?
   emailVerified         DateTime?
-  role                  UserRole                    @default(USER)
-  status                UserStatus                  @default(ACTIVE)
+  role                  UserRole           @default(USER)
+  status                UserStatus         @default(ACTIVE)
   lastLoginAt           DateTime?
-  loginAttempts         Int                         @default(0)
+  loginAttempts         Int                @default(0)
   lockedUntil           DateTime?
-  dataConsent           Boolean                     @default(false)
+  dataConsent           Boolean            @default(false)
   consentDate           DateTime?
   dataRetentionUntil    DateTime?
-  isDeleted             Boolean                     @default(false)
+  isDeleted             Boolean            @default(false)
   deletedAt             DateTime?
-  onboardingCompleted   Boolean                     @default(false)
-  onboardingProgress    Int                         @default(0)
-  onboardingStep        Int                         @default(1)
+  onboardingCompleted   Boolean            @default(false)
+  onboardingProgress    Int                @default(0)
+  onboardingStep        Int                @default(1)
   onboardingStartedAt   DateTime?
   onboardingCompletedAt DateTime?
   ipAddress             String?
   userAgent             String?
   timezone              String?
-  locale                String?                     @default("en")
-  oauthProviders        String[]                    @default([]) // Track linked OAuth providers
-  primaryAuthProvider   String? // 'email' | 'google' | 'github' | 'linkedin'
-  createdAt             DateTime                    @default(now())
-  updatedAt             DateTime                    @updatedAt
+  locale                String?            @default("en")
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
   accounts              Account[]
   analyticsEvents       AnalyticsEvent[]
   applicationQueue      ApplicationQueue[]
@@ -54,8 +52,6 @@ model User {
   notifications         UserNotification[]
   preferences           UserPreferences?
   profile               UserProfile?
-  dataRequests          JobApplicationDataRequest[]
-  fieldData             JobApplicationFieldData[]
 
   @@index([email])
   @@index([status])
@@ -100,7 +96,6 @@ model UserProfile {
   desiredSalaryMax      Int?
   preferredCurrency     String?
   willingToRelocate     Boolean?          @default(false)
-  needsVisaSponsorship  Boolean?          @default(false)
   profileVisibility     ProfileVisibility @default(PRIVATE)
   showEmail             Boolean           @default(false)
   showPhone             Boolean           @default(false)
@@ -109,6 +104,7 @@ model UserProfile {
   automationPreferences Json?
   coverLetterTemplate   String?
   workAuthorization     String?
+  needsVisaSponsorship  Boolean?          @default(false)
   user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -191,23 +187,6 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model OAuthState {
-  id           String   @id @default(uuid())
-  state        String   @unique
-  codeVerifier String? // PKCE code verifier for enhanced security
-  provider     String // 'google' | 'github' | 'linkedin'
-  redirectUri  String // Where to redirect after OAuth
-  source       String // 'web' | 'desktop' | 'mobile'
-  metadata     Json? // Additional data (deviceId, etc.)
-  createdAt    DateTime @default(now())
-  expiresAt    DateTime // State expires after 10 minutes
-
-  @@index([state])
-  @@index([expiresAt])
-  @@index([provider])
-  @@map("oauth_states")
-}
-
 model UserJobSwipe {
   id             String         @id @default(uuid())
   userId         String
@@ -239,42 +218,40 @@ model UserJobSwipe {
 }
 
 model ApplicationQueue {
-  id               String                     @id @default(uuid())
+  id               String          @id @default(uuid())
   userId           String
   jobPostingId     String
   applicationId    String?
-  status           QueueStatus                @default(PENDING)
-  priority         QueuePriority              @default(NORMAL)
-  attempts         Int                        @default(0)
-  maxAttempts      Int                        @default(3)
+  status           QueueStatus     @default(PENDING)
+  priority         QueuePriority   @default(NORMAL)
+  attempts         Int             @default(0)
+  maxAttempts      Int             @default(3)
   scheduledAt      DateTime?
   startedAt        DateTime?
   completedAt      DateTime?
   failedAt         DateTime?
   nextRetryAt      DateTime?
-  useCustomResume  Boolean                    @default(false)
+  useCustomResume  Boolean         @default(false)
   resumeId         String?
   coverLetter      String?
   customFields     Json?
   automationConfig Json?
-  requiresCaptcha  Boolean                    @default(false)
-  captchaSolved    Boolean                    @default(false)
+  requiresCaptcha  Boolean         @default(false)
+  captchaSolved    Boolean         @default(false)
   success          Boolean?
   errorMessage     String?
   errorType        String?
   responseData     Json?
   desktopSessionId String?
-  claimedBy        String? // 'SERVER' or 'DESKTOP' - prevents duplicate processing
-  claimedAt        DateTime? // When the job was claimed for processing
-  createdAt        DateTime                   @default(now())
-  updatedAt        DateTime                   @updatedAt
-  application      JobApplication?            @relation(fields: [applicationId], references: [id])
-  jobPosting       JobPosting                 @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  claimedAt        DateTime?
+  claimedBy        String?
+  application      JobApplication? @relation(fields: [applicationId], references: [id])
+  jobPosting       JobPosting      @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   automationLogs   AutomationLog[]
   jobSnapshot      JobSnapshot?
-  dataRequest      JobApplicationDataRequest?
-  fieldData        JobApplicationFieldData[]
 
   @@index([userId, status])
   @@index([status, scheduledAt])
@@ -562,83 +539,76 @@ model CompanyReview {
   @@map("company_reviews")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model JobPosting {
-  id               String      @id @default(uuid())
-  title            String
-  description      String
-  requirements     String?
-  benefits         String?
-  type             JobType     @default(FULL_TIME)
-  level            JobLevel    @default(MID)
-  department       String?
-  category         JobCategory @default(OTHER)
-  remote           Boolean     @default(false)
-  remoteType       RemoteType  @default(ONSITE)
-  location         String?
-  timeZone         String?
-  city             String?
-  state            String?
-  country          String?
-  coordinates      Json?
-  salaryMin        Int?
-  salaryMax        Int?
-  currency         String?     @default("USD")
-  salaryType       SalaryType?
-  equity           String?
-  bonus            String?
-  experienceYears  Int?
-  skills           String[]
-  education        String?
-  languages        String[]
-  companyId        String
-  externalId       String?     @unique
-  source           JobSource   @default(MANUAL)
-  sourceUrl        String?
-  applyUrl         String?
-  keywords         String[]
-  tags             String[]
-  qualityScore     Float?
-  isVerified       Boolean     @default(false)
-  verifiedAt       DateTime?
-  status           JobStatus   @default(ACTIVE)
-  isActive         Boolean     @default(true)
-  isFeatured       Boolean     @default(false)
-  isUrgent         Boolean     @default(false)
-  postedAt         DateTime?
-  expiresAt        DateTime?
-  lastScrapedAt    DateTime?
-  viewCount        Int         @default(0)
-  applicationCount Int         @default(0)
-  rightSwipeCount  Int         @default(0)
-  leftSwipeCount   Int         @default(0)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-
-  // Greenhouse-specific fields for automation
-  greenhouseCompanyId String?
-  greenhouseJobId     String?
-  applicationSchema   Json?
-  formMetadata        Json?
-
-  // Automation intelligence metrics
-  automationFeasibility String? // 'high', 'medium', 'low'
-  estimatedSuccessRate  Int? // 0-100
-  prefilledFieldCount   Int     @default(0)
-  aiRequiredFieldCount  Int     @default(0)
-  totalRequiredFields   Int     @default(0)
-
-  // Schema tracking
-  lastSchemaUpdate DateTime?
-  schemaVersion    String?   @default("1.0")
-
-  queueItems   ApplicationQueue[]
-  applications JobApplication[]
-  company      Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  snapshots    JobSnapshot[]
-  enhancements ResumeEnhancement[]
-  savedBy      SavedJob[]
-  swipes       UserJobSwipe[]
-  dataRequests JobApplicationDataRequest[]
+  id                    String              @id @default(uuid())
+  title                 String
+  description           String
+  requirements          String?
+  benefits              String?
+  type                  JobType             @default(FULL_TIME)
+  level                 JobLevel            @default(MID)
+  department            String?
+  category              JobCategory         @default(OTHER)
+  remote                Boolean             @default(false)
+  remoteType            RemoteType          @default(ONSITE)
+  location              String?
+  timeZone              String?
+  city                  String?
+  state                 String?
+  country               String?
+  coordinates           Json?
+  salaryMin             Int?
+  salaryMax             Int?
+  currency              String?             @default("USD")
+  salaryType            SalaryType?
+  equity                String?
+  bonus                 String?
+  experienceYears       Int?
+  skills                String[]
+  education             String?
+  languages             String[]
+  companyId             String
+  externalId            String?             @unique
+  source                JobSource           @default(MANUAL)
+  sourceUrl             String?
+  applyUrl              String?
+  keywords              String[]
+  tags                  String[]
+  qualityScore          Float?
+  isVerified            Boolean             @default(false)
+  verifiedAt            DateTime?
+  status                JobStatus           @default(ACTIVE)
+  isActive              Boolean             @default(true)
+  isFeatured            Boolean             @default(false)
+  isUrgent              Boolean             @default(false)
+  postedAt              DateTime?
+  expiresAt             DateTime?
+  lastScrapedAt         DateTime?
+  viewCount             Int                 @default(0)
+  applicationCount      Int                 @default(0)
+  rightSwipeCount       Int                 @default(0)
+  leftSwipeCount        Int                 @default(0)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  aiRequiredFieldCount  Int                 @default(0)
+  applicationSchema     Json?
+  automationFeasibility String?
+  estimatedSuccessRate  Int?
+  formMetadata          Json?
+  greenhouseCompanyId   String?
+  greenhouseJobId       String?
+  lastSchemaUpdate      DateTime?
+  prefilledFieldCount   Int                 @default(0)
+  schemaVersion         String?             @default("1.0")
+  totalRequiredFields   Int                 @default(0)
+  queueItems            ApplicationQueue[]
+  applications          JobApplication[]
+  company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  snapshots             JobSnapshot[]
+  enhancements          ResumeEnhancement[]
+  savedBy               SavedJob[]
+  swipes                UserJobSwipe[]
 
   @@unique([greenhouseCompanyId, greenhouseJobId])
   @@index([companyId])
@@ -652,7 +622,6 @@ model JobPosting {
   @@index([postedAt])
   @@index([qualityScore])
   @@index([title])
-  @@index([description])
   @@index([greenhouseCompanyId, greenhouseJobId])
   @@index([automationFeasibility])
   @@index([estimatedSuccessRate])
@@ -1041,64 +1010,6 @@ model UsageRecord {
   @@map("usage_records")
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MISSING DATA TRACKING MODELS (Adaptive Automation)
-// ═══════════════════════════════════════════════════════════════
-
-model JobApplicationDataRequest {
-  id            String  @id @default(uuid())
-  applicationId String? @unique // Null if pre-application analysis
-  userId        String
-  jobPostingId  String
-
-  // What data is missing
-  missingFields Json // Array of {fieldName, fieldLabel, fieldType, required, context}
-
-  // Response from user
-  providedData Json? // Map of fieldName -> userValue
-
-  status DataRequestStatus @default(PENDING)
-
-  requestedAt DateTime  @default(now())
-  respondedAt DateTime?
-  expiresAt   DateTime // 24 hours from request
-
-  application ApplicationQueue? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  jobPosting  JobPosting        @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-  @@index([applicationId])
-  @@index([status, expiresAt])
-  @@map("job_application_data_requests")
-}
-
-model JobApplicationFieldData {
-  id            String @id @default(uuid())
-  applicationId String
-  userId        String
-
-  fieldName  String // e.g., "why_this_company"
-  fieldLabel String // e.g., "Why do you want to work here?"
-  fieldType  String // "text", "textarea", "select", etc.
-  fieldValue String // User's response
-
-  isAiGenerated Boolean @default(false) // Was this AI-suggested?
-  aiSuggestion  String? // Original AI suggestion if any
-
-  providedAt        DateTime @default(now())
-  usedInApplication Boolean  @default(false) // Was this actually used?
-
-  application ApplicationQueue @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([applicationId, fieldName])
-  @@index([applicationId])
-  @@index([userId])
-  @@index([fieldName])
-  @@map("job_application_field_data")
-}
-
 enum UserRole {
   USER
   PREMIUM_USER
@@ -1335,7 +1246,6 @@ enum QueueStatus {
   RETRYING
   PAUSED
   REQUIRES_CAPTCHA
-  WAITING_FOR_DESKTOP 
 }
 
 enum QueuePriority {
@@ -1344,14 +1254,6 @@ enum QueuePriority {
   HIGH
   URGENT
   IMMEDIATE
-}
-
-enum DataRequestStatus {
-  PENDING // Waiting for user input
-  PARTIALLY_FILLED // Some fields filled, some missing
-  COMPLETED // All required fields filled
-  EXPIRED // User didn't respond within 24h
-  CANCELLED // User cancelled application
 }
 
 enum InteractionType {

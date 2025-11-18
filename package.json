@@ -63,6 +63,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "bullmq": "^5.63.2",
     "fastify": "^5.4.0",
     "ioredis": "^5.8.2",

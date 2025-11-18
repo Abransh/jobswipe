@@ -147,8 +147,6 @@ exports.Prisma.UserScalarFieldEnum = {
   userAgent: 'userAgent',
   timezone: 'timezone',
   locale: 'locale',
-  oauthProviders: 'oauthProviders',
-  primaryAuthProvider: 'primaryAuthProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -194,7 +192,6 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   desiredSalaryMax: 'desiredSalaryMax',
   preferredCurrency: 'preferredCurrency',
   willingToRelocate: 'willingToRelocate',
-  needsVisaSponsorship: 'needsVisaSponsorship',
   profileVisibility: 'profileVisibility',
   showEmail: 'showEmail',
   showPhone: 'showPhone',
@@ -202,7 +199,8 @@ exports.Prisma.UserProfileScalarFieldEnum = {
   updatedAt: 'updatedAt',
   automationPreferences: 'automationPreferences',
   coverLetterTemplate: 'coverLetterTemplate',
-  workAuthorization: 'workAuthorization'
+  workAuthorization: 'workAuthorization',
+  needsVisaSponsorship: 'needsVisaSponsorship'
 };
 
 exports.Prisma.UserPreferencesScalarFieldEnum = {
@@ -266,18 +264,6 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   expires: 'expires'
 };
 
-exports.Prisma.OAuthStateScalarFieldEnum = {
-  id: 'id',
-  state: 'state',
-  codeVerifier: 'codeVerifier',
-  provider: 'provider',
-  redirectUri: 'redirectUri',
-  source: 'source',
-  metadata: 'metadata',
-  createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
-};
-
 exports.Prisma.UserJobSwipeScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -325,10 +311,10 @@ exports.Prisma.ApplicationQueueScalarFieldEnum = {
   errorType: 'errorType',
   responseData: 'responseData',
   desktopSessionId: 'desktopSessionId',
-  claimedBy: 'claimedBy',
-  claimedAt: 'claimedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  claimedAt: 'claimedAt',
+  claimedBy: 'claimedBy'
 };
 
 exports.Prisma.AutomationLogScalarFieldEnum = {
@@ -600,17 +586,17 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   leftSwipeCount: 'leftSwipeCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  greenhouseCompanyId: 'greenhouseCompanyId',
-  greenhouseJobId: 'greenhouseJobId',
+  aiRequiredFieldCount: 'aiRequiredFieldCount',
   applicationSchema: 'applicationSchema',
-  formMetadata: 'formMetadata',
   automationFeasibility: 'automationFeasibility',
   estimatedSuccessRate: 'estimatedSuccessRate',
-  prefilledFieldCount: 'prefilledFieldCount',
-  aiRequiredFieldCount: 'aiRequiredFieldCount',
-  totalRequiredFields: 'totalRequiredFields',
+  formMetadata: 'formMetadata',
+  greenhouseCompanyId: 'greenhouseCompanyId',
+  greenhouseJobId: 'greenhouseJobId',
   lastSchemaUpdate: 'lastSchemaUpdate',
-  schemaVersion: 'schemaVersion'
+  prefilledFieldCount: 'prefilledFieldCount',
+  schemaVersion: 'schemaVersion',
+  totalRequiredFields: 'totalRequiredFields'
 };
 
 exports.Prisma.JobSnapshotScalarFieldEnum = {
@@ -905,33 +891,6 @@ exports.Prisma.UsageRecordScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.JobApplicationDataRequestScalarFieldEnum = {
-  id: 'id',
-  applicationId: 'applicationId',
-  userId: 'userId',
-  jobPostingId: 'jobPostingId',
-  missingFields: 'missingFields',
-  providedData: 'providedData',
-  status: 'status',
-  requestedAt: 'requestedAt',
-  respondedAt: 'respondedAt',
-  expiresAt: 'expiresAt'
-};
-
-exports.Prisma.JobApplicationFieldDataScalarFieldEnum = {
-  id: 'id',
-  applicationId: 'applicationId',
-  userId: 'userId',
-  fieldName: 'fieldName',
-  fieldLabel: 'fieldLabel',
-  fieldType: 'fieldType',
-  fieldValue: 'fieldValue',
-  isAiGenerated: 'isAiGenerated',
-  aiSuggestion: 'aiSuggestion',
-  providedAt: 'providedAt',
-  usedInApplication: 'usedInApplication'
-};
-
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -965,9 +924,7 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   timezone: 'timezone',
-  locale: 'locale',
-  oauthProviders: 'oauthProviders',
-  primaryAuthProvider: 'primaryAuthProvider'
+  locale: 'locale'
 };
 
 exports.Prisma.JsonNullValueFilter = {
@@ -1045,15 +1002,6 @@ exports.Prisma.SessionOrderByRelevanceFieldEnum = {
 exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
   identifier: 'identifier',
   token: 'token'
-};
-
-exports.Prisma.OAuthStateOrderByRelevanceFieldEnum = {
-  id: 'id',
-  state: 'state',
-  codeVerifier: 'codeVerifier',
-  provider: 'provider',
-  redirectUri: 'redirectUri',
-  source: 'source'
 };
 
 exports.Prisma.UserJobSwipeOrderByRelevanceFieldEnum = {
@@ -1234,9 +1182,9 @@ exports.Prisma.JobPostingOrderByRelevanceFieldEnum = {
   applyUrl: 'applyUrl',
   keywords: 'keywords',
   tags: 'tags',
+  automationFeasibility: 'automationFeasibility',
   greenhouseCompanyId: 'greenhouseCompanyId',
   greenhouseJobId: 'greenhouseJobId',
-  automationFeasibility: 'automationFeasibility',
   schemaVersion: 'schemaVersion'
 };
 
@@ -1392,24 +1340,6 @@ exports.Prisma.UsageRecordOrderByRelevanceFieldEnum = {
   deviceType: 'deviceType',
   ipAddress: 'ipAddress'
 };
-
-exports.Prisma.JobApplicationDataRequestOrderByRelevanceFieldEnum = {
-  id: 'id',
-  applicationId: 'applicationId',
-  userId: 'userId',
-  jobPostingId: 'jobPostingId'
-};
-
-exports.Prisma.JobApplicationFieldDataOrderByRelevanceFieldEnum = {
-  id: 'id',
-  applicationId: 'applicationId',
-  userId: 'userId',
-  fieldName: 'fieldName',
-  fieldLabel: 'fieldLabel',
-  fieldType: 'fieldType',
-  fieldValue: 'fieldValue',
-  aiSuggestion: 'aiSuggestion'
-};
 exports.UserRole = exports.$Enums.UserRole = {
   USER: 'USER',
   PREMIUM_USER: 'PREMIUM_USER',
@@ -1456,8 +1386,7 @@ exports.QueueStatus = exports.$Enums.QueueStatus = {
   CANCELLED: 'CANCELLED',
   RETRYING: 'RETRYING',
   PAUSED: 'PAUSED',
-  REQUIRES_CAPTCHA: 'REQUIRES_CAPTCHA',
-  WAITING_FOR_DESKTOP: 'WAITING_FOR_DESKTOP'
+  REQUIRES_CAPTCHA: 'REQUIRES_CAPTCHA'
 };
 
 exports.QueuePriority = exports.$Enums.QueuePriority = {
@@ -1895,14 +1824,6 @@ exports.UsageFeature = exports.$Enums.UsageFeature = {
   AUDIT_LOG_ENTRY: 'AUDIT_LOG_ENTRY'
 };
 
-exports.DataRequestStatus = exports.$Enums.DataRequestStatus = {
-  PENDING: 'PENDING',
-  PARTIALLY_FILLED: 'PARTIALLY_FILLED',
-  COMPLETED: 'COMPLETED',
-  EXPIRED: 'EXPIRED',
-  CANCELLED: 'CANCELLED'
-};
-
 exports.Prisma.ModelName = {
   User: 'User',
   UserProfile: 'UserProfile',
@@ -1910,7 +1831,6 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken',
-  OAuthState: 'OAuthState',
   UserJobSwipe: 'UserJobSwipe',
   ApplicationQueue: 'ApplicationQueue',
   AutomationLog: 'AutomationLog',
@@ -1932,9 +1852,7 @@ exports.Prisma.ModelName = {
   SavedJob: 'SavedJob',
   Subscription: 'Subscription',
   BillingHistory: 'BillingHistory',
-  UsageRecord: 'UsageRecord',
-  JobApplicationDataRequest: 'JobApplicationDataRequest',
-  JobApplicationFieldData: 'JobApplicationFieldData'
+  UsageRecord: 'UsageRecord'
 };
 
 /**
