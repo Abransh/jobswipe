@@ -10,35 +10,35 @@ datasource db {
 }
 
 model User {
-  id                    String             @id @default(uuid())
-  email                 String             @unique
+  id                    String                      @id @default(uuid())
+  email                 String                      @unique
   passwordHash          String?
   name                  String?
   avatar                String?
   emailVerified         DateTime?
-  role                  UserRole           @default(USER)
-  status                UserStatus         @default(ACTIVE)
+  role                  UserRole                    @default(USER)
+  status                UserStatus                  @default(ACTIVE)
   lastLoginAt           DateTime?
-  loginAttempts         Int                @default(0)
+  loginAttempts         Int                         @default(0)
   lockedUntil           DateTime?
-  dataConsent           Boolean            @default(false)
+  dataConsent           Boolean                     @default(false)
   consentDate           DateTime?
   dataRetentionUntil    DateTime?
-  isDeleted             Boolean            @default(false)
+  isDeleted             Boolean                     @default(false)
   deletedAt             DateTime?
-  onboardingCompleted   Boolean            @default(false)
-  onboardingProgress    Int                @default(0)
-  onboardingStep        Int                @default(1)
+  onboardingCompleted   Boolean                     @default(false)
+  onboardingProgress    Int                         @default(0)
+  onboardingStep        Int                         @default(1)
   onboardingStartedAt   DateTime?
   onboardingCompletedAt DateTime?
   ipAddress             String?
   userAgent             String?
   timezone              String?
-  locale                String?            @default("en")
-  oauthProviders        String[]           @default([]) // Track linked OAuth providers
+  locale                String?                     @default("en")
+  oauthProviders        String[]                    @default([]) // Track linked OAuth providers
   primaryAuthProvider   String? // 'email' | 'google' | 'github' | 'linkedin'
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
   accounts              Account[]
   analyticsEvents       AnalyticsEvent[]
   applicationQueue      ApplicationQueue[]
@@ -54,6 +54,8 @@ model User {
   notifications         UserNotification[]
   preferences           UserPreferences?
   profile               UserProfile?
+  dataRequests          JobApplicationDataRequest[]
+  fieldData             JobApplicationFieldData[]
 
   @@index([email])
   @@index([status])
@@ -237,26 +239,26 @@ model UserJobSwipe {
 }
 
 model ApplicationQueue {
-  id               String          @id @default(uuid())
+  id               String                     @id @default(uuid())
   userId           String
   jobPostingId     String
   applicationId    String?
-  status           QueueStatus     @default(PENDING)
-  priority         QueuePriority   @default(NORMAL)
-  attempts         Int             @default(0)
-  maxAttempts      Int             @default(3)
+  status           QueueStatus                @default(PENDING)
+  priority         QueuePriority              @default(NORMAL)
+  attempts         Int                        @default(0)
+  maxAttempts      Int                        @default(3)
   scheduledAt      DateTime?
   startedAt        DateTime?
   completedAt      DateTime?
   failedAt         DateTime?
   nextRetryAt      DateTime?
-  useCustomResume  Boolean         @default(false)
+  useCustomResume  Boolean                    @default(false)
   resumeId         String?
   coverLetter      String?
   customFields     Json?
   automationConfig Json?
-  requiresCaptcha  Boolean         @default(false)
-  captchaSolved    Boolean         @default(false)
+  requiresCaptcha  Boolean                    @default(false)
+  captchaSolved    Boolean                    @default(false)
   success          Boolean?
   errorMessage     String?
   errorType        String?
@@ -264,13 +266,15 @@ model ApplicationQueue {
   desktopSessionId String?
   claimedBy        String? // 'SERVER' or 'DESKTOP' - prevents duplicate processing
   claimedAt        DateTime? // When the job was claimed for processing
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  application      JobApplication? @relation(fields: [applicationId], references: [id])
-  jobPosting       JobPosting      @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  application      JobApplication?            @relation(fields: [applicationId], references: [id])
+  jobPosting       JobPosting                 @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   automationLogs   AutomationLog[]
   jobSnapshot      JobSnapshot?
+  dataRequest      JobApplicationDataRequest?
+  fieldData        JobApplicationFieldData[]
 
   @@index([userId, status])
   @@index([status, scheduledAt])
@@ -629,11 +633,12 @@ model JobPosting {
 
   queueItems   ApplicationQueue[]
   applications JobApplication[]
-  company      Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company      Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   snapshots    JobSnapshot[]
   enhancements ResumeEnhancement[]
   savedBy      SavedJob[]
   swipes       UserJobSwipe[]
+  dataRequests JobApplicationDataRequest[]
 
   @@unique([greenhouseCompanyId, greenhouseJobId])
   @@index([companyId])
@@ -1036,6 +1041,64 @@ model UsageRecord {
   @@map("usage_records")
 }
 
+// ═══════════════════════════════════════════════════════════════
+// MISSING DATA TRACKING MODELS (Adaptive Automation)
+// ═══════════════════════════════════════════════════════════════
+
+model JobApplicationDataRequest {
+  id            String  @id @default(uuid())
+  applicationId String? @unique // Null if pre-application analysis
+  userId        String
+  jobPostingId  String
+
+  // What data is missing
+  missingFields Json // Array of {fieldName, fieldLabel, fieldType, required, context}
+
+  // Response from user
+  providedData Json? // Map of fieldName -> userValue
+
+  status DataRequestStatus @default(PENDING)
+
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
+  expiresAt   DateTime // 24 hours from request
+
+  application ApplicationQueue? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobPosting  JobPosting        @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([applicationId])
+  @@index([status, expiresAt])
+  @@map("job_application_data_requests")
+}
+
+model JobApplicationFieldData {
+  id            String @id @default(uuid())
+  applicationId String
+  userId        String
+
+  fieldName  String // e.g., "why_this_company"
+  fieldLabel String // e.g., "Why do you want to work here?"
+  fieldType  String // "text", "textarea", "select", etc.
+  fieldValue String // User's response
+
+  isAiGenerated Boolean @default(false) // Was this AI-suggested?
+  aiSuggestion  String? // Original AI suggestion if any
+
+  providedAt        DateTime @default(now())
+  usedInApplication Boolean  @default(false) // Was this actually used?
+
+  application ApplicationQueue @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, fieldName])
+  @@index([applicationId])
+  @@index([userId])
+  @@index([fieldName])
+  @@map("job_application_field_data")
+}
+
 enum UserRole {
   USER
   PREMIUM_USER
@@ -1272,6 +1335,7 @@ enum QueueStatus {
   RETRYING
   PAUSED
   REQUIRES_CAPTCHA
+  WAITING_FOR_DESKTOP
 }
 
 enum QueuePriority {
@@ -1280,6 +1344,14 @@ enum QueuePriority {
   HIGH
   URGENT
   IMMEDIATE
+}
+
+enum DataRequestStatus {
+  PENDING // Waiting for user input
+  PARTIALLY_FILLED // Some fields filled, some missing
+  COMPLETED // All required fields filled
+  EXPIRED // User didn't respond within 24h
+  CANCELLED // User cancelled application
 }
 
 enum InteractionType {

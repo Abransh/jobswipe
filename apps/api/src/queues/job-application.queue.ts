@@ -196,7 +196,7 @@ export function createJobApplicationQueue(
   });
 
   queue.on('progress', (job, progress) => {
-    console.log(`📊 Job ${job.id} progress: ${progress}%`);
+    console.log(`📊 Job ${(job as any).id} progress: ${progress}%`);
   });
 
   console.log(`✅ Job Application Queue '${JOB_APPLICATION_QUEUE_NAME}' created`);

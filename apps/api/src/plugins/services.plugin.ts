@@ -504,7 +504,7 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
           return {
             status: healthStatus.status,
             details: {
-              activeProcesses: healthStatus.activeProcesses,
+              activeProcesses: (healthStatus as any).activeProcesses,
               queueHealth: healthStatus.queueHealth,
               systemInfo: healthStatus.systemInfo,
               issues: healthStatus.issues

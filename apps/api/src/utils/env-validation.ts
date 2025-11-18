@@ -83,10 +83,17 @@ const ProxyConfigSchema = z.object({
 
 const QueueConfigSchema = z.object({
   enabled: z.coerce.boolean().default(true),
-  defaultJobOptions: z.string().transform(val => {
+  // default to a JSON string so zod always receives a string even when the env var is missing
+  defaultJobOptions: z.string().default(JSON.stringify({
+    removeOnComplete: 100,
+    removeOnFail: 50,
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 2000 }
+  })).transform(val => {
     try {
       return JSON.parse(val);
     } catch {
+      // fallback object if parsing somehow fails
       return {
         removeOnComplete: 100,
         removeOnFail: 50,
@@ -99,6 +106,7 @@ const QueueConfigSchema = z.object({
   maxStalledCount: z.coerce.number().min(1).default(1),
   stalledInterval: z.coerce.number().min(1000).default(30000),
 });
+
 
 const WebSocketConfigSchema = z.object({
   enabled: z.coerce.boolean().default(true),

@@ -388,3 +388,4 @@ export function createJobApplicationWorker(fastify: FastifyInstance): Worker<Job
 
   return worker;
   }
+}

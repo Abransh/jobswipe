@@ -1335,6 +1335,7 @@ enum QueueStatus {
   RETRYING
   PAUSED
   REQUIRES_CAPTCHA
+  WAITING_FOR_DESKTOP 
 }
 
 enum QueuePriority {
