@@ -549,7 +549,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
     // - PAID users → Server execution (QUEUED in BullMQ)
 
     const executionMode: 'server' | 'desktop' = serverEligibility.allowed ? 'server' : 'desktop';
-    const initialStatus = executionMode === 'desktop' ? QueueStatus.WAITING_FOR_DESKTOP : QueueStatus.PENDING;
+    const initialStatus = QueueStatus.PENDING;
 
     request.server.log.info({
       ...enhancedLogContext,
