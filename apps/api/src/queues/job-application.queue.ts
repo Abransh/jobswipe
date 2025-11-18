@@ -66,9 +66,6 @@ export const defaultJobOptions: DefaultJobOptions = {
     delay: 5000, // Start with 5 seconds, doubles each retry
   },
 
-  // Timeout configuration
-  timeout: 900000, // 15 minutes max per job
-
   // Job retention configuration
   removeOnComplete: {
     count: 1000, // Keep last 1000 completed jobs
@@ -77,6 +74,9 @@ export const defaultJobOptions: DefaultJobOptions = {
   removeOnFail: {
     count: 5000, // Keep last 5000 failed jobs for debugging
   },
+
+  // NOTE: Job timeout is configured on the Worker, not in DefaultJobOptions
+  // See: job-application.worker.ts for timeout configuration
 
   // Job ID will be set per job (from database ID)
   // This ensures idempotency
@@ -110,93 +110,13 @@ export function createJobApplicationQueue(
     queueOptions
   );
 
-  // Queue event listeners for monitoring
+  // NOTE: Event listeners have been moved to QueueEvents in queue.plugin.ts
+  // BullMQ v5 deprecated queue.on() in favor of QueueEvents
+  // All monitoring and DLQ logic is now handled by the queue.plugin.ts using QueueEvents
+
+  // Error events still supported on Queue instance for queue-level errors
   queue.on('error', (error) => {
     console.error('❌ Queue error:', error);
-  });
-
-  queue.on('waiting', (jobId) => {
-    console.log(`⏳ Job ${jobId} is waiting`);
-  });
-
-  queue.on('active', (job) => {
-    console.log(`🔄 Job ${job.id} is now active`);
-  });
-
-  queue.on('completed', (job) => {
-    console.log(`✅ Job ${job.id} completed`);
-  });
-
-  // Enhanced failed handler with Dead Letter Queue support
-  queue.on('failed', async (job, error) => {
-    if (!job) {
-      console.error('❌ Job failed but job object is null:', error.message);
-      return;
-    }
-
-    console.error(`❌ Job ${job.id} failed (attempt ${job.attemptsMade}/${job.opts.attempts}):`, error.message);
-
-    // Check if job has exhausted all retry attempts
-    const maxAttempts = job.opts.attempts || 3;
-    const hasExhaustedRetries = job.attemptsMade >= maxAttempts;
-
-    if (hasExhaustedRetries && dlq) {
-      // Move to Dead Letter Queue
-      try {
-        console.warn(`💀 Job ${job.id} exhausted all ${maxAttempts} attempts - moving to DLQ`);
-
-        // Determine failure reason
-        let failureReason: DeadLetterJobData['failureMetadata']['failureReason'] = 'max_attempts';
-        if (error.message.includes('timeout')) {
-          failureReason = 'timeout';
-        } else if (error.message.includes('validation')) {
-          failureReason = 'validation_error';
-        } else if (error.message.includes('system')) {
-          failureReason = 'system_error';
-        }
-
-        // Create DLQ job data with failure metadata
-        const dlqJobData: DeadLetterJobData = {
-          ...job.data,
-          failureMetadata: {
-            originalJobId: job.id || 'unknown',
-            failedAt: new Date().toISOString(),
-            attemptsMade: job.attemptsMade,
-            lastError: error.message,
-            lastErrorStack: error.stack,
-            failureReason,
-            originalQueueName: JOB_APPLICATION_QUEUE_NAME,
-          },
-        };
-
-        // Add to Dead Letter Queue with original job ID
-        await dlq.add(
-          `dlq-${job.id}`,
-          dlqJobData,
-          {
-            jobId: `dlq-${job.id}`, // Ensure unique ID in DLQ
-            removeOnComplete: false, // Keep for manual review
-            removeOnFail: false,
-          }
-        );
-
-        console.log(`✅ Job ${job.id} successfully moved to Dead Letter Queue`);
-
-        // TODO: Send alert notification to monitoring system
-        // TODO: Update database application status to 'DEAD_LETTER'
-      } catch (dlqError) {
-        console.error(`❌ Failed to move job ${job.id} to DLQ:`, dlqError);
-        // Job will remain in failed state for manual intervention
-      }
-    }
-  });
-
-  queue.on('stalled', (jobId) => {
-    console.warn(`⚠️ Job ${jobId} stalled`);
-  });
-
-  queue.on('progress', (job, progress) => {
-    console.log(`📊 Job ${(job as any).id} progress: ${progress}%`);
   });
 
   console.log(`✅ Job Application Queue '${JOB_APPLICATION_QUEUE_NAME}' created`);
@@ -285,13 +205,12 @@ export function createDeadLetterQueue(): Queue<DeadLetterJobData> {
     dlqOptions
   );
 
-  // DLQ event listeners
+  // NOTE: DLQ event listeners moved to QueueEvents in queue.plugin.ts
+  // BullMQ v5 deprecated queue.on() in favor of QueueEvents
+
+  // Error events still supported on Queue instance for queue-level errors
   dlq.on('error', (error) => {
     console.error('❌ DLQ error:', error);
-  });
-
-  dlq.on('added', (job) => {
-    console.log(`💀 Job ${job.id} added to Dead Letter Queue`);
   });
 
   console.log(`✅ Dead Letter Queue '${JOB_APPLICATION_DLQ_NAME}' created`);

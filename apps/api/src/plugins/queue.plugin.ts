@@ -178,7 +178,7 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
           timestamp: new Date().toISOString(),
         };
 
-        return reply.code(isReady ? 200 : 503).send(health);
+        return reply.code(isHealthy ? 200 : 503).send(health);
       } catch (error) {
         fastify.log.error({ error }, '❌ Queue health check failed');
         return reply.code(503).send({
