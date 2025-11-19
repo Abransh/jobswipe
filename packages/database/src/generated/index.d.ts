@@ -4580,8 +4580,10 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    needsVisaSponsorship: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    primaryAuthProvider: string | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -4610,8 +4612,10 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    needsVisaSponsorship: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    primaryAuthProvider: string | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -4640,8 +4644,11 @@ export namespace Prisma {
     userAgent: number
     timezone: number
     locale: number
+    needsVisaSponsorship: number
     createdAt: number
     updatedAt: number
+    oauthProviders: number
+    primaryAuthProvider: number
     _all: number
   }
 
@@ -4684,8 +4691,10 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    needsVisaSponsorship?: true
     createdAt?: true
     updatedAt?: true
+    primaryAuthProvider?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -4714,8 +4723,10 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    needsVisaSponsorship?: true
     createdAt?: true
     updatedAt?: true
+    primaryAuthProvider?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -4744,8 +4755,11 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    needsVisaSponsorship?: true
     createdAt?: true
     updatedAt?: true
+    oauthProviders?: true
+    primaryAuthProvider?: true
     _all?: true
   }
 
@@ -4838,7 +4852,7 @@ export namespace Prisma {
   export type UserGroupByOutputType = {
     id: string
     email: string
-    passwordHash: string | null
+    passwordHash: string
     name: string | null
     avatar: string | null
     emailVerified: Date | null
@@ -4861,8 +4875,11 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    needsVisaSponsorship: boolean | null
     createdAt: Date
     updatedAt: Date
+    oauthProviders: string[]
+    primaryAuthProvider: string | null
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -4910,8 +4927,11 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    needsVisaSponsorship?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
     analyticsEvents?: boolean | User$analyticsEventsArgs<ExtArgs>
     applicationQueue?: boolean | User$applicationQueueArgs<ExtArgs>
@@ -4956,8 +4976,11 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    needsVisaSponsorship?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4986,8 +5009,11 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    needsVisaSponsorship?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -5016,11 +5042,14 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    needsVisaSponsorship?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "avatar" | "emailVerified" | "role" | "status" | "lastLoginAt" | "loginAttempts" | "lockedUntil" | "dataConsent" | "consentDate" | "dataRetentionUntil" | "isDeleted" | "deletedAt" | "onboardingCompleted" | "onboardingProgress" | "onboardingStep" | "onboardingStartedAt" | "onboardingCompletedAt" | "ipAddress" | "userAgent" | "timezone" | "locale" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "avatar" | "emailVerified" | "role" | "status" | "lastLoginAt" | "loginAttempts" | "lockedUntil" | "dataConsent" | "consentDate" | "dataRetentionUntil" | "isDeleted" | "deletedAt" | "onboardingCompleted" | "onboardingProgress" | "onboardingStep" | "onboardingStartedAt" | "onboardingCompletedAt" | "ipAddress" | "userAgent" | "timezone" | "locale" | "needsVisaSponsorship" | "createdAt" | "updatedAt" | "oauthProviders" | "primaryAuthProvider", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     analyticsEvents?: boolean | User$analyticsEventsArgs<ExtArgs>
@@ -5064,7 +5093,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string
-      passwordHash: string | null
+      passwordHash: string
       name: string | null
       avatar: string | null
       emailVerified: Date | null
@@ -5087,8 +5116,11 @@ export namespace Prisma {
       userAgent: string | null
       timezone: string | null
       locale: string | null
+      needsVisaSponsorship: boolean | null
       createdAt: Date
       updatedAt: Date
+      oauthProviders: string[]
+      primaryAuthProvider: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -5552,8 +5584,11 @@ export namespace Prisma {
     readonly userAgent: FieldRef<"User", 'String'>
     readonly timezone: FieldRef<"User", 'String'>
     readonly locale: FieldRef<"User", 'String'>
+    readonly needsVisaSponsorship: FieldRef<"User", 'Boolean'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly oauthProviders: FieldRef<"User", 'String[]'>
+    readonly primaryAuthProvider: FieldRef<"User", 'String'>
   }
     
 
@@ -26965,9 +27000,9 @@ export namespace Prisma {
     applicationCount: number | null
     rightSwipeCount: number | null
     leftSwipeCount: number | null
-    aiRequiredFieldCount: number | null
     estimatedSuccessRate: number | null
     prefilledFieldCount: number | null
+    aiRequiredFieldCount: number | null
     totalRequiredFields: number | null
   }
 
@@ -26980,9 +27015,9 @@ export namespace Prisma {
     applicationCount: number | null
     rightSwipeCount: number | null
     leftSwipeCount: number | null
-    aiRequiredFieldCount: number | null
     estimatedSuccessRate: number | null
     prefilledFieldCount: number | null
+    aiRequiredFieldCount: number | null
     totalRequiredFields: number | null
   }
 
@@ -27032,15 +27067,15 @@ export namespace Prisma {
     leftSwipeCount: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    aiRequiredFieldCount: number | null
-    automationFeasibility: string | null
-    estimatedSuccessRate: number | null
     greenhouseCompanyId: string | null
     greenhouseJobId: string | null
-    lastSchemaUpdate: Date | null
+    automationFeasibility: string | null
+    estimatedSuccessRate: number | null
     prefilledFieldCount: number | null
-    schemaVersion: string | null
+    aiRequiredFieldCount: number | null
     totalRequiredFields: number | null
+    lastSchemaUpdate: Date | null
+    schemaVersion: string | null
   }
 
   export type JobPostingMaxAggregateOutputType = {
@@ -27089,15 +27124,15 @@ export namespace Prisma {
     leftSwipeCount: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    aiRequiredFieldCount: number | null
-    automationFeasibility: string | null
-    estimatedSuccessRate: number | null
     greenhouseCompanyId: string | null
     greenhouseJobId: string | null
-    lastSchemaUpdate: Date | null
+    automationFeasibility: string | null
+    estimatedSuccessRate: number | null
     prefilledFieldCount: number | null
-    schemaVersion: string | null
+    aiRequiredFieldCount: number | null
     totalRequiredFields: number | null
+    lastSchemaUpdate: Date | null
+    schemaVersion: string | null
   }
 
   export type JobPostingCountAggregateOutputType = {
@@ -27151,17 +27186,17 @@ export namespace Prisma {
     leftSwipeCount: number
     createdAt: number
     updatedAt: number
-    aiRequiredFieldCount: number
-    applicationSchema: number
-    automationFeasibility: number
-    estimatedSuccessRate: number
-    formMetadata: number
     greenhouseCompanyId: number
     greenhouseJobId: number
-    lastSchemaUpdate: number
+    applicationSchema: number
+    formMetadata: number
+    automationFeasibility: number
+    estimatedSuccessRate: number
     prefilledFieldCount: number
-    schemaVersion: number
+    aiRequiredFieldCount: number
     totalRequiredFields: number
+    lastSchemaUpdate: number
+    schemaVersion: number
     _all: number
   }
 
@@ -27175,9 +27210,9 @@ export namespace Prisma {
     applicationCount?: true
     rightSwipeCount?: true
     leftSwipeCount?: true
-    aiRequiredFieldCount?: true
     estimatedSuccessRate?: true
     prefilledFieldCount?: true
+    aiRequiredFieldCount?: true
     totalRequiredFields?: true
   }
 
@@ -27190,9 +27225,9 @@ export namespace Prisma {
     applicationCount?: true
     rightSwipeCount?: true
     leftSwipeCount?: true
-    aiRequiredFieldCount?: true
     estimatedSuccessRate?: true
     prefilledFieldCount?: true
+    aiRequiredFieldCount?: true
     totalRequiredFields?: true
   }
 
@@ -27242,15 +27277,15 @@ export namespace Prisma {
     leftSwipeCount?: true
     createdAt?: true
     updatedAt?: true
-    aiRequiredFieldCount?: true
-    automationFeasibility?: true
-    estimatedSuccessRate?: true
     greenhouseCompanyId?: true
     greenhouseJobId?: true
-    lastSchemaUpdate?: true
+    automationFeasibility?: true
+    estimatedSuccessRate?: true
     prefilledFieldCount?: true
-    schemaVersion?: true
+    aiRequiredFieldCount?: true
     totalRequiredFields?: true
+    lastSchemaUpdate?: true
+    schemaVersion?: true
   }
 
   export type JobPostingMaxAggregateInputType = {
@@ -27299,15 +27334,15 @@ export namespace Prisma {
     leftSwipeCount?: true
     createdAt?: true
     updatedAt?: true
-    aiRequiredFieldCount?: true
-    automationFeasibility?: true
-    estimatedSuccessRate?: true
     greenhouseCompanyId?: true
     greenhouseJobId?: true
-    lastSchemaUpdate?: true
+    automationFeasibility?: true
+    estimatedSuccessRate?: true
     prefilledFieldCount?: true
-    schemaVersion?: true
+    aiRequiredFieldCount?: true
     totalRequiredFields?: true
+    lastSchemaUpdate?: true
+    schemaVersion?: true
   }
 
   export type JobPostingCountAggregateInputType = {
@@ -27361,17 +27396,17 @@ export namespace Prisma {
     leftSwipeCount?: true
     createdAt?: true
     updatedAt?: true
-    aiRequiredFieldCount?: true
-    applicationSchema?: true
-    automationFeasibility?: true
-    estimatedSuccessRate?: true
-    formMetadata?: true
     greenhouseCompanyId?: true
     greenhouseJobId?: true
-    lastSchemaUpdate?: true
+    applicationSchema?: true
+    formMetadata?: true
+    automationFeasibility?: true
+    estimatedSuccessRate?: true
     prefilledFieldCount?: true
-    schemaVersion?: true
+    aiRequiredFieldCount?: true
     totalRequiredFields?: true
+    lastSchemaUpdate?: true
+    schemaVersion?: true
     _all?: true
   }
 
@@ -27512,17 +27547,17 @@ export namespace Prisma {
     leftSwipeCount: number
     createdAt: Date
     updatedAt: Date
-    aiRequiredFieldCount: number
-    applicationSchema: JsonValue | null
-    automationFeasibility: string | null
-    estimatedSuccessRate: number | null
-    formMetadata: JsonValue | null
     greenhouseCompanyId: string | null
     greenhouseJobId: string | null
-    lastSchemaUpdate: Date | null
+    applicationSchema: JsonValue | null
+    formMetadata: JsonValue | null
+    automationFeasibility: string | null
+    estimatedSuccessRate: number | null
     prefilledFieldCount: number
-    schemaVersion: string | null
+    aiRequiredFieldCount: number
     totalRequiredFields: number
+    lastSchemaUpdate: Date | null
+    schemaVersion: string | null
     _count: JobPostingCountAggregateOutputType | null
     _avg: JobPostingAvgAggregateOutputType | null
     _sum: JobPostingSumAggregateOutputType | null
@@ -27595,17 +27630,17 @@ export namespace Prisma {
     leftSwipeCount?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    aiRequiredFieldCount?: boolean
-    applicationSchema?: boolean
-    automationFeasibility?: boolean
-    estimatedSuccessRate?: boolean
-    formMetadata?: boolean
     greenhouseCompanyId?: boolean
     greenhouseJobId?: boolean
-    lastSchemaUpdate?: boolean
+    applicationSchema?: boolean
+    formMetadata?: boolean
+    automationFeasibility?: boolean
+    estimatedSuccessRate?: boolean
     prefilledFieldCount?: boolean
-    schemaVersion?: boolean
+    aiRequiredFieldCount?: boolean
     totalRequiredFields?: boolean
+    lastSchemaUpdate?: boolean
+    schemaVersion?: boolean
     queueItems?: boolean | JobPosting$queueItemsArgs<ExtArgs>
     applications?: boolean | JobPosting$applicationsArgs<ExtArgs>
     company?: boolean | CompanyDefaultArgs<ExtArgs>
@@ -27667,17 +27702,17 @@ export namespace Prisma {
     leftSwipeCount?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    aiRequiredFieldCount?: boolean
-    applicationSchema?: boolean
-    automationFeasibility?: boolean
-    estimatedSuccessRate?: boolean
-    formMetadata?: boolean
     greenhouseCompanyId?: boolean
     greenhouseJobId?: boolean
-    lastSchemaUpdate?: boolean
+    applicationSchema?: boolean
+    formMetadata?: boolean
+    automationFeasibility?: boolean
+    estimatedSuccessRate?: boolean
     prefilledFieldCount?: boolean
-    schemaVersion?: boolean
+    aiRequiredFieldCount?: boolean
     totalRequiredFields?: boolean
+    lastSchemaUpdate?: boolean
+    schemaVersion?: boolean
     company?: boolean | CompanyDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
 
@@ -27732,17 +27767,17 @@ export namespace Prisma {
     leftSwipeCount?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    aiRequiredFieldCount?: boolean
-    applicationSchema?: boolean
-    automationFeasibility?: boolean
-    estimatedSuccessRate?: boolean
-    formMetadata?: boolean
     greenhouseCompanyId?: boolean
     greenhouseJobId?: boolean
-    lastSchemaUpdate?: boolean
+    applicationSchema?: boolean
+    formMetadata?: boolean
+    automationFeasibility?: boolean
+    estimatedSuccessRate?: boolean
     prefilledFieldCount?: boolean
-    schemaVersion?: boolean
+    aiRequiredFieldCount?: boolean
     totalRequiredFields?: boolean
+    lastSchemaUpdate?: boolean
+    schemaVersion?: boolean
     company?: boolean | CompanyDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobPosting"]>
 
@@ -27797,20 +27832,20 @@ export namespace Prisma {
     leftSwipeCount?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    aiRequiredFieldCount?: boolean
-    applicationSchema?: boolean
-    automationFeasibility?: boolean
-    estimatedSuccessRate?: boolean
-    formMetadata?: boolean
     greenhouseCompanyId?: boolean
     greenhouseJobId?: boolean
-    lastSchemaUpdate?: boolean
+    applicationSchema?: boolean
+    formMetadata?: boolean
+    automationFeasibility?: boolean
+    estimatedSuccessRate?: boolean
     prefilledFieldCount?: boolean
-    schemaVersion?: boolean
+    aiRequiredFieldCount?: boolean
     totalRequiredFields?: boolean
+    lastSchemaUpdate?: boolean
+    schemaVersion?: boolean
   }
 
-  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "requirements" | "benefits" | "type" | "level" | "department" | "category" | "remote" | "remoteType" | "location" | "timeZone" | "city" | "state" | "country" | "coordinates" | "salaryMin" | "salaryMax" | "currency" | "salaryType" | "equity" | "bonus" | "experienceYears" | "skills" | "education" | "languages" | "companyId" | "externalId" | "source" | "sourceUrl" | "applyUrl" | "keywords" | "tags" | "qualityScore" | "isVerified" | "verifiedAt" | "status" | "isActive" | "isFeatured" | "isUrgent" | "postedAt" | "expiresAt" | "lastScrapedAt" | "viewCount" | "applicationCount" | "rightSwipeCount" | "leftSwipeCount" | "createdAt" | "updatedAt" | "aiRequiredFieldCount" | "applicationSchema" | "automationFeasibility" | "estimatedSuccessRate" | "formMetadata" | "greenhouseCompanyId" | "greenhouseJobId" | "lastSchemaUpdate" | "prefilledFieldCount" | "schemaVersion" | "totalRequiredFields", ExtArgs["result"]["jobPosting"]>
+  export type JobPostingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "requirements" | "benefits" | "type" | "level" | "department" | "category" | "remote" | "remoteType" | "location" | "timeZone" | "city" | "state" | "country" | "coordinates" | "salaryMin" | "salaryMax" | "currency" | "salaryType" | "equity" | "bonus" | "experienceYears" | "skills" | "education" | "languages" | "companyId" | "externalId" | "source" | "sourceUrl" | "applyUrl" | "keywords" | "tags" | "qualityScore" | "isVerified" | "verifiedAt" | "status" | "isActive" | "isFeatured" | "isUrgent" | "postedAt" | "expiresAt" | "lastScrapedAt" | "viewCount" | "applicationCount" | "rightSwipeCount" | "leftSwipeCount" | "createdAt" | "updatedAt" | "greenhouseCompanyId" | "greenhouseJobId" | "applicationSchema" | "formMetadata" | "automationFeasibility" | "estimatedSuccessRate" | "prefilledFieldCount" | "aiRequiredFieldCount" | "totalRequiredFields" | "lastSchemaUpdate" | "schemaVersion", ExtArgs["result"]["jobPosting"]>
   export type JobPostingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     queueItems?: boolean | JobPosting$queueItemsArgs<ExtArgs>
     applications?: boolean | JobPosting$applicationsArgs<ExtArgs>
@@ -27890,17 +27925,17 @@ export namespace Prisma {
       leftSwipeCount: number
       createdAt: Date
       updatedAt: Date
-      aiRequiredFieldCount: number
-      applicationSchema: Prisma.JsonValue | null
-      automationFeasibility: string | null
-      estimatedSuccessRate: number | null
-      formMetadata: Prisma.JsonValue | null
       greenhouseCompanyId: string | null
       greenhouseJobId: string | null
-      lastSchemaUpdate: Date | null
+      applicationSchema: Prisma.JsonValue | null
+      formMetadata: Prisma.JsonValue | null
+      automationFeasibility: string | null
+      estimatedSuccessRate: number | null
       prefilledFieldCount: number
-      schemaVersion: string | null
+      aiRequiredFieldCount: number
       totalRequiredFields: number
+      lastSchemaUpdate: Date | null
+      schemaVersion: string | null
     }, ExtArgs["result"]["jobPosting"]>
     composites: {}
   }
@@ -28381,17 +28416,17 @@ export namespace Prisma {
     readonly leftSwipeCount: FieldRef<"JobPosting", 'Int'>
     readonly createdAt: FieldRef<"JobPosting", 'DateTime'>
     readonly updatedAt: FieldRef<"JobPosting", 'DateTime'>
-    readonly aiRequiredFieldCount: FieldRef<"JobPosting", 'Int'>
-    readonly applicationSchema: FieldRef<"JobPosting", 'Json'>
-    readonly automationFeasibility: FieldRef<"JobPosting", 'String'>
-    readonly estimatedSuccessRate: FieldRef<"JobPosting", 'Int'>
-    readonly formMetadata: FieldRef<"JobPosting", 'Json'>
     readonly greenhouseCompanyId: FieldRef<"JobPosting", 'String'>
     readonly greenhouseJobId: FieldRef<"JobPosting", 'String'>
-    readonly lastSchemaUpdate: FieldRef<"JobPosting", 'DateTime'>
+    readonly applicationSchema: FieldRef<"JobPosting", 'Json'>
+    readonly formMetadata: FieldRef<"JobPosting", 'Json'>
+    readonly automationFeasibility: FieldRef<"JobPosting", 'String'>
+    readonly estimatedSuccessRate: FieldRef<"JobPosting", 'Int'>
     readonly prefilledFieldCount: FieldRef<"JobPosting", 'Int'>
-    readonly schemaVersion: FieldRef<"JobPosting", 'String'>
+    readonly aiRequiredFieldCount: FieldRef<"JobPosting", 'Int'>
     readonly totalRequiredFields: FieldRef<"JobPosting", 'Int'>
+    readonly lastSchemaUpdate: FieldRef<"JobPosting", 'DateTime'>
+    readonly schemaVersion: FieldRef<"JobPosting", 'String'>
   }
     
 
@@ -43116,8 +43151,11 @@ export namespace Prisma {
     userAgent: 'userAgent',
     timezone: 'timezone',
     locale: 'locale',
+    needsVisaSponsorship: 'needsVisaSponsorship',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    oauthProviders: 'oauthProviders',
+    primaryAuthProvider: 'primaryAuthProvider'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -43609,17 +43647,17 @@ export namespace Prisma {
     leftSwipeCount: 'leftSwipeCount',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    aiRequiredFieldCount: 'aiRequiredFieldCount',
-    applicationSchema: 'applicationSchema',
-    automationFeasibility: 'automationFeasibility',
-    estimatedSuccessRate: 'estimatedSuccessRate',
-    formMetadata: 'formMetadata',
     greenhouseCompanyId: 'greenhouseCompanyId',
     greenhouseJobId: 'greenhouseJobId',
-    lastSchemaUpdate: 'lastSchemaUpdate',
+    applicationSchema: 'applicationSchema',
+    formMetadata: 'formMetadata',
+    automationFeasibility: 'automationFeasibility',
+    estimatedSuccessRate: 'estimatedSuccessRate',
     prefilledFieldCount: 'prefilledFieldCount',
-    schemaVersion: 'schemaVersion',
-    totalRequiredFields: 'totalRequiredFields'
+    aiRequiredFieldCount: 'aiRequiredFieldCount',
+    totalRequiredFields: 'totalRequiredFields',
+    lastSchemaUpdate: 'lastSchemaUpdate',
+    schemaVersion: 'schemaVersion'
   };
 
   export type JobPostingScalarFieldEnum = (typeof JobPostingScalarFieldEnum)[keyof typeof JobPostingScalarFieldEnum]
@@ -43995,7 +44033,9 @@ export namespace Prisma {
     ipAddress: 'ipAddress',
     userAgent: 'userAgent',
     timezone: 'timezone',
-    locale: 'locale'
+    locale: 'locale',
+    oauthProviders: 'oauthProviders',
+    primaryAuthProvider: 'primaryAuthProvider'
   };
 
   export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -44307,9 +44347,9 @@ export namespace Prisma {
     applyUrl: 'applyUrl',
     keywords: 'keywords',
     tags: 'tags',
-    automationFeasibility: 'automationFeasibility',
     greenhouseCompanyId: 'greenhouseCompanyId',
     greenhouseJobId: 'greenhouseJobId',
+    automationFeasibility: 'automationFeasibility',
     schemaVersion: 'schemaVersion'
   };
 
@@ -45178,7 +45218,7 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     id?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
-    passwordHash?: StringNullableFilter<"User"> | string | null
+    passwordHash?: StringFilter<"User"> | string
     name?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -45201,8 +45241,11 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
+    needsVisaSponsorship?: BoolNullableFilter<"User"> | boolean | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     analyticsEvents?: AnalyticsEventListRelationFilter
     applicationQueue?: ApplicationQueueListRelationFilter
@@ -45223,7 +45266,7 @@ export namespace Prisma {
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrder
-    passwordHash?: SortOrderInput | SortOrder
+    passwordHash?: SortOrder
     name?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     emailVerified?: SortOrderInput | SortOrder
@@ -45246,8 +45289,11 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
+    needsVisaSponsorship?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrderInput | SortOrder
     accounts?: AccountOrderByRelationAggregateInput
     analyticsEvents?: AnalyticsEventOrderByRelationAggregateInput
     applicationQueue?: ApplicationQueueOrderByRelationAggregateInput
@@ -45272,7 +45318,7 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    passwordHash?: StringNullableFilter<"User"> | string | null
+    passwordHash?: StringFilter<"User"> | string
     name?: StringNullableFilter<"User"> | string | null
     avatar?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -45295,8 +45341,11 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
+    needsVisaSponsorship?: BoolNullableFilter<"User"> | boolean | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
     accounts?: AccountListRelationFilter
     analyticsEvents?: AnalyticsEventListRelationFilter
     applicationQueue?: ApplicationQueueListRelationFilter
@@ -45317,7 +45366,7 @@ export namespace Prisma {
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrder
-    passwordHash?: SortOrderInput | SortOrder
+    passwordHash?: SortOrder
     name?: SortOrderInput | SortOrder
     avatar?: SortOrderInput | SortOrder
     emailVerified?: SortOrderInput | SortOrder
@@ -45340,8 +45389,11 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
+    needsVisaSponsorship?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -45355,7 +45407,7 @@ export namespace Prisma {
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
-    passwordHash?: StringNullableWithAggregatesFilter<"User"> | string | null
+    passwordHash?: StringWithAggregatesFilter<"User"> | string
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
     emailVerified?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -45378,8 +45430,11 @@ export namespace Prisma {
     userAgent?: StringNullableWithAggregatesFilter<"User"> | string | null
     timezone?: StringNullableWithAggregatesFilter<"User"> | string | null
     locale?: StringNullableWithAggregatesFilter<"User"> | string | null
+    needsVisaSponsorship?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type UserProfileWhereInput = {
@@ -47621,17 +47676,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFilter<"JobPosting"> | number
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
-    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
-    applicationSchema?: JsonNullableFilter<"JobPosting">
-    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
-    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
-    formMetadata?: JsonNullableFilter<"JobPosting">
     greenhouseCompanyId?: StringNullableFilter<"JobPosting"> | string | null
     greenhouseJobId?: StringNullableFilter<"JobPosting"> | string | null
-    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    applicationSchema?: JsonNullableFilter<"JobPosting">
+    formMetadata?: JsonNullableFilter<"JobPosting">
+    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
+    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
     prefilledFieldCount?: IntFilter<"JobPosting"> | number
-    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
+    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
     totalRequiredFields?: IntFilter<"JobPosting"> | number
+    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
     queueItems?: ApplicationQueueListRelationFilter
     applications?: JobApplicationListRelationFilter
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
@@ -47692,17 +47747,17 @@ export namespace Prisma {
     leftSwipeCount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    aiRequiredFieldCount?: SortOrder
-    applicationSchema?: SortOrderInput | SortOrder
-    automationFeasibility?: SortOrderInput | SortOrder
-    estimatedSuccessRate?: SortOrderInput | SortOrder
-    formMetadata?: SortOrderInput | SortOrder
     greenhouseCompanyId?: SortOrderInput | SortOrder
     greenhouseJobId?: SortOrderInput | SortOrder
-    lastSchemaUpdate?: SortOrderInput | SortOrder
+    applicationSchema?: SortOrderInput | SortOrder
+    formMetadata?: SortOrderInput | SortOrder
+    automationFeasibility?: SortOrderInput | SortOrder
+    estimatedSuccessRate?: SortOrderInput | SortOrder
     prefilledFieldCount?: SortOrder
-    schemaVersion?: SortOrderInput | SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
+    lastSchemaUpdate?: SortOrderInput | SortOrder
+    schemaVersion?: SortOrderInput | SortOrder
     queueItems?: ApplicationQueueOrderByRelationAggregateInput
     applications?: JobApplicationOrderByRelationAggregateInput
     company?: CompanyOrderByWithRelationInput
@@ -47716,7 +47771,6 @@ export namespace Prisma {
   export type JobPostingWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     externalId?: string
-    greenhouseCompanyId_greenhouseJobId?: JobPostingGreenhouseCompanyIdGreenhouseJobIdCompoundUniqueInput
     AND?: JobPostingWhereInput | JobPostingWhereInput[]
     OR?: JobPostingWhereInput[]
     NOT?: JobPostingWhereInput | JobPostingWhereInput[]
@@ -47768,17 +47822,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFilter<"JobPosting"> | number
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
-    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
-    applicationSchema?: JsonNullableFilter<"JobPosting">
-    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
-    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
-    formMetadata?: JsonNullableFilter<"JobPosting">
     greenhouseCompanyId?: StringNullableFilter<"JobPosting"> | string | null
     greenhouseJobId?: StringNullableFilter<"JobPosting"> | string | null
-    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    applicationSchema?: JsonNullableFilter<"JobPosting">
+    formMetadata?: JsonNullableFilter<"JobPosting">
+    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
+    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
     prefilledFieldCount?: IntFilter<"JobPosting"> | number
-    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
+    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
     totalRequiredFields?: IntFilter<"JobPosting"> | number
+    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
     queueItems?: ApplicationQueueListRelationFilter
     applications?: JobApplicationListRelationFilter
     company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
@@ -47786,7 +47840,7 @@ export namespace Prisma {
     enhancements?: ResumeEnhancementListRelationFilter
     savedBy?: SavedJobListRelationFilter
     swipes?: UserJobSwipeListRelationFilter
-  }, "id" | "externalId" | "greenhouseCompanyId_greenhouseJobId">
+  }, "id" | "externalId">
 
   export type JobPostingOrderByWithAggregationInput = {
     id?: SortOrder
@@ -47839,17 +47893,17 @@ export namespace Prisma {
     leftSwipeCount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    aiRequiredFieldCount?: SortOrder
-    applicationSchema?: SortOrderInput | SortOrder
-    automationFeasibility?: SortOrderInput | SortOrder
-    estimatedSuccessRate?: SortOrderInput | SortOrder
-    formMetadata?: SortOrderInput | SortOrder
     greenhouseCompanyId?: SortOrderInput | SortOrder
     greenhouseJobId?: SortOrderInput | SortOrder
-    lastSchemaUpdate?: SortOrderInput | SortOrder
+    applicationSchema?: SortOrderInput | SortOrder
+    formMetadata?: SortOrderInput | SortOrder
+    automationFeasibility?: SortOrderInput | SortOrder
+    estimatedSuccessRate?: SortOrderInput | SortOrder
     prefilledFieldCount?: SortOrder
-    schemaVersion?: SortOrderInput | SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
+    lastSchemaUpdate?: SortOrderInput | SortOrder
+    schemaVersion?: SortOrderInput | SortOrder
     _count?: JobPostingCountOrderByAggregateInput
     _avg?: JobPostingAvgOrderByAggregateInput
     _max?: JobPostingMaxOrderByAggregateInput
@@ -47911,17 +47965,17 @@ export namespace Prisma {
     leftSwipeCount?: IntWithAggregatesFilter<"JobPosting"> | number
     createdAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobPosting"> | Date | string
-    aiRequiredFieldCount?: IntWithAggregatesFilter<"JobPosting"> | number
-    applicationSchema?: JsonNullableWithAggregatesFilter<"JobPosting">
-    automationFeasibility?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
-    estimatedSuccessRate?: IntNullableWithAggregatesFilter<"JobPosting"> | number | null
-    formMetadata?: JsonNullableWithAggregatesFilter<"JobPosting">
     greenhouseCompanyId?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
     greenhouseJobId?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
-    lastSchemaUpdate?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
+    applicationSchema?: JsonNullableWithAggregatesFilter<"JobPosting">
+    formMetadata?: JsonNullableWithAggregatesFilter<"JobPosting">
+    automationFeasibility?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
+    estimatedSuccessRate?: IntNullableWithAggregatesFilter<"JobPosting"> | number | null
     prefilledFieldCount?: IntWithAggregatesFilter<"JobPosting"> | number
-    schemaVersion?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
+    aiRequiredFieldCount?: IntWithAggregatesFilter<"JobPosting"> | number
     totalRequiredFields?: IntWithAggregatesFilter<"JobPosting"> | number
+    lastSchemaUpdate?: DateTimeNullableWithAggregatesFilter<"JobPosting"> | Date | string | null
+    schemaVersion?: StringNullableWithAggregatesFilter<"JobPosting"> | string | null
   }
 
   export type JobSnapshotWhereInput = {
@@ -49613,7 +49667,7 @@ export namespace Prisma {
   export type UserCreateInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -49636,8 +49690,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -49658,7 +49715,7 @@ export namespace Prisma {
   export type UserUncheckedCreateInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -49681,8 +49738,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -49703,7 +49763,7 @@ export namespace Prisma {
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49726,8 +49786,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -49748,7 +49811,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49771,8 +49834,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -49793,7 +49859,7 @@ export namespace Prisma {
   export type UserCreateManyInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -49816,14 +49882,17 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49846,14 +49915,17 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -49876,8 +49948,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserProfileCreateInput = {
@@ -52584,17 +52659,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -52655,17 +52730,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
@@ -52724,17 +52799,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -52795,17 +52870,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
@@ -52865,17 +52940,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
   }
 
   export type JobPostingUpdateManyMutationInput = {
@@ -52928,17 +53003,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type JobPostingUncheckedUpdateManyInput = {
@@ -52992,17 +53067,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type JobSnapshotCreateInput = {
@@ -55137,6 +55212,11 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -55146,6 +55226,14 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type AccountListRelationFilter = {
@@ -55320,8 +55408,11 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    needsVisaSponsorship?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -55356,8 +55447,10 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    needsVisaSponsorship?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    primaryAuthProvider?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -55386,8 +55479,10 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    needsVisaSponsorship?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    primaryAuthProvider?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -55492,6 +55587,14 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -55516,14 +55619,6 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -55546,11 +55641,6 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-
-  export type BoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
   }
 
   export type EnumProfileVisibilityFilter<$PrismaModel = never> = {
@@ -55752,14 +55842,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedJsonNullableFilter<$PrismaModel>
     _max?: NestedJsonNullableFilter<$PrismaModel>
-  }
-
-  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type EnumProfileVisibilityWithAggregatesFilter<$PrismaModel = never> = {
@@ -57425,11 +57507,6 @@ export namespace Prisma {
     search: string
   }
 
-  export type JobPostingGreenhouseCompanyIdGreenhouseJobIdCompoundUniqueInput = {
-    greenhouseCompanyId: string
-    greenhouseJobId: string
-  }
-
   export type JobPostingCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
@@ -57481,17 +57558,17 @@ export namespace Prisma {
     leftSwipeCount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    aiRequiredFieldCount?: SortOrder
-    applicationSchema?: SortOrder
-    automationFeasibility?: SortOrder
-    estimatedSuccessRate?: SortOrder
-    formMetadata?: SortOrder
     greenhouseCompanyId?: SortOrder
     greenhouseJobId?: SortOrder
-    lastSchemaUpdate?: SortOrder
+    applicationSchema?: SortOrder
+    formMetadata?: SortOrder
+    automationFeasibility?: SortOrder
+    estimatedSuccessRate?: SortOrder
     prefilledFieldCount?: SortOrder
-    schemaVersion?: SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
+    lastSchemaUpdate?: SortOrder
+    schemaVersion?: SortOrder
   }
 
   export type JobPostingAvgOrderByAggregateInput = {
@@ -57503,9 +57580,9 @@ export namespace Prisma {
     applicationCount?: SortOrder
     rightSwipeCount?: SortOrder
     leftSwipeCount?: SortOrder
-    aiRequiredFieldCount?: SortOrder
     estimatedSuccessRate?: SortOrder
     prefilledFieldCount?: SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
   }
 
@@ -57555,15 +57632,15 @@ export namespace Prisma {
     leftSwipeCount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    aiRequiredFieldCount?: SortOrder
-    automationFeasibility?: SortOrder
-    estimatedSuccessRate?: SortOrder
     greenhouseCompanyId?: SortOrder
     greenhouseJobId?: SortOrder
-    lastSchemaUpdate?: SortOrder
+    automationFeasibility?: SortOrder
+    estimatedSuccessRate?: SortOrder
     prefilledFieldCount?: SortOrder
-    schemaVersion?: SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
+    lastSchemaUpdate?: SortOrder
+    schemaVersion?: SortOrder
   }
 
   export type JobPostingMinOrderByAggregateInput = {
@@ -57612,15 +57689,15 @@ export namespace Prisma {
     leftSwipeCount?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    aiRequiredFieldCount?: SortOrder
-    automationFeasibility?: SortOrder
-    estimatedSuccessRate?: SortOrder
     greenhouseCompanyId?: SortOrder
     greenhouseJobId?: SortOrder
-    lastSchemaUpdate?: SortOrder
+    automationFeasibility?: SortOrder
+    estimatedSuccessRate?: SortOrder
     prefilledFieldCount?: SortOrder
-    schemaVersion?: SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
+    lastSchemaUpdate?: SortOrder
+    schemaVersion?: SortOrder
   }
 
   export type JobPostingSumOrderByAggregateInput = {
@@ -57632,9 +57709,9 @@ export namespace Prisma {
     applicationCount?: SortOrder
     rightSwipeCount?: SortOrder
     leftSwipeCount?: SortOrder
-    aiRequiredFieldCount?: SortOrder
     estimatedSuccessRate?: SortOrder
     prefilledFieldCount?: SortOrder
+    aiRequiredFieldCount?: SortOrder
     totalRequiredFields?: SortOrder
   }
 
@@ -59119,6 +59196,10 @@ export namespace Prisma {
     _max?: NestedEnumUsageFeatureFilter<$PrismaModel>
   }
 
+  export type UserCreateoauthProvidersInput = {
+    set: string[]
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -59355,8 +59436,17 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type UserUpdateoauthProvidersInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type AccountUpdateManyWithoutUserNestedInput = {
@@ -59785,10 +59875,6 @@ export namespace Prisma {
   export type UserProfileUpdatedesiredJobTypesInput = {
     set?: string[]
     push?: string | string[]
-  }
-
-  export type NullableBoolFieldUpdateOperationsInput = {
-    set?: boolean | null
   }
 
   export type EnumProfileVisibilityFieldUpdateOperationsInput = {
@@ -61468,6 +61554,11 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -61595,6 +61686,14 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -61607,11 +61706,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedBoolNullableFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
   }
 
   export type NestedEnumProfileVisibilityFilter<$PrismaModel = never> = {
@@ -61669,14 +61763,6 @@ export namespace Prisma {
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-
-  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
-    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedBoolNullableFilter<$PrismaModel>
-    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumProfileVisibilityWithAggregatesFilter<$PrismaModel = never> = {
@@ -64110,7 +64196,7 @@ export namespace Prisma {
   export type UserCreateWithoutProfileInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64133,8 +64219,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -64154,7 +64243,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutProfileInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64177,8 +64266,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -64214,7 +64306,7 @@ export namespace Prisma {
   export type UserUpdateWithoutProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64237,8 +64329,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -64258,7 +64353,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64281,8 +64376,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -64302,7 +64400,7 @@ export namespace Prisma {
   export type UserCreateWithoutPreferencesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64325,8 +64423,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -64346,7 +64447,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutPreferencesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64369,8 +64470,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -64406,7 +64510,7 @@ export namespace Prisma {
   export type UserUpdateWithoutPreferencesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64429,8 +64533,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -64450,7 +64557,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutPreferencesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64473,8 +64580,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -64494,7 +64604,7 @@ export namespace Prisma {
   export type UserCreateWithoutAccountsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64517,8 +64627,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
@@ -64538,7 +64651,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutAccountsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64561,8 +64674,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -64598,7 +64714,7 @@ export namespace Prisma {
   export type UserUpdateWithoutAccountsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64621,8 +64737,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
@@ -64642,7 +64761,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutAccountsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64665,8 +64784,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -64686,7 +64808,7 @@ export namespace Prisma {
   export type UserCreateWithoutSessionsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64709,8 +64831,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -64730,7 +64855,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutSessionsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -64753,8 +64878,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -64790,7 +64918,7 @@ export namespace Prisma {
   export type UserUpdateWithoutSessionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64813,8 +64941,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -64834,7 +64965,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutSessionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -64857,8 +64988,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -64925,17 +65059,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -64995,17 +65129,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
@@ -65021,7 +65155,7 @@ export namespace Prisma {
   export type UserCreateWithoutJobSwipesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -65044,8 +65178,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -65065,7 +65202,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutJobSwipesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -65088,8 +65225,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -65172,17 +65312,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -65242,17 +65382,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
@@ -65274,7 +65414,7 @@ export namespace Prisma {
   export type UserUpdateWithoutJobSwipesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -65297,8 +65437,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -65318,7 +65461,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutJobSwipesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -65341,8 +65484,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -65504,17 +65650,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
     snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
@@ -65574,17 +65720,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
@@ -65600,7 +65746,7 @@ export namespace Prisma {
   export type UserCreateWithoutApplicationQueueInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -65623,8 +65769,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
@@ -65644,7 +65793,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutApplicationQueueInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -65667,8 +65816,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -66015,17 +66167,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
     snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
@@ -66085,17 +66237,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -66117,7 +66269,7 @@ export namespace Prisma {
   export type UserUpdateWithoutApplicationQueueInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66140,8 +66292,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
@@ -66161,7 +66316,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutApplicationQueueInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66184,8 +66339,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -66514,7 +66672,7 @@ export namespace Prisma {
   export type UserCreateWithoutAuditLogsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66537,8 +66695,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -66558,7 +66719,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutAuditLogsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66581,8 +66742,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -66618,7 +66782,7 @@ export namespace Prisma {
   export type UserUpdateWithoutAuditLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66641,8 +66805,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -66662,7 +66829,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66685,8 +66852,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -66706,7 +66876,7 @@ export namespace Prisma {
   export type UserCreateWithoutAnalyticsEventsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66729,8 +66899,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogCreateNestedManyWithoutUserInput
@@ -66750,7 +66923,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutAnalyticsEventsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66773,8 +66946,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutUserInput
@@ -66810,7 +66986,7 @@ export namespace Prisma {
   export type UserUpdateWithoutAnalyticsEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66833,8 +67009,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUpdateManyWithoutUserNestedInput
@@ -66854,7 +67033,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutAnalyticsEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -66877,8 +67056,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutUserNestedInput
@@ -66898,7 +67080,7 @@ export namespace Prisma {
   export type UserCreateWithoutNotificationsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66921,8 +67103,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -66942,7 +67127,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutNotificationsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -66965,8 +67150,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -67002,7 +67190,7 @@ export namespace Prisma {
   export type UserUpdateWithoutNotificationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -67025,8 +67213,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -67046,7 +67237,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutNotificationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -67069,8 +67260,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -67195,17 +67389,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
@@ -67264,17 +67458,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
@@ -67379,17 +67573,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFilter<"JobPosting"> | number
     createdAt?: DateTimeFilter<"JobPosting"> | Date | string
     updatedAt?: DateTimeFilter<"JobPosting"> | Date | string
-    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
-    applicationSchema?: JsonNullableFilter<"JobPosting">
-    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
-    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
-    formMetadata?: JsonNullableFilter<"JobPosting">
     greenhouseCompanyId?: StringNullableFilter<"JobPosting"> | string | null
     greenhouseJobId?: StringNullableFilter<"JobPosting"> | string | null
-    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    applicationSchema?: JsonNullableFilter<"JobPosting">
+    formMetadata?: JsonNullableFilter<"JobPosting">
+    automationFeasibility?: StringNullableFilter<"JobPosting"> | string | null
+    estimatedSuccessRate?: IntNullableFilter<"JobPosting"> | number | null
     prefilledFieldCount?: IntFilter<"JobPosting"> | number
-    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
+    aiRequiredFieldCount?: IntFilter<"JobPosting"> | number
     totalRequiredFields?: IntFilter<"JobPosting"> | number
+    lastSchemaUpdate?: DateTimeNullableFilter<"JobPosting"> | Date | string | null
+    schemaVersion?: StringNullableFilter<"JobPosting"> | string | null
   }
 
   export type CompanyCreateWithoutCompanyReviewsInput = {
@@ -67476,7 +67670,7 @@ export namespace Prisma {
   export type UserCreateWithoutCompanyReviewsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -67499,8 +67693,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -67520,7 +67717,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutCompanyReviewsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -67543,8 +67740,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -67667,7 +67867,7 @@ export namespace Prisma {
   export type UserUpdateWithoutCompanyReviewsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -67690,8 +67890,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -67711,7 +67914,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutCompanyReviewsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -67734,8 +67937,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -68659,17 +68865,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -68729,17 +68935,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
@@ -68890,17 +69096,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -68960,17 +69166,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -69354,7 +69560,7 @@ export namespace Prisma {
   export type UserCreateWithoutResumesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -69377,8 +69583,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -69398,7 +69607,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutResumesInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -69421,8 +69630,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -69561,7 +69773,7 @@ export namespace Prisma {
   export type UserUpdateWithoutResumesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -69584,8 +69796,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -69605,7 +69820,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutResumesInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -69628,8 +69843,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -69696,17 +69914,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -69766,17 +69984,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
@@ -69986,17 +70204,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -70056,17 +70274,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
@@ -70418,17 +70636,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
     snapshots?: JobSnapshotCreateNestedManyWithoutOriginalJobInput
@@ -70488,17 +70706,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutJobPostingInput
@@ -70585,7 +70803,7 @@ export namespace Prisma {
   export type UserCreateWithoutApplicationsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -70608,8 +70826,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -70629,7 +70850,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutApplicationsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -70652,8 +70873,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -70802,17 +71026,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
     snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
@@ -70872,17 +71096,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutJobPostingNestedInput
@@ -70981,7 +71205,7 @@ export namespace Prisma {
   export type UserUpdateWithoutApplicationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71004,8 +71228,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -71025,7 +71252,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutApplicationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71048,8 +71275,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -71312,17 +71542,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationCreateNestedManyWithoutJobPostingInput
     company: CompanyCreateNestedOneWithoutJobPostingsInput
@@ -71382,17 +71612,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
     queueItems?: ApplicationQueueUncheckedCreateNestedManyWithoutJobPostingInput
     applications?: JobApplicationUncheckedCreateNestedManyWithoutJobPostingInput
     snapshots?: JobSnapshotUncheckedCreateNestedManyWithoutOriginalJobInput
@@ -71408,7 +71638,7 @@ export namespace Prisma {
   export type UserCreateWithoutSavedJobsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -71431,8 +71661,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -71452,7 +71685,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutSavedJobsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -71475,8 +71708,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -71559,17 +71795,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     company?: CompanyUpdateOneRequiredWithoutJobPostingsNestedInput
@@ -71629,17 +71865,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
@@ -71661,7 +71897,7 @@ export namespace Prisma {
   export type UserUpdateWithoutSavedJobsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71684,8 +71920,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -71705,7 +71944,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutSavedJobsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71728,8 +71967,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -71791,7 +72033,7 @@ export namespace Prisma {
   export type UserCreateWithoutSubscriptionInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -71814,8 +72056,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -71835,7 +72080,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutSubscriptionInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -71858,8 +72103,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -71969,7 +72217,7 @@ export namespace Prisma {
   export type UserUpdateWithoutSubscriptionInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -71992,8 +72240,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -72013,7 +72264,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutSubscriptionInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -72036,8 +72287,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -72280,7 +72534,7 @@ export namespace Prisma {
   export type UserCreateWithoutUsageRecordsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -72303,8 +72557,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueCreateNestedManyWithoutUserInput
@@ -72324,7 +72581,7 @@ export namespace Prisma {
   export type UserUncheckedCreateWithoutUsageRecordsInput = {
     id?: string
     email: string
-    passwordHash?: string | null
+    passwordHash: string
     name?: string | null
     avatar?: string | null
     emailVerified?: Date | string | null
@@ -72347,8 +72604,11 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    needsVisaSponsorship?: boolean | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
     applicationQueue?: ApplicationQueueUncheckedCreateNestedManyWithoutUserInput
@@ -72457,7 +72717,7 @@ export namespace Prisma {
   export type UserUpdateWithoutUsageRecordsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -72480,8 +72740,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUpdateManyWithoutUserNestedInput
@@ -72501,7 +72764,7 @@ export namespace Prisma {
   export type UserUncheckedUpdateWithoutUsageRecordsInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
-    passwordHash?: NullableStringFieldUpdateOperationsInput | string | null
+    passwordHash?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -72524,8 +72787,11 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
     applicationQueue?: ApplicationQueueUncheckedUpdateManyWithoutUserNestedInput
@@ -73776,17 +74042,17 @@ export namespace Prisma {
     leftSwipeCount?: number
     createdAt?: Date | string
     updatedAt?: Date | string
-    aiRequiredFieldCount?: number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: string | null
-    estimatedSuccessRate?: number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: string | null
     greenhouseJobId?: string | null
-    lastSchemaUpdate?: Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: string | null
+    estimatedSuccessRate?: number | null
     prefilledFieldCount?: number
-    schemaVersion?: string | null
+    aiRequiredFieldCount?: number
     totalRequiredFields?: number
+    lastSchemaUpdate?: Date | string | null
+    schemaVersion?: string | null
   }
 
   export type CompanyReviewUpdateWithoutCompanyInput = {
@@ -73911,17 +74177,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUpdateManyWithoutOriginalJobNestedInput
@@ -73980,17 +74246,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
     queueItems?: ApplicationQueueUncheckedUpdateManyWithoutJobPostingNestedInput
     applications?: JobApplicationUncheckedUpdateManyWithoutJobPostingNestedInput
     snapshots?: JobSnapshotUncheckedUpdateManyWithoutOriginalJobNestedInput
@@ -74049,17 +74315,17 @@ export namespace Prisma {
     leftSwipeCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
-    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
-    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
-    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
-    formMetadata?: NullableJsonNullValueInput | InputJsonValue
     greenhouseCompanyId?: NullableStringFieldUpdateOperationsInput | string | null
     greenhouseJobId?: NullableStringFieldUpdateOperationsInput | string | null
-    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    applicationSchema?: NullableJsonNullValueInput | InputJsonValue
+    formMetadata?: NullableJsonNullValueInput | InputJsonValue
+    automationFeasibility?: NullableStringFieldUpdateOperationsInput | string | null
+    estimatedSuccessRate?: NullableIntFieldUpdateOperationsInput | number | null
     prefilledFieldCount?: IntFieldUpdateOperationsInput | number
-    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    aiRequiredFieldCount?: IntFieldUpdateOperationsInput | number
     totalRequiredFields?: IntFieldUpdateOperationsInput | number
+    lastSchemaUpdate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    schemaVersion?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ApplicationQueueCreateManyJobPostingInput = {

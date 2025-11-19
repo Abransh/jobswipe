@@ -147,8 +147,11 @@ exports.Prisma.UserScalarFieldEnum = {
   userAgent: 'userAgent',
   timezone: 'timezone',
   locale: 'locale',
+  needsVisaSponsorship: 'needsVisaSponsorship',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider'
 };
 
 exports.Prisma.RelationLoadStrategy = {
@@ -586,17 +589,17 @@ exports.Prisma.JobPostingScalarFieldEnum = {
   leftSwipeCount: 'leftSwipeCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  aiRequiredFieldCount: 'aiRequiredFieldCount',
-  applicationSchema: 'applicationSchema',
-  automationFeasibility: 'automationFeasibility',
-  estimatedSuccessRate: 'estimatedSuccessRate',
-  formMetadata: 'formMetadata',
   greenhouseCompanyId: 'greenhouseCompanyId',
   greenhouseJobId: 'greenhouseJobId',
-  lastSchemaUpdate: 'lastSchemaUpdate',
+  applicationSchema: 'applicationSchema',
+  formMetadata: 'formMetadata',
+  automationFeasibility: 'automationFeasibility',
+  estimatedSuccessRate: 'estimatedSuccessRate',
   prefilledFieldCount: 'prefilledFieldCount',
-  schemaVersion: 'schemaVersion',
-  totalRequiredFields: 'totalRequiredFields'
+  aiRequiredFieldCount: 'aiRequiredFieldCount',
+  totalRequiredFields: 'totalRequiredFields',
+  lastSchemaUpdate: 'lastSchemaUpdate',
+  schemaVersion: 'schemaVersion'
 };
 
 exports.Prisma.JobSnapshotScalarFieldEnum = {
@@ -924,7 +927,9 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   timezone: 'timezone',
-  locale: 'locale'
+  locale: 'locale',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider'
 };
 
 exports.Prisma.JsonNullValueFilter = {
@@ -1182,9 +1187,9 @@ exports.Prisma.JobPostingOrderByRelevanceFieldEnum = {
   applyUrl: 'applyUrl',
   keywords: 'keywords',
   tags: 'tags',
-  automationFeasibility: 'automationFeasibility',
   greenhouseCompanyId: 'greenhouseCompanyId',
   greenhouseJobId: 'greenhouseJobId',
+  automationFeasibility: 'automationFeasibility',
   schemaVersion: 'schemaVersion'
 };
 

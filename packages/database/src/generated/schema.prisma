@@ -12,7 +12,7 @@ datasource db {
 model User {
   id                    String             @id @default(uuid())
   email                 String             @unique
-  passwordHash          String?
+  passwordHash          String
   name                  String?
   avatar                String?
   emailVerified         DateTime?
@@ -35,8 +35,11 @@ model User {
   userAgent             String?
   timezone              String?
   locale                String?            @default("en")
+  needsVisaSponsorship  Boolean?           @default(false)
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
+  oauthProviders        String[]           @default([]) @map("oauth_providers")
+  primaryAuthProvider   String?            @map("primary_auth_provider")
   accounts              Account[]
   analyticsEvents       AnalyticsEvent[]
   applicationQueue      ApplicationQueue[]
@@ -591,17 +594,17 @@ model JobPosting {
   leftSwipeCount        Int                 @default(0)
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
-  aiRequiredFieldCount  Int                 @default(0)
-  applicationSchema     Json?
-  automationFeasibility String?
-  estimatedSuccessRate  Int?
-  formMetadata          Json?
   greenhouseCompanyId   String?
   greenhouseJobId       String?
-  lastSchemaUpdate      DateTime?
+  applicationSchema     Json?
+  formMetadata          Json?
+  automationFeasibility String?
+  estimatedSuccessRate  Int?
   prefilledFieldCount   Int                 @default(0)
-  schemaVersion         String?             @default("1.0")
+  aiRequiredFieldCount  Int                 @default(0)
   totalRequiredFields   Int                 @default(0)
+  lastSchemaUpdate      DateTime?
+  schemaVersion         String?             @default("1.0")
   queueItems            ApplicationQueue[]
   applications          JobApplication[]
   company               Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -610,7 +613,6 @@ model JobPosting {
   savedBy               SavedJob[]
   swipes                UserJobSwipe[]
 
-  @@unique([greenhouseCompanyId, greenhouseJobId])
   @@index([companyId])
   @@index([type, level])
   @@index([remote, remoteType])
