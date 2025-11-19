@@ -33,19 +33,26 @@ class AutomationEngine:
             # Import automation classes
             from ..companies.linkedin.linkedin_automation import LinkedInAutomation
             from ..companies.greenhouse.greenhouse_automation import GreenhouseAutomation
+            from ..companies.generic.generic_automation import GenericAutomation
 
             # Register automations
             self.automations['linkedin'] = LinkedInAutomation
             self.automations['greenhouse'] = GreenhouseAutomation
 
-            # Generic fallback
-            self.automations['generic'] = BaseJobAutomation
+            # Generic fallback (works for any URL)
+            self.automations['generic'] = GenericAutomation
 
             print(f"✅ Registered {len(self.automations)} automation types")
         except ImportError as e:
             print(f"⚠️  Warning: Could not import all automation classes: {e}")
-            # Fallback to base automation only
-            self.automations['generic'] = BaseJobAutomation
+            # Minimal fallback - import GenericAutomation separately
+            try:
+                from ..companies.generic.generic_automation import GenericAutomation
+                self.automations['generic'] = GenericAutomation
+                print("✅ Registered generic automation as fallback")
+            except ImportError:
+                print("❌ CRITICAL: Could not import GenericAutomation!")
+                raise
 
     def detect_company_type(self, job_url: str) -> str:
         """
@@ -129,29 +136,39 @@ class AutomationEngine:
             session_id=session_id
         )
 
-        context.log_info("AutomationEngine starting execution", extra={
-            'job_title': job_data.get('title'),
-            'company': job_data.get('company'),
-            'mode': mode.value
-        })
+        context.log_info("=" * 80)
+        context.log_info("🚀 AutomationEngine starting execution")
+        context.log_info(f"📋 Job: {job_data.get('title')} at {job_data.get('company')}")
+        context.log_info(f"📍 Mode: {mode.value}")
+        context.log_info("=" * 80)
 
         try:
             # Detect company type
             job_url = job_data.get('apply_url') or job_data.get('url', '')
-            company_type = self.detect_company_type(job_url)
+            context.log_info(f"🔍 Detecting company type from URL: {job_url}")
 
-            context.log_info(f"Detected company type: {company_type}")
+            company_type = self.detect_company_type(job_url)
+            context.log_info(f"✅ Detected company type: {company_type}")
 
             # Get automation class
             AutomationClass = self.automations.get(company_type)
 
             if not AutomationClass:
-                context.log_warning(f"No automation found for {company_type}, using generic")
-                AutomationClass = self.automations.get('generic', BaseJobAutomation)
+                context.log_warning(f"⚠️  No automation found for {company_type}, using generic")
+                AutomationClass = self.automations.get('generic')
+                if not AutomationClass:
+                    raise RuntimeError("No generic automation available as fallback!")
+
+            context.log_info(f"🏭 Using automation class: {AutomationClass.__name__}")
 
             # Execute automation
+            context.log_info(f"🔨 Instantiating {AutomationClass.__name__}...")
             automation = AutomationClass(context=context)
+            context.log_info(f"✅ Automation instance created")
+
+            context.log_info(f"▶️  Calling automation.apply()...")
             result = await automation.apply(job_data, user_profile)
+            context.log_info(f"✅ automation.apply() returned")
 
             # Add metadata
             execution_time = int((time.time() - start_time) * 1000)
