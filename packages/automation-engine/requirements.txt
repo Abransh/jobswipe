@@ -2,7 +2,8 @@
 
 # Core dependencies (browser automation)
 playwright>=1.40.0
-pydantic>=2.0.0
+pydantic[email]>=2.0.0
+email-validator>=2.0.0
 
 # LLM providers (browser-use compatibility)
 anthropic>=0.18.0
