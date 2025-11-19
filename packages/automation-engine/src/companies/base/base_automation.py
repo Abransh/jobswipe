@@ -313,7 +313,9 @@ class BaseJobAutomation(ABC):
                     task=task_description,
                     llm=llm,
                     controller=self.controller,
-                    browser_session=browser_session
+                    browser_session=browser_session,
+                    max_actions_per_step=10,  # Increased from default 4 to allow more actions per step
+                    max_failures=5,  # Allow more failures before giving up
                 )
                 self.logger.info("✅ Agent created, preparing to execute...")
 
@@ -321,17 +323,66 @@ class BaseJobAutomation(ABC):
                     "initialize", "Initialize browser and AI agent", True, 2000
                 )
 
-                # Execute the automation
+                # Define step monitoring callbacks
+                step_count = [0]  # Use list to allow modification in nested function
+
+                async def on_step_start(agent_instance: Agent):
+                    step_count[0] += 1
+                    self.logger.info(f"🔄 Step {step_count[0]} STARTED - Current n_steps: {agent_instance.state.n_steps}")
+
+                async def on_step_end(agent_instance: Agent):
+                    self.logger.info(f"✅ Step {step_count[0]} COMPLETED")
+                    # Log current state after step
+                    if hasattr(agent_instance, 'state') and agent_instance.state:
+                        self.logger.info(f"   📊 Consecutive failures: {agent_instance.state.consecutive_failures}")
+                        self.logger.info(f"   📊 Agent stopped flag: {agent_instance.state.stopped}")
+
+                    # Log recent history item
+                    if hasattr(agent_instance, 'history') and agent_instance.history and agent_instance.history.history:
+                        recent = agent_instance.history.history[-1]
+                        if hasattr(recent, 'model_output') and recent.model_output:
+                            output = recent.model_output
+                            if hasattr(output, 'current_state') and output.current_state:
+                                state = output.current_state
+                                if hasattr(state, 'next_goal'):
+                                    self.logger.info(f"   🎯 Next goal: {state.next_goal}")
+                                if hasattr(state, 'evaluation_previous_goal'):
+                                    self.logger.info(f"   📝 Evaluation: {state.evaluation_previous_goal}")
+
+                # Execute the automation with step monitoring
                 self.logger.info("▶️  EXECUTING AI-POWERED JOB APPLICATION...")
                 self.logger.info("=" * 60)
-                agent_result = await agent.run()
+                self.logger.info("🎯 Max steps: 50 (job applications typically take 10-30 steps)")
+
+                agent_result = await agent.run(
+                    max_steps=50,  # Explicitly set max steps for job applications
+                    on_step_start=on_step_start,
+                    on_step_end=on_step_end
+                )
+
                 self.logger.info("=" * 60)
                 self.logger.info(f"✅ Agent execution completed!")
-                self.logger.info(f"📊 Agent result: {str(agent_result)[:500]}")  # Log first 500 chars
+                self.logger.info(f"📊 Total steps executed: {step_count[0]}")
+                self.logger.info(f"📊 Agent state n_steps: {agent.state.n_steps}")
+
+                # Log detailed history
+                if hasattr(agent_result, 'history') and agent_result.history:
+                    self.logger.info(f"📚 History items: {len(agent_result.history)}")
+                    for idx, item in enumerate(agent_result.history[-5:], 1):  # Log last 5 items
+                        self.logger.info(f"   History item {idx}: {str(item)[:200]}")
+
+                # Log final result if available
+                if hasattr(agent_result, 'final_result'):
+                    final = agent_result.final_result()
+                    self.logger.info(f"📄 Final result: {final}")
 
                 self.result.add_step(
                     "execute", "Execute AI automation", True,
-                    metadata={"agent_result": str(agent_result)}
+                    metadata={
+                        "agent_steps": step_count[0],
+                        "agent_n_steps": agent.state.n_steps,
+                        "history_items": len(agent_result.history) if hasattr(agent_result, 'history') else 0
+                    }
                 )
 
                 # Process the results
@@ -379,56 +430,136 @@ class BaseJobAutomation(ABC):
     async def _process_automation_result(self, agent: Agent, browser_session: BrowserSession):
         """Process the automation result and update the result object"""
         try:
+            self.logger.info("📊 Processing automation result...")
+
+            # Analyze Agent history for detailed execution information
+            if hasattr(agent, 'history') and agent.history:
+                history = agent.history
+                self.logger.info(f"📚 Analyzing {len(history.history)} history items...")
+
+                # Check if agent completed successfully
+                if hasattr(history, 'is_done') and callable(history.is_done):
+                    is_done = history.is_done()
+                    self.logger.info(f"   ✓ Agent is_done: {is_done}")
+
+                # Get final result text
+                if hasattr(history, 'final_result') and callable(history.final_result):
+                    final_result = history.final_result()
+                    self.logger.info(f"   ✓ Final result: {final_result}")
+
+                    # Check for success indicators in final result
+                    if final_result and isinstance(final_result, str):
+                        success_keywords = ['success', 'submitted', 'complete', 'thank you', 'confirmation']
+                        if any(keyword in final_result.lower() for keyword in success_keywords):
+                            # Try to extract confirmation number
+                            confirmation_id = ResultProcessor.extract_confirmation_number(final_result)
+                            self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
+                            self.logger.info(f"   ✅ SUCCESS detected in final result! Confirmation: {confirmation_id}")
+                            self.result.add_step(
+                                "confirm", "Application completed successfully", True,
+                                metadata={"final_result": final_result, "confirmation_id": confirmation_id}
+                            )
+                            return
+
+                # Check the last few history items for action results
+                for idx, history_item in enumerate(reversed(history.history[-5:]), 1):
+                    self.logger.info(f"   📝 Analyzing history item {idx}...")
+
+                    # Check model output
+                    if hasattr(history_item, 'model_output') and history_item.model_output:
+                        output = history_item.model_output
+                        if hasattr(output, 'current_state') and output.current_state:
+                            state = output.current_state
+
+                            # Log evaluation
+                            if hasattr(state, 'evaluation_previous_goal') and state.evaluation_previous_goal:
+                                eval_text = state.evaluation_previous_goal
+                                self.logger.info(f"      Evaluation: {eval_text}")
+
+                                # Check for success in evaluation
+                                if 'success' in eval_text.lower() or 'completed' in eval_text.lower():
+                                    self.logger.info(f"      ✅ Success indicator found in evaluation!")
+
+                            # Log memory
+                            if hasattr(state, 'memory') and state.memory:
+                                self.logger.info(f"      Memory: {state.memory[:200]}...")
+
+                    # Check result actions
+                    if hasattr(history_item, 'result') and history_item.result:
+                        for action_result in history_item.result:
+                            if hasattr(action_result, 'extracted_content') and action_result.extracted_content:
+                                content = action_result.extracted_content
+                                self.logger.info(f"      Extracted content: {content[:200]}...")
+
+                            if hasattr(action_result, 'error') and action_result.error:
+                                self.logger.warning(f"      ⚠️  Action error: {action_result.error}")
+
             # Extract information from agent memory/context
             if hasattr(agent, 'memory') and agent.memory:
                 memory_content = str(agent.memory)
+                self.logger.info(f"💭 Agent memory: {memory_content[:300]}...")
 
-                if 'SUCCESS:' in memory_content:
+                if 'SUCCESS:' in memory_content or 'CONFIRMATION:' in memory_content:
                     # Extract confirmation ID
-                    success_parts = memory_content.split('SUCCESS:')
+                    success_parts = memory_content.split('SUCCESS:') if 'SUCCESS:' in memory_content else memory_content.split('CONFIRMATION:')
                     if len(success_parts) > 1:
                         confirmation_id = success_parts[1].split()[0] if success_parts[1].split() else None
                         self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
+                        self.logger.info(f"✅ SUCCESS found in memory! Confirmation: {confirmation_id}")
 
                         self.result.add_step(
-                            "confirm", "Extract confirmation details", True,
+                            "confirm", "Extract confirmation details from memory", True,
                             metadata={"confirmation_id": confirmation_id}
                         )
                         return
 
-                elif 'CAPTCHA_DETECTED:' in memory_content:
+                elif 'CAPTCHA' in memory_content.upper():
                     self.result.set_failed(
                         "Captcha detected - manual intervention required",
                         "CAPTCHA_REQUIRED",
                         ApplicationStatus.CAPTCHA_REQUIRED
                     )
+                    self.logger.warning("⚠️  CAPTCHA detected in memory")
                     return
 
-                elif 'ERROR:' in memory_content:
-                    error_parts = memory_content.split('ERROR:')
+                elif 'ERROR:' in memory_content or 'FAILED:' in memory_content:
+                    error_parts = memory_content.split('ERROR:') if 'ERROR:' in memory_content else memory_content.split('FAILED:')
                     error_msg = error_parts[1].split('\n')[0] if len(error_parts) > 1 else "Unknown error"
                     self.result.set_failed(error_msg, "FORM_ERROR", ApplicationStatus.FORM_ERROR)
+                    self.logger.error(f"❌ ERROR found in memory: {error_msg}")
                     return
 
             # Default: Check current page for success indicators
+            self.logger.info("🔍 Checking current page for success indicators...")
             page = await browser_session.get_current_page()
             page_text = await page.inner_text('body')
+            page_url = page.url
+            self.logger.info(f"   Current URL: {page_url}")
+            self.logger.info(f"   Page text length: {len(page_text)} characters")
 
-            if any(indicator in page_text.lower() for indicator in [
-                'thank you', 'application submitted', 'successfully applied', 'confirmation'
-            ]):
+            success_indicators = [
+                'thank you', 'application submitted', 'successfully applied',
+                'confirmation', 'received your application', 'application complete'
+            ]
+
+            found_indicators = [ind for ind in success_indicators if ind in page_text.lower()]
+            self.logger.info(f"   Found indicators: {found_indicators}")
+
+            if found_indicators:
                 confirmation_id = ResultProcessor.extract_confirmation_number(page_text)
                 self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
+                self.logger.info(f"✅ SUCCESS detected on page! Confirmation: {confirmation_id}")
 
                 self.result.add_step(
                     "confirm", "Detected success on final page", True,
-                    metadata={"page_indicators": True}
+                    metadata={"page_indicators": found_indicators, "confirmation_id": confirmation_id}
                 )
             else:
+                self.logger.warning("⚠️  No clear success indicators found")
                 self.result.set_failed("No clear success indicators found", "UNCLEAR_RESULT")
 
         except Exception as e:
-            self.logger.error(f"Failed to process automation result: {e}")
+            self.logger.error(f"Failed to process automation result: {e}", exc_info=True)
             self.result.set_failed(f"Result processing failed: {str(e)}", "PROCESSING_ERROR")
 
 
