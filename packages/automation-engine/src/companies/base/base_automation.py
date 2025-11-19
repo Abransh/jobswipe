@@ -31,7 +31,7 @@ except ImportError:
     # Fallback to langchain if browser-use doesn't have native wrappers
     try:
         from langchain_anthropic import ChatAnthropic
-        from langchain_google_genai import ChatGoogleGenerativeAI as ChatGoogle
+        from browser_use.llm.google.chat import ChatGoogle
         from langchain_openai import ChatOpenAI
     except ImportError:
         ChatAnthropic = None
