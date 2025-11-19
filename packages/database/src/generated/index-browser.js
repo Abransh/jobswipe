@@ -147,6 +147,8 @@ exports.Prisma.UserScalarFieldEnum = {
   userAgent: 'userAgent',
   timezone: 'timezone',
   locale: 'locale',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -924,7 +926,9 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   timezone: 'timezone',
-  locale: 'locale'
+  locale: 'locale',
+  oauthProviders: 'oauthProviders',
+  primaryAuthProvider: 'primaryAuthProvider'
 };
 
 exports.Prisma.JsonNullValueFilter = {

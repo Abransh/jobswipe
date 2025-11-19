@@ -4580,6 +4580,7 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    primaryAuthProvider: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4610,6 +4611,7 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    primaryAuthProvider: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4640,6 +4642,8 @@ export namespace Prisma {
     userAgent: number
     timezone: number
     locale: number
+    oauthProviders: number
+    primaryAuthProvider: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4684,6 +4688,7 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    primaryAuthProvider?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4714,6 +4719,7 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    primaryAuthProvider?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4744,6 +4750,8 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
+    oauthProviders?: true
+    primaryAuthProvider?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4861,6 +4869,8 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
+    oauthProviders: string[]
+    primaryAuthProvider: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -4910,6 +4920,8 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     accounts?: boolean | User$accountsArgs<ExtArgs>
@@ -4956,6 +4968,8 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -4986,6 +5000,8 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -5016,11 +5032,13 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
+    oauthProviders?: boolean
+    primaryAuthProvider?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "avatar" | "emailVerified" | "role" | "status" | "lastLoginAt" | "loginAttempts" | "lockedUntil" | "dataConsent" | "consentDate" | "dataRetentionUntil" | "isDeleted" | "deletedAt" | "onboardingCompleted" | "onboardingProgress" | "onboardingStep" | "onboardingStartedAt" | "onboardingCompletedAt" | "ipAddress" | "userAgent" | "timezone" | "locale" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "avatar" | "emailVerified" | "role" | "status" | "lastLoginAt" | "loginAttempts" | "lockedUntil" | "dataConsent" | "consentDate" | "dataRetentionUntil" | "isDeleted" | "deletedAt" | "onboardingCompleted" | "onboardingProgress" | "onboardingStep" | "onboardingStartedAt" | "onboardingCompletedAt" | "ipAddress" | "userAgent" | "timezone" | "locale" | "oauthProviders" | "primaryAuthProvider" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     accounts?: boolean | User$accountsArgs<ExtArgs>
     analyticsEvents?: boolean | User$analyticsEventsArgs<ExtArgs>
@@ -5087,6 +5105,8 @@ export namespace Prisma {
       userAgent: string | null
       timezone: string | null
       locale: string | null
+      oauthProviders: string[]
+      primaryAuthProvider: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -5552,6 +5572,8 @@ export namespace Prisma {
     readonly userAgent: FieldRef<"User", 'String'>
     readonly timezone: FieldRef<"User", 'String'>
     readonly locale: FieldRef<"User", 'String'>
+    readonly oauthProviders: FieldRef<"User", 'String[]'>
+    readonly primaryAuthProvider: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -43116,6 +43138,8 @@ export namespace Prisma {
     userAgent: 'userAgent',
     timezone: 'timezone',
     locale: 'locale',
+    oauthProviders: 'oauthProviders',
+    primaryAuthProvider: 'primaryAuthProvider',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -43995,7 +44019,9 @@ export namespace Prisma {
     ipAddress: 'ipAddress',
     userAgent: 'userAgent',
     timezone: 'timezone',
-    locale: 'locale'
+    locale: 'locale',
+    oauthProviders: 'oauthProviders',
+    primaryAuthProvider: 'primaryAuthProvider'
   };
 
   export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -45201,6 +45227,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
@@ -45246,6 +45274,8 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     accounts?: AccountOrderByRelationAggregateInput
@@ -45295,6 +45325,8 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     accounts?: AccountListRelationFilter
@@ -45340,6 +45372,8 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -45378,6 +45412,8 @@ export namespace Prisma {
     userAgent?: StringNullableWithAggregatesFilter<"User"> | string | null
     timezone?: StringNullableWithAggregatesFilter<"User"> | string | null
     locale?: StringNullableWithAggregatesFilter<"User"> | string | null
+    oauthProviders?: StringNullableListFilter<"User">
+    primaryAuthProvider?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -49636,6 +49672,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -49681,6 +49719,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -49726,6 +49766,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -49771,6 +49813,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -49816,6 +49860,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -49846,6 +49892,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -49876,6 +49924,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -55137,6 +55187,14 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -55320,6 +55378,8 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    oauthProviders?: SortOrder
+    primaryAuthProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -55356,6 +55416,7 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    primaryAuthProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -55386,6 +55447,7 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
+    primaryAuthProvider?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -55515,14 +55577,6 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
   }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -59119,6 +59173,10 @@ export namespace Prisma {
     _max?: NestedEnumUsageFeatureFilter<$PrismaModel>
   }
 
+  export type UserCreateoauthProvidersInput = {
+    set: string[]
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -59353,6 +59411,11 @@ export namespace Prisma {
 
   export type BoolFieldUpdateOperationsInput = {
     set?: boolean
+  }
+
+  export type UserUpdateoauthProvidersInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -64133,6 +64196,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -64177,6 +64242,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -64237,6 +64304,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -64281,6 +64350,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -64325,6 +64396,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -64369,6 +64442,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -64429,6 +64504,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -64473,6 +64550,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -64517,6 +64596,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     analyticsEvents?: AnalyticsEventCreateNestedManyWithoutUserInput
@@ -64561,6 +64642,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutUserInput
@@ -64621,6 +64704,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     analyticsEvents?: AnalyticsEventUpdateManyWithoutUserNestedInput
@@ -64665,6 +64750,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutUserNestedInput
@@ -64709,6 +64796,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -64753,6 +64842,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -64813,6 +64904,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -64857,6 +64950,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -65044,6 +65139,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -65088,6 +65185,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -65297,6 +65396,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -65341,6 +65442,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -65623,6 +65726,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -65667,6 +65772,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -66140,6 +66247,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -66184,6 +66293,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -66537,6 +66648,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -66581,6 +66694,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -66641,6 +66756,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -66685,6 +66802,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -66729,6 +66848,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -66773,6 +66894,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -66833,6 +66956,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -66877,6 +67002,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -66921,6 +67048,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -66965,6 +67094,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -67025,6 +67156,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -67069,6 +67202,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -67499,6 +67634,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -67543,6 +67680,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -67690,6 +67829,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -67734,6 +67875,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -69377,6 +69520,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -69421,6 +69566,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -69584,6 +69731,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -69628,6 +69777,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -70608,6 +70759,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -70652,6 +70805,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -71004,6 +71159,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -71048,6 +71205,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -71431,6 +71590,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -71475,6 +71636,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -71684,6 +71847,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -71728,6 +71893,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -71814,6 +71981,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -71858,6 +72027,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -71992,6 +72163,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -72036,6 +72209,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -72303,6 +72478,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountCreateNestedManyWithoutUserInput
@@ -72347,6 +72524,8 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
+    oauthProviders?: UserCreateoauthProvidersInput | string[]
+    primaryAuthProvider?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
@@ -72480,6 +72659,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUpdateManyWithoutUserNestedInput
@@ -72524,6 +72705,8 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
+    oauthProviders?: UserUpdateoauthProvidersInput | string[]
+    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput

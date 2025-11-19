@@ -35,6 +35,8 @@ model User {
   userAgent             String?
   timezone              String?
   locale                String?            @default("en")
+  oauthProviders        String[]           @default([]) @map("oauth_providers")
+  primaryAuthProvider   String?            @map("primary_auth_provider")
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   accounts              Account[]
