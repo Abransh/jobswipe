@@ -46,7 +46,7 @@ except ImportError as e:
 async def main():
     """
     Main entry point for server automation
-    Reads data from environment variables, executes automation, outputs JSON result
+    Reads data from environment variables OR data file, executes automation, outputs JSON result
     """
 
     try:
@@ -58,50 +58,94 @@ async def main():
         if not all([user_id, job_id, application_id]):
             raise ValueError("Missing required environment variables: USER_ID, JOB_ID, APPLICATION_ID")
 
-        # Read user profile (from environment or data file)
-        user_profile = {
-            "first_name": os.getenv('USER_FIRST_NAME'),
-            "last_name": os.getenv('USER_LAST_NAME'),
-            "email": os.getenv('USER_EMAIL'),
-            "phone": os.getenv('USER_PHONE'),
-            "resume_url": os.getenv('USER_RESUME_URL'),
-            "current_title": os.getenv('USER_CURRENT_TITLE'),
-            "years_experience": int(os.getenv('USER_YEARS_EXPERIENCE', '0')) or None,
-            "skills": json.loads(os.getenv('USER_SKILLS', '[]')),
-            "current_location": os.getenv('USER_CURRENT_LOCATION'),
-            "linkedin_url": os.getenv('USER_LINKEDIN_URL'),
-            "work_authorization": os.getenv('USER_WORK_AUTHORIZATION'),
-            "cover_letter": os.getenv('USER_COVER_LETTER')
-        }
-
-        # Read job data
-        job_data = {
-            "job_id": job_id,
-            "title": os.getenv('JOB_TITLE'),
-            "company": os.getenv('JOB_COMPANY'),
-            "apply_url": os.getenv('JOB_APPLY_URL'),
-            "location": os.getenv('JOB_LOCATION'),
-            "description": os.getenv('JOB_DESCRIPTION')
-        }
-
-        # Read proxy configuration (if provided)
-        proxy_config_str = os.getenv('PROXY_CONFIG')
+        # Try to read from JOB_DATA_FILE first (contains complete structured data)
+        job_data_file = os.getenv('JOB_DATA_FILE')
+        user_profile = None
+        job_data = None
         proxy_config = None
 
-        if proxy_config_str:
+        if job_data_file and os.path.exists(job_data_file):
+            print(f"📄 Reading data from file: {job_data_file}", file=sys.stderr)
             try:
-                proxy_data = json.loads(proxy_config_str)
-                proxy_config = {
-                    "enabled": True,
-                    "host": proxy_data.get('host'),
-                    "port": proxy_data.get('port'),
-                    "username": proxy_data.get('username'),
-                    "password": proxy_data.get('password'),
-                    "type": proxy_data.get('type', 'http')
-                }
-                print(f"✅ Using proxy: {proxy_config['host']}:{proxy_config['port']}", file=sys.stderr)
-            except json.JSONDecodeError:
-                print(f"⚠️ Failed to parse proxy configuration", file=sys.stderr)
+                with open(job_data_file, 'r') as f:
+                    data_payload = json.load(f)
+                    user_profile = data_payload.get('user_profile', {})
+                    job_data = data_payload.get('job_data', {})
+                    proxy_config_data = data_payload.get('proxy_config')
+                    if proxy_config_data:
+                        proxy_config = {
+                            "enabled": True,
+                            "host": proxy_config_data.get('host'),
+                            "port": proxy_config_data.get('port'),
+                            "username": proxy_config_data.get('username'),
+                            "password": proxy_config_data.get('password'),
+                            "type": proxy_config_data.get('type', 'http')
+                        }
+                print(f"✅ Data loaded from file successfully", file=sys.stderr)
+            except Exception as e:
+                print(f"⚠️ Failed to read data file, falling back to environment variables: {e}", file=sys.stderr)
+
+        # Fallback: Read from environment variables if file not available or parsing failed
+        if not user_profile:
+            print(f"📋 Reading user profile from environment variables", file=sys.stderr)
+            user_profile = {
+                "first_name": os.getenv('USER_FIRST_NAME'),
+                "last_name": os.getenv('USER_LAST_NAME'),
+                "email": os.getenv('USER_EMAIL'),
+                "phone": os.getenv('USER_PHONE'),
+                "resume_url": os.getenv('USER_RESUME_URL'),
+                "resume_local_path": os.getenv('USER_RESUME_LOCAL_PATH'),
+                "current_title": os.getenv('USER_CURRENT_TITLE'),
+                "years_experience": int(os.getenv('USER_YEARS_EXPERIENCE', '0')) or None,
+                "skills": json.loads(os.getenv('USER_SKILLS', '[]')),
+                "current_location": os.getenv('USER_CURRENT_LOCATION'),
+                "linkedin_url": os.getenv('USER_LINKEDIN_URL'),
+                "work_authorization": os.getenv('USER_WORK_AUTHORIZATION'),
+                "cover_letter": os.getenv('USER_COVER_LETTER')
+            }
+
+        if not job_data:
+            print(f"📋 Reading job data from environment variables", file=sys.stderr)
+            job_data = {
+                "job_id": job_id,
+                "title": os.getenv('JOB_TITLE'),
+                "company": os.getenv('JOB_COMPANY'),
+                "apply_url": os.getenv('JOB_APPLY_URL'),
+                "location": os.getenv('JOB_LOCATION'),
+                "description": os.getenv('JOB_DESCRIPTION')
+            }
+
+        # Read proxy configuration from environment if not loaded from file
+        if not proxy_config:
+            proxy_config_str = os.getenv('PROXY_CONFIG')
+            if proxy_config_str:
+                try:
+                    proxy_data = json.loads(proxy_config_str)
+                    proxy_config = {
+                        "enabled": True,
+                        "host": proxy_data.get('host'),
+                        "port": proxy_data.get('port'),
+                        "username": proxy_data.get('username'),
+                        "password": proxy_data.get('password'),
+                        "type": proxy_data.get('type', 'http')
+                    }
+                except json.JSONDecodeError:
+                    print(f"⚠️ Failed to parse proxy configuration from environment", file=sys.stderr)
+
+        # Validate required user profile fields
+        required_user_fields = ['first_name', 'last_name', 'email', 'phone']
+        missing_user_fields = [field for field in required_user_fields if not user_profile.get(field)]
+        if missing_user_fields:
+            raise ValueError(f"Missing required user profile fields: {', '.join(missing_user_fields)}")
+
+        # Validate required job data fields
+        required_job_fields = ['title', 'company', 'apply_url']
+        missing_job_fields = [field for field in required_job_fields if not job_data.get(field)]
+        if missing_job_fields:
+            raise ValueError(f"Missing required job data fields: {', '.join(missing_job_fields)}")
+
+        if proxy_config:
+            print(f"✅ Using proxy: {proxy_config.get('host')}:{proxy_config.get('port')}", file=sys.stderr)
 
         # Execute automation using unified engine
         print(f"🚀 Starting server automation for {job_data['title']} at {job_data['company']}", file=sys.stderr)

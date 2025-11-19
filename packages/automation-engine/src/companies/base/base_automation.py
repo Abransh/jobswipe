@@ -141,24 +141,29 @@ class BaseJobAutomation(ABC):
 
     def _create_llm(self):
         """Create and return an LLM instance based on available API keys"""
-        # Debug: Check which API keys are available
-        self.logger.debug(f"API Keys check - ANTHROPIC: {bool(os.getenv('ANTHROPIC_API_KEY'))}, OPENAI: {bool(os.getenv('OPENAI_API_KEY'))}, GOOGLE: {bool(os.getenv('GOOGLE_API_KEY'))}")
+        # Get API keys and strip whitespace to ensure they're not empty or whitespace-only
+        anthropic_key = (os.getenv('ANTHROPIC_API_KEY') or '').strip()
+        openai_key = (os.getenv('OPENAI_API_KEY') or '').strip()
+        google_key = (os.getenv('GOOGLE_API_KEY') or '').strip()
 
-        if os.getenv('ANTHROPIC_API_KEY') and ChatAnthropic:
+        # Debug: Check which API keys are available
+        self.logger.debug(f"API Keys check - ANTHROPIC: {bool(anthropic_key)}, OPENAI: {bool(openai_key)}, GOOGLE: {bool(google_key)}")
+
+        if anthropic_key and ChatAnthropic:
             return ChatAnthropic(
-                api_key=os.getenv('ANTHROPIC_API_KEY'),
+                api_key=anthropic_key,
                 model="claude-3-5-sonnet-20241022",
                 temperature=0.1
             )
-        elif os.getenv('OPENAI_API_KEY') and ChatOpenAI:
+        elif openai_key and ChatOpenAI:
             return ChatOpenAI(
-                api_key=os.getenv('OPENAI_API_KEY'),
+                api_key=openai_key,
                 model="gpt-4-turbo-preview",
                 temperature=0.1
             )
-        elif os.getenv('GOOGLE_API_KEY') and ChatGoogle:
+        elif google_key and ChatGoogle:
             return ChatGoogle(
-                api_key=os.getenv('GOOGLE_API_KEY'),
+                api_key=google_key,
                 model="gemini-2.0-flash-exp",
                 temperature=0.1
             )
@@ -181,10 +186,15 @@ class BaseJobAutomation(ABC):
 
         # Create BrowserProfile with headless setting from execution context
         from browser_use.browser import BrowserProfile
+        from browser_use.browser.profile import ProxySettings
 
         browser_profile = BrowserProfile(
             headless=browser_options.get('headless', False),
             args=browser_options.get('args', []),
+            # Enable default extensions (ad blockers, privacy tools)
+            enable_default_extensions=True,
+            # Grant necessary permissions for automation
+            permissions=['clipboardReadWrite', 'notifications'],
         )
 
         # Add user_data_dir if present (desktop mode)
@@ -193,9 +203,17 @@ class BaseJobAutomation(ABC):
             self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
 
         # Add proxy if present (server mode)
-        #if 'proxy' in browser_options and browser_options['proxy']:
-         #   browser_profile.proxy = browser_options['proxy']
-          #  self.logger.info(f"✅ Using proxy: {browser_options['proxy'].get('server', 'unknown')}")
+        if self.context.proxy_config and self.context.proxy_config.enabled:
+            proxy_dict = self.context.proxy_config.to_playwright_proxy()
+            if proxy_dict:
+                # Convert to browser-use ProxySettings format
+                proxy_settings = ProxySettings(
+                    server=proxy_dict['server'],
+                    username=proxy_dict.get('username'),
+                    password=proxy_dict.get('password')
+                )
+                browser_profile.proxy = proxy_settings
+                self.logger.info(f"✅ Using proxy: {proxy_dict['server']}")
 
         # Create BrowserSession with the configured profile
         browser_session = BrowserSession(browser_profile=browser_profile)
