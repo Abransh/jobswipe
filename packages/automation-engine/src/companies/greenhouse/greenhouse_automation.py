@@ -144,6 +144,53 @@ STEP-BY-STEP INSTRUCTIONS:
    - Try to extract any confirmation numbers or reference IDs
    - Take a final screenshot of the confirmation page
 
+9. 🚨 HANDLING UNKNOWN/MISSING DATA (CRITICAL)
+
+   If you encounter a form field that requires information NOT provided in the candidate information above,
+   you MUST use the 'request_missing_data' action to pause and ask the user.
+
+   WHEN TO REQUEST DATA:
+   - Field asks specifically about THIS company (e.g., "Why do you want to work at {job_data.company}?")
+   - Field requires company-specific motivation, interest, or knowledge
+   - Field asks for data not in profile (referral code, specific project examples, custom questions)
+   - Field is a required essay, long-form question, or detailed explanation
+   - Field asks "Why this role?" or "Why this company?" (even if we have generic cover letter)
+
+   DO NOT request for standard fields already in profile:
+   - Name, email, phone, address (we have these)
+   - Resume/CV (we have this)
+   - Work authorization (we have this)
+   - Years of experience, skills, education (we have these)
+   - Generic cover letter (we have this)
+
+   HOW TO REQUEST:
+   ```
+   result = await request_missing_data(
+       field_name="why_{job_data.company.lower().replace(' ', '_')}",
+       field_label="Why do you want to work at {job_data.company}?",
+       field_type="textarea",
+       required=True,
+       context="Asking about specific motivation for applying to {job_data.company} for {job_data.title} role",
+       max_length=500
+   )
+
+   if result['success']:
+       # Fill the field with user's response
+       fill_field_with_value(result['value'])
+   else:
+       # User didn't respond (timeout) or cancelled
+       # If field is required, this may fail the application
+       # If field is optional, you can skip it
+   ```
+
+   EXAMPLES OF FIELDS TO REQUEST:
+   - "Why are you interested in {job_data.company}?" → request_missing_data (company-specific)
+   - "Why do you want this role?" → request_missing_data (role-specific)
+   - "Describe a project where you used [technology]" → request_missing_data (specific example)
+   - "What do you know about our company?" → request_missing_data (company knowledge)
+   - "How did you hear about this position?" → request_missing_data (source)
+   - "Do you have a referral?" → request_missing_data (referral info)
+
 IMPORTANT GUIDELINES:
 - Be patient with page loads and form submissions
 - Handle dynamic content that loads after the initial page

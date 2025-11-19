@@ -107,6 +107,134 @@ class BaseJobAutomation(ABC):
             self.logger.info(f"Resume upload requested for: {params.file_path}")
             return {"success": True, "message": f"Resume upload initiated for {params.file_path}"}
 
+        # Define parameter model for request_missing_data
+        class MissingDataRequestParams(BaseModel):
+            field_name: str = Field(..., description="Unique identifier for the field (e.g., 'why_this_company')")
+            field_label: str = Field(..., description="Human-readable field label (e.g., 'Why do you want to work here?')")
+            field_type: str = Field(..., description="Field type: text, textarea, select, date, file")
+            required: bool = Field(..., description="Whether this field is required")
+            context: str = Field(..., description="Additional context about what this field is asking")
+            max_length: Optional[int] = Field(None, description="Maximum character length if applicable")
+
+        @self.controller.action(
+            "Request missing data from user during automation (DESKTOP mode only)",
+            param_model=MissingDataRequestParams
+        )
+        async def request_missing_data(params: MissingDataRequestParams):
+            """
+            Pause automation and request data from user in real-time.
+            Only available in DESKTOP mode - will fail in SERVER mode.
+
+            This action:
+            1. Sends request to API
+            2. Waits for user to provide data (with 5-minute timeout)
+            3. Returns the user's response to fill the field
+            """
+            if self.context.mode != ExecutionMode.DESKTOP:
+                self.logger.error("❌ Cannot request real-time data in SERVER mode")
+                return {
+                    "success": False,
+                    "error": "Real-time data requests only available in DESKTOP mode",
+                    "value": ""
+                }
+
+            self.logger.info(f"🔔 Requesting missing data from user: {params.field_label}")
+
+            try:
+                import aiohttp
+
+                # Get API URL from environment
+                api_url = os.getenv('API_URL', 'http://localhost:3000')
+
+                # Get application context
+                application_id = os.getenv('APPLICATION_ID', 'unknown')
+                user_id = os.getenv('USER_ID', 'unknown')
+
+                # Build request payload
+                request_data = {
+                    "applicationId": application_id,
+                    "userId": user_id,
+                    "fieldName": params.field_name,
+                    "fieldLabel": params.field_label,
+                    "fieldType": params.field_type,
+                    "required": params.required,
+                    "context": params.context,
+                    "maxLength": params.max_length
+                }
+
+                # 1. Send data request to API
+                async with aiohttp.ClientSession() as session:
+                    try:
+                        async with session.post(
+                            f"{api_url}/api/v1/automation/request-data",
+                            json=request_data,
+                            headers={"Content-Type": "application/json"},
+                            timeout=aiohttp.ClientTimeout(total=10)
+                        ) as response:
+                            result = await response.json()
+
+                            if not result.get('success'):
+                                self.logger.error(f"Failed to send data request: {result.get('error')}")
+                                return {
+                                    "success": False,
+                                    "error": result.get('error', 'Failed to send request'),
+                                    "value": ""
+                                }
+                    except Exception as e:
+                        self.logger.error(f"Error sending data request: {str(e)}")
+                        return {
+                            "success": False,
+                            "error": f"API request failed: {str(e)}",
+                            "value": ""
+                        }
+
+                # 2. WAIT for user response (with timeout)
+                timeout_seconds = 300  # 5 minutes
+                poll_interval = 2      # Check every 2 seconds
+                start_time = time.time()
+
+                self.logger.info(f"⏳ Waiting for user response (timeout: {timeout_seconds}s)...")
+
+                while time.time() - start_time < timeout_seconds:
+                    # Poll for response
+                    async with aiohttp.ClientSession() as session:
+                        try:
+                            async with session.get(
+                                f"{api_url}/api/v1/automation/{application_id}/field-data/{params.field_name}",
+                                timeout=aiohttp.ClientTimeout(total=5)
+                            ) as response:
+                                response_data = await response.json()
+
+                                if response_data.get('provided'):
+                                    value = response_data.get('value', '')
+                                    self.logger.info(f"✅ Received user response: {value[:50]}...")
+
+                                    return {
+                                        "success": True,
+                                        "value": value
+                                    }
+                        except Exception as e:
+                            self.logger.debug(f"Polling error (will retry): {str(e)}")
+
+                    # Wait before next poll
+                    await asyncio.sleep(poll_interval)
+
+                # Timeout reached
+                self.logger.error(f"⏰ Timeout waiting for user response to: {params.field_label}")
+                return {
+                    "success": False,
+                    "error": f"User did not respond within {timeout_seconds} seconds",
+                    "value": ""
+                }
+
+            except Exception as e:
+                self.logger.error(f"Error in request_missing_data: {str(e)}", exc_info=True)
+                return {
+                    "success": False,
+                    "error": str(e),
+                    "value": ""
+                }
+
         @self.controller.action("Detect and handle captcha")
         async def detect_captcha():
             """Detect various types of captchas on the page"""
