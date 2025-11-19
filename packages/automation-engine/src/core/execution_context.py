@@ -134,12 +134,33 @@ class ExecutionContext:
         Returns:
             Dict with Playwright launch options
         """
+        # Enhanced browser arguments for anti-detection and performance
+        browser_args = [
+            # Window and cache settings
+            "--disable-bfcache",
+            f"--window-size={self.browser_config.viewport_width},{self.browser_config.viewport_height}",
+
+            # Anti-detection: Remove automation indicators
+            "--disable-blink-features=AutomationControlled",
+
+            # Performance optimizations
+            "--disable-dev-shm-usage",  # Overcome limited resource problems
+            "--disable-gpu",  # Applicable to windows os only
+            "--no-sandbox",  # Required for Docker/containerized environments
+
+            # Stability improvements
+            "--disable-setuid-sandbox",
+            "--disable-infobars",
+            "--disable-notifications",
+
+            # Additional anti-detection
+            "--disable-web-security",
+            "--disable-features=IsolateOrigins,site-per-process",
+        ]
+
         options = {
             "headless": self.browser_config.headless,
-            "args": [
-                "--disable-bfcache",
-                f"--window-size={self.browser_config.viewport_width},{self.browser_config.viewport_height}",
-            ],
+            "args": browser_args,
         }
 
         # Add proxy if configured (server mode)

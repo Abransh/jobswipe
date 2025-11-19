@@ -327,7 +327,7 @@ export class PythonBridge extends EventEmitter {
       JOB_DESCRIPTION: request.jobData.description || '',
       
       // Resume handling
-  //    USER_RESUME_URL: request.userProfile.resumeUrl || '',
+      USER_RESUME_URL: request.userProfile.resumeUrl || '',
       USER_RESUME_LOCAL_PATH: request.userProfile.resumeLocalPath || '',
       
       // Cover letter and custom fields
