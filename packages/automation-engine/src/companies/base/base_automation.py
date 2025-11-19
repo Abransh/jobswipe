@@ -286,38 +286,55 @@ class BaseJobAutomation(ABC):
         )
 
         try:
-            self.logger.info(f"Starting job application for {job_data.title} at {job_data.company}")
-            self.logger.info(f"Execution mode: {self.context.mode.value}")
+            self.logger.info(f"🚀 Starting job application for {job_data.title} at {job_data.company}")
+            self.logger.info(f"📍 Execution mode: {self.context.mode.value}")
+            self.logger.info(f"🔗 Apply URL: {job_data.apply_url}")
 
             # Validate inputs
             if not self.can_handle_url(job_data.apply_url):
                 raise ValueError(f"URL {job_data.apply_url} not supported by {self.company_name} automation")
 
             # Create LLM and browser session
+            self.logger.info("🤖 Creating LLM instance...")
             llm = self._create_llm()
+            self.logger.info(f"✅ LLM created: {llm.__class__.__name__}")
+
+            self.logger.info("🌐 Creating browser session...")
             browser_session = self._create_browser_session()
+            self.logger.info("✅ Browser session created")
 
             try:
+                self.logger.info("🔄 Starting browser...")
                 await browser_session.start()
+                self.logger.info("✅ Browser started successfully")
 
                 # Generate company-specific task
+                self.logger.info("📝 Generating task description...")
                 task_description = self.get_company_specific_task(user_profile, job_data)
+                self.logger.info(f"✅ Task generated ({len(task_description)} characters)")
+                self.logger.debug(f"Task: {task_description[:200]}...")  # Log first 200 chars
 
                 # Create and run AI agent
+                self.logger.info("🤖 Creating AI agent...")
                 agent = Agent(
                     task=task_description,
                     llm=llm,
                     controller=self.controller,
                     browser_session=browser_session
                 )
+                self.logger.info("✅ Agent created, preparing to execute...")
 
                 self.result.add_step(
                     "initialize", "Initialize browser and AI agent", True, 2000
                 )
 
                 # Execute the automation
-                self.logger.info("Executing AI-powered job application...")
+                self.logger.info("▶️  EXECUTING AI-POWERED JOB APPLICATION...")
+                self.logger.info("=" * 60)
                 agent_result = await agent.run()
+                self.logger.info("=" * 60)
+                self.logger.info(f"✅ Agent execution completed!")
+                self.logger.info(f"📊 Agent result: {str(agent_result)[:500]}")  # Log first 500 chars
 
                 self.result.add_step(
                     "execute", "Execute AI automation", True,
