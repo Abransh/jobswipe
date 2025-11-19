@@ -342,6 +342,39 @@ packages/*/src/**/*.js.map
 !*rc.js
 
 # =============================================================================
+# Python
+# =============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+.env.python/
+
+# Python distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Python testing
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Python mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# =============================================================================
 # Custom Project Ignores
 # =============================================================================
 # Job scraping data
