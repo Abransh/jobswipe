@@ -22,6 +22,7 @@ from browser_use import Agent
 from browser_use.tools.service import Controller
 from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
+from browser_use.browser.events import UploadFileEvent
 from pydantic import BaseModel, Field
 
 # Import browser-use native LLMs (preferred over langchain)
@@ -98,14 +99,55 @@ class BaseJobAutomation(ABC):
 
         # Define parameter model for upload_resume
         class UploadResumeParams(BaseModel):
+            index: int = Field(..., description="Index of the file input element to upload to")
             file_path: str = Field(..., description="Path to the resume file to upload")
 
-        @self.controller.action("Upload resume file to form", param_model=UploadResumeParams)
-        async def upload_resume(params: UploadResumeParams):
-            """Upload resume file to any file input element"""
-            # browser_session is auto-injected by browser-use, access via Agent
-            self.logger.info(f"Resume upload requested for: {params.file_path}")
-            return {"success": True, "message": f"Resume upload initiated for {params.file_path}"}
+        @self.controller.action("Upload resume file to file input element", param_model=UploadResumeParams)
+        async def upload_resume(params: UploadResumeParams, browser_session: BrowserSession):
+            """
+            Upload resume file to a file input element using browser-use UploadFileEvent
+
+            Args:
+                params: Contains index and file_path
+                browser_session: Auto-injected by browser-use
+            """
+            try:
+                self.logger.info(f"📎 Uploading resume from: {params.file_path} to element at index {params.index}")
+
+                # Verify file exists
+                if not Path(params.file_path).exists():
+                    error_msg = f"Resume file not found at: {params.file_path}"
+                    self.logger.error(error_msg)
+                    return ActionResult(error=error_msg)
+
+                # Get the DOM element by index
+                dom_element = await browser_session.get_dom_element_by_index(params.index)
+
+                if dom_element is None:
+                    error_msg = f"No element found at index {params.index}"
+                    self.logger.error(error_msg)
+                    return ActionResult(error=error_msg)
+
+                # Verify it's a file input element
+                if dom_element.tag_name.lower() != 'input' or dom_element.attributes.get('type') != 'file':
+                    error_msg = f"Element at index {params.index} is not a file input (tag: {dom_element.tag_name}, type: {dom_element.attributes.get('type')})"
+                    self.logger.error(error_msg)
+                    return ActionResult(error=error_msg)
+
+                # Dispatch the upload file event using browser-use's event system
+                event = browser_session.event_bus.dispatch(
+                    UploadFileEvent(node=dom_element, file_path=params.file_path)
+                )
+                await event
+
+                success_msg = f"✅ Successfully uploaded resume to element {params.index}"
+                self.logger.info(success_msg)
+                return ActionResult(extracted_content=success_msg, include_in_memory=True)
+
+            except Exception as e:
+                error_msg = f"Failed to upload resume: {str(e)}"
+                self.logger.error(error_msg, exc_info=True)
+                return ActionResult(error=error_msg)
 
         @self.controller.action("Detect and handle captcha")
         async def detect_captcha():
@@ -139,86 +181,37 @@ class BaseJobAutomation(ABC):
             self.logger.error(f"Screenshot failed: {e}")
             return ""
 
-    def _create_llm(self):
-        """Create and return an LLM instance based on available API keys"""
-        # Get API keys and strip whitespace to ensure they're not empty or whitespace-only
-        anthropic_key = (os.getenv('ANTHROPIC_API_KEY') or '').strip()
-        openai_key = (os.getenv('OPENAI_API_KEY') or '').strip()
-        google_key = (os.getenv('GOOGLE_API_KEY') or '').strip()
+    def _get_llm(self):
+        """
+        Get LLM from ExecutionContext (already initialized)
 
-        # Debug: Check which API keys are available
-        self.logger.debug(f"API Keys check - ANTHROPIC: {bool(anthropic_key)}, OPENAI: {bool(openai_key)}, GOOGLE: {bool(google_key)}")
+        Returns the LLM instance that was initialized in ExecutionContext.__post_init__()
+        This ensures we use the same LLM configuration across the automation system
+        """
+        if self.context.llm is None:
+            raise RuntimeError("LLM not initialized in ExecutionContext! This should never happen.")
 
-        if anthropic_key and ChatAnthropic:
-            return ChatAnthropic(
-                api_key=anthropic_key,
-                model="claude-3-5-sonnet-20241022",
-                temperature=0.1
-            )
-        elif openai_key and ChatOpenAI:
-            return ChatOpenAI(
-                api_key=openai_key,
-                model="gpt-4-turbo-preview",
-                temperature=0.1
-            )
-        elif google_key and ChatGoogle:
-            return ChatGoogle(
-                api_key=google_key,
-                model="gemini-2.0-flash-exp",
-                temperature=0.1
-            )
-        else:
-            raise RuntimeError("No valid LLM API key found. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GOOGLE_API_KEY")
+        self.logger.info(f"✅ Using LLM from ExecutionContext: {type(self.context.llm).__name__}")
+        return self.context.llm
 
     def _create_browser_session(self) -> BrowserSession:
         """
-        Create and return a browser session using ExecutionContext
+        Create and return a browser session using BrowserProfile from ExecutionContext
 
-        UNIFIED VERSION: ExecutionContext handles SERVER vs DESKTOP differences
-        - SERVER mode: headless=False (visible), with proxy rotation
-        - DESKTOP mode: headless=False (visible), with user's browser profile, no proxy
+        UNIFIED VERSION: ExecutionContext already configured BrowserProfile for:
+        - SERVER mode: headless=True, with proxy
+        - DESKTOP mode: headless=False, with user's browser profile, no proxy
         """
-        # Get browser options from context (automatically configured for mode)
-        browser_options = self.context.get_browser_launch_options()
+        if self.context.browser_profile is None:
+            raise RuntimeError("BrowserProfile not initialized in ExecutionContext! This should never happen.")
 
         self.logger.info(f"Creating browser session for {self.context.mode.value} mode")
-        self.logger.info(f"Headless: {browser_options.get('headless', False)}")
+        self.logger.info(f"Using BrowserProfile: headless={self.context.browser_profile.headless}, proxy={self.context.browser_profile.proxy is not None}")
 
-        # Create BrowserProfile with headless setting from execution context
-        from browser_use.browser import BrowserProfile
-        from browser_use.browser.profile import ProxySettings
+        # Create BrowserSession with the pre-configured profile from ExecutionContext
+        browser_session = BrowserSession(browser_profile=self.context.browser_profile)
 
-        browser_profile = BrowserProfile(
-            headless=browser_options.get('headless', False),
-            args=browser_options.get('args', []),
-            # Enable default extensions (ad blockers, privacy tools)
-            enable_default_extensions=True,
-            # Grant necessary permissions for automation
-            permissions=['clipboardReadWrite', 'notifications'],
-        )
-
-        # Add user_data_dir if present (desktop mode)
-        if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
-            browser_profile.user_data_dir = browser_options['user_data_dir']
-            self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
-
-        # Add proxy if present (server mode)
-        if self.context.proxy_config and self.context.proxy_config.enabled:
-            proxy_dict = self.context.proxy_config.to_playwright_proxy()
-            if proxy_dict:
-                # Convert to browser-use ProxySettings format
-                proxy_settings = ProxySettings(
-                    server=proxy_dict['server'],
-                    username=proxy_dict.get('username'),
-                    password=proxy_dict.get('password')
-                )
-                browser_profile.proxy = proxy_settings
-                self.logger.info(f"✅ Using proxy: {proxy_dict['server']}")
-
-        # Create BrowserSession with the configured profile
-        browser_session = BrowserSession(browser_profile=browser_profile)
-
-        self.logger.info(f"Browser session created with headless={browser_profile.headless}")
+        self.logger.info(f"✅ Browser session created successfully")
         return browser_session
 
     @abstractmethod
@@ -294,10 +287,10 @@ class BaseJobAutomation(ABC):
             if not self.can_handle_url(job_data.apply_url):
                 raise ValueError(f"URL {job_data.apply_url} not supported by {self.company_name} automation")
 
-            # Create LLM and browser session
-            self.logger.info("🤖 Creating LLM instance...")
-            llm = self._create_llm()
-            self.logger.info(f"✅ LLM created: {llm.__class__.__name__}")
+            # Get LLM from ExecutionContext (already initialized)
+            self.logger.info("🤖 Getting LLM from ExecutionContext...")
+            llm = self._get_llm()
+            self.logger.info(f"✅ LLM ready: {llm.__class__.__name__}")
 
             self.logger.info("🌐 Creating browser session...")
             browser_session = self._create_browser_session()

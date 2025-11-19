@@ -5,12 +5,20 @@ Handles different execution modes (SERVER vs DESKTOP) with proper configuration
 
 import logging
 import os
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel
+
+# Add browser-use library to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / 'browser-use'))
+
+# Import browser-use components
+from browser_use import BrowserProfile, ProxySettings
+from browser_use.llm import ChatGoogle
 
 
 class ExecutionMode(str, Enum):
@@ -75,10 +83,20 @@ class ExecutionContext:
     session_id: Optional[str] = None
     logger: Optional[logging.Logger] = None
 
+    # browser-use Agent components (initialized in __post_init__)
+    llm: Optional[Any] = None
+    browser_profile: Optional[BrowserProfile] = None
+
     def __post_init__(self):
-        """Setup logger if not provided"""
+        """Setup logger, LLM, and BrowserProfile"""
         if self.logger is None:
             self.logger = self._setup_logger()
+
+        # Initialize LLM for AI-powered automation
+        self.llm = self._initialize_llm()
+
+        # Initialize BrowserProfile with proxy support
+        self.browser_profile = self._initialize_browser_profile()
 
         # Configure browser based on execution mode
         if self.mode == ExecutionMode.SERVER:
@@ -101,6 +119,80 @@ class ExecutionContext:
             logger.addHandler(handler)
 
         return logger
+
+    def _initialize_llm(self):
+        """
+        Initialize LLM for AI-powered automation
+        Uses Google Gemini (ChatGoogle) as recommended
+        """
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+
+        if not google_api_key:
+            error_msg = "GOOGLE_API_KEY environment variable not found! Cannot initialize LLM for automation."
+            if self.logger:
+                self.logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        try:
+            # Initialize Google Gemini LLM
+            llm = ChatGoogle(model='gemini-2.0-flash-exp')
+
+            if self.logger:
+                self.logger.info("✅ LLM initialized successfully: Google Gemini 2.0 Flash")
+
+            return llm
+
+        except Exception as e:
+            error_msg = f"Failed to initialize LLM: {str(e)}"
+            if self.logger:
+                self.logger.error(error_msg, exc_info=True)
+            raise RuntimeError(error_msg) from e
+
+    def _initialize_browser_profile(self) -> BrowserProfile:
+        """
+        Initialize BrowserProfile with proxy support for browser-use Agent
+        """
+        try:
+            # Build proxy settings if proxy config exists
+            proxy_settings = None
+            if self.proxy_config and self.proxy_config.enabled and self.proxy_config.host:
+                server_url = f"{self.proxy_config.type}://{self.proxy_config.host}:{self.proxy_config.port}"
+
+                proxy_settings = ProxySettings(
+                    server=server_url,
+                    username=self.proxy_config.username,
+                    password=self.proxy_config.password
+                )
+
+                if self.logger:
+                    self.logger.info(f"✅ Proxy configured: {server_url}")
+
+            # Create BrowserProfile
+            # For server mode: headless=True (changed from False for performance)
+            # For desktop mode: headless=False (visible browser)
+            is_headless = self.mode == ExecutionMode.SERVER
+
+            browser_profile = BrowserProfile(
+                headless=is_headless,
+                proxy=proxy_settings,
+                keep_alive=False,  # Always cleanup after job
+                wait_between_actions=0.5,  # Slight delay to avoid rate limits
+                disable_security=False,  # Keep security enabled
+                use_vision=True,  # Enable vision for better form understanding
+                max_actions_per_step=4,  # Reasonable action limit per step
+            )
+
+            if self.logger:
+                mode_str = "headless" if is_headless else "headful"
+                self.logger.info(f"✅ BrowserProfile initialized ({mode_str} mode)")
+
+            return browser_profile
+
+        except Exception as e:
+            error_msg = f"Failed to initialize BrowserProfile: {str(e)}"
+            if self.logger:
+                self.logger.error(error_msg, exc_info=True)
+            raise RuntimeError(error_msg) from e
 
     def _configure_for_server(self):
         """Configure context for server execution"""
