@@ -129,47 +129,96 @@ class AutomationEngine:
             session_id=session_id
         )
 
-        context.log_info("AutomationEngine starting execution", extra={
-            'job_title': job_data.get('title'),
-            'company': job_data.get('company'),
-            'mode': mode.value
-        })
+        # Log execution start with configuration summary
+        context.log_info("=" * 80)
+        context.log_info("⚙️  AUTOMATION ENGINE STARTING")
+        context.log_info(f"Job: {job_data.get('title')} at {job_data.get('company')}")
+        context.log_info(f"Mode: {mode.value}")
+        context.log_info(f"Session ID: {session_id or 'N/A'}")
+
+        # Log configuration details
+        if mode == ExecutionMode.SERVER:
+            if proxy_config:
+                context.log_info(f"Proxy: {proxy_config.host}:{proxy_config.port} ({proxy_config.type})")
+            else:
+                context.log_warning("Proxy: Not configured (may encounter rate limiting)")
+        else:
+            context.log_info("Browser: Local user profile")
+
+        context.log_info("=" * 80)
+
+        company_type = 'unknown'  # Initialize for exception handling
 
         try:
             # Detect company type
             job_url = job_data.get('apply_url') or job_data.get('url', '')
             company_type = self.detect_company_type(job_url)
 
-            context.log_info(f"Detected company type: {company_type}")
+            context.log_info(f"🔍 Detected company type: {company_type}")
 
             # Get automation class
             AutomationClass = self.automations.get(company_type)
 
             if not AutomationClass:
-                context.log_warning(f"No automation found for {company_type}, using generic")
+                context.log_warning(f"⚠️  No specific automation for {company_type}, using generic fallback")
                 AutomationClass = self.automations.get('generic', BaseJobAutomation)
+            else:
+                context.log_info(f"✅ Using automation: {AutomationClass.__name__}")
 
             # Execute automation
+            context.log_info(f"🚀 Starting {company_type} automation...")
             automation = AutomationClass(context=context)
             result = await automation.apply(job_data, user_profile)
 
-            # Add metadata
+            # Calculate performance metrics
             execution_time = int((time.time() - start_time) * 1000)
+            execution_seconds = execution_time / 1000
+
+            # Add metadata
             result['execution_time_ms'] = execution_time
             result['company_type'] = company_type
             result['mode'] = mode.value
 
-            context.log_info("Automation completed", extra={
-                'success': result.get('success', False),
-                'execution_time_ms': execution_time
-            })
+            # Log completion with performance metrics
+            success = result.get('success', False)
+            status = result.get('status', 'UNKNOWN')
+
+            context.log_info("=" * 80)
+            if success:
+                context.log_info(f"✅ AUTOMATION SUCCEEDED")
+            else:
+                context.log_warning(f"❌ AUTOMATION FAILED")
+
+            context.log_info(f"Status: {status}")
+            context.log_info(f"⏱️  Execution time: {execution_seconds:.2f}s ({execution_time}ms)")
+            context.log_info(f"Company type: {company_type}")
+
+            # Log additional result details
+            if success and 'confirmation_number' in result:
+                context.log_info(f"Confirmation: {result['confirmation_number']}")
+
+            if 'screenshots' in result and result['screenshots']:
+                context.log_info(f"Screenshots: {len(result['screenshots'])} captured")
+
+            if not success and 'error' in result:
+                context.log_warning(f"Error: {result['error']}")
+
+            context.log_info("=" * 80)
 
             return result
 
         except Exception as e:
             execution_time = int((time.time() - start_time) * 1000)
+            execution_seconds = execution_time / 1000
 
-            context.log_error(f"Automation failed: {str(e)}", exc_info=True)
+            # Log exception with details
+            context.log_error("=" * 80)
+            context.log_error(f"❌ AUTOMATION ENGINE EXCEPTION")
+            context.log_error(f"Error type: {type(e).__name__}")
+            context.log_error(f"Error message: {str(e)}")
+            context.log_error(f"Company type: {company_type}")
+            context.log_error(f"⏱️  Execution time before failure: {execution_seconds:.2f}s")
+            context.log_error("=" * 80, exc_info=True)
 
             return {
                 'success': False,
@@ -178,8 +227,9 @@ class AutomationEngine:
                 'logs': [f"Fatal error: {str(e)}"],
                 'screenshots': [],
                 'execution_time_ms': execution_time,
-                'company_type': company_type if 'company_type' in locals() else 'unknown',
-                'mode': mode.value
+                'company_type': company_type,
+                'mode': mode.value,
+                'status': 'FAILED'
             }
 
     def get_supported_companies(self) -> Dict[str, str]:

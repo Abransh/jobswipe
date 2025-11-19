@@ -127,13 +127,78 @@ class ExecutionContext:
 
         self.logger.info("ExecutionContext configured for DESKTOP mode (visible browser, local)")
 
+    def get_browser_profile_config(self) -> Dict[str, Any]:
+        """
+        Get browser-use BrowserProfile configuration based on execution context
+
+        This method returns configuration for browser-use v0.6.0+ BrowserProfile.
+        All parameters should be passed to the BrowserProfile constructor at once
+        to ensure proper Pydantic validation.
+
+        Returns:
+            Dict with BrowserProfile constructor parameters
+        """
+        # Base configuration
+        config = {
+            "headless": self.browser_config.headless,
+            "args": [
+                "--disable-bfcache",
+                f"--window-size={self.browser_config.viewport_width},{self.browser_config.viewport_height}",
+            ],
+            "timeout": self.browser_config.timeout,
+            "viewport": {
+                "width": self.browser_config.viewport_width,
+                "height": self.browser_config.viewport_height,
+            },
+        }
+
+        # Mode-specific configuration
+        if self.mode == ExecutionMode.SERVER:
+            # Server mode: stealth enabled, proxy configured
+            config["stealth"] = True
+            config["disable_security"] = False
+
+            # Add proxy if configured
+            if self.proxy_config:
+                proxy_dict = self.proxy_config.to_playwright_proxy()
+                if proxy_dict:
+                    config["proxy"] = proxy_dict
+                    self.logger.info(f"Browser profile configured with proxy: {proxy_dict['server']}")
+
+        else:  # DESKTOP mode
+            # Desktop mode: use user's browser profile, keep browser alive
+            config["keep_alive"] = True
+            config["stealth"] = False  # Not needed for user's local browser
+
+            # Add user data dir if configured
+            if self.browser_config.user_data_dir:
+                config["user_data_dir"] = self.browser_config.user_data_dir
+                self.logger.info(f"Browser profile configured with user data: {self.browser_config.user_data_dir}")
+
+        # Add user agent if specified
+        if self.browser_config.user_agent:
+            config["args"].append(f"--user-agent={self.browser_config.user_agent}")
+
+        self.logger.debug(f"BrowserProfile config generated for {self.mode.value} mode")
+        return config
+
     def get_browser_launch_options(self) -> Dict[str, Any]:
         """
         Get Playwright browser launch options based on context
 
+        DEPRECATED: Use get_browser_profile_config() instead for browser-use v0.6.0+
+        This method is kept for backward compatibility.
+
         Returns:
             Dict with Playwright launch options
         """
+        import warnings
+        warnings.warn(
+            "get_browser_launch_options() is deprecated. Use get_browser_profile_config() instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         options = {
             "headless": self.browser_config.headless,
             "args": [

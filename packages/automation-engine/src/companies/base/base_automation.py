@@ -24,6 +24,7 @@ from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
 from pydantic import BaseModel, Field
 
+
 # Import browser-use native LLMs (preferred over langchain)
 try:
     from browser_use.llm import ChatAnthropic, ChatGoogle, ChatOpenAI
@@ -48,6 +49,7 @@ from .result_handler import (
     ApplicationResult, ApplicationStatus, CaptchaType,
     ResultProcessor, AutomationStep
 )
+from .job_application_tools import JobApplicationTools
 
 
 class BaseJobAutomation(ABC):
@@ -73,7 +75,7 @@ class BaseJobAutomation(ABC):
         self.controller = Controller()
         self.result: Optional[ApplicationResult] = None
 
-        # Setup browser automation actions
+        # Setup browser automation actions using JobApplicationTools
         self._setup_common_actions()
 
         self.logger.info(f"Initialized {company_name} automation in {context.mode.value} mode")
@@ -94,30 +96,79 @@ class BaseJobAutomation(ABC):
         return logger
 
     def _setup_common_actions(self):
-        """Setup common browser automation actions"""
+        """
+        Setup common browser automation actions using JobApplicationTools
 
-        # Define parameter model for upload_resume
-        class UploadResumeParams(BaseModel):
-            file_path: str = Field(..., description="Path to the resume file to upload")
+        JobApplicationTools provides functional implementations of:
+        - upload_resume: Actually uploads file to browser input element
+        - detect_captcha: Inspects DOM for captcha presence
+        - extract_confirmation: Extracts confirmation details from page
 
-        @self.controller.action("Upload resume file to form", param_model=UploadResumeParams)
-        async def upload_resume(params: UploadResumeParams):
-            """Upload resume file to any file input element"""
-            # browser_session is auto-injected by browser-use, access via Agent
-            self.logger.info(f"Resume upload requested for: {params.file_path}")
-            return {"success": True, "message": f"Resume upload initiated for {params.file_path}"}
+        All actions use proper browser-use patterns with browser_session injection
+        """
+        # Initialize JobApplicationTools (automatically registers actions with controller)
+        self.tools = JobApplicationTools(self.controller, self.logger)
 
-        @self.controller.action("Detect and handle captcha")
-        async def detect_captcha():
-            """Detect various types of captchas on the page"""
-            # Note: browser_session is auto-injected by browser-use
-            return ActionResult(extracted_content="Captcha detection not yet implemented")
+        self.logger.info(f"Registered {len(self.controller.registry.actions)} custom actions")
+        self.logger.debug(f"Available actions: {list(self.controller.registry.actions.keys())}")
 
-        @self.controller.action("Extract confirmation details")
-        async def extract_confirmation():
-            """Extract application confirmation details from the page"""
-            # Note: browser_session is auto-injected by browser-use
-            return ActionResult(extracted_content="Confirmation extraction not yet implemented")
+    def _setup_event_monitoring(self, agent: Agent):
+        """
+        Setup event bus monitoring for production debugging
+
+        Subscribes to browser-use agent events to track:
+        - Agent steps and actions
+        - Browser navigation
+        - Task progress
+        - Errors and failures
+
+        Events are logged and recorded in ApplicationResult for debugging
+        """
+        if not hasattr(agent, 'eventbus'):
+            self.logger.warning("Agent does not have eventbus - skipping event monitoring")
+            return
+
+        try:
+            # Subscribe to all events (will filter in handler)
+            def event_handler(event):
+                """Handle agent events for logging and debugging"""
+                event_type = type(event).__name__
+
+                # Log navigation events at INFO level
+                if 'Navigation' in event_type or 'PageLoad' in event_type:
+                    self.logger.info(f"🌐 {event_type}: {getattr(event, 'url', 'N/A')}")
+
+                # Log action events at DEBUG level
+                elif 'Action' in event_type:
+                    action_name = getattr(event, 'action', getattr(event, 'name', 'unknown'))
+                    self.logger.debug(f"⚡ {event_type}: {action_name}")
+
+                # Log step events at INFO level
+                elif 'Step' in event_type:
+                    step_info = getattr(event, 'description', getattr(event, 'step', 'N/A'))
+                    self.logger.info(f"📍 {event_type}: {step_info}")
+
+                # Log error events at ERROR level
+                elif 'Error' in event_type or 'Failure' in event_type:
+                    error_msg = getattr(event, 'message', getattr(event, 'error', 'N/A'))
+                    self.logger.error(f"❌ {event_type}: {error_msg}")
+
+                # Record significant events in result
+                if self.result and event_type in ['CreateAgentStepEvent', 'UpdateAgentTaskEvent']:
+                    self.result.events.append({
+                        'type': event_type,
+                        'timestamp': datetime.now(timezone.utc).isoformat(),
+                        'data': str(event)[:500]  # Limit size
+                    })
+
+            # Subscribe to all events with wildcard
+            agent.eventbus.on('*', event_handler)
+
+            self.logger.info("✅ Event monitoring enabled for agent")
+
+        except Exception as e:
+            self.logger.warning(f"Failed to setup event monitoring: {e}")
+            # Don't fail the automation if event monitoring setup fails
 
     async def _take_screenshot(self, browser_session: BrowserSession,
                               name: str = "screenshot") -> str:
@@ -170,37 +221,37 @@ class BaseJobAutomation(ABC):
         Create and return a browser session using ExecutionContext
 
         UNIFIED VERSION: ExecutionContext handles SERVER vs DESKTOP differences
-        - SERVER mode: headless=False (visible), with proxy rotation
-        - DESKTOP mode: headless=False (visible), with user's browser profile, no proxy
+        - SERVER mode: headless=True, stealth enabled, with proxy rotation
+        - DESKTOP mode: headless=False, keep_alive=True, with user's browser profile, no proxy
+
+        Uses browser-use v0.6.0+ BrowserProfile pattern: all parameters passed to constructor
+        to ensure proper Pydantic validation.
         """
-        # Get browser options from context (automatically configured for mode)
-        browser_options = self.context.get_browser_launch_options()
-
-        self.logger.info(f"Creating browser session for {self.context.mode.value} mode")
-        self.logger.info(f"Headless: {browser_options.get('headless', False)}")
-
-        # Create BrowserProfile with headless setting from execution context
         from browser_use.browser import BrowserProfile
 
-        browser_profile = BrowserProfile(
-            headless=browser_options.get('headless', False),
-            args=browser_options.get('args', []),
-        )
+        # Get browser-use BrowserProfile configuration from context
+        # This returns all parameters ready for BrowserProfile constructor
+        profile_config = self.context.get_browser_profile_config()
 
-        # Add user_data_dir if present (desktop mode)
-        if 'user_data_dir' in browser_options and browser_options['user_data_dir']:
-            browser_profile.user_data_dir = browser_options['user_data_dir']
-            self.logger.info(f"✅ Using browser profile: {browser_options['user_data_dir']}")
+        self.logger.info(f"Creating browser session for {self.context.mode.value} mode")
+        self.logger.debug(f"Browser profile config: {profile_config}")
 
-        # Add proxy if present (server mode)
-        #if 'proxy' in browser_options and browser_options['proxy']:
-         #   browser_profile.proxy = browser_options['proxy']
-          #  self.logger.info(f"✅ Using proxy: {browser_options['proxy'].get('server', 'unknown')}")
+        # Create BrowserProfile with ALL parameters at once (browser-use v0.6.0+ pattern)
+        # This ensures proper Pydantic validation and avoids post-creation modification
+        browser_profile = BrowserProfile(**profile_config)
 
         # Create BrowserSession with the configured profile
         browser_session = BrowserSession(browser_profile=browser_profile)
 
-        self.logger.info(f"Browser session created with headless={browser_profile.headless}")
+        # Log configuration summary
+        self.logger.info(f"Browser session created:")
+        self.logger.info(f"  - Headless: {browser_profile.headless}")
+        self.logger.info(f"  - Stealth: {browser_profile.stealth}")
+        if browser_profile.user_data_dir:
+            self.logger.info(f"  - User data dir: {browser_profile.user_data_dir}")
+        if browser_profile.proxy:
+            self.logger.info(f"  - Proxy: {browser_profile.proxy.get('server', 'configured')}")
+
         return browser_session
 
     @abstractmethod
@@ -285,13 +336,43 @@ class BaseJobAutomation(ABC):
                 # Generate company-specific task
                 task_description = self.get_company_specific_task(user_profile, job_data)
 
-                # Create and run AI agent
+                # Create logs directory structure for conversation and debugging
+                log_dir = Path(f"./logs/automation/{job_data.job_id}")
+                log_dir.mkdir(parents=True, exist_ok=True)
+
+                # Get resume path for available_file_paths
+                resume_path = user_profile.get_resume_path() if hasattr(user_profile, 'get_resume_path') else None
+                available_files = [resume_path] if resume_path else []
+
+                # Create and run AI agent with advanced browser-use features
                 agent = Agent(
                     task=task_description,
                     llm=llm,
                     controller=self.controller,
-                    browser_session=browser_session
+                    browser_session=browser_session,
+
+                    # Vision capabilities for analyzing job postings and forms
+                    use_vision=True,
+
+                    # Memory system for debugging (enabled per user preference)
+                    save_conversation_path=str(log_dir / "conversation.json"),
+
+                    # File access for resume upload
+                    available_file_paths=available_files,
+
+                    # Error handling configuration
+                    max_failures=5,  # Job applications can be complex with multiple retries
+
+                    # Performance tuning
+                    max_actions_per_step=10,  # Allow multiple actions per step
+                    use_thinking=True,  # Enable chain-of-thought reasoning
                 )
+
+                self.logger.info(f"Agent configured with vision={agent.use_vision}, memory={bool(agent.save_conversation_path)}")
+                self.logger.debug(f"Available files for agent: {available_files}")
+
+                # Setup event monitoring for production debugging
+                self._setup_event_monitoring(agent)
 
                 self.result.add_step(
                     "initialize", "Initialize browser and AI agent", True, 2000

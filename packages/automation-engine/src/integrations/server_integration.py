@@ -75,23 +75,37 @@ class ServerAutomationIntegration:
         Returns:
             ApplicationResult with automation outcome
         """
+        proxy_config = None  # Initialize for finally block
+
         try:
             # Convert dictionaries to models
             user_profile = UserProfile.from_dict(user_profile_data)
             job = JobData.from_dict(job_data)
 
-            self.logger.info(f"Executing server automation for {job.title} at {job.company}")
+            self.logger.info("=" * 80)
+            self.logger.info(f"🚀 SERVER AUTOMATION STARTED")
+            self.logger.info(f"Job: {job.title} at {job.company}")
+            self.logger.info(f"URL: {job.apply_url}")
+            self.logger.info(f"Session ID: {session_id or 'N/A'}")
+            self.logger.info("=" * 80)
 
             # Get proxy from proxy manager (if available)
-            proxy_config = None
             if self.proxy_manager:
                 proxy_config = self.proxy_manager.get_next_proxy()
                 if proxy_config:
-                    self.logger.info(f"Using proxy: {proxy_config.host}:{proxy_config.port}")
+                    self.logger.info(f"✅ Proxy assigned: {proxy_config.host}:{proxy_config.port}")
+                    self.logger.debug(f"Proxy type: {proxy_config.type}")
+                    if proxy_config.username:
+                        self.logger.debug(f"Proxy authentication: enabled (username: {proxy_config.username})")
                 else:
-                    self.logger.warning("No proxies available - running without proxy")
+                    self.logger.warning("⚠️  No proxies available in proxy manager")
+                    self.logger.warning("Running without proxy - may encounter rate limiting")
+            else:
+                self.logger.warning("⚠️  No proxy manager configured - running without proxy")
+                self.logger.warning("For production, configure proxy rotation to avoid rate limiting")
 
             # Execute automation using engine
+            self.logger.info("Starting automation engine execution...")
             result = await self.engine.execute(
                 job_data=job.to_dict(),
                 user_profile=user_profile.to_dict(),
@@ -100,7 +114,26 @@ class ServerAutomationIntegration:
                 session_id=session_id
             )
 
-            self.logger.info(f"Server automation completed: {result.get('success', False)}")
+            # Log automation result
+            success = result.get('success', False) if isinstance(result, dict) else result.success
+            status = result.get('status', 'UNKNOWN') if isinstance(result, dict) else result.status
+
+            self.logger.info("=" * 80)
+            if success:
+                self.logger.info(f"✅ SERVER AUTOMATION SUCCEEDED")
+            else:
+                self.logger.warning(f"❌ SERVER AUTOMATION FAILED")
+            self.logger.info(f"Status: {status}")
+            self.logger.info("=" * 80)
+
+            # Track proxy success/failure for rotation logic
+            if self.proxy_manager and proxy_config:
+                if success:
+                    self.logger.debug(f"Marking proxy {proxy_config.host}:{proxy_config.port} as successful")
+                    # Future: self.proxy_manager.mark_proxy_success(proxy_config)
+                else:
+                    self.logger.debug(f"Marking proxy {proxy_config.host}:{proxy_config.port} as failed")
+                    # Future: self.proxy_manager.mark_proxy_failure(proxy_config)
 
             # Convert result dict to ApplicationResult if needed
             if isinstance(result, dict):
@@ -110,7 +143,16 @@ class ServerAutomationIntegration:
             return result
 
         except Exception as e:
-            self.logger.error(f"Server automation failed: {e}", exc_info=True)
+            self.logger.error("=" * 80)
+            self.logger.error(f"❌ SERVER AUTOMATION EXCEPTION")
+            self.logger.error(f"Error: {e}", exc_info=True)
+            self.logger.error("=" * 80)
+
+            # Track proxy failure if exception occurred
+            if self.proxy_manager and proxy_config:
+                self.logger.debug(f"Marking proxy {proxy_config.host}:{proxy_config.port} as failed (exception)")
+                # Future: self.proxy_manager.mark_proxy_failure(proxy_config)
+
             from ..companies.base.result_handler import ResultProcessor
             return ResultProcessor.create_failed_result(
                 job_data.get('job_id', 'unknown'),
