@@ -19,7 +19,7 @@ from typing import Dict, List, Optional, Any, Union
 
 # Import browser-use - use only what's available in the pip package
 from browser_use import Agent
-from browser_use.controller.service import Controller
+from browser_use.tools.service import Controller
 from browser_use.browser.session import BrowserSession
 from browser_use.agent.views import ActionResult
 from pydantic import BaseModel, Field
