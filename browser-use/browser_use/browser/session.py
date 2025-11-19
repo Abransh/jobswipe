@@ -1497,9 +1497,7 @@ class BrowserSession(BaseModel):
 
 		try:
 			# Create and store the CDP client for direct CDP communication
-			self._cdp_client_root = CDPClient(
-				self.cdp_url, max_ws_frame_size=200 * 1024 * 1024
-			)  # Use 200MB limit to handle pages with very large DOMs
+			self._cdp_client_root = CDPClient(self.cdp_url) # Use 200MB limit to handle pages with very large DOMs
 			assert self._cdp_client_root is not None
 			await self._cdp_client_root.start()
 
