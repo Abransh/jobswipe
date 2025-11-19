@@ -17,6 +17,7 @@ httpx>=0.25.0
 # Data validation and parsing
 python-dotenv>=1.0.0
 
+browser-use>=0.9.7
 cdp-use>=1.4.4
 
 # Logging and monitoring
