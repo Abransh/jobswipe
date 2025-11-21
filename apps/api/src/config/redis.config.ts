@@ -10,10 +10,13 @@ import { Redis, RedisOptions } from 'ioredis';
 /**
  * Parse Redis URL into connection options
  * Supports formats: redis://[[username]:password@]host[:port][/db-number]
+ * Auto-detects and configures TLS for Upstash and other cloud providers
  */
 function parseRedisUrl(url: string): Partial<RedisOptions> {
   try {
     const parsed = new URL(url);
+    const isUpstash = parsed.hostname.includes('.upstash.io');
+
     const config: Partial<RedisOptions> = {
       host: parsed.hostname,
       port: parsed.port ? parseInt(parsed.port, 10) : 6379,
@@ -31,9 +34,16 @@ function parseRedisUrl(url: string): Partial<RedisOptions> {
       }
     }
 
-    // Support TLS URLs
-    if (parsed.protocol === 'rediss:') {
-      config.tls = {};
+    // Enable TLS for rediss:// protocol or Upstash domains
+    if (parsed.protocol === 'rediss:' || isUpstash) {
+      config.tls = {
+        // Upstash and some cloud providers use self-signed certs
+        rejectUnauthorized: false,
+      };
+
+      if (isUpstash) {
+        console.log('🔒 Detected Upstash Redis - enabling TLS with custom settings');
+      }
     }
 
     return config;
