@@ -313,9 +313,10 @@ class BaseJobAutomation(ABC):
                     task=task_description,
                     llm=llm,
                     controller=self.controller,
-                    browser_session=browser_session
+                    browser_session=browser_session,
+                    flash_mode=True  # Enable flash mode for faster, more reliable automation
                 )
-                self.logger.info("✅ Agent created, preparing to execute...")
+                self.logger.info("✅ Agent created (flash mode enabled), preparing to execute...")
 
                 self.result.add_step(
                     "initialize", "Initialize browser and AI agent", True, 2000

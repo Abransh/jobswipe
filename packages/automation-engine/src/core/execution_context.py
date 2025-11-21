@@ -136,10 +136,11 @@ class ExecutionContext:
 
         try:
             # Initialize Google Gemini LLM
-            llm = ChatGoogle(model='gemini-2.5-pro')
+            # Using flash-latest for faster, more reliable automation
+            llm = ChatGoogle(model='gemini-flash-latest')
 
             if self.logger:
-                self.logger.info("✅ LLM initialized successfully: Google Gemini 2.5 Pro")
+                self.logger.info("✅ LLM initialized successfully: Google Gemini Flash (latest)")
 
             return llm
 
@@ -178,10 +179,10 @@ class ExecutionContext:
                 headless=False,  # Always headful mode
                 proxy=proxy_settings,
                 keep_alive=False,  # Always cleanup after job
-                wait_between_actions=0.5,  # Slight delay to avoid rate limits
+                wait_between_actions=0.3,  # Slight delay to avoid rate limits (reduced from 0.5)
                 disable_security=False,  # Keep security enabled
-                use_vision=True,  # Enable vision for better form understanding
-                max_actions_per_step=4,  # Reasonable action limit per step
+                use_vision=False,  # Disable vision for faster processing (flash model is sufficient)
+                # max_actions_per_step removed - let agent decide how many actions needed
             )
 
             if self.logger:
