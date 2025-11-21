@@ -13,16 +13,16 @@ process.chdir(path.join(__dirname, '..'));
 
 try {
   console.log('🚀 Generating Prisma migration for onboarding features...');
-  
+
   // Generate the migration
-  execSync('npx prisma migrate dev --name add-onboarding-tracking --create-only', {
+  execSync('prisma migrate dev --name add-onboarding-tracking --create-only', {
     stdio: 'inherit',
     env: { ...process.env, PRISMA_MIGRATE_SKIP_GENERATE: 'true' }
   });
-  
+
   console.log('✅ Migration generated successfully!');
-  console.log('📝 Review the migration file before applying with: npx prisma migrate dev');
-  
+  console.log('📝 Review the migration file before applying with: prisma migrate dev');
+
 } catch (error) {
   console.error('❌ Error generating migration:', error.message);
   process.exit(1);

@@ -1,9 +1,9 @@
 {
   "version": 2,
   "name": "jobswipe-web",
-  "buildCommand": "cd ../.. && cd packages/database && pnpm run db:generate && cd ../.. && pnpm --filter @jobswipe/shared build && pnpm --filter @jobswipe/database build && pnpm --filter @jobswipe/web build",
+  "buildCommand": "cd ../.. && pnpm --filter @jobswipe/database run db:generate && pnpm --filter @jobswipe/shared build && pnpm --filter @jobswipe/database build && pnpm --filter @jobswipe/web build",
   "devCommand": "cd ../.. && pnpm run dev:web",
-  "installCommand": "npm install -g pnpm@latest && cd ../.. && pnpm install --frozen-lockfile --ignore-scripts",
+  "installCommand": "npm install -g pnpm@9.0.0 && cd ../.. && pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
@@ -12,7 +12,8 @@
   "build": {
     "env": {
       "NODE_ENV": "production",
-      "NEXT_TELEMETRY_DISABLED": "1"
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "SKIP_ENV_VALIDATION": "1"
     }
   },
   "regions": ["iad1"],
