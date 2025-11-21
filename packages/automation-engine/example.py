@@ -19,7 +19,7 @@ async def run_search():
 	llm = ChatGoogle(model='gemini-flash-latest', api_key=api_key)
 	agent = Agent(
 		llm=llm,
-		task='How many stars does the browser-use repo have?',
+		task='go to https://job-boards.greenhouse.io/anthropic/jobs/4935314008 and apply for the job',
 		flash_mode=True,
 	)
 

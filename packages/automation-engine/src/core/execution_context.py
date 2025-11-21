@@ -61,7 +61,7 @@ class ProxyConfig(BaseModel):
 
 class BrowserConfig(BaseModel):
     """Browser configuration"""
-    headless: bool = True
+    headless: bool = False
     disable_bfcache: bool = True
     user_data_dir: Optional[str] = None
     timeout: int = 60000  # 60 seconds
@@ -136,10 +136,10 @@ class ExecutionContext:
 
         try:
             # Initialize Google Gemini LLM
-            llm = ChatGoogle(model='gemini-2.0-flash-exp')
+            llm = ChatGoogle(model='gemini-2.5-pro')
 
             if self.logger:
-                self.logger.info("✅ LLM initialized successfully: Google Gemini 2.0 Flash")
+                self.logger.info("✅ LLM initialized successfully: Google Gemini 2.5 Pro")
 
             return llm
 
@@ -155,18 +155,22 @@ class ExecutionContext:
         """
         try:
             # Build proxy settings if proxy config exists
+            # Build proxy settings if proxy config exists
             proxy_settings = None
-            if self.proxy_config and self.proxy_config.enabled and self.proxy_config.host:
-                server_url = f"{self.proxy_config.type}://{self.proxy_config.host}:{self.proxy_config.port}"
-
-                proxy_settings = ProxySettings(
-                    server=server_url,
-                    username=self.proxy_config.username,
-                    password=self.proxy_config.password
-                )
-
-                if self.logger:
-                    self.logger.info(f"✅ Proxy configured: {server_url}")
+            # PROXY DISABLED BY USER REQUEST
+            # if self.proxy_config and self.proxy_config.enabled and self.proxy_config.host:
+            #     # Sanitize host: remove scheme if present to avoid double scheme (e.g. http://http://...)
+            #     host = self.proxy_config.host.replace("http://", "").replace("https://", "")
+            #     server_url = f"{self.proxy_config.type}://{host}:{self.proxy_config.port}"
+            #
+            #     proxy_settings = ProxySettings(
+            #         server=server_url,
+            #         username=self.proxy_config.username,
+            #         password=self.proxy_config.password
+            #     )
+            #
+            #     if self.logger:
+            #         self.logger.info(f"✅ Proxy configured: {server_url}")
 
             # Create BrowserProfile
             # For server mode: headless=True (changed from False for performance)
@@ -184,7 +188,8 @@ class ExecutionContext:
             )
 
             if self.logger:
-                mode_str = "headless" if is_headless else "headful"
+                #mode_str = "headless" if is_headless else "headful"
+                mode_str = "headful"
                 self.logger.info(f"✅ BrowserProfile initialized ({mode_str} mode)")
 
             return browser_profile
@@ -197,8 +202,8 @@ class ExecutionContext:
 
     def _configure_for_server(self):
         """Configure context for server execution"""
-        # Server mode: headless browser, with proxy
-        self.browser_config.headless = True
+        # Server mode: headful browser (for debugging), with proxy
+        self.browser_config.headless = False
 
         # Ensure proxy is configured for server mode
         if self.proxy_config is None:
@@ -252,7 +257,7 @@ class ExecutionContext:
         ]
 
         options = {
-            "headless": self.browser_config.headless,
+            "headful": self.browser_config.headless,
             "args": browser_args,
         }
 

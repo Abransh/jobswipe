@@ -482,7 +482,7 @@ export class PythonBridge extends EventEmitter {
         const output = data.toString();
         stderr += output;
 
-        this.fastify.log.debug({
+        this.fastify.log.info({
           ...logContext,
           event: 'python_stderr',
           message: 'Python script error output',
