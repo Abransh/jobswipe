@@ -79,10 +79,10 @@ function parseRedisUrlForWebSocket(url: string): any {
         return Math.min(times * 100, 3000); // Exponential backoff up to 3s
       },
 
-      // Lazy connection - don't wait for ready
+      // Socket.IO adapter needs offline queue to handle commands during connection
       lazyConnect: true,
       enableReadyCheck: false,
-      enableOfflineQueue: false,
+      enableOfflineQueue: true, // MUST be true for Socket.IO adapter to queue commands
     };
 
     // Enable TLS for rediss:// or Upstash domains
@@ -126,7 +126,7 @@ const websocketPlugin = async (
         db: options.redis?.db || parseInt(process.env.REDIS_DB || '0'),
         lazyConnect: true,
         enableReadyCheck: false,
-        enableOfflineQueue: false,
+        enableOfflineQueue: true, // MUST be true for Socket.IO adapter to queue commands
       };
     }
 
