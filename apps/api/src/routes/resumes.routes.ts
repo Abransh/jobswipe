@@ -502,7 +502,7 @@ export const resumeRoutes: FastifyPluginAsync = async (fastify) => {
         const s3Result = await s3Service.uploadProcessedResume(
           user.id,
           id,
-          'enhanced_tailored',
+          'enhanced',
           enhancedPdf,
           'application/pdf',
           { tailoredFor: version.jobPostingId || '' }

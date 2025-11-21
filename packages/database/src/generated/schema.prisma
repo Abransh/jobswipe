@@ -190,23 +190,6 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model OAuthState {
-  id           String   @id @default(uuid())
-  state        String   @unique
-  codeVerifier String? // PKCE code verifier for enhanced security
-  provider     String // 'google' | 'github' | 'linkedin'
-  redirectUri  String // Where to redirect after OAuth
-  source       String // 'web' | 'desktop' | 'mobile'
-  metadata     Json? // Additional data (deviceId, etc.)
-  createdAt    DateTime @default(now())
-  expiresAt    DateTime // State expires after 10 minutes
-
-  @@index([state])
-  @@index([expiresAt])
-  @@index([provider])
-  @@map("oauth_states")
-}
-
 model UserJobSwipe {
   id             String         @id @default(uuid())
   userId         String

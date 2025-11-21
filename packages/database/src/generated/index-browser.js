@@ -147,12 +147,7 @@ exports.Prisma.UserScalarFieldEnum = {
   userAgent: 'userAgent',
   timezone: 'timezone',
   locale: 'locale',
-<<<<<<< HEAD
-  oauthProviders: 'oauthProviders',
-  primaryAuthProvider: 'primaryAuthProvider',
-=======
   needsVisaSponsorship: 'needsVisaSponsorship',
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   oauthProviders: 'oauthProviders',
@@ -270,18 +265,6 @@ exports.Prisma.VerificationTokenScalarFieldEnum = {
   identifier: 'identifier',
   token: 'token',
   expires: 'expires'
-};
-
-exports.Prisma.OAuthStateScalarFieldEnum = {
-  id: 'id',
-  state: 'state',
-  codeVerifier: 'codeVerifier',
-  provider: 'provider',
-  redirectUri: 'redirectUri',
-  source: 'source',
-  metadata: 'metadata',
-  createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
 };
 
 exports.Prisma.UserJobSwipeScalarFieldEnum = {
@@ -1036,15 +1019,6 @@ exports.Prisma.SessionOrderByRelevanceFieldEnum = {
 exports.Prisma.VerificationTokenOrderByRelevanceFieldEnum = {
   identifier: 'identifier',
   token: 'token'
-};
-
-exports.Prisma.OAuthStateOrderByRelevanceFieldEnum = {
-  id: 'id',
-  state: 'state',
-  codeVerifier: 'codeVerifier',
-  provider: 'provider',
-  redirectUri: 'redirectUri',
-  source: 'source'
 };
 
 exports.Prisma.UserJobSwipeOrderByRelevanceFieldEnum = {
@@ -1893,7 +1867,6 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken',
-  OAuthState: 'OAuthState',
   UserJobSwipe: 'UserJobSwipe',
   ApplicationQueue: 'ApplicationQueue',
   AutomationLog: 'AutomationLog',

@@ -44,11 +44,6 @@ export type Session = $Result.DefaultSelection<Prisma.$SessionPayload>
  */
 export type VerificationToken = $Result.DefaultSelection<Prisma.$VerificationTokenPayload>
 /**
- * Model OAuthState
- * 
- */
-export type OAuthState = $Result.DefaultSelection<Prisma.$OAuthStatePayload>
-/**
  * Model UserJobSwipe
  * 
  */
@@ -351,32 +346,6 @@ export const CompanyStatus: {
 export type CompanyStatus = (typeof CompanyStatus)[keyof typeof CompanyStatus]
 
 
-<<<<<<< HEAD
-export const ProcessingStatus: {
-  PENDING: 'PENDING',
-  PARSING: 'PARSING',
-  PARSED: 'PARSED',
-  ENHANCING: 'ENHANCING',
-  ENHANCED: 'ENHANCED',
-  FAILED: 'FAILED',
-  ERROR: 'ERROR'
-};
-
-export type ProcessingStatus = (typeof ProcessingStatus)[keyof typeof ProcessingStatus]
-
-
-export const EnhancementType: {
-  KEYWORD_OPTIMIZATION: 'KEYWORD_OPTIMIZATION',
-  ATS_OPTIMIZATION: 'ATS_OPTIMIZATION',
-  JOB_SPECIFIC_TAILORING: 'JOB_SPECIFIC_TAILORING',
-  SKILL_HIGHLIGHTING: 'SKILL_HIGHLIGHTING',
-  EXPERIENCE_ENHANCEMENT: 'EXPERIENCE_ENHANCEMENT',
-  SUMMARY_IMPROVEMENT: 'SUMMARY_IMPROVEMENT',
-  GRAMMAR_CHECK: 'GRAMMAR_CHECK',
-  FORMAT_OPTIMIZATION: 'FORMAT_OPTIMIZATION',
-  LENGTH_OPTIMIZATION: 'LENGTH_OPTIMIZATION',
-  IMPACT_ENHANCEMENT: 'IMPACT_ENHANCEMENT'
-=======
 export const EmploymentType: {
   FULL_TIME: 'FULL_TIME',
   PART_TIME: 'PART_TIME',
@@ -384,7 +353,6 @@ export const EmploymentType: {
   FREELANCE: 'FREELANCE',
   INTERNSHIP: 'INTERNSHIP',
   TEMPORARY: 'TEMPORARY'
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
 };
 
 export type EmploymentType = (typeof EmploymentType)[keyof typeof EmploymentType]
@@ -580,6 +548,19 @@ export const ResumeVisibility: {
 };
 
 export type ResumeVisibility = (typeof ResumeVisibility)[keyof typeof ResumeVisibility]
+
+
+export const ProcessingStatus: {
+  PENDING: 'PENDING',
+  PARSING: 'PARSING',
+  PARSED: 'PARSED',
+  ENHANCING: 'ENHANCING',
+  ENHANCED: 'ENHANCED',
+  FAILED: 'FAILED',
+  ERROR: 'ERROR'
+};
+
+export type ProcessingStatus = (typeof ProcessingStatus)[keyof typeof ProcessingStatus]
 
 
 export const EnhancementType: {
@@ -850,15 +831,7 @@ export type CompanyStatus = $Enums.CompanyStatus
 
 export const CompanyStatus: typeof $Enums.CompanyStatus
 
-<<<<<<< HEAD
-export type ProcessingStatus = $Enums.ProcessingStatus
-
-export const ProcessingStatus: typeof $Enums.ProcessingStatus
-
-export type EnhancementType = $Enums.EnhancementType
-=======
 export type EmploymentType = $Enums.EmploymentType
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
 
 export const EmploymentType: typeof $Enums.EmploymentType
 
@@ -909,6 +882,10 @@ export const TemplateCategory: typeof $Enums.TemplateCategory
 export type ResumeVisibility = $Enums.ResumeVisibility
 
 export const ResumeVisibility: typeof $Enums.ResumeVisibility
+
+export type ProcessingStatus = $Enums.ProcessingStatus
+
+export const ProcessingStatus: typeof $Enums.ProcessingStatus
 
 export type EnhancementType = $Enums.EnhancementType
 
@@ -1147,16 +1124,6 @@ export class PrismaClient<
     * ```
     */
   get verificationToken(): Prisma.VerificationTokenDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.oAuthState`: Exposes CRUD operations for the **OAuthState** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more OAuthStates
-    * const oAuthStates = await prisma.oAuthState.findMany()
-    * ```
-    */
-  get oAuthState(): Prisma.OAuthStateDelegate<ExtArgs>;
 
   /**
    * `prisma.userJobSwipe`: Exposes CRUD operations for the **UserJobSwipe** model.
@@ -1824,7 +1791,6 @@ export namespace Prisma {
     Account: 'Account',
     Session: 'Session',
     VerificationToken: 'VerificationToken',
-    OAuthState: 'OAuthState',
     UserJobSwipe: 'UserJobSwipe',
     ApplicationQueue: 'ApplicationQueue',
     AutomationLog: 'AutomationLog',
@@ -1865,7 +1831,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "oAuthState" | "userJobSwipe" | "applicationQueue" | "automationLog" | "automationProxy" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "jobSnapshot" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
+      modelProps: "user" | "userProfile" | "userPreferences" | "account" | "session" | "verificationToken" | "userJobSwipe" | "applicationQueue" | "automationLog" | "automationProxy" | "auditLog" | "analyticsEvent" | "userNotification" | "systemSetting" | "notificationTemplate" | "company" | "companyReview" | "jobPosting" | "jobSnapshot" | "resumeTemplate" | "resume" | "resumeEnhancement" | "jobApplication" | "applicationInteraction" | "savedJob" | "subscription" | "billingHistory" | "usageRecord"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2310,76 +2276,6 @@ export namespace Prisma {
           count: {
             args: Prisma.VerificationTokenCountArgs<ExtArgs>
             result: $Utils.Optional<VerificationTokenCountAggregateOutputType> | number
-          }
-        }
-      }
-      OAuthState: {
-        payload: Prisma.$OAuthStatePayload<ExtArgs>
-        fields: Prisma.OAuthStateFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.OAuthStateFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.OAuthStateFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          findFirst: {
-            args: Prisma.OAuthStateFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.OAuthStateFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          findMany: {
-            args: Prisma.OAuthStateFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>[]
-          }
-          create: {
-            args: Prisma.OAuthStateCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          createMany: {
-            args: Prisma.OAuthStateCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.OAuthStateCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>[]
-          }
-          delete: {
-            args: Prisma.OAuthStateDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          update: {
-            args: Prisma.OAuthStateUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          deleteMany: {
-            args: Prisma.OAuthStateDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.OAuthStateUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.OAuthStateUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OAuthStatePayload>
-          }
-          aggregate: {
-            args: Prisma.OAuthStateAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateOAuthState>
-          }
-          groupBy: {
-            args: Prisma.OAuthStateGroupByArgs<ExtArgs>
-            result: $Utils.Optional<OAuthStateGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.OAuthStateCountArgs<ExtArgs>
-            result: $Utils.Optional<OAuthStateCountAggregateOutputType> | number
           }
         }
       }
@@ -4701,11 +4597,7 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
-<<<<<<< HEAD
-    primaryAuthProvider: string | null
-=======
     needsVisaSponsorship: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt: Date | null
     updatedAt: Date | null
     primaryAuthProvider: string | null
@@ -4737,11 +4629,7 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
-<<<<<<< HEAD
-    primaryAuthProvider: string | null
-=======
     needsVisaSponsorship: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt: Date | null
     updatedAt: Date | null
     primaryAuthProvider: string | null
@@ -4773,12 +4661,7 @@ export namespace Prisma {
     userAgent: number
     timezone: number
     locale: number
-<<<<<<< HEAD
-    oauthProviders: number
-    primaryAuthProvider: number
-=======
     needsVisaSponsorship: number
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt: number
     updatedAt: number
     oauthProviders: number
@@ -4825,11 +4708,7 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
-<<<<<<< HEAD
-    primaryAuthProvider?: true
-=======
     needsVisaSponsorship?: true
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: true
     updatedAt?: true
     primaryAuthProvider?: true
@@ -4861,11 +4740,7 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
-<<<<<<< HEAD
-    primaryAuthProvider?: true
-=======
     needsVisaSponsorship?: true
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: true
     updatedAt?: true
     primaryAuthProvider?: true
@@ -4897,12 +4772,7 @@ export namespace Prisma {
     userAgent?: true
     timezone?: true
     locale?: true
-<<<<<<< HEAD
-    oauthProviders?: true
-    primaryAuthProvider?: true
-=======
     needsVisaSponsorship?: true
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: true
     updatedAt?: true
     oauthProviders?: true
@@ -5022,12 +4892,7 @@ export namespace Prisma {
     userAgent: string | null
     timezone: string | null
     locale: string | null
-<<<<<<< HEAD
-    oauthProviders: string[]
-    primaryAuthProvider: string | null
-=======
     needsVisaSponsorship: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt: Date
     updatedAt: Date
     oauthProviders: string[]
@@ -5079,12 +4944,7 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
-<<<<<<< HEAD
-    oauthProviders?: boolean
-    primaryAuthProvider?: boolean
-=======
     needsVisaSponsorship?: boolean
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: boolean
     updatedAt?: boolean
     oauthProviders?: boolean
@@ -5133,12 +4993,7 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
-<<<<<<< HEAD
-    oauthProviders?: boolean
-    primaryAuthProvider?: boolean
-=======
     needsVisaSponsorship?: boolean
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: boolean
     updatedAt?: boolean
     oauthProviders?: boolean
@@ -5204,12 +5059,7 @@ export namespace Prisma {
     userAgent?: boolean
     timezone?: boolean
     locale?: boolean
-<<<<<<< HEAD
-    oauthProviders?: boolean
-    primaryAuthProvider?: boolean
-=======
     needsVisaSponsorship?: boolean
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: boolean
     updatedAt?: boolean
     oauthProviders?: boolean
@@ -5283,12 +5133,7 @@ export namespace Prisma {
       userAgent: string | null
       timezone: string | null
       locale: string | null
-<<<<<<< HEAD
-      oauthProviders: string[]
-      primaryAuthProvider: string | null
-=======
       needsVisaSponsorship: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
       createdAt: Date
       updatedAt: Date
       oauthProviders: string[]
@@ -5756,12 +5601,7 @@ export namespace Prisma {
     readonly userAgent: FieldRef<"User", 'String'>
     readonly timezone: FieldRef<"User", 'String'>
     readonly locale: FieldRef<"User", 'String'>
-<<<<<<< HEAD
-    readonly oauthProviders: FieldRef<"User", 'String[]'>
-    readonly primaryAuthProvider: FieldRef<"User", 'String'>
-=======
     readonly needsVisaSponsorship: FieldRef<"User", 'Boolean'>
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly oauthProviders: FieldRef<"User", 'String[]'>
@@ -12749,937 +12589,6 @@ export namespace Prisma {
      * Omit specific fields from the VerificationToken
      */
     omit?: VerificationTokenOmit<ExtArgs> | null
-  }
-
-
-  /**
-   * Model OAuthState
-   */
-
-  export type AggregateOAuthState = {
-    _count: OAuthStateCountAggregateOutputType | null
-    _min: OAuthStateMinAggregateOutputType | null
-    _max: OAuthStateMaxAggregateOutputType | null
-  }
-
-  export type OAuthStateMinAggregateOutputType = {
-    id: string | null
-    state: string | null
-    codeVerifier: string | null
-    provider: string | null
-    redirectUri: string | null
-    source: string | null
-    createdAt: Date | null
-    expiresAt: Date | null
-  }
-
-  export type OAuthStateMaxAggregateOutputType = {
-    id: string | null
-    state: string | null
-    codeVerifier: string | null
-    provider: string | null
-    redirectUri: string | null
-    source: string | null
-    createdAt: Date | null
-    expiresAt: Date | null
-  }
-
-  export type OAuthStateCountAggregateOutputType = {
-    id: number
-    state: number
-    codeVerifier: number
-    provider: number
-    redirectUri: number
-    source: number
-    metadata: number
-    createdAt: number
-    expiresAt: number
-    _all: number
-  }
-
-
-  export type OAuthStateMinAggregateInputType = {
-    id?: true
-    state?: true
-    codeVerifier?: true
-    provider?: true
-    redirectUri?: true
-    source?: true
-    createdAt?: true
-    expiresAt?: true
-  }
-
-  export type OAuthStateMaxAggregateInputType = {
-    id?: true
-    state?: true
-    codeVerifier?: true
-    provider?: true
-    redirectUri?: true
-    source?: true
-    createdAt?: true
-    expiresAt?: true
-  }
-
-  export type OAuthStateCountAggregateInputType = {
-    id?: true
-    state?: true
-    codeVerifier?: true
-    provider?: true
-    redirectUri?: true
-    source?: true
-    metadata?: true
-    createdAt?: true
-    expiresAt?: true
-    _all?: true
-  }
-
-  export type OAuthStateAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which OAuthState to aggregate.
-     */
-    where?: OAuthStateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of OAuthStates to fetch.
-     */
-    orderBy?: OAuthStateOrderByWithRelationInput | OAuthStateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: OAuthStateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` OAuthStates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` OAuthStates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned OAuthStates
-    **/
-    _count?: true | OAuthStateCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: OAuthStateMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: OAuthStateMaxAggregateInputType
-  }
-
-  export type GetOAuthStateAggregateType<T extends OAuthStateAggregateArgs> = {
-        [P in keyof T & keyof AggregateOAuthState]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateOAuthState[P]>
-      : GetScalarType<T[P], AggregateOAuthState[P]>
-  }
-
-
-
-
-  export type OAuthStateGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: OAuthStateWhereInput
-    orderBy?: OAuthStateOrderByWithAggregationInput | OAuthStateOrderByWithAggregationInput[]
-    by: OAuthStateScalarFieldEnum[] | OAuthStateScalarFieldEnum
-    having?: OAuthStateScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: OAuthStateCountAggregateInputType | true
-    _min?: OAuthStateMinAggregateInputType
-    _max?: OAuthStateMaxAggregateInputType
-  }
-
-  export type OAuthStateGroupByOutputType = {
-    id: string
-    state: string
-    codeVerifier: string | null
-    provider: string
-    redirectUri: string
-    source: string
-    metadata: JsonValue | null
-    createdAt: Date
-    expiresAt: Date
-    _count: OAuthStateCountAggregateOutputType | null
-    _min: OAuthStateMinAggregateOutputType | null
-    _max: OAuthStateMaxAggregateOutputType | null
-  }
-
-  type GetOAuthStateGroupByPayload<T extends OAuthStateGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<OAuthStateGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof OAuthStateGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], OAuthStateGroupByOutputType[P]>
-            : GetScalarType<T[P], OAuthStateGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type OAuthStateSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    state?: boolean
-    codeVerifier?: boolean
-    provider?: boolean
-    redirectUri?: boolean
-    source?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    expiresAt?: boolean
-  }, ExtArgs["result"]["oAuthState"]>
-
-  export type OAuthStateSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    state?: boolean
-    codeVerifier?: boolean
-    provider?: boolean
-    redirectUri?: boolean
-    source?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    expiresAt?: boolean
-  }, ExtArgs["result"]["oAuthState"]>
-
-  export type OAuthStateSelectScalar = {
-    id?: boolean
-    state?: boolean
-    codeVerifier?: boolean
-    provider?: boolean
-    redirectUri?: boolean
-    source?: boolean
-    metadata?: boolean
-    createdAt?: boolean
-    expiresAt?: boolean
-  }
-
-
-  export type $OAuthStatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "OAuthState"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      state: string
-      codeVerifier: string | null
-      provider: string
-      redirectUri: string
-      source: string
-      metadata: Prisma.JsonValue | null
-      createdAt: Date
-      expiresAt: Date
-    }, ExtArgs["result"]["oAuthState"]>
-    composites: {}
-  }
-
-  type OAuthStateGetPayload<S extends boolean | null | undefined | OAuthStateDefaultArgs> = $Result.GetResult<Prisma.$OAuthStatePayload, S>
-
-  type OAuthStateCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<OAuthStateFindManyArgs, 'select' | 'include' | 'distinct' | 'relationLoadStrategy'> & {
-      select?: OAuthStateCountAggregateInputType | true
-    }
-
-  export interface OAuthStateDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['OAuthState'], meta: { name: 'OAuthState' } }
-    /**
-     * Find zero or one OAuthState that matches the filter.
-     * @param {OAuthStateFindUniqueArgs} args - Arguments to find a OAuthState
-     * @example
-     * // Get one OAuthState
-     * const oAuthState = await prisma.oAuthState.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends OAuthStateFindUniqueArgs>(args: SelectSubset<T, OAuthStateFindUniqueArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
-
-    /**
-     * Find one OAuthState that matches the filter or throw an error with `error.code='P2025'` 
-     * if no matches were found.
-     * @param {OAuthStateFindUniqueOrThrowArgs} args - Arguments to find a OAuthState
-     * @example
-     * // Get one OAuthState
-     * const oAuthState = await prisma.oAuthState.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends OAuthStateFindUniqueOrThrowArgs>(args: SelectSubset<T, OAuthStateFindUniqueOrThrowArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
-
-    /**
-     * Find the first OAuthState that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateFindFirstArgs} args - Arguments to find a OAuthState
-     * @example
-     * // Get one OAuthState
-     * const oAuthState = await prisma.oAuthState.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends OAuthStateFindFirstArgs>(args?: SelectSubset<T, OAuthStateFindFirstArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
-
-    /**
-     * Find the first OAuthState that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateFindFirstOrThrowArgs} args - Arguments to find a OAuthState
-     * @example
-     * // Get one OAuthState
-     * const oAuthState = await prisma.oAuthState.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends OAuthStateFindFirstOrThrowArgs>(args?: SelectSubset<T, OAuthStateFindFirstOrThrowArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
-
-    /**
-     * Find zero or more OAuthStates that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all OAuthStates
-     * const oAuthStates = await prisma.oAuthState.findMany()
-     * 
-     * // Get first 10 OAuthStates
-     * const oAuthStates = await prisma.oAuthState.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const oAuthStateWithIdOnly = await prisma.oAuthState.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends OAuthStateFindManyArgs>(args?: SelectSubset<T, OAuthStateFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "findMany">>
-
-    /**
-     * Create a OAuthState.
-     * @param {OAuthStateCreateArgs} args - Arguments to create a OAuthState.
-     * @example
-     * // Create one OAuthState
-     * const OAuthState = await prisma.oAuthState.create({
-     *   data: {
-     *     // ... data to create a OAuthState
-     *   }
-     * })
-     * 
-     */
-    create<T extends OAuthStateCreateArgs>(args: SelectSubset<T, OAuthStateCreateArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "create">, never, ExtArgs>
-
-    /**
-     * Create many OAuthStates.
-     * @param {OAuthStateCreateManyArgs} args - Arguments to create many OAuthStates.
-     * @example
-     * // Create many OAuthStates
-     * const oAuthState = await prisma.oAuthState.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends OAuthStateCreateManyArgs>(args?: SelectSubset<T, OAuthStateCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many OAuthStates and returns the data saved in the database.
-     * @param {OAuthStateCreateManyAndReturnArgs} args - Arguments to create many OAuthStates.
-     * @example
-     * // Create many OAuthStates
-     * const oAuthState = await prisma.oAuthState.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many OAuthStates and only return the `id`
-     * const oAuthStateWithIdOnly = await prisma.oAuthState.createManyAndReturn({ 
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends OAuthStateCreateManyAndReturnArgs>(args?: SelectSubset<T, OAuthStateCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "createManyAndReturn">>
-
-    /**
-     * Delete a OAuthState.
-     * @param {OAuthStateDeleteArgs} args - Arguments to delete one OAuthState.
-     * @example
-     * // Delete one OAuthState
-     * const OAuthState = await prisma.oAuthState.delete({
-     *   where: {
-     *     // ... filter to delete one OAuthState
-     *   }
-     * })
-     * 
-     */
-    delete<T extends OAuthStateDeleteArgs>(args: SelectSubset<T, OAuthStateDeleteArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "delete">, never, ExtArgs>
-
-    /**
-     * Update one OAuthState.
-     * @param {OAuthStateUpdateArgs} args - Arguments to update one OAuthState.
-     * @example
-     * // Update one OAuthState
-     * const oAuthState = await prisma.oAuthState.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends OAuthStateUpdateArgs>(args: SelectSubset<T, OAuthStateUpdateArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "update">, never, ExtArgs>
-
-    /**
-     * Delete zero or more OAuthStates.
-     * @param {OAuthStateDeleteManyArgs} args - Arguments to filter OAuthStates to delete.
-     * @example
-     * // Delete a few OAuthStates
-     * const { count } = await prisma.oAuthState.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends OAuthStateDeleteManyArgs>(args?: SelectSubset<T, OAuthStateDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more OAuthStates.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many OAuthStates
-     * const oAuthState = await prisma.oAuthState.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends OAuthStateUpdateManyArgs>(args: SelectSubset<T, OAuthStateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one OAuthState.
-     * @param {OAuthStateUpsertArgs} args - Arguments to update or create a OAuthState.
-     * @example
-     * // Update or create a OAuthState
-     * const oAuthState = await prisma.oAuthState.upsert({
-     *   create: {
-     *     // ... data to create a OAuthState
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the OAuthState we want to update
-     *   }
-     * })
-     */
-    upsert<T extends OAuthStateUpsertArgs>(args: SelectSubset<T, OAuthStateUpsertArgs<ExtArgs>>): Prisma__OAuthStateClient<$Result.GetResult<Prisma.$OAuthStatePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
-
-
-    /**
-     * Count the number of OAuthStates.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateCountArgs} args - Arguments to filter OAuthStates to count.
-     * @example
-     * // Count the number of OAuthStates
-     * const count = await prisma.oAuthState.count({
-     *   where: {
-     *     // ... the filter for the OAuthStates we want to count
-     *   }
-     * })
-    **/
-    count<T extends OAuthStateCountArgs>(
-      args?: Subset<T, OAuthStateCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], OAuthStateCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a OAuthState.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends OAuthStateAggregateArgs>(args: Subset<T, OAuthStateAggregateArgs>): Prisma.PrismaPromise<GetOAuthStateAggregateType<T>>
-
-    /**
-     * Group by OAuthState.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {OAuthStateGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends OAuthStateGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: OAuthStateGroupByArgs['orderBy'] }
-        : { orderBy?: OAuthStateGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, OAuthStateGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetOAuthStateGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the OAuthState model
-   */
-  readonly fields: OAuthStateFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for OAuthState.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__OAuthStateClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the OAuthState model
-   */ 
-  interface OAuthStateFieldRefs {
-    readonly id: FieldRef<"OAuthState", 'String'>
-    readonly state: FieldRef<"OAuthState", 'String'>
-    readonly codeVerifier: FieldRef<"OAuthState", 'String'>
-    readonly provider: FieldRef<"OAuthState", 'String'>
-    readonly redirectUri: FieldRef<"OAuthState", 'String'>
-    readonly source: FieldRef<"OAuthState", 'String'>
-    readonly metadata: FieldRef<"OAuthState", 'Json'>
-    readonly createdAt: FieldRef<"OAuthState", 'DateTime'>
-    readonly expiresAt: FieldRef<"OAuthState", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * OAuthState findUnique
-   */
-  export type OAuthStateFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter, which OAuthState to fetch.
-     */
-    where: OAuthStateWhereUniqueInput
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState findUniqueOrThrow
-   */
-  export type OAuthStateFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter, which OAuthState to fetch.
-     */
-    where: OAuthStateWhereUniqueInput
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState findFirst
-   */
-  export type OAuthStateFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter, which OAuthState to fetch.
-     */
-    where?: OAuthStateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of OAuthStates to fetch.
-     */
-    orderBy?: OAuthStateOrderByWithRelationInput | OAuthStateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for OAuthStates.
-     */
-    cursor?: OAuthStateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` OAuthStates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` OAuthStates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of OAuthStates.
-     */
-    distinct?: OAuthStateScalarFieldEnum | OAuthStateScalarFieldEnum[]
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState findFirstOrThrow
-   */
-  export type OAuthStateFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter, which OAuthState to fetch.
-     */
-    where?: OAuthStateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of OAuthStates to fetch.
-     */
-    orderBy?: OAuthStateOrderByWithRelationInput | OAuthStateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for OAuthStates.
-     */
-    cursor?: OAuthStateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` OAuthStates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` OAuthStates.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of OAuthStates.
-     */
-    distinct?: OAuthStateScalarFieldEnum | OAuthStateScalarFieldEnum[]
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState findMany
-   */
-  export type OAuthStateFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter, which OAuthStates to fetch.
-     */
-    where?: OAuthStateWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of OAuthStates to fetch.
-     */
-    orderBy?: OAuthStateOrderByWithRelationInput | OAuthStateOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing OAuthStates.
-     */
-    cursor?: OAuthStateWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` OAuthStates from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` OAuthStates.
-     */
-    skip?: number
-    distinct?: OAuthStateScalarFieldEnum | OAuthStateScalarFieldEnum[]
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState create
-   */
-  export type OAuthStateCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * The data needed to create a OAuthState.
-     */
-    data: XOR<OAuthStateCreateInput, OAuthStateUncheckedCreateInput>
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState createMany
-   */
-  export type OAuthStateCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many OAuthStates.
-     */
-    data: OAuthStateCreateManyInput | OAuthStateCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * OAuthState createManyAndReturn
-   */
-  export type OAuthStateCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * The data used to create many OAuthStates.
-     */
-    data: OAuthStateCreateManyInput | OAuthStateCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * OAuthState update
-   */
-  export type OAuthStateUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * The data needed to update a OAuthState.
-     */
-    data: XOR<OAuthStateUpdateInput, OAuthStateUncheckedUpdateInput>
-    /**
-     * Choose, which OAuthState to update.
-     */
-    where: OAuthStateWhereUniqueInput
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState updateMany
-   */
-  export type OAuthStateUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update OAuthStates.
-     */
-    data: XOR<OAuthStateUpdateManyMutationInput, OAuthStateUncheckedUpdateManyInput>
-    /**
-     * Filter which OAuthStates to update
-     */
-    where?: OAuthStateWhereInput
-  }
-
-  /**
-   * OAuthState upsert
-   */
-  export type OAuthStateUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * The filter to search for the OAuthState to update in case it exists.
-     */
-    where: OAuthStateWhereUniqueInput
-    /**
-     * In case the OAuthState found by the `where` argument doesn't exist, create a new OAuthState with this data.
-     */
-    create: XOR<OAuthStateCreateInput, OAuthStateUncheckedCreateInput>
-    /**
-     * In case the OAuthState was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<OAuthStateUpdateInput, OAuthStateUncheckedUpdateInput>
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState delete
-   */
-  export type OAuthStateDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
-    /**
-     * Filter which OAuthState to delete.
-     */
-    where: OAuthStateWhereUniqueInput
-    relationLoadStrategy?: RelationLoadStrategy
-  }
-
-  /**
-   * OAuthState deleteMany
-   */
-  export type OAuthStateDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which OAuthStates to delete
-     */
-    where?: OAuthStateWhereInput
-  }
-
-  /**
-   * OAuthState without action
-   */
-  export type OAuthStateDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OAuthState
-     */
-    select?: OAuthStateSelect<ExtArgs> | null
   }
 
 
@@ -33853,6 +32762,18 @@ export namespace Prisma {
     completeness?: boolean
     readabilityScore?: boolean
     keywordMatch?: boolean
+    s3Key?: boolean
+    s3Bucket?: boolean
+    s3Region?: boolean
+    originalFileName?: boolean
+    processingStatus?: boolean
+    processingError?: boolean
+    lastParsedAt?: boolean
+    rawText?: boolean
+    markdownContent?: boolean
+    hasRMSMetadata?: boolean
+    rmsVersion?: boolean
+    rmsSchemaUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | Resume$templateArgs<ExtArgs>
@@ -33903,7 +32824,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ResumeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "templateId" | "name" | "title" | "content" | "sections" | "metadata" | "pdfUrl" | "docxUrl" | "htmlUrl" | "fileSize" | "pageCount" | "lastGenerated" | "version" | "parentResumeId" | "isDefault" | "visibility" | "shareToken" | "viewCount" | "downloadCount" | "applicationCount" | "aiEnhanced" | "enhancementData" | "completeness" | "readabilityScore" | "keywordMatch" | "createdAt" | "updatedAt", ExtArgs["result"]["resume"]>
+  export type ResumeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "templateId" | "name" | "title" | "content" | "sections" | "metadata" | "pdfUrl" | "docxUrl" | "htmlUrl" | "fileSize" | "pageCount" | "lastGenerated" | "version" | "parentResumeId" | "isDefault" | "visibility" | "shareToken" | "viewCount" | "downloadCount" | "applicationCount" | "aiEnhanced" | "enhancementData" | "completeness" | "readabilityScore" | "keywordMatch" | "s3Key" | "s3Bucket" | "s3Region" | "originalFileName" | "processingStatus" | "processingError" | "lastParsedAt" | "rawText" | "markdownContent" | "hasRMSMetadata" | "rmsVersion" | "rmsSchemaUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["resume"]>
   export type ResumeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Resume$applicationsArgs<ExtArgs>
     enhancements?: boolean | Resume$enhancementsArgs<ExtArgs>
@@ -44403,12 +43324,7 @@ export namespace Prisma {
     userAgent: 'userAgent',
     timezone: 'timezone',
     locale: 'locale',
-<<<<<<< HEAD
-    oauthProviders: 'oauthProviders',
-    primaryAuthProvider: 'primaryAuthProvider',
-=======
     needsVisaSponsorship: 'needsVisaSponsorship',
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     oauthProviders: 'oauthProviders',
@@ -44547,21 +43463,6 @@ export namespace Prisma {
   };
 
   export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
-
-
-  export const OAuthStateScalarFieldEnum: {
-    id: 'id',
-    state: 'state',
-    codeVerifier: 'codeVerifier',
-    provider: 'provider',
-    redirectUri: 'redirectUri',
-    source: 'source',
-    metadata: 'metadata',
-    createdAt: 'createdAt',
-    expiresAt: 'expiresAt'
-  };
-
-  export type OAuthStateScalarFieldEnum = (typeof OAuthStateScalarFieldEnum)[keyof typeof OAuthStateScalarFieldEnum]
 
 
   export const UserJobSwipeScalarFieldEnum: {
@@ -45418,18 +44319,6 @@ export namespace Prisma {
   };
 
   export type VerificationTokenOrderByRelevanceFieldEnum = (typeof VerificationTokenOrderByRelevanceFieldEnum)[keyof typeof VerificationTokenOrderByRelevanceFieldEnum]
-
-
-  export const OAuthStateOrderByRelevanceFieldEnum: {
-    id: 'id',
-    state: 'state',
-    codeVerifier: 'codeVerifier',
-    provider: 'provider',
-    redirectUri: 'redirectUri',
-    source: 'source'
-  };
-
-  export type OAuthStateOrderByRelevanceFieldEnum = (typeof OAuthStateOrderByRelevanceFieldEnum)[keyof typeof OAuthStateOrderByRelevanceFieldEnum]
 
 
   export const UserJobSwipeOrderByRelevanceFieldEnum: {
@@ -46560,12 +45449,7 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
-<<<<<<< HEAD
-    oauthProviders?: StringNullableListFilter<"User">
-    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
-=======
     needsVisaSponsorship?: BoolNullableFilter<"User"> | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     oauthProviders?: StringNullableListFilter<"User">
@@ -46613,12 +45497,7 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
-<<<<<<< HEAD
-    oauthProviders?: SortOrder
-    primaryAuthProvider?: SortOrderInput | SortOrder
-=======
     needsVisaSponsorship?: SortOrderInput | SortOrder
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: SortOrder
     updatedAt?: SortOrder
     oauthProviders?: SortOrder
@@ -46670,12 +45549,7 @@ export namespace Prisma {
     userAgent?: StringNullableFilter<"User"> | string | null
     timezone?: StringNullableFilter<"User"> | string | null
     locale?: StringNullableFilter<"User"> | string | null
-<<<<<<< HEAD
-    oauthProviders?: StringNullableListFilter<"User">
-    primaryAuthProvider?: StringNullableFilter<"User"> | string | null
-=======
     needsVisaSponsorship?: BoolNullableFilter<"User"> | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     oauthProviders?: StringNullableListFilter<"User">
@@ -46723,12 +45597,7 @@ export namespace Prisma {
     userAgent?: SortOrderInput | SortOrder
     timezone?: SortOrderInput | SortOrder
     locale?: SortOrderInput | SortOrder
-<<<<<<< HEAD
-    oauthProviders?: SortOrder
-    primaryAuthProvider?: SortOrderInput | SortOrder
-=======
     needsVisaSponsorship?: SortOrderInput | SortOrder
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: SortOrder
     updatedAt?: SortOrder
     oauthProviders?: SortOrder
@@ -46769,12 +45638,7 @@ export namespace Prisma {
     userAgent?: StringNullableWithAggregatesFilter<"User"> | string | null
     timezone?: StringNullableWithAggregatesFilter<"User"> | string | null
     locale?: StringNullableWithAggregatesFilter<"User"> | string | null
-<<<<<<< HEAD
-    oauthProviders?: StringNullableListFilter<"User">
-    primaryAuthProvider?: StringNullableWithAggregatesFilter<"User"> | string | null
-=======
     needsVisaSponsorship?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     oauthProviders?: StringNullableListFilter<"User">
@@ -47404,79 +46268,6 @@ export namespace Prisma {
     identifier?: StringWithAggregatesFilter<"VerificationToken"> | string
     token?: StringWithAggregatesFilter<"VerificationToken"> | string
     expires?: DateTimeWithAggregatesFilter<"VerificationToken"> | Date | string
-  }
-
-  export type OAuthStateWhereInput = {
-    AND?: OAuthStateWhereInput | OAuthStateWhereInput[]
-    OR?: OAuthStateWhereInput[]
-    NOT?: OAuthStateWhereInput | OAuthStateWhereInput[]
-    id?: StringFilter<"OAuthState"> | string
-    state?: StringFilter<"OAuthState"> | string
-    codeVerifier?: StringNullableFilter<"OAuthState"> | string | null
-    provider?: StringFilter<"OAuthState"> | string
-    redirectUri?: StringFilter<"OAuthState"> | string
-    source?: StringFilter<"OAuthState"> | string
-    metadata?: JsonNullableFilter<"OAuthState">
-    createdAt?: DateTimeFilter<"OAuthState"> | Date | string
-    expiresAt?: DateTimeFilter<"OAuthState"> | Date | string
-  }
-
-  export type OAuthStateOrderByWithRelationInput = {
-    id?: SortOrder
-    state?: SortOrder
-    codeVerifier?: SortOrderInput | SortOrder
-    provider?: SortOrder
-    redirectUri?: SortOrder
-    source?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    expiresAt?: SortOrder
-    _relevance?: OAuthStateOrderByRelevanceInput
-  }
-
-  export type OAuthStateWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    state?: string
-    AND?: OAuthStateWhereInput | OAuthStateWhereInput[]
-    OR?: OAuthStateWhereInput[]
-    NOT?: OAuthStateWhereInput | OAuthStateWhereInput[]
-    codeVerifier?: StringNullableFilter<"OAuthState"> | string | null
-    provider?: StringFilter<"OAuthState"> | string
-    redirectUri?: StringFilter<"OAuthState"> | string
-    source?: StringFilter<"OAuthState"> | string
-    metadata?: JsonNullableFilter<"OAuthState">
-    createdAt?: DateTimeFilter<"OAuthState"> | Date | string
-    expiresAt?: DateTimeFilter<"OAuthState"> | Date | string
-  }, "id" | "state">
-
-  export type OAuthStateOrderByWithAggregationInput = {
-    id?: SortOrder
-    state?: SortOrder
-    codeVerifier?: SortOrderInput | SortOrder
-    provider?: SortOrder
-    redirectUri?: SortOrder
-    source?: SortOrder
-    metadata?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    expiresAt?: SortOrder
-    _count?: OAuthStateCountOrderByAggregateInput
-    _max?: OAuthStateMaxOrderByAggregateInput
-    _min?: OAuthStateMinOrderByAggregateInput
-  }
-
-  export type OAuthStateScalarWhereWithAggregatesInput = {
-    AND?: OAuthStateScalarWhereWithAggregatesInput | OAuthStateScalarWhereWithAggregatesInput[]
-    OR?: OAuthStateScalarWhereWithAggregatesInput[]
-    NOT?: OAuthStateScalarWhereWithAggregatesInput | OAuthStateScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"OAuthState"> | string
-    state?: StringWithAggregatesFilter<"OAuthState"> | string
-    codeVerifier?: StringNullableWithAggregatesFilter<"OAuthState"> | string | null
-    provider?: StringWithAggregatesFilter<"OAuthState"> | string
-    redirectUri?: StringWithAggregatesFilter<"OAuthState"> | string
-    source?: StringWithAggregatesFilter<"OAuthState"> | string
-    metadata?: JsonNullableWithAggregatesFilter<"OAuthState">
-    createdAt?: DateTimeWithAggregatesFilter<"OAuthState"> | Date | string
-    expiresAt?: DateTimeWithAggregatesFilter<"OAuthState"> | Date | string
   }
 
   export type UserJobSwipeWhereInput = {
@@ -50014,15 +48805,9 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Resume"> | Date | string
     applications?: JobApplicationListRelationFilter
     enhancements?: ResumeEnhancementListRelationFilter
-<<<<<<< HEAD
-    template?: XOR<ResumeTemplateNullableRelationFilter, ResumeTemplateWhereInput> | null
-    user?: XOR<UserRelationFilter, UserWhereInput>
-  }, "id" | "s3Key">
-=======
     template?: XOR<ResumeTemplateNullableScalarRelationFilter, ResumeTemplateWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id">
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
+  }, "id" | "s3Key">
 
   export type ResumeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -51173,12 +49958,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -51226,12 +50006,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -51279,12 +50054,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -51332,12 +50102,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -51385,12 +50150,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -51423,12 +50183,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -51461,12 +50216,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -52223,90 +50973,6 @@ export namespace Prisma {
     identifier?: StringFieldUpdateOperationsInput | string
     token?: StringFieldUpdateOperationsInput | string
     expires?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type OAuthStateCreateInput = {
-    id?: string
-    state: string
-    codeVerifier?: string | null
-    provider: string
-    redirectUri: string
-    source: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    expiresAt: Date | string
-  }
-
-  export type OAuthStateUncheckedCreateInput = {
-    id?: string
-    state: string
-    codeVerifier?: string | null
-    provider: string
-    redirectUri: string
-    source: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    expiresAt: Date | string
-  }
-
-  export type OAuthStateUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    codeVerifier?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: StringFieldUpdateOperationsInput | string
-    redirectUri?: StringFieldUpdateOperationsInput | string
-    source?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type OAuthStateUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    codeVerifier?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: StringFieldUpdateOperationsInput | string
-    redirectUri?: StringFieldUpdateOperationsInput | string
-    source?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type OAuthStateCreateManyInput = {
-    id?: string
-    state: string
-    codeVerifier?: string | null
-    provider: string
-    redirectUri: string
-    source: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    expiresAt: Date | string
-  }
-
-  export type OAuthStateUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    codeVerifier?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: StringFieldUpdateOperationsInput | string
-    redirectUri?: StringFieldUpdateOperationsInput | string
-    source?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type OAuthStateUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    state?: StringFieldUpdateOperationsInput | string
-    codeVerifier?: NullableStringFieldUpdateOperationsInput | string | null
-    provider?: StringFieldUpdateOperationsInput | string
-    redirectUri?: StringFieldUpdateOperationsInput | string
-    source?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserJobSwipeCreateInput = {
@@ -56898,18 +55564,9 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-<<<<<<< HEAD
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-=======
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -57103,12 +55760,7 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
-<<<<<<< HEAD
-    oauthProviders?: SortOrder
-    primaryAuthProvider?: SortOrder
-=======
     needsVisaSponsorship?: SortOrder
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: SortOrder
     updatedAt?: SortOrder
     oauthProviders?: SortOrder
@@ -57147,11 +55799,7 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
-<<<<<<< HEAD
-    primaryAuthProvider?: SortOrder
-=======
     needsVisaSponsorship?: SortOrder
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: SortOrder
     updatedAt?: SortOrder
     primaryAuthProvider?: SortOrder
@@ -57183,11 +55831,7 @@ export namespace Prisma {
     userAgent?: SortOrder
     timezone?: SortOrder
     locale?: SortOrder
-<<<<<<< HEAD
-    primaryAuthProvider?: SortOrder
-=======
     needsVisaSponsorship?: SortOrder
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: SortOrder
     updatedAt?: SortOrder
     primaryAuthProvider?: SortOrder
@@ -57327,11 +55971,7 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
-<<<<<<< HEAD
-  export type JsonNullableFilter<$PrismaModel = never> = 
-=======
   export type JsonNullableFilter<$PrismaModel = never> =
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonNullableFilterBase<$PrismaModel>>
@@ -57806,46 +56446,6 @@ export namespace Prisma {
     identifier?: SortOrder
     token?: SortOrder
     expires?: SortOrder
-  }
-
-  export type OAuthStateOrderByRelevanceInput = {
-    fields: OAuthStateOrderByRelevanceFieldEnum | OAuthStateOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type OAuthStateCountOrderByAggregateInput = {
-    id?: SortOrder
-    state?: SortOrder
-    codeVerifier?: SortOrder
-    provider?: SortOrder
-    redirectUri?: SortOrder
-    source?: SortOrder
-    metadata?: SortOrder
-    createdAt?: SortOrder
-    expiresAt?: SortOrder
-  }
-
-  export type OAuthStateMaxOrderByAggregateInput = {
-    id?: SortOrder
-    state?: SortOrder
-    codeVerifier?: SortOrder
-    provider?: SortOrder
-    redirectUri?: SortOrder
-    source?: SortOrder
-    createdAt?: SortOrder
-    expiresAt?: SortOrder
-  }
-
-  export type OAuthStateMinOrderByAggregateInput = {
-    id?: SortOrder
-    state?: SortOrder
-    codeVerifier?: SortOrder
-    provider?: SortOrder
-    redirectUri?: SortOrder
-    source?: SortOrder
-    createdAt?: SortOrder
-    expiresAt?: SortOrder
   }
 
   export type EnumSwipeDirectionFilter<$PrismaModel = never> = {
@@ -59900,7 +58500,6 @@ export namespace Prisma {
     not?: NestedEnumResumeVisibilityFilter<$PrismaModel> | $Enums.ResumeVisibility
   }
 
-<<<<<<< HEAD
   export type EnumProcessingStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
     in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
@@ -59908,10 +58507,7 @@ export namespace Prisma {
     not?: NestedEnumProcessingStatusFilter<$PrismaModel> | $Enums.ProcessingStatus
   }
 
-  export type ResumeTemplateNullableRelationFilter = {
-=======
   export type ResumeTemplateNullableScalarRelationFilter = {
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     is?: ResumeTemplateWhereInput | null
     isNot?: ResumeTemplateWhereInput | null
   }
@@ -61245,14 +59841,8 @@ export namespace Prisma {
     set?: boolean
   }
 
-<<<<<<< HEAD
-  export type UserUpdateoauthProvidersInput = {
-    set?: string[]
-    push?: string | string[]
-=======
   export type NullableBoolFieldUpdateOperationsInput = {
     set?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -66091,12 +64681,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66143,12 +64728,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66211,12 +64791,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66263,12 +64838,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66315,12 +64885,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66367,12 +64932,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66435,12 +64995,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66487,12 +65042,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66539,12 +65089,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66591,12 +65136,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66659,12 +65199,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66711,12 +65246,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66763,12 +65293,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66815,12 +65340,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -66883,12 +65403,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -66935,12 +65450,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -67130,12 +65640,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -67182,12 +65687,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -67399,12 +65899,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -67451,12 +65946,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -67741,12 +66231,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -67793,12 +66278,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -68274,12 +66754,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -68326,12 +66801,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -68687,12 +67157,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -68739,12 +67204,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -68807,12 +67267,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -68859,12 +67314,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -68911,12 +67361,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -68963,12 +67408,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -69031,12 +67471,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -69083,12 +67518,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -69135,12 +67565,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -69187,12 +67612,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -69255,12 +67675,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -69307,12 +67722,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -69745,12 +68155,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -69797,12 +68202,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -69952,12 +68352,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -70004,12 +68399,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -71679,12 +70069,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -71731,12 +70116,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -71902,12 +70282,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -71954,12 +70329,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -73014,12 +71384,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -73066,12 +71431,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -73450,12 +71810,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -73502,12 +71857,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -73893,12 +72243,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -73945,12 +72290,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -74162,12 +72502,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -74214,12 +72549,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -74308,12 +72638,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -74360,12 +72685,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -74502,12 +72822,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -74554,12 +72869,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -74829,12 +73139,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -74881,12 +73186,7 @@ export namespace Prisma {
     userAgent?: string | null
     timezone?: string | null
     locale?: string | null
-<<<<<<< HEAD
-    oauthProviders?: UserCreateoauthProvidersInput | string[]
-    primaryAuthProvider?: string | null
-=======
     needsVisaSponsorship?: boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: Date | string
     updatedAt?: Date | string
     oauthProviders?: UserCreateoauthProvidersInput | string[]
@@ -75022,12 +73322,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -75074,12 +73369,7 @@ export namespace Prisma {
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
     timezone?: NullableStringFieldUpdateOperationsInput | string | null
     locale?: NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-    oauthProviders?: UserUpdateoauthProvidersInput | string[]
-    primaryAuthProvider?: NullableStringFieldUpdateOperationsInput | string | null
-=======
     needsVisaSponsorship?: NullableBoolFieldUpdateOperationsInput | boolean | null
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     oauthProviders?: UserUpdateoauthProvidersInput | string[]
@@ -78299,161 +76589,6 @@ export namespace Prisma {
 
 
   /**
-<<<<<<< HEAD
-   * Aliases for legacy arg types
-   */
-    /**
-     * @deprecated Use UserCountOutputTypeDefaultArgs instead
-     */
-    export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ApplicationQueueCountOutputTypeDefaultArgs instead
-     */
-    export type ApplicationQueueCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ApplicationQueueCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use CompanyCountOutputTypeDefaultArgs instead
-     */
-    export type CompanyCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CompanyCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use JobPostingCountOutputTypeDefaultArgs instead
-     */
-    export type JobPostingCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobPostingCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ResumeTemplateCountOutputTypeDefaultArgs instead
-     */
-    export type ResumeTemplateCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ResumeTemplateCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ResumeCountOutputTypeDefaultArgs instead
-     */
-    export type ResumeCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ResumeCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use JobApplicationCountOutputTypeDefaultArgs instead
-     */
-    export type JobApplicationCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobApplicationCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SubscriptionCountOutputTypeDefaultArgs instead
-     */
-    export type SubscriptionCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SubscriptionCountOutputTypeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserDefaultArgs instead
-     */
-    export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserProfileDefaultArgs instead
-     */
-    export type UserProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserProfileDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserPreferencesDefaultArgs instead
-     */
-    export type UserPreferencesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserPreferencesDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use AccountDefaultArgs instead
-     */
-    export type AccountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AccountDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SessionDefaultArgs instead
-     */
-    export type SessionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SessionDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use VerificationTokenDefaultArgs instead
-     */
-    export type VerificationTokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = VerificationTokenDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use OAuthStateDefaultArgs instead
-     */
-    export type OAuthStateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = OAuthStateDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserJobSwipeDefaultArgs instead
-     */
-    export type UserJobSwipeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserJobSwipeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ApplicationQueueDefaultArgs instead
-     */
-    export type ApplicationQueueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ApplicationQueueDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use AutomationLogDefaultArgs instead
-     */
-    export type AutomationLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AutomationLogDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use AutomationProxyDefaultArgs instead
-     */
-    export type AutomationProxyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AutomationProxyDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use AuditLogDefaultArgs instead
-     */
-    export type AuditLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AuditLogDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use AnalyticsEventDefaultArgs instead
-     */
-    export type AnalyticsEventArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AnalyticsEventDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UserNotificationDefaultArgs instead
-     */
-    export type UserNotificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserNotificationDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SystemSettingDefaultArgs instead
-     */
-    export type SystemSettingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SystemSettingDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use NotificationTemplateDefaultArgs instead
-     */
-    export type NotificationTemplateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationTemplateDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use CompanyDefaultArgs instead
-     */
-    export type CompanyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CompanyDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use CompanyReviewDefaultArgs instead
-     */
-    export type CompanyReviewArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CompanyReviewDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use JobPostingDefaultArgs instead
-     */
-    export type JobPostingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobPostingDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use JobSnapshotDefaultArgs instead
-     */
-    export type JobSnapshotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobSnapshotDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ResumeTemplateDefaultArgs instead
-     */
-    export type ResumeTemplateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ResumeTemplateDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ResumeDefaultArgs instead
-     */
-    export type ResumeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ResumeDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ResumeEnhancementDefaultArgs instead
-     */
-    export type ResumeEnhancementArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ResumeEnhancementDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use JobApplicationDefaultArgs instead
-     */
-    export type JobApplicationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = JobApplicationDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use ApplicationInteractionDefaultArgs instead
-     */
-    export type ApplicationInteractionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ApplicationInteractionDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SavedJobDefaultArgs instead
-     */
-    export type SavedJobArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SavedJobDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use SubscriptionDefaultArgs instead
-     */
-    export type SubscriptionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = SubscriptionDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use BillingHistoryDefaultArgs instead
-     */
-    export type BillingHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = BillingHistoryDefaultArgs<ExtArgs>
-    /**
-     * @deprecated Use UsageRecordDefaultArgs instead
-     */
-    export type UsageRecordArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UsageRecordDefaultArgs<ExtArgs>
-
-  /**
-=======
->>>>>>> 9307de66562e9f82b4f4178d8681e2ba8225c029
    * Batch Payload for updateMany & deleteMany & createMany
    */
 

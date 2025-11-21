@@ -314,6 +314,7 @@ class BaseJobAutomation(ABC):
                     llm=llm,
                     controller=self.controller,
                     browser_session=browser_session
+                    
                 )
                 self.logger.info("✅ Agent created, preparing to execute...")
 

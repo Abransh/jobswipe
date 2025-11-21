@@ -133,8 +133,8 @@ export class ResumeParserService {
    */
   private async parsePDF(fileBuffer: Buffer, options: ParserOptions = {}): Promise<ParsedResume> {
     try {
-      // Parse PDF using pdf-parse
-      const pdfData = await pdfParse(fileBuffer);
+      // Parse PDF using pdf-parse (use .default for CommonJS module)
+      const pdfData = await (pdfParse as any).default(fileBuffer);
 
       // Extract metadata using pdf-lib for more detailed info
       let pdfDoc: PDFDocument | null = null;
