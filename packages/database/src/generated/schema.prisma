@@ -737,7 +737,7 @@ model ResumeTemplate {
 }
 
 model Resume {
-  id               String              @id @default(uuid())
+  id               String           @id @default(uuid())
   userId           String
   templateId       String?
   name             String
@@ -751,31 +751,55 @@ model Resume {
   fileSize         Int?
   pageCount        Int?
   lastGenerated    DateTime?
-  version          Int                 @default(1)
+  version          Int              @default(1)
   parentResumeId   String?
-  isDefault        Boolean             @default(false)
-  visibility       ResumeVisibility    @default(PRIVATE)
+  isDefault        Boolean          @default(false)
+  visibility       ResumeVisibility @default(PRIVATE)
   shareToken       String?
-  viewCount        Int                 @default(0)
-  downloadCount    Int                 @default(0)
-  applicationCount Int                 @default(0)
-  aiEnhanced       Boolean             @default(false)
+  viewCount        Int              @default(0)
+  downloadCount    Int              @default(0)
+  applicationCount Int              @default(0)
+  aiEnhanced       Boolean          @default(false)
   enhancementData  Json?
   completeness     Float?
   readabilityScore Float?
   keywordMatch     Float?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  applications     JobApplication[]
-  enhancements     ResumeEnhancement[]
-  template         ResumeTemplate?     @relation(fields: [templateId], references: [id])
-  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // S3 Storage fields
+  s3Key            String? @unique
+  s3Bucket         String?
+  s3Region         String?
+  originalFileName String?
+
+  // Processing status and metadata
+  processingStatus ProcessingStatus @default(PENDING)
+  processingError  String?
+  lastParsedAt     DateTime?
+
+  // Parsed content
+  rawText         String? @db.Text
+  markdownContent String? @db.Text
+
+  // RMS (Resume Metadata Standard) tracking
+  hasRMSMetadata Boolean @default(false)
+  rmsVersion     String?
+  rmsSchemaUrl   String? @default("https://github.com/rezi-io/resume-standard")
+
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  applications JobApplication[]
+  enhancements ResumeEnhancement[]
+  template     ResumeTemplate?     @relation(fields: [templateId], references: [id])
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isDefault])
   @@index([templateId])
   @@index([visibility])
   @@index([aiEnhanced])
   @@index([createdAt])
+  @@index([s3Key])
+  @@index([processingStatus])
+  @@index([hasRMSMetadata])
   @@map("resumes")
 }
 
@@ -1324,6 +1348,16 @@ enum ResumeVisibility {
   PUBLIC
   RECRUITERS_ONLY
   SHARED_LINK
+}
+
+enum ProcessingStatus {
+  PENDING // Upload received, not yet processed
+  PARSING // Extracting text and structure
+  PARSED // Successfully parsed
+  ENHANCING // AI enhancement in progress
+  ENHANCED // AI enhancement complete
+  FAILED // Processing failed
+  ERROR // Critical error occurred
 }
 
 enum EnhancementType {

@@ -716,6 +716,18 @@ exports.Prisma.ResumeScalarFieldEnum = {
   completeness: 'completeness',
   readabilityScore: 'readabilityScore',
   keywordMatch: 'keywordMatch',
+  s3Key: 's3Key',
+  s3Bucket: 's3Bucket',
+  s3Region: 's3Region',
+  originalFileName: 'originalFileName',
+  processingStatus: 'processingStatus',
+  processingError: 'processingError',
+  lastParsedAt: 'lastParsedAt',
+  rawText: 'rawText',
+  markdownContent: 'markdownContent',
+  hasRMSMetadata: 'hasRMSMetadata',
+  rmsVersion: 'rmsVersion',
+  rmsSchemaUrl: 'rmsSchemaUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1256,7 +1268,16 @@ exports.Prisma.ResumeOrderByRelevanceFieldEnum = {
   docxUrl: 'docxUrl',
   htmlUrl: 'htmlUrl',
   parentResumeId: 'parentResumeId',
-  shareToken: 'shareToken'
+  shareToken: 'shareToken',
+  s3Key: 's3Key',
+  s3Bucket: 's3Bucket',
+  s3Region: 's3Region',
+  originalFileName: 'originalFileName',
+  processingError: 'processingError',
+  rawText: 'rawText',
+  markdownContent: 'markdownContent',
+  rmsVersion: 'rmsVersion',
+  rmsSchemaUrl: 'rmsSchemaUrl'
 };
 
 exports.Prisma.ResumeEnhancementOrderByRelevanceFieldEnum = {
@@ -1647,6 +1668,16 @@ exports.ResumeVisibility = exports.$Enums.ResumeVisibility = {
   PUBLIC: 'PUBLIC',
   RECRUITERS_ONLY: 'RECRUITERS_ONLY',
   SHARED_LINK: 'SHARED_LINK'
+};
+
+exports.ProcessingStatus = exports.$Enums.ProcessingStatus = {
+  PENDING: 'PENDING',
+  PARSING: 'PARSING',
+  PARSED: 'PARSED',
+  ENHANCING: 'ENHANCING',
+  ENHANCED: 'ENHANCED',
+  FAILED: 'FAILED',
+  ERROR: 'ERROR'
 };
 
 exports.EnhancementType = exports.$Enums.EnhancementType = {

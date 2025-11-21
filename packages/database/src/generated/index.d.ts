@@ -550,6 +550,19 @@ export const ResumeVisibility: {
 export type ResumeVisibility = (typeof ResumeVisibility)[keyof typeof ResumeVisibility]
 
 
+export const ProcessingStatus: {
+  PENDING: 'PENDING',
+  PARSING: 'PARSING',
+  PARSED: 'PARSED',
+  ENHANCING: 'ENHANCING',
+  ENHANCED: 'ENHANCED',
+  FAILED: 'FAILED',
+  ERROR: 'ERROR'
+};
+
+export type ProcessingStatus = (typeof ProcessingStatus)[keyof typeof ProcessingStatus]
+
+
 export const EnhancementType: {
   KEYWORD_OPTIMIZATION: 'KEYWORD_OPTIMIZATION',
   ATS_OPTIMIZATION: 'ATS_OPTIMIZATION',
@@ -869,6 +882,10 @@ export const TemplateCategory: typeof $Enums.TemplateCategory
 export type ResumeVisibility = $Enums.ResumeVisibility
 
 export const ResumeVisibility: typeof $Enums.ResumeVisibility
+
+export type ProcessingStatus = $Enums.ProcessingStatus
+
+export const ProcessingStatus: typeof $Enums.ProcessingStatus
 
 export type EnhancementType = $Enums.EnhancementType
 
@@ -32222,6 +32239,18 @@ export namespace Prisma {
     completeness: number | null
     readabilityScore: number | null
     keywordMatch: number | null
+    s3Key: string | null
+    s3Bucket: string | null
+    s3Region: string | null
+    originalFileName: string | null
+    processingStatus: $Enums.ProcessingStatus | null
+    processingError: string | null
+    lastParsedAt: Date | null
+    rawText: string | null
+    markdownContent: string | null
+    hasRMSMetadata: boolean | null
+    rmsVersion: string | null
+    rmsSchemaUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -32250,6 +32279,18 @@ export namespace Prisma {
     completeness: number | null
     readabilityScore: number | null
     keywordMatch: number | null
+    s3Key: string | null
+    s3Bucket: string | null
+    s3Region: string | null
+    originalFileName: string | null
+    processingStatus: $Enums.ProcessingStatus | null
+    processingError: string | null
+    lastParsedAt: Date | null
+    rawText: string | null
+    markdownContent: string | null
+    hasRMSMetadata: boolean | null
+    rmsVersion: string | null
+    rmsSchemaUrl: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -32282,6 +32323,18 @@ export namespace Prisma {
     completeness: number
     readabilityScore: number
     keywordMatch: number
+    s3Key: number
+    s3Bucket: number
+    s3Region: number
+    originalFileName: number
+    processingStatus: number
+    processingError: number
+    lastParsedAt: number
+    rawText: number
+    markdownContent: number
+    hasRMSMetadata: number
+    rmsVersion: number
+    rmsSchemaUrl: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -32336,6 +32389,18 @@ export namespace Prisma {
     completeness?: true
     readabilityScore?: true
     keywordMatch?: true
+    s3Key?: true
+    s3Bucket?: true
+    s3Region?: true
+    originalFileName?: true
+    processingStatus?: true
+    processingError?: true
+    lastParsedAt?: true
+    rawText?: true
+    markdownContent?: true
+    hasRMSMetadata?: true
+    rmsVersion?: true
+    rmsSchemaUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -32364,6 +32429,18 @@ export namespace Prisma {
     completeness?: true
     readabilityScore?: true
     keywordMatch?: true
+    s3Key?: true
+    s3Bucket?: true
+    s3Region?: true
+    originalFileName?: true
+    processingStatus?: true
+    processingError?: true
+    lastParsedAt?: true
+    rawText?: true
+    markdownContent?: true
+    hasRMSMetadata?: true
+    rmsVersion?: true
+    rmsSchemaUrl?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -32396,6 +32473,18 @@ export namespace Prisma {
     completeness?: true
     readabilityScore?: true
     keywordMatch?: true
+    s3Key?: true
+    s3Bucket?: true
+    s3Region?: true
+    originalFileName?: true
+    processingStatus?: true
+    processingError?: true
+    lastParsedAt?: true
+    rawText?: true
+    markdownContent?: true
+    hasRMSMetadata?: true
+    rmsVersion?: true
+    rmsSchemaUrl?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -32515,6 +32604,18 @@ export namespace Prisma {
     completeness: number | null
     readabilityScore: number | null
     keywordMatch: number | null
+    s3Key: string | null
+    s3Bucket: string | null
+    s3Region: string | null
+    originalFileName: string | null
+    processingStatus: $Enums.ProcessingStatus
+    processingError: string | null
+    lastParsedAt: Date | null
+    rawText: string | null
+    markdownContent: string | null
+    hasRMSMetadata: boolean
+    rmsVersion: string | null
+    rmsSchemaUrl: string | null
     createdAt: Date
     updatedAt: Date
     _count: ResumeCountAggregateOutputType | null
@@ -32566,6 +32667,18 @@ export namespace Prisma {
     completeness?: boolean
     readabilityScore?: boolean
     keywordMatch?: boolean
+    s3Key?: boolean
+    s3Bucket?: boolean
+    s3Region?: boolean
+    originalFileName?: boolean
+    processingStatus?: boolean
+    processingError?: boolean
+    lastParsedAt?: boolean
+    rawText?: boolean
+    markdownContent?: boolean
+    hasRMSMetadata?: boolean
+    rmsVersion?: boolean
+    rmsSchemaUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     applications?: boolean | Resume$applicationsArgs<ExtArgs>
@@ -32603,6 +32716,18 @@ export namespace Prisma {
     completeness?: boolean
     readabilityScore?: boolean
     keywordMatch?: boolean
+    s3Key?: boolean
+    s3Bucket?: boolean
+    s3Region?: boolean
+    originalFileName?: boolean
+    processingStatus?: boolean
+    processingError?: boolean
+    lastParsedAt?: boolean
+    rawText?: boolean
+    markdownContent?: boolean
+    hasRMSMetadata?: boolean
+    rmsVersion?: boolean
+    rmsSchemaUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | Resume$templateArgs<ExtArgs>
@@ -32637,6 +32762,18 @@ export namespace Prisma {
     completeness?: boolean
     readabilityScore?: boolean
     keywordMatch?: boolean
+    s3Key?: boolean
+    s3Bucket?: boolean
+    s3Region?: boolean
+    originalFileName?: boolean
+    processingStatus?: boolean
+    processingError?: boolean
+    lastParsedAt?: boolean
+    rawText?: boolean
+    markdownContent?: boolean
+    hasRMSMetadata?: boolean
+    rmsVersion?: boolean
+    rmsSchemaUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     template?: boolean | Resume$templateArgs<ExtArgs>
@@ -32671,11 +32808,23 @@ export namespace Prisma {
     completeness?: boolean
     readabilityScore?: boolean
     keywordMatch?: boolean
+    s3Key?: boolean
+    s3Bucket?: boolean
+    s3Region?: boolean
+    originalFileName?: boolean
+    processingStatus?: boolean
+    processingError?: boolean
+    lastParsedAt?: boolean
+    rawText?: boolean
+    markdownContent?: boolean
+    hasRMSMetadata?: boolean
+    rmsVersion?: boolean
+    rmsSchemaUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ResumeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "templateId" | "name" | "title" | "content" | "sections" | "metadata" | "pdfUrl" | "docxUrl" | "htmlUrl" | "fileSize" | "pageCount" | "lastGenerated" | "version" | "parentResumeId" | "isDefault" | "visibility" | "shareToken" | "viewCount" | "downloadCount" | "applicationCount" | "aiEnhanced" | "enhancementData" | "completeness" | "readabilityScore" | "keywordMatch" | "createdAt" | "updatedAt", ExtArgs["result"]["resume"]>
+  export type ResumeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "templateId" | "name" | "title" | "content" | "sections" | "metadata" | "pdfUrl" | "docxUrl" | "htmlUrl" | "fileSize" | "pageCount" | "lastGenerated" | "version" | "parentResumeId" | "isDefault" | "visibility" | "shareToken" | "viewCount" | "downloadCount" | "applicationCount" | "aiEnhanced" | "enhancementData" | "completeness" | "readabilityScore" | "keywordMatch" | "s3Key" | "s3Bucket" | "s3Region" | "originalFileName" | "processingStatus" | "processingError" | "lastParsedAt" | "rawText" | "markdownContent" | "hasRMSMetadata" | "rmsVersion" | "rmsSchemaUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["resume"]>
   export type ResumeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     applications?: boolean | Resume$applicationsArgs<ExtArgs>
     enhancements?: boolean | Resume$enhancementsArgs<ExtArgs>
@@ -32728,6 +32877,18 @@ export namespace Prisma {
       completeness: number | null
       readabilityScore: number | null
       keywordMatch: number | null
+      s3Key: string | null
+      s3Bucket: string | null
+      s3Region: string | null
+      originalFileName: string | null
+      processingStatus: $Enums.ProcessingStatus
+      processingError: string | null
+      lastParsedAt: Date | null
+      rawText: string | null
+      markdownContent: string | null
+      hasRMSMetadata: boolean
+      rmsVersion: string | null
+      rmsSchemaUrl: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["resume"]>
@@ -33184,6 +33345,18 @@ export namespace Prisma {
     readonly completeness: FieldRef<"Resume", 'Float'>
     readonly readabilityScore: FieldRef<"Resume", 'Float'>
     readonly keywordMatch: FieldRef<"Resume", 'Float'>
+    readonly s3Key: FieldRef<"Resume", 'String'>
+    readonly s3Bucket: FieldRef<"Resume", 'String'>
+    readonly s3Region: FieldRef<"Resume", 'String'>
+    readonly originalFileName: FieldRef<"Resume", 'String'>
+    readonly processingStatus: FieldRef<"Resume", 'ProcessingStatus'>
+    readonly processingError: FieldRef<"Resume", 'String'>
+    readonly lastParsedAt: FieldRef<"Resume", 'DateTime'>
+    readonly rawText: FieldRef<"Resume", 'String'>
+    readonly markdownContent: FieldRef<"Resume", 'String'>
+    readonly hasRMSMetadata: FieldRef<"Resume", 'Boolean'>
+    readonly rmsVersion: FieldRef<"Resume", 'String'>
+    readonly rmsSchemaUrl: FieldRef<"Resume", 'String'>
     readonly createdAt: FieldRef<"Resume", 'DateTime'>
     readonly updatedAt: FieldRef<"Resume", 'DateTime'>
   }
@@ -43783,6 +43956,18 @@ export namespace Prisma {
     completeness: 'completeness',
     readabilityScore: 'readabilityScore',
     keywordMatch: 'keywordMatch',
+    s3Key: 's3Key',
+    s3Bucket: 's3Bucket',
+    s3Region: 's3Region',
+    originalFileName: 'originalFileName',
+    processingStatus: 'processingStatus',
+    processingError: 'processingError',
+    lastParsedAt: 'lastParsedAt',
+    rawText: 'rawText',
+    markdownContent: 'markdownContent',
+    hasRMSMetadata: 'hasRMSMetadata',
+    rmsVersion: 'rmsVersion',
+    rmsSchemaUrl: 'rmsSchemaUrl',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -44425,7 +44610,16 @@ export namespace Prisma {
     docxUrl: 'docxUrl',
     htmlUrl: 'htmlUrl',
     parentResumeId: 'parentResumeId',
-    shareToken: 'shareToken'
+    shareToken: 'shareToken',
+    s3Key: 's3Key',
+    s3Bucket: 's3Bucket',
+    s3Region: 's3Region',
+    originalFileName: 'originalFileName',
+    processingError: 'processingError',
+    rawText: 'rawText',
+    markdownContent: 'markdownContent',
+    rmsVersion: 'rmsVersion',
+    rmsSchemaUrl: 'rmsSchemaUrl'
   };
 
   export type ResumeOrderByRelevanceFieldEnum = (typeof ResumeOrderByRelevanceFieldEnum)[keyof typeof ResumeOrderByRelevanceFieldEnum]
@@ -45024,6 +45218,20 @@ export namespace Prisma {
    * Reference to a field of type 'ResumeVisibility[]'
    */
   export type ListEnumResumeVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ResumeVisibility[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProcessingStatus'
+   */
+  export type EnumProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcessingStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProcessingStatus[]'
+   */
+  export type ListEnumProcessingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcessingStatus[]'>
     
 
 
@@ -48481,6 +48689,18 @@ export namespace Prisma {
     completeness?: FloatNullableFilter<"Resume"> | number | null
     readabilityScore?: FloatNullableFilter<"Resume"> | number | null
     keywordMatch?: FloatNullableFilter<"Resume"> | number | null
+    s3Key?: StringNullableFilter<"Resume"> | string | null
+    s3Bucket?: StringNullableFilter<"Resume"> | string | null
+    s3Region?: StringNullableFilter<"Resume"> | string | null
+    originalFileName?: StringNullableFilter<"Resume"> | string | null
+    processingStatus?: EnumProcessingStatusFilter<"Resume"> | $Enums.ProcessingStatus
+    processingError?: StringNullableFilter<"Resume"> | string | null
+    lastParsedAt?: DateTimeNullableFilter<"Resume"> | Date | string | null
+    rawText?: StringNullableFilter<"Resume"> | string | null
+    markdownContent?: StringNullableFilter<"Resume"> | string | null
+    hasRMSMetadata?: BoolFilter<"Resume"> | boolean
+    rmsVersion?: StringNullableFilter<"Resume"> | string | null
+    rmsSchemaUrl?: StringNullableFilter<"Resume"> | string | null
     createdAt?: DateTimeFilter<"Resume"> | Date | string
     updatedAt?: DateTimeFilter<"Resume"> | Date | string
     applications?: JobApplicationListRelationFilter
@@ -48517,6 +48737,18 @@ export namespace Prisma {
     completeness?: SortOrderInput | SortOrder
     readabilityScore?: SortOrderInput | SortOrder
     keywordMatch?: SortOrderInput | SortOrder
+    s3Key?: SortOrderInput | SortOrder
+    s3Bucket?: SortOrderInput | SortOrder
+    s3Region?: SortOrderInput | SortOrder
+    originalFileName?: SortOrderInput | SortOrder
+    processingStatus?: SortOrder
+    processingError?: SortOrderInput | SortOrder
+    lastParsedAt?: SortOrderInput | SortOrder
+    rawText?: SortOrderInput | SortOrder
+    markdownContent?: SortOrderInput | SortOrder
+    hasRMSMetadata?: SortOrder
+    rmsVersion?: SortOrderInput | SortOrder
+    rmsSchemaUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     applications?: JobApplicationOrderByRelationAggregateInput
@@ -48528,6 +48760,7 @@ export namespace Prisma {
 
   export type ResumeWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    s3Key?: string
     AND?: ResumeWhereInput | ResumeWhereInput[]
     OR?: ResumeWhereInput[]
     NOT?: ResumeWhereInput | ResumeWhereInput[]
@@ -48557,13 +48790,24 @@ export namespace Prisma {
     completeness?: FloatNullableFilter<"Resume"> | number | null
     readabilityScore?: FloatNullableFilter<"Resume"> | number | null
     keywordMatch?: FloatNullableFilter<"Resume"> | number | null
+    s3Bucket?: StringNullableFilter<"Resume"> | string | null
+    s3Region?: StringNullableFilter<"Resume"> | string | null
+    originalFileName?: StringNullableFilter<"Resume"> | string | null
+    processingStatus?: EnumProcessingStatusFilter<"Resume"> | $Enums.ProcessingStatus
+    processingError?: StringNullableFilter<"Resume"> | string | null
+    lastParsedAt?: DateTimeNullableFilter<"Resume"> | Date | string | null
+    rawText?: StringNullableFilter<"Resume"> | string | null
+    markdownContent?: StringNullableFilter<"Resume"> | string | null
+    hasRMSMetadata?: BoolFilter<"Resume"> | boolean
+    rmsVersion?: StringNullableFilter<"Resume"> | string | null
+    rmsSchemaUrl?: StringNullableFilter<"Resume"> | string | null
     createdAt?: DateTimeFilter<"Resume"> | Date | string
     updatedAt?: DateTimeFilter<"Resume"> | Date | string
     applications?: JobApplicationListRelationFilter
     enhancements?: ResumeEnhancementListRelationFilter
     template?: XOR<ResumeTemplateNullableScalarRelationFilter, ResumeTemplateWhereInput> | null
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id">
+  }, "id" | "s3Key">
 
   export type ResumeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -48593,6 +48837,18 @@ export namespace Prisma {
     completeness?: SortOrderInput | SortOrder
     readabilityScore?: SortOrderInput | SortOrder
     keywordMatch?: SortOrderInput | SortOrder
+    s3Key?: SortOrderInput | SortOrder
+    s3Bucket?: SortOrderInput | SortOrder
+    s3Region?: SortOrderInput | SortOrder
+    originalFileName?: SortOrderInput | SortOrder
+    processingStatus?: SortOrder
+    processingError?: SortOrderInput | SortOrder
+    lastParsedAt?: SortOrderInput | SortOrder
+    rawText?: SortOrderInput | SortOrder
+    markdownContent?: SortOrderInput | SortOrder
+    hasRMSMetadata?: SortOrder
+    rmsVersion?: SortOrderInput | SortOrder
+    rmsSchemaUrl?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ResumeCountOrderByAggregateInput
@@ -48633,6 +48889,18 @@ export namespace Prisma {
     completeness?: FloatNullableWithAggregatesFilter<"Resume"> | number | null
     readabilityScore?: FloatNullableWithAggregatesFilter<"Resume"> | number | null
     keywordMatch?: FloatNullableWithAggregatesFilter<"Resume"> | number | null
+    s3Key?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    s3Bucket?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    s3Region?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    originalFileName?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    processingStatus?: EnumProcessingStatusWithAggregatesFilter<"Resume"> | $Enums.ProcessingStatus
+    processingError?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    lastParsedAt?: DateTimeNullableWithAggregatesFilter<"Resume"> | Date | string | null
+    rawText?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    markdownContent?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    hasRMSMetadata?: BoolWithAggregatesFilter<"Resume"> | boolean
+    rmsVersion?: StringNullableWithAggregatesFilter<"Resume"> | string | null
+    rmsSchemaUrl?: StringNullableWithAggregatesFilter<"Resume"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Resume"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Resume"> | Date | string
   }
@@ -53714,6 +53982,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationCreateNestedManyWithoutResumeInput
@@ -53750,6 +54030,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationUncheckedCreateNestedManyWithoutResumeInput
@@ -53782,6 +54074,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUpdateManyWithoutResumeNestedInput
@@ -53818,6 +54122,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUncheckedUpdateManyWithoutResumeNestedInput
@@ -53852,6 +54168,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -53882,6 +54210,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -53914,6 +54254,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -58148,6 +58500,13 @@ export namespace Prisma {
     not?: NestedEnumResumeVisibilityFilter<$PrismaModel> | $Enums.ResumeVisibility
   }
 
+  export type EnumProcessingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcessingStatusFilter<$PrismaModel> | $Enums.ProcessingStatus
+  }
+
   export type ResumeTemplateNullableScalarRelationFilter = {
     is?: ResumeTemplateWhereInput | null
     isNot?: ResumeTemplateWhereInput | null
@@ -58187,6 +58546,18 @@ export namespace Prisma {
     completeness?: SortOrder
     readabilityScore?: SortOrder
     keywordMatch?: SortOrder
+    s3Key?: SortOrder
+    s3Bucket?: SortOrder
+    s3Region?: SortOrder
+    originalFileName?: SortOrder
+    processingStatus?: SortOrder
+    processingError?: SortOrder
+    lastParsedAt?: SortOrder
+    rawText?: SortOrder
+    markdownContent?: SortOrder
+    hasRMSMetadata?: SortOrder
+    rmsVersion?: SortOrder
+    rmsSchemaUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -58227,6 +58598,18 @@ export namespace Prisma {
     completeness?: SortOrder
     readabilityScore?: SortOrder
     keywordMatch?: SortOrder
+    s3Key?: SortOrder
+    s3Bucket?: SortOrder
+    s3Region?: SortOrder
+    originalFileName?: SortOrder
+    processingStatus?: SortOrder
+    processingError?: SortOrder
+    lastParsedAt?: SortOrder
+    rawText?: SortOrder
+    markdownContent?: SortOrder
+    hasRMSMetadata?: SortOrder
+    rmsVersion?: SortOrder
+    rmsSchemaUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -58255,6 +58638,18 @@ export namespace Prisma {
     completeness?: SortOrder
     readabilityScore?: SortOrder
     keywordMatch?: SortOrder
+    s3Key?: SortOrder
+    s3Bucket?: SortOrder
+    s3Region?: SortOrder
+    originalFileName?: SortOrder
+    processingStatus?: SortOrder
+    processingError?: SortOrder
+    lastParsedAt?: SortOrder
+    rawText?: SortOrder
+    markdownContent?: SortOrder
+    hasRMSMetadata?: SortOrder
+    rmsVersion?: SortOrder
+    rmsSchemaUrl?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -58279,6 +58674,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumResumeVisibilityFilter<$PrismaModel>
     _max?: NestedEnumResumeVisibilityFilter<$PrismaModel>
+  }
+
+  export type EnumProcessingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcessingStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcessingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProcessingStatusFilter<$PrismaModel>
+    _max?: NestedEnumProcessingStatusFilter<$PrismaModel>
   }
 
   export type EnumEnhancementTypeFilter<$PrismaModel = never> = {
@@ -60982,6 +61387,10 @@ export namespace Prisma {
     set?: $Enums.ResumeVisibility
   }
 
+  export type EnumProcessingStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ProcessingStatus
+  }
+
   export type JobApplicationUpdateManyWithoutResumeNestedInput = {
     create?: XOR<JobApplicationCreateWithoutResumeInput, JobApplicationUncheckedCreateWithoutResumeInput> | JobApplicationCreateWithoutResumeInput[] | JobApplicationUncheckedCreateWithoutResumeInput[]
     connectOrCreate?: JobApplicationCreateOrConnectWithoutResumeInput | JobApplicationCreateOrConnectWithoutResumeInput[]
@@ -62272,6 +62681,13 @@ export namespace Prisma {
     not?: NestedEnumResumeVisibilityFilter<$PrismaModel> | $Enums.ResumeVisibility
   }
 
+  export type NestedEnumProcessingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcessingStatusFilter<$PrismaModel> | $Enums.ProcessingStatus
+  }
+
   export type NestedEnumResumeVisibilityWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.ResumeVisibility | EnumResumeVisibilityFieldRefInput<$PrismaModel>
     in?: $Enums.ResumeVisibility[] | ListEnumResumeVisibilityFieldRefInput<$PrismaModel>
@@ -62280,6 +62696,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumResumeVisibilityFilter<$PrismaModel>
     _max?: NestedEnumResumeVisibilityFilter<$PrismaModel>
+  }
+
+  export type NestedEnumProcessingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcessingStatus | EnumProcessingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcessingStatus[] | ListEnumProcessingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcessingStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcessingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProcessingStatusFilter<$PrismaModel>
+    _max?: NestedEnumProcessingStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumEnhancementTypeFilter<$PrismaModel = never> = {
@@ -62944,6 +63370,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationCreateNestedManyWithoutResumeInput
@@ -62978,6 +63416,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationUncheckedCreateNestedManyWithoutResumeInput
@@ -63760,6 +64210,18 @@ export namespace Prisma {
     completeness?: FloatNullableFilter<"Resume"> | number | null
     readabilityScore?: FloatNullableFilter<"Resume"> | number | null
     keywordMatch?: FloatNullableFilter<"Resume"> | number | null
+    s3Key?: StringNullableFilter<"Resume"> | string | null
+    s3Bucket?: StringNullableFilter<"Resume"> | string | null
+    s3Region?: StringNullableFilter<"Resume"> | string | null
+    originalFileName?: StringNullableFilter<"Resume"> | string | null
+    processingStatus?: EnumProcessingStatusFilter<"Resume"> | $Enums.ProcessingStatus
+    processingError?: StringNullableFilter<"Resume"> | string | null
+    lastParsedAt?: DateTimeNullableFilter<"Resume"> | Date | string | null
+    rawText?: StringNullableFilter<"Resume"> | string | null
+    markdownContent?: StringNullableFilter<"Resume"> | string | null
+    hasRMSMetadata?: BoolFilter<"Resume"> | boolean
+    rmsVersion?: StringNullableFilter<"Resume"> | string | null
+    rmsSchemaUrl?: StringNullableFilter<"Resume"> | string | null
     createdAt?: DateTimeFilter<"Resume"> | Date | string
     updatedAt?: DateTimeFilter<"Resume"> | Date | string
   }
@@ -69260,6 +69722,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationCreateNestedManyWithoutResumeInput
@@ -69294,6 +69768,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationUncheckedCreateNestedManyWithoutResumeInput
@@ -70033,6 +70519,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationCreateNestedManyWithoutResumeInput
@@ -70068,6 +70566,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     applications?: JobApplicationUncheckedCreateNestedManyWithoutResumeInput
@@ -70329,6 +70839,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUpdateManyWithoutResumeNestedInput
@@ -70364,6 +70886,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUncheckedUpdateManyWithoutResumeNestedInput
@@ -70755,6 +71289,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     enhancements?: ResumeEnhancementCreateNestedManyWithoutResumeInput
@@ -70790,6 +71336,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     enhancements?: ResumeEnhancementUncheckedCreateNestedManyWithoutResumeInput
@@ -71151,6 +71709,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     enhancements?: ResumeEnhancementUpdateManyWithoutResumeNestedInput
@@ -71186,6 +71756,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     enhancements?: ResumeEnhancementUncheckedUpdateManyWithoutResumeNestedInput
@@ -72995,6 +73577,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -73591,6 +74185,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUpdateManyWithoutResumeNestedInput
@@ -73625,6 +74231,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUncheckedUpdateManyWithoutResumeNestedInput
@@ -73658,6 +74276,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -75123,6 +75753,18 @@ export namespace Prisma {
     completeness?: number | null
     readabilityScore?: number | null
     keywordMatch?: number | null
+    s3Key?: string | null
+    s3Bucket?: string | null
+    s3Region?: string | null
+    originalFileName?: string | null
+    processingStatus?: $Enums.ProcessingStatus
+    processingError?: string | null
+    lastParsedAt?: Date | string | null
+    rawText?: string | null
+    markdownContent?: string | null
+    hasRMSMetadata?: boolean
+    rmsVersion?: string | null
+    rmsSchemaUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -75213,6 +75855,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUpdateManyWithoutResumeNestedInput
@@ -75247,6 +75901,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     applications?: JobApplicationUncheckedUpdateManyWithoutResumeNestedInput
@@ -75280,6 +75946,18 @@ export namespace Prisma {
     completeness?: NullableFloatFieldUpdateOperationsInput | number | null
     readabilityScore?: NullableFloatFieldUpdateOperationsInput | number | null
     keywordMatch?: NullableFloatFieldUpdateOperationsInput | number | null
+    s3Key?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Bucket?: NullableStringFieldUpdateOperationsInput | string | null
+    s3Region?: NullableStringFieldUpdateOperationsInput | string | null
+    originalFileName?: NullableStringFieldUpdateOperationsInput | string | null
+    processingStatus?: EnumProcessingStatusFieldUpdateOperationsInput | $Enums.ProcessingStatus
+    processingError?: NullableStringFieldUpdateOperationsInput | string | null
+    lastParsedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rawText?: NullableStringFieldUpdateOperationsInput | string | null
+    markdownContent?: NullableStringFieldUpdateOperationsInput | string | null
+    hasRMSMetadata?: BoolFieldUpdateOperationsInput | boolean
+    rmsVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    rmsSchemaUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

@@ -764,6 +764,27 @@ model Resume {
   completeness     Float?
   readabilityScore Float?
   keywordMatch     Float?
+
+  // S3 Storage fields
+  s3Key            String?             @unique
+  s3Bucket         String?
+  s3Region         String?
+  originalFileName String?
+
+  // Processing status and metadata
+  processingStatus ProcessingStatus    @default(PENDING)
+  processingError  String?
+  lastParsedAt     DateTime?
+
+  // Parsed content
+  rawText          String?             @db.Text
+  markdownContent  String?             @db.Text
+
+  // RMS (Resume Metadata Standard) tracking
+  hasRMSMetadata   Boolean             @default(false)
+  rmsVersion       String?
+  rmsSchemaUrl     String?             @default("https://github.com/rezi-io/resume-standard")
+
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
   applications     JobApplication[]
@@ -776,6 +797,9 @@ model Resume {
   @@index([visibility])
   @@index([aiEnhanced])
   @@index([createdAt])
+  @@index([s3Key])
+  @@index([processingStatus])
+  @@index([hasRMSMetadata])
   @@map("resumes")
 }
 
@@ -1324,6 +1348,16 @@ enum ResumeVisibility {
   PUBLIC
   RECRUITERS_ONLY
   SHARED_LINK
+}
+
+enum ProcessingStatus {
+  PENDING      // Upload received, not yet processed
+  PARSING      // Extracting text and structure
+  PARSED       // Successfully parsed
+  ENHANCING    // AI enhancement in progress
+  ENHANCED     // AI enhancement complete
+  FAILED       // Processing failed
+  ERROR        // Critical error occurred
 }
 
 enum EnhancementType {
