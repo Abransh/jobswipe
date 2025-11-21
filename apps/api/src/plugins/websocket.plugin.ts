@@ -132,29 +132,13 @@ const websocketPlugin = async (
 
     log.info('Creating Redis clients for Socket.IO adapter...');
 
-    // Create Redis clients for Socket.IO adapter
+    // Create Redis clients for Socket.IO adapter with lazy connection
+    // With lazyConnect: true, we DON'T call .connect() - the Socket.IO adapter
+    // will handle connections internally when needed
     const pubClient = new Redis(redisConfig);
     const subClient = pubClient.duplicate();
 
-    // Connect lazily - Socket.IO adapter will handle connection internally
-    // This prevents timeout issues with slow cloud Redis connections
-    try {
-      await Promise.race([
-        Promise.all([
-          pubClient.connect(),
-          subClient.connect(),
-        ]),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Redis connection timeout after 15s')), 15000)
-        ),
-      ]);
-
-      log.info('✅ Redis clients connected for WebSocket adapter');
-    } catch (connectError) {
-      log.warn('⚠️ Redis connection slow/failed, continuing with lazy connection');
-      log.warn(`Connection error: ${connectError}`);
-      // Continue anyway - Socket.IO adapter will retry connections
-    }
+    log.info('✅ Redis clients created (lazy connection - will connect on first use)');
 
     // Create Socket.IO server
     const io = new SocketIOServer(fastify.server, {
