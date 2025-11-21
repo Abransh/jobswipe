@@ -16,11 +16,10 @@ if not api_key:
 
 
 async def run_search():
-	llm = ChatGoogle(model='gemini-2.5-flash', api_key=api_key)
-
+	llm = ChatGoogle(model='gemini-flash-latest', api_key=api_key)
 	agent = Agent(
 		llm=llm,
-		task='go to "https://job-boards.greenhouse.io/anthropic/jobs/4948535008" and apply with random details ',
+		task='How many stars does the browser-use repo have?',
 		flash_mode=True,
 	)
 

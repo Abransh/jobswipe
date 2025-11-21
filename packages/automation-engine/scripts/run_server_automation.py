@@ -19,6 +19,8 @@ sys.path.insert(0, str(engine_path))
 try:
     from src.integrations.server_integration import execute_server_automation
     from src.core.proxy_manager import ProxyServer, ProxyManager
+    import browser_use
+    from browser_use.logging_config import setup_logging
 except ImportError as e:
     # Log the import error to stderr
     print(f"❌ IMPORT ERROR: {str(e)}", file=sys.stderr)
@@ -48,6 +50,9 @@ async def main():
     Main entry point for server automation
     Reads data from environment variables OR data file, executes automation, outputs JSON result
     """
+    # Configure browser-use logging to stderr to avoid polluting stdout (which is used for JSON result)
+    setup_logging(stream=sys.stderr)
+    print(f"🔍 Browser-Use Location: {os.path.dirname(browser_use.__file__)}", file=sys.stderr)
 
     try:
         # Read configuration from environment variables

@@ -197,14 +197,14 @@ class ExecutionContext:
 
     def _configure_for_server(self):
         """Configure context for server execution"""
-        # Server mode: visible browser (headful), with proxy
-        self.browser_config.headless = False
+        # Server mode: headless browser, with proxy
+        self.browser_config.headless = True
 
         # Ensure proxy is configured for server mode
         if self.proxy_config is None:
             self.logger.warning("Server mode without proxy configuration - this may cause rate limiting")
 
-        self.logger.info("ExecutionContext configured for SERVER mode (visible browser, with proxy)")
+        self.logger.info("ExecutionContext configured for SERVER mode (headless browser, with proxy)")
 
     def _configure_for_desktop(self):
         """Configure context for desktop execution"""
