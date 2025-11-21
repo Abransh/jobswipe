@@ -105,6 +105,10 @@ playwright/.cache/
 
 # Prisma
 packages/database/migrations/
+# Prisma engine binaries (generated during install)
+*.so.node
+*.node
+**/libquery_engine-*.node
 
 # =============================================================================
 # Cache & Temporary Files

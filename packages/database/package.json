@@ -8,19 +8,13 @@
     "build": "tsc && cp -r src/generated dist/generated",
     "dev": "tsc --watch",
     "clean": "rm -rf dist node_modules",
-    "db:generate": "npx prisma generate",
-
-    "db:push": "npx prisma db push",
-
-    "db:pull": "npx prisma db pull",
-
-    "db:migrate": "npx prisma migrate dev",
-
-    "db:deploy": "npx prisma migrate deploy",
-
-    "db:reset": "npx prisma migrate reset",
-
-    "db:studio": "npx prisma studio",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:pull": "prisma db pull",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:reset": "prisma migrate reset",
+    "db:studio": "prisma studio",
     "db:seed": "tsx seed/index.ts",
     "type-check": "tsc --noEmit"
   },
