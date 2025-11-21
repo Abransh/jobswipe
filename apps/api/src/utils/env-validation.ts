@@ -41,7 +41,7 @@ const JWTConfigSchema = z.object({
 const ServerConfigSchema = z.object({
   port: z.coerce.number().min(1).max(65535).default(3001),
   host: z.string().default('0.0.0.0'),
-  corsOrigin: z.string().transform(val => val.split(',')).default('http://localhost:3000'),
+  corsOrigin: z.string().transform(val => val.split(',')).default(() => ['http://localhost:3000']),
   corsCredentials: z.coerce.boolean().default(true),
 });
 
@@ -83,10 +83,17 @@ const ProxyConfigSchema = z.object({
 
 const QueueConfigSchema = z.object({
   enabled: z.coerce.boolean().default(true),
-  defaultJobOptions: z.string().transform(val => {
+  // default to a JSON string so zod always receives a string even when the env var is missing
+  defaultJobOptions: z.string().default(JSON.stringify({
+    removeOnComplete: 100,
+    removeOnFail: 50,
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 2000 }
+  })).transform(val => {
     try {
       return JSON.parse(val);
     } catch {
+      // fallback object if parsing somehow fails
       return {
         removeOnComplete: 100,
         removeOnFail: 50,
@@ -100,9 +107,10 @@ const QueueConfigSchema = z.object({
   stalledInterval: z.coerce.number().min(1000).default(30000),
 });
 
+
 const WebSocketConfigSchema = z.object({
   enabled: z.coerce.boolean().default(true),
-  corsOrigin: z.string().transform(val => val.split(',')).default('http://localhost:3000'),
+  corsOrigin: z.string().transform(val => val.split(',')).default(() => ['http://localhost:3000']),
   path: z.string().default('/socket.io'),
   transports: z.string().transform(val => {
     try {
@@ -276,7 +284,7 @@ export function validateEnvironment() {
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error('❌ Environment validation failed:');
-      error.errors.forEach(err => {
+      error.issues.forEach(err => {
         console.error(`  - ${err.path.join('.')}: ${err.message}`);
       });
 

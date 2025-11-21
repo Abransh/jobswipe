@@ -1,9 +1,9 @@
 {
   "version": 2,
   "name": "jobswipe-web",
-  "buildCommand": "cd ../.. && pnpm run build:web",
+  "buildCommand": "cd ../.. && cd packages/database && pnpm run db:generate && cd ../.. && pnpm --filter @jobswipe/shared build && pnpm --filter @jobswipe/database build && pnpm --filter @jobswipe/web build",
   "devCommand": "cd ../.. && pnpm run dev:web",
-  "installCommand": "cd ../.. && npm install -g pnpm && pnpm install --no-frozen-lockfile",
+  "installCommand": "npm install -g pnpm@latest && cd ../.. && pnpm install --frozen-lockfile --ignore-scripts",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {

@@ -15,7 +15,32 @@ from pathlib import Path
 engine_path = Path(__file__).parent.parent
 sys.path.insert(0, str(engine_path))
 
-from src.integrations.desktop_integration import execute_desktop_automation
+# Try to import with better error handling
+try:
+    from src.integrations.desktop_integration import execute_desktop_automation
+except ImportError as e:
+    # Log the import error to stderr
+    print(f"❌ IMPORT ERROR: {str(e)}", file=sys.stderr)
+    print(f"Traceback:", file=sys.stderr)
+    traceback.print_exc(file=sys.stderr)
+
+    # Return error JSON to stdout
+    error_output = {
+        "success": False,
+        "application_id": os.getenv('APPLICATION_ID', 'unknown'),
+        "execution_time_ms": 0,
+        "company_automation": "unknown",
+        "status": "failed",
+        "error_message": f"Import error: {str(e)}. Run: pip install -r requirements.txt",
+        "steps": [],
+        "screenshots": [],
+        "captcha_events": [],
+        "steps_completed": 0,
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "execution_mode": "desktop"
+    }
+    print(json.dumps(error_output))
+    sys.exit(1)
 
 
 async def main():
@@ -54,7 +79,7 @@ async def main():
                 "email": os.getenv('USER_EMAIL'),
                 "phone": os.getenv('USER_PHONE'),
               #  "resume_local_path": os.getenv('USER_RESUME_LOCAL_PATH'),
-               # "resume_url": os.getenv('USER_RESUME_URL'),
+                "resume_url": os.getenv('USER_RESUME_URL'),
                 "current_title": os.getenv('USER_CURRENT_TITLE'),
                 "years_experience": int(os.getenv('USER_YEARS_EXPERIENCE', '0')) or None,
                 "skills": json.loads(os.getenv('USER_SKILLS', '[]')),

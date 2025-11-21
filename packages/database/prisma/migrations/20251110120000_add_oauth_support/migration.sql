@@ -1,10 +1,10 @@
--- AlterTable: Add OAuth tracking fields to users table
+-- AlterTable: Add OAuth tracking fields to users table (IF NOT EXISTS)
 ALTER TABLE "users"
-  ADD COLUMN "oauth_providers" TEXT[] DEFAULT '{}',
-  ADD COLUMN "primary_auth_provider" TEXT;
+  ADD COLUMN IF NOT EXISTS "oauth_providers" TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS "primary_auth_provider" TEXT;
 
--- CreateTable: OAuth state management for CSRF protection
-CREATE TABLE "oauth_states" (
+-- CreateTable: OAuth state management for CSRF protection (IF NOT EXISTS)
+CREATE TABLE IF NOT EXISTS "oauth_states" (
     "id" TEXT NOT NULL,
     "state" TEXT NOT NULL,
     "code_verifier" TEXT,
@@ -18,17 +18,11 @@ CREATE TABLE "oauth_states" (
     CONSTRAINT "oauth_states_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "oauth_states_state_key" ON "oauth_states"("state");
-
--- CreateIndex
-CREATE INDEX "oauth_states_state_idx" ON "oauth_states"("state");
-
--- CreateIndex
-CREATE INDEX "oauth_states_expires_at_idx" ON "oauth_states"("expiresAt");
-
--- CreateIndex
-CREATE INDEX "oauth_states_provider_idx" ON "oauth_states"("provider");
+-- CreateIndex (IF NOT EXISTS)
+CREATE UNIQUE INDEX IF NOT EXISTS "oauth_states_state_key" ON "oauth_states"("state");
+CREATE INDEX IF NOT EXISTS "oauth_states_state_idx" ON "oauth_states"("state");
+CREATE INDEX IF NOT EXISTS "oauth_states_expires_at_idx" ON "oauth_states"("expires_at");
+CREATE INDEX IF NOT EXISTS "oauth_states_provider_idx" ON "oauth_states"("provider");
 
 -- Add comment for documentation
 COMMENT ON TABLE "oauth_states" IS 'Stores OAuth state tokens for CSRF protection during OAuth flows';

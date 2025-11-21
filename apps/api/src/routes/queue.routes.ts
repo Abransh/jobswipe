@@ -57,7 +57,7 @@ const JobApplicationRequestSchema = z.object({
   resumeId: z.string().uuid('Invalid resume ID format').optional(),
   coverLetter: z.string().max(2000, 'Cover letter too long').optional(),
   priority: z.number().int().min(1).max(10).default(5),
-  customFields: z.record(z.string()).optional(),
+  customFields: z.record(z.string(), z.string()).optional(),
   metadata: z.object({
     source: z.enum(['web', 'mobile', 'desktop']),
     deviceId: z.string().optional(),
@@ -541,14 +541,26 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
       }
     }
     
-    // Log desktop queue routing
+    // =============================================================================
+    // EXECUTION MODE DETERMINATION (P0-3: FREE User Deferral Logic)
+    // =============================================================================
+    // Determine execution mode based on user eligibility:
+    // - FREE users → Desktop execution (WAITING_FOR_DESKTOP)
+    // - PAID users → Server execution (QUEUED in BullMQ)
+
+    const executionMode: 'server' | 'desktop' = serverEligibility.allowed ? 'server' : 'desktop';
+    const initialStatus = QueueStatus.PENDING;
+
     request.server.log.info({
       ...enhancedLogContext,
-      event: 'desktop_queue_routing',
-      message: 'Routing application to desktop queue',
-      reason: serverEligibility.allowed ? 'server_automation_failed' : serverEligibility.reason
+      event: 'execution_mode_determined',
+      message: `Application routed to ${executionMode} execution`,
+      executionMode,
+      initialStatus,
+      eligible: serverEligibility.allowed,
+      reason: serverEligibility.reason
     });
-    
+
     // Start database transaction
     request.server.log.info({
       ...enhancedLogContext,
@@ -586,8 +598,8 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         data: {
           userId: user.id,
           jobPostingId: data.jobId,
-          status: QueueStatus.PENDING,
-          priority: data.priority === 10 ? 'IMMEDIATE' : 
+          status: initialStatus, // Use determined status based on execution mode
+          priority: data.priority === 10 ? 'IMMEDIATE' :
                    data.priority >= 8 ? 'URGENT' :
                    data.priority >= 6 ? 'HIGH' : 'NORMAL',
           useCustomResume: !!data.resumeId,
@@ -598,6 +610,7 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
             source: data.metadata.source,
             deviceId: data.metadata.deviceId,
             timestamp: new Date().toISOString(),
+            executionMode, // Track execution mode in config
           },
         },
       });
@@ -695,158 +708,261 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         });
       }
 
-      // Queue job application using BullMQ
-      if (request.server.queueService) {
-        // Transform data to match BullMQ JobData format
-        const queueJobData = {
-          jobId: data.jobId,
-          userId: user.id,
-          jobData: {
-            title: jobPosting.title,
-            company: jobPosting.company.name,
-            url: jobPosting.applyUrl || jobPosting.sourceUrl || '',
-            description: jobPosting.description,
-            requirements: jobPosting.requirements || '',
-            salary: jobPosting.salaryMin && jobPosting.salaryMax ? {
-              min: jobPosting.salaryMin,
-              max: jobPosting.salaryMax,
-              currency: jobPosting.currency || 'USD'
-            } : undefined,
-            location: jobPosting.location || `${jobPosting.city}, ${jobPosting.state}`,
-            remote: jobPosting.remote,
-            type: jobPosting.type.toString(),
-            level: jobPosting.level.toString(),
-          },
-          userProfile: {
-            resumeUrl: userProfile?.resumeUrl,
-            coverLetter: data.coverLetter,
-            preferences: {
-              firstName: userProfile?.firstName || user.email.split('@')[0],
-              lastName: userProfile?.lastName || 'User',
-              email: user.email,
-              phone: userProfile?.phone || '',
-              currentTitle: userProfile?.currentTitle,
-              yearsExperience: userProfile?.yearsExperience,
-              skills: userProfile?.skills || [],
-              currentLocation: userProfile?.currentLocation || jobPosting.location,
-              linkedinUrl: userProfile?.linkedinUrl,
-              workAuthorization: userProfile?.workAuthorization,
-              applicationId: queueEntry.id,
-            }
-          },
-          priority: data.priority,
-          metadata: {
-            source: data.metadata.source,
-            deviceId: data.metadata.deviceId,
-            timestamp: new Date().toISOString(),
-          }
-        };
-        
-        // Add job to BullMQ queue
-        try {
-          const isPriority = data.priority >= 8;
-          const queueJobId = await request.server.queueService.addJobApplication(queueJobData, isPriority);
-          
-          request.server.log.info({
-            ...enhancedLogContext,
-            event: 'bullmq_job_queued',
-            message: 'Application queued in BullMQ for processing',
-            queueJobId,
-            queueName: isPriority ? 'priority' : 'applications',
-            executionMode: 'worker'
-          });
-
-          // Emit WebSocket event for real-time updates
-          if (request.server.websocket) {
-            // Queue position update
-            const queuePosition = await getQueuePosition(snapshot.id);
-            const estimatedTime = calculateEstimatedTime(queuePosition, isPriority);
-
-            request.server.websocket.emitToUser(user.id, 'job-queued', {
-              applicationId: queueEntry.id,
-              queueJobId,
-              status: 'queued',
-              jobTitle: queueJobData.jobData.title,
-              company: queueJobData.jobData.company,
-              queuedAt: new Date().toISOString(),
-              isPriority,
-              queuePosition,
-              estimatedTime,
-              message: 'Job application has been queued for automation'
-            });
-
-            // Application status update
-            (request.server.websocket as any).emitApplicationStatusUpdate({
-              userId: user.id,
-              applicationId: queueEntry.id,
-              jobId: data.jobId,
-              jobTitle: queueJobData.jobData.title,
-              company: queueJobData.jobData.company,
-              status: 'queued',
-              queuePosition,
-              estimatedTime,
-              timestamp: new Date().toISOString()
-            });
-          }
-          
-          // Update the database entry with queue job ID
-          await tx.applicationQueue.update({
-            where: { id: queueEntry.id },
-            data: {
-              status: 'QUEUED',
-              automationConfig: {
-                ...queueEntry.automationConfig,
-                queueJobId,
-                queuedAt: new Date().toISOString(),
-                isPriority
-              }
-            }
-          });
-        } catch (queueError) {
-          request.server.log.error({
-            ...enhancedLogContext,
-            event: 'bullmq_queue_failed',
-            message: 'Failed to queue job in BullMQ - job saved for manual processing',
-            error: queueError instanceof Error ? queueError.message : String(queueError),
-            errorStack: queueError instanceof Error ? queueError.stack : undefined,
-            queueServiceAvailable: !!request.server.queueService,
-            websocketAvailable: !!request.server.websocket
-          });
-          
-          // Emit WebSocket event about queue failure
-          if (request.server.websocket) {
-            request.server.websocket.emitToUser(user.id, 'queue-failed', {
-              applicationId: queueEntry.id,
-              status: 'pending',
-              jobTitle: jobPosting.title,
-              company: jobPosting.company.name,
-              failedAt: new Date().toISOString(),
-              error: 'Failed to queue job - will be processed manually',
-              message: 'Job application saved but queuing failed'
-            });
-          }
-          
-          // Don't fail the entire request, just log the error
-          // The job is still saved in the database for manual processing
-        }
-      } else {
-        request.server.log.warn({
-          ...enhancedLogContext,
-          event: 'queue_service_unavailable',
-          message: 'Queue service not available - job saved for manual processing'
-        });
-      }
-      
+      // Return database IDs for post-transaction processing
       return {
         applicationId: queueEntry.id,
-        snapshotId: snapshot.id,
+        snapshotId: snapshot?.id,
         status: queueEntry.status,
         priority: queueEntry.priority,
+        queueEntry, // Return full object for BullMQ processing
+        jobPosting, // Return for BullMQ data
+        userProfile, // Return for BullMQ data
       };
     });
 
-    // WEBSOCKET PUSH: Immediately push job to desktop app (replaces polling!)
-    if (request.server.websocket) {
+    // =============================================================================
+    // POST-TRANSACTION: BullMQ Queue Addition with Compensating Transaction
+    // =============================================================================
+    // BullMQ addition happens OUTSIDE the database transaction to ensure atomicity.
+    // If BullMQ fails, we run a compensating transaction to delete orphaned records.
+    //
+    // CONDITIONAL ROUTING (P0-2: Duplicate Job Processing Fix):
+    // - Server execution → Add to BullMQ ONLY
+    // - Desktop execution → Skip BullMQ, push via WebSocket ONLY
+
+    let queueJobId: string | undefined;
+
+    if (executionMode === 'desktop') {
+      // FREE users: Skip BullMQ, route to desktop via WebSocket
+      request.server.log.info({
+        ...enhancedLogContext,
+        event: 'skipping_bullmq_for_desktop',
+        message: 'Skipping BullMQ addition - FREE user routed to desktop execution',
+        applicationId: result.applicationId,
+        status: initialStatus
+      });
+
+      // Jump to desktop WebSocket push section
+      // (handled after this block)
+    } else if (!request.server.jobQueue) {
+      request.server.log.error({
+        ...enhancedLogContext,
+        event: 'queue_service_unavailable',
+        message: 'CRITICAL: Queue service not available - cannot process application',
+        applicationId: result.applicationId
+      });
+
+      // Run compensating transaction: delete orphaned records
+      await request.server.db.$transaction(async (tx) => {
+        await tx.applicationQueue.delete({
+          where: { id: result.applicationId }
+        });
+        if (result.snapshotId) {
+          await tx.jobSnapshot.delete({
+            where: { id: result.snapshotId }
+          }).catch(() => {}); // Ignore if already deleted
+        }
+      });
+
+      return reply.code(503).send({
+        success: false,
+        error: 'Queue service unavailable - please try again later',
+        errorCode: 'QUEUE_SERVICE_UNAVAILABLE',
+        correlationId
+      });
+    } else {
+      // PAID users: Add to BullMQ for server execution
+      // Transform data to match BullMQ JobApplicationData format
+      const queueJobData = {
+        applicationId: result.applicationId,
+        userId: user.id,
+        jobData: {
+          id: data.jobId,
+          title: result.jobPosting.title,
+          company: result.jobPosting.company.name,
+          applyUrl: result.jobPosting.applyUrl || result.jobPosting.sourceUrl || '',
+          location: result.jobPosting.location || `${result.jobPosting.city}, ${result.jobPosting.state}`,
+          description: result.jobPosting.description,
+          requirements: result.jobPosting.requirements ? [result.jobPosting.requirements] : [],
+        },
+        userProfile: {
+          firstName: result.userProfile?.firstName || user.email.split('@')[0],
+          lastName: result.userProfile?.lastName || 'User',
+          email: user.email,
+          phone: result.userProfile?.phone || '',
+          resumeUrl: result.userProfile?.resumeUrl,
+          currentTitle: result.userProfile?.currentTitle,
+          yearsExperience: result.userProfile?.yearsExperience,
+          skills: result.userProfile?.skills || [],
+          currentLocation: result.userProfile?.currentLocation || result.jobPosting.location,
+          linkedinUrl: result.userProfile?.linkedinUrl,
+          workAuthorization: result.userProfile?.workAuthorization,
+          coverLetter: data.coverLetter,
+        },
+        executionMode: 'server' as const,
+        options: {
+          priority: data.priority,
+          headless: true,
+          timeout: 900000, // 15 minutes
+          maxRetries: 3,
+        }
+      };
+
+    // Add job to BullMQ queue with proper error handling
+    try {
+      const isPriority = data.priority >= 8;
+      const job = await request.server.jobQueue!.add(
+        'job-application',
+        queueJobData,
+        {
+          jobId: result.applicationId,
+          priority: isPriority ? 1 : 5,
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 5000
+          }
+        }
+      );
+      queueJobId = job.id as string;
+
+      request.server.log.info({
+        ...enhancedLogContext,
+        event: 'bullmq_job_queued',
+        message: 'Application successfully queued in BullMQ',
+        queueJobId,
+        applicationId: result.applicationId,
+        queueName: isPriority ? 'priority' : 'applications',
+        executionMode: 'worker'
+      });
+
+      // Update database with BullMQ job ID
+      await request.server.db.applicationQueue.update({
+        where: { id: result.applicationId },
+        data: {
+          status: 'QUEUED',
+          automationConfig: {
+            ...(result.queueEntry.automationConfig as any || {}),
+            queueJobId,
+            queuedAt: new Date().toISOString(),
+            isPriority
+          }
+        }
+      });
+
+      // Emit WebSocket event for real-time updates
+      if (request.server.websocket) {
+        const queuePosition = await getQueuePosition(result.snapshotId);
+        const estimatedTime = calculateEstimatedTime(queuePosition, isPriority);
+
+        request.server.websocket.emitToUser(user.id, 'job-queued', {
+          applicationId: result.applicationId,
+          queueJobId,
+          status: 'queued',
+          jobTitle: queueJobData.jobData.title,
+          company: queueJobData.jobData.company,
+          queuedAt: new Date().toISOString(),
+          isPriority,
+          queuePosition,
+          estimatedTime,
+          message: 'Job application has been queued for automation'
+        });
+
+        (request.server.websocket as any).emitApplicationStatusUpdate({
+          userId: user.id,
+          applicationId: result.applicationId,
+          jobId: data.jobId,
+          jobTitle: queueJobData.jobData.title,
+          company: queueJobData.jobData.company,
+          status: 'queued',
+          queuePosition,
+          estimatedTime,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+    } catch (queueError) {
+      // CRITICAL: BullMQ addition failed after DB commit
+      // Run compensating transaction to maintain data consistency
+      request.server.log.error({
+        ...enhancedLogContext,
+        event: 'bullmq_queue_failed_compensating',
+        message: 'CRITICAL: BullMQ queue addition failed - running compensating transaction',
+        error: queueError instanceof Error ? queueError.message : String(queueError),
+        errorStack: queueError instanceof Error ? queueError.stack : undefined,
+        applicationId: result.applicationId,
+        action: 'deleting_orphaned_records'
+      });
+
+      // Compensating transaction: delete orphaned database records
+      try {
+        await request.server.db.$transaction(async (tx) => {
+          // Delete the queue entry
+          await tx.applicationQueue.delete({
+            where: { id: result.applicationId }
+          });
+
+          // Delete the job snapshot if it exists
+          if (result.snapshotId) {
+            await tx.jobSnapshot.delete({
+              where: { id: result.snapshotId }
+            }).catch((deleteError) => {
+              request.server.log.warn({
+                ...enhancedLogContext,
+                event: 'snapshot_deletion_failed',
+                message: 'Failed to delete job snapshot in compensating transaction',
+                error: deleteError instanceof Error ? deleteError.message : String(deleteError),
+                snapshotId: result.snapshotId
+              });
+            });
+          }
+
+          // Delete the swipe record to allow retry
+          await tx.userJobSwipe.deleteMany({
+            where: {
+              userId: user.id,
+              jobPostingId: data.jobId
+            }
+          }).catch(() => {}); // Ignore if already deleted
+        });
+
+        request.server.log.info({
+          ...enhancedLogContext,
+          event: 'compensating_transaction_completed',
+          message: 'Successfully cleaned up orphaned records',
+          applicationId: result.applicationId
+        });
+      } catch (compensatingError) {
+        // If compensating transaction fails, we have a serious data inconsistency
+        request.server.log.error({
+          ...enhancedLogContext,
+          event: 'compensating_transaction_failed',
+          message: 'CRITICAL: Compensating transaction failed - data inconsistency detected',
+          error: compensatingError instanceof Error ? compensatingError.message : String(compensatingError),
+          errorStack: compensatingError instanceof Error ? compensatingError.stack : undefined,
+          applicationId: result.applicationId,
+          requiresManualCleanup: true
+        });
+      }
+
+      // Return error to user - do NOT lie about success
+      return reply.code(500).send({
+        success: false,
+        error: 'Failed to queue job application - please try again',
+        errorCode: 'QUEUE_ADDITION_FAILED',
+        correlationId,
+        retryable: true
+      });
+    }
+    } // End of server execution BullMQ block
+
+    // =============================================================================
+    // DESKTOP EXECUTION: WebSocket Push to Desktop App
+    // =============================================================================
+    // For FREE users (executionMode === 'desktop'), push job via WebSocket to desktop app
+    // For PAID users (executionMode === 'server'), skip this section
+
+    if (executionMode === 'desktop' && request.server.websocket) {
       try {
         // Get the full job data with snapshot for desktop
         const fullApplication = await request.server.db.applicationQueue.findUnique({
@@ -920,31 +1036,46 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
 
     const processingTime = Date.now() - startTime;
 
+    // Prepare response data based on execution mode
+    const responseData: any = {
+      applicationId: result.applicationId,
+      snapshotId: result.snapshotId,
+      status: executionMode === 'desktop' ? 'WAITING_FOR_DESKTOP' : 'QUEUED',
+      priority: result.priority,
+      executionMode,
+      serverAutomation: {
+        eligible: serverEligibility.allowed,
+        reason: serverEligibility.reason,
+        remainingServerApplications: serverEligibility.remainingServerApplications,
+        upgradeRequired: serverEligibility.upgradeRequired,
+        suggestedAction: serverEligibility.suggestedAction
+      }
+    };
+
+    // Add queueJobId only for server execution
+    if (executionMode === 'server') {
+      responseData.queueJobId = queueJobId;
+    }
+
+    const successMessage = executionMode === 'server'
+      ? 'Job application queued successfully for server processing'
+      : 'Job application queued successfully for desktop processing';
+
     request.server.log.info({
       ...enhancedLogContext,
       event: 'request_completed_success',
-      message: 'Job application request completed successfully',
+      message: successMessage,
       processingTimeMs: processingTime,
       applicationId: result.applicationId,
+      executionMode,
+      queueJobId: executionMode === 'server' ? queueJobId : undefined,
       queuePosition: await getQueuePosition(result.snapshotId)
     });
 
     return reply.code(201).send({
       success: true,
-      data: {
-        ...result,
-        executionMode: 'desktop',
-        serverAutomation: {
-          eligible: serverEligibility.allowed,
-          reason: serverEligibility.reason,
-          remainingServerApplications: serverEligibility.remainingServerApplications,
-          upgradeRequired: serverEligibility.upgradeRequired,
-          suggestedAction: serverEligibility.suggestedAction
-        }
-      },
-      message: serverEligibility.allowed 
-        ? 'Server automation not available - job queued for desktop processing'
-        : `Server automation limit reached - ${serverEligibility.reason}. Download desktop app for unlimited applications.`,
+      data: responseData,
+      message: successMessage,
       correlationId,
       processingTime: processingTime
     });
@@ -958,13 +1089,13 @@ async function applyHandler(request: AuthenticatedRequest, reply: FastifyReply) 
         event: 'request_validation_failed',
         message: 'Job application request validation failed',
         processingTimeMs: processingTime,
-        validationErrors: error.errors
+        validationErrors: error.issues
       });
       
       return reply.code(400).send({
         success: false,
         error: 'Validation failed',
-        details: error.errors,
+        details: error.issues,
         errorCode: 'VALIDATION_ERROR',
         correlationId
       });
@@ -1112,7 +1243,7 @@ async function getApplicationsHandler(request: AuthenticatedRequest, reply: Fast
       return reply.code(400).send({
         success: false,
         error: 'Validation failed',
-        details: error.errors,
+        details: error.issues,
         errorCode: 'VALIDATION_ERROR',
       });
     }
@@ -1374,7 +1505,7 @@ async function applicationActionHandler(request: AuthenticatedRequest, reply: Fa
       return reply.code(400).send({
         success: false,
         error: 'Validation failed',
-        details: error.errors,
+        details: error.issues,
         errorCode: 'VALIDATION_ERROR',
       });
     }

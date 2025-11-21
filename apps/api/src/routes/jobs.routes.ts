@@ -15,11 +15,11 @@ import { randomUUID } from 'crypto';
 // =============================================================================
 
 const JobSwipeRequestSchema = z.object({
-  direction: z.enum(['LEFT', 'RIGHT'], { required_error: 'Direction is required' }),
+  direction: z.enum(['LEFT', 'RIGHT'], { message: 'Direction is required' }),
   resumeId: z.string().uuid('Invalid resume ID format').optional(),
   coverLetter: z.string().max(2000, 'Cover letter too long').optional(),
   priority: z.number().int().min(1).max(10).default(5),
-  customFields: z.record(z.string()).optional(),
+  customFields: z.record(z.string(), z.string()).optional(),
   metadata: z.object({
     source: z.enum(['web', 'mobile']).default('web'),
     deviceId: z.string().optional(),
@@ -1002,13 +1002,13 @@ const jobsRoutes: FastifyPluginAsync = async function (fastify) {
           event: 'swipe_validation_failed',
           message: 'Job swipe validation failed',
           processingTimeMs: processingTime,
-          validationErrors: error.errors,
+          validationErrors: error.issues,
         });
 
         return reply.code(400).send({
           success: false,
           error: 'Validation failed',
-          details: error.errors,
+          details: error.issues,
           errorCode: 'VALIDATION_ERROR',
           correlationId,
         });

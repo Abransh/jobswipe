@@ -469,6 +469,7 @@ export class ServerAutomationService extends EventEmitter {
         // Collect stdout
         pythonProcess.stdout?.on('data', (data) => {
           const output = data.toString();
+          this.fastify.log.error(`[Python stderr]: ${output}`);
           stdout += output;
           this.fastify.log.debug({
             ...logContext,

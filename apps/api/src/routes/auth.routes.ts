@@ -322,6 +322,15 @@ async function registerHandler(
     });
     
   } catch (error) {
+    // Log detailed error for debugging
+    request.log.error({
+      error,
+      email: request.body?.email,
+      source: request.body?.source,
+      stack: error instanceof Error ? error.stack : undefined,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 'Registration failed');
+
     if (error instanceof Error && error.message.includes('User already exists')) {
       return reply.status(409).send({
         success: false,
@@ -329,8 +338,8 @@ async function registerHandler(
         errorCode: AuthErrorCode.CONFLICT,
       });
     }
-    
-    // Registration error handled
+
+    // Return generic error to user for security
     return reply.status(500).send({
       success: false,
       error: 'Registration failed',
@@ -433,7 +442,16 @@ async function loginHandler(
     });
     
   } catch (error) {
-    // Login error handled
+    // Log detailed error for debugging
+    request.log.error({
+      error,
+      email: request.body?.email,
+      source: request.body?.source,
+      stack: error instanceof Error ? error.stack : undefined,
+      message: error instanceof Error ? error.message : 'Unknown error',
+    }, 'Login failed');
+
+    // Return generic error to user for security
     return reply.status(500).send({
       success: false,
       error: 'Login failed',

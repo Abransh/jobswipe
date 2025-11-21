@@ -744,6 +744,14 @@ async function monitoringPlugin(fastify: FastifyInstance) {
             monitoring: { type: 'object' },
           },
         },
+        503: {
+          type: 'object',
+          properties: {
+            status: { type: 'string' },
+            timestamp: { type: 'string' },
+            monitoring: { type: 'object' },
+          },
+        },
       },
     },
   }, async (request, reply) => {

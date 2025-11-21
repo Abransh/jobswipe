@@ -365,6 +365,22 @@ const databasePlugin: FastifyPluginAsync<DatabasePluginOptions> = async (
             },
             timestamp: { type: 'string', format: 'date-time' }
           }
+        },
+        503: {
+          type: 'object',
+          properties: {
+            status: { type: 'string', enum: ['healthy', 'degraded', 'unhealthy'] },
+            details: {
+              type: 'object',
+              properties: {
+                connected: { type: 'boolean' },
+                connectionCount: { type: 'number' },
+                lastQuery: { type: 'string', format: 'date-time' },
+                error: { type: 'string' }
+              }
+            },
+            timestamp: { type: 'string', format: 'date-time' }
+          }
         }
       }
     }

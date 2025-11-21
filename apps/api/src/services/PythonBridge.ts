@@ -112,7 +112,7 @@ export class PythonBridge extends EventEmitter {
     super();
 
     this.config = {
-      pythonPath: config?.pythonPath || process.env.PYTHON_PATH || path.join(__dirname, '../../../desktop/venv/bin/python'),
+      pythonPath: config?.pythonPath || process.env.PYTHON_PATH || path.join(__dirname, '../../../../venv/bin/python'),
       // Updated to point to unified automation engine
       companiesPath: config?.companiesPath || process.env.PYTHON_COMPANIES_PATH || path.join(__dirname, '../../../../packages/automation-engine/scripts'),
       timeout: config?.timeout || parseInt(process.env.PYTHON_TIMEOUT || '120000'), // 2 minutes
@@ -141,7 +141,7 @@ export class PythonBridge extends EventEmitter {
    * Execute Python automation script with standardized data passing
    */
   async executePythonAutomation(
-    companyAutomation: string, 
+    companyAutomation: string,
     request: PythonExecutionRequest
   ): Promise<PythonExecutionResult> {
     const logContext = {
@@ -163,19 +163,19 @@ export class PythonBridge extends EventEmitter {
     try {
       // Validate script exists
       const scriptPath = await this.validateScript(companyAutomation);
-      
+
       // Prepare environment variables
       const env = this.createExecutionEnvironment(request);
-      
+
       // Create temporary data file for complex data structures
       const dataFilePath = await this.createDataFile(request);
-      
+
       // Execute Python script
       const result = await this.runPythonScript(scriptPath, env, dataFilePath, logContext);
-      
+
       // Cleanup temporary file
       await this.cleanupDataFile(dataFilePath);
-      
+
       this.fastify.log.info({
         ...logContext,
         event: 'python_execution_completed',
@@ -218,7 +218,7 @@ export class PythonBridge extends EventEmitter {
    */
   private async validateScript(companyAutomation: string): Promise<string> {
     const scriptPath = this.getScriptPath(companyAutomation);
-    
+
     // Validate Python executable
     try {
       await fs.access(this.config.pythonPath);
@@ -230,7 +230,7 @@ export class PythonBridge extends EventEmitter {
     } catch (error) {
       throw new Error(`Python executable not found: ${this.config.pythonPath}. Make sure virtual environment is set up.`);
     }
-    
+
     // Validate script exists
     try {
       await fs.access(scriptPath);
@@ -270,17 +270,17 @@ export class PythonBridge extends EventEmitter {
   private createExecutionEnvironment(request: PythonExecutionRequest): NodeJS.ProcessEnv {
     return {
       ...process.env,
-      
+
       // Request identifiers
       CORRELATION_ID: request.correlationId,
       APPLICATION_ID: request.applicationId,
       USER_ID: request.userId,
       JOB_ID: request.jobData.id,
-      
+
       // Execution mode
       EXECUTION_MODE: 'server',
       DATA_SOURCE: 'bridge',
-      
+
       // API keys (only pass if defined to avoid "undefined" string)
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
       OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
@@ -290,7 +290,7 @@ export class PythonBridge extends EventEmitter {
       ...(process.env.NODE_ENV === 'development' && {
         _DEBUG_API_KEYS: `ANTHROPIC:${!!process.env.ANTHROPIC_API_KEY},OPENAI:${!!process.env.OPENAI_API_KEY},GOOGLE:${!!process.env.GOOGLE_API_KEY}`
       }),
-      
+
       // Automation configuration
       AUTOMATION_HEADLESS: (request.automationConfig.headless !== false).toString(),
       AUTOMATION_TIMEOUT: (request.automationConfig.timeout || this.config.timeout).toString(),
@@ -307,7 +307,7 @@ export class PythonBridge extends EventEmitter {
         password: request.proxyConfig.password,
         type: request.proxyConfig.type
       }) : undefined,
-      
+
       // Basic user data (for simple access)
       USER_FIRST_NAME: request.userProfile.firstName,
       USER_LAST_NAME: request.userProfile.lastName,
@@ -318,18 +318,18 @@ export class PythonBridge extends EventEmitter {
       USER_CURRENT_LOCATION: request.userProfile.currentLocation || '',
       USER_WORK_AUTHORIZATION: request.userProfile.workAuthorization || '',
       USER_LINKEDIN_URL: request.userProfile.linkedinUrl || '',
-      
+
       // Job data
       JOB_TITLE: request.jobData.title,
       JOB_COMPANY: request.jobData.company,
       JOB_APPLY_URL: request.jobData.applyUrl,
       JOB_LOCATION: request.jobData.location || '',
       JOB_DESCRIPTION: request.jobData.description || '',
-      
+
       // Resume handling
-  //    USER_RESUME_URL: request.userProfile.resumeUrl || '',
+      USER_RESUME_URL: request.userProfile.resumeUrl || '',
       USER_RESUME_LOCAL_PATH: request.userProfile.resumeLocalPath || '',
-      
+
       // Cover letter and custom fields
       USER_COVER_LETTER: request.userProfile.coverLetter || '',
       USER_SKILLS: JSON.stringify(request.userProfile.skills || []),
@@ -344,11 +344,11 @@ export class PythonBridge extends EventEmitter {
     if (!requirements) {
       return ['General requirements'];
     }
-    
+
     if (Array.isArray(requirements)) {
       return requirements.filter(req => req && typeof req === 'string');
     }
-    
+
     if (typeof requirements === 'string') {
       // Split by common delimiters or return as single item array
       const trimmed = requirements.trim();
@@ -360,7 +360,7 @@ export class PythonBridge extends EventEmitter {
         return [trimmed];
       }
     }
-    
+
     // Fallback for unexpected types
     return ['General requirements'];
   }
@@ -371,7 +371,7 @@ export class PythonBridge extends EventEmitter {
   private async createDataFile(request: PythonExecutionRequest): Promise<string> {
     const dataFileName = `job_data_${request.applicationId}_${Date.now()}.json`;
     const dataFilePath = path.join('/tmp', dataFileName);
-    
+
     // Transform data to match Python script expectations
     const dataPayload = {
       user_profile: {
@@ -408,9 +408,9 @@ export class PythonBridge extends EventEmitter {
         timestamp: new Date().toISOString()
       }
     };
-    
+
     await fs.writeFile(dataFilePath, JSON.stringify(dataPayload, null, 2), 'utf8');
-    
+
     this.fastify.log.debug({
       correlationId: request.correlationId,
       event: 'data_file_created',
@@ -418,7 +418,7 @@ export class PythonBridge extends EventEmitter {
       dataFilePath,
       dataSize: JSON.stringify(dataPayload).length
     });
-    
+
     return dataFilePath;
   }
 
@@ -426,20 +426,20 @@ export class PythonBridge extends EventEmitter {
    * Execute the Python script and parse results
    */
   private async runPythonScript(
-    scriptPath: string, 
-    env: NodeJS.ProcessEnv, 
+    scriptPath: string,
+    env: NodeJS.ProcessEnv,
     dataFilePath: string,
     logContext: Record<string, any>
   ): Promise<PythonExecutionResult> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
-      
+
       // Add data file path to environment
       const scriptEnv = {
         ...env,
         JOB_DATA_FILE: dataFilePath
       };
-      
+
       // Debug log the execution environment
       this.fastify.log.info({
         ...logContext,
@@ -451,7 +451,7 @@ export class PythonBridge extends EventEmitter {
         dataSource: env.DATA_SOURCE,
         dataFilePath: scriptEnv.JOB_DATA_FILE
       });
-      
+
       // Spawn Python process
       const pythonProcess = spawn(this.config.pythonPath, [scriptPath], {
         env: scriptEnv,
@@ -468,7 +468,7 @@ export class PythonBridge extends EventEmitter {
       pythonProcess.stdout?.on('data', (data) => {
         const output = data.toString();
         stdout += output;
-        
+
         this.fastify.log.debug({
           ...logContext,
           event: 'python_stdout',
@@ -481,8 +481,8 @@ export class PythonBridge extends EventEmitter {
       pythonProcess.stderr?.on('data', (data) => {
         const output = data.toString();
         stderr += output;
-        
-        this.fastify.log.debug({
+
+        this.fastify.log.info({
           ...logContext,
           event: 'python_stderr',
           message: 'Python script error output',
@@ -503,7 +503,7 @@ export class PythonBridge extends EventEmitter {
             // Mark as failed but still return the parsed result for debugging
             result.success = false;
             result.error = result.error || `Python process exited with code ${code}: ${stderr}`;
-            
+
             this.fastify.log.warn({
               ...logContext,
               event: 'python_non_zero_exit',
@@ -516,10 +516,10 @@ export class PythonBridge extends EventEmitter {
           resolve(result);
         } catch (parseError) {
           // If parsing fails and exit code is non-zero, this is a complete failure
-          const errorMessage = code === 0 
+          const errorMessage = code === 0
             ? `Failed to parse Python output: ${parseError}`
             : `Python process failed with code ${code}. Stderr: ${stderr}. Parse error: ${parseError}`;
-          
+
           this.fastify.log.error({
             ...logContext,
             event: 'python_complete_failure',
@@ -529,7 +529,7 @@ export class PythonBridge extends EventEmitter {
             stderr: stderr.trim(),
             stdout: stdout.slice(0, 500) // Log first 500 chars for debugging
           });
-          
+
           reject(new Error(errorMessage));
         }
       });
@@ -559,8 +559,8 @@ export class PythonBridge extends EventEmitter {
    * Parse Python execution result from stdout
    */
   private parseExecutionResult(
-    stdout: string, 
-    logContext: Record<string, any>, 
+    stdout: string,
+    logContext: Record<string, any>,
     executionTime: number
   ): PythonExecutionResult {
     try {
@@ -652,13 +652,13 @@ export class PythonBridge extends EventEmitter {
     }, 5000);
 
     this.activeProcesses.delete(applicationId);
-    
+
     this.fastify.log.info({
       event: 'python_execution_stopped',
       message: 'Python execution stopped',
       applicationId
     });
-    
+
     return true;
   }
 

@@ -1,7 +1,27 @@
 import { PrismaClient } from './generated';
-// Temporary stubs for missing @jobswipe/shared package
-const hashPassword = async (password: string) => password; // TODO: implement proper hashing
-const verifyPassword = async (password: string, hash: string) => password === hash; // TODO: implement proper verification
+import { hash, compare } from 'bcryptjs';
+
+// Password hashing configuration
+const SALT_ROUNDS = 12;
+
+/**
+ * Hash password using bcryptjs
+ * @param password - Plain text password to hash
+ * @returns Bcrypt hashed password
+ */
+const hashPassword = async (password: string): Promise<string> => {
+  return await hash(password, SALT_ROUNDS);
+};
+
+/**
+ * Verify password against bcrypt hash
+ * @param password - Plain text password to verify
+ * @param hash - Bcrypt hash to compare against
+ * @returns True if password matches hash
+ */
+const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+  return await compare(password, hash);
+};
 
 // Singleton pattern for Prisma client
 const globalForPrisma = globalThis as unknown as {
@@ -26,7 +46,8 @@ export * from './generated';
  */
 export async function getUserById(id: string) {
   try {
-    return await db.user.findUnique({
+    return await db.user.
+    findUnique({
       where: { id },
       include: {
         profile: true,

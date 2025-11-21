@@ -770,3 +770,4 @@ export const resumeRoutes: FastifyPluginAsync = async (fastify) => {
 };
 
 export default resumeRoutes;
+

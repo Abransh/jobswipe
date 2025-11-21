@@ -38,7 +38,7 @@ async function authMiddleware(request: AuthRequest, reply: FastifyReply): Promis
       id: (tokenResult.payload.sub || (tokenResult.payload as any).userId) as UserId,
       email: tokenResult.payload.email,
       role: tokenResult.payload.role,
-      status: tokenResult.payload.status,
+      status: (tokenResult.payload as any).status,
       createdAt: new Date(),
       updatedAt: new Date(),
       ...tokenResult.payload,
@@ -71,7 +71,7 @@ const progressSchema = z.object({
       currentCountryWorkAuth: z.string().optional(),
       interestedInInternational: z.boolean().optional(),
       targetRegions: z.array(z.string()).optional(),
-      workAuthByRegion: z.record(z.string()).optional(),
+      workAuthByRegion: z.record(z.string(), z.string()).optional(),
     }).optional(),
   })
 });
@@ -92,7 +92,7 @@ const completeSchema = z.object({
       currentCountryWorkAuth: z.string().optional(),
       interestedInInternational: z.boolean(),
       targetRegions: z.array(z.string()).optional(),
-      workAuthByRegion: z.record(z.string()).optional(),
+      workAuthByRegion: z.record(z.string(), z.string()).optional(),
     }),
   })
 });
@@ -167,7 +167,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
         return reply.status(400).send({
           success: false,
           error: 'Invalid request data',
-          details: validation.error.errors
+          details: validation.error.issues
         });
       }
 
@@ -286,7 +286,7 @@ export async function registerOnboardingRoutes(server: FastifyInstance) {
         return reply.status(400).send({
           success: false,
           error: 'Invalid request data',
-          details: validation.error.errors
+          details: validation.error.issues
         });
       }
 

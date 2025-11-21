@@ -86,14 +86,14 @@ async function triggerAutomation(
   try {
     const { applicationId, userId, jobId, jobData, userProfile, executionMode, priority } = request.body;
 
-    request.log.info('🤖 Automation trigger received:', {
+    request.log.info( {
       applicationId,
       userId,
       jobId,
       jobTitle: jobData.title,
       company: jobData.company,
       executionMode
-    });
+    }, '🤖 Automation trigger received:',);
 
     // Check if automation service is available
     if (!request.server.automationService) {
@@ -105,57 +105,53 @@ async function triggerAutomation(
       });
     }
 
-    // Transform data for AutomationService
-    const automationData = {
+    // Transform data for AutomationService.queueApplication()
+    const applicationData = {
       userId,
       jobData: {
-        job_id: jobData.id,
+        id: jobData.id,
         title: jobData.title,
         company: jobData.company,
-        apply_url: jobData.applyUrl,
+        applyUrl: jobData.applyUrl,
         location: jobData.location,
-        description: jobData.description
+        description: jobData.description,
       },
       userProfile: {
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
         email: userProfile.email,
-        phone: userProfile.phone,
-        resume: userProfile.resume
+        phone: userProfile.phone || '',
+        resumeUrl: userProfile.resume?.url,
       },
       options: {
-        execution_mode: executionMode,
-        priority: priority.toLowerCase(),
-        application_id: applicationId
+        headless: true,
+        timeout: 900000, // 15 minutes
+        maxRetries: 3,
       }
     };
 
-    // Execute automation
-    const result = await request.server.automationService.executeJobApplication(
-      automationData.jobData,
-      automationData.userProfile,
-      automationData.options
-    );
+    // Queue the application for automation
+    const queuedApplicationId = await request.server.automationService.queueApplication(applicationData);
 
-    request.log.info('✅ Automation executed successfully:', {
-      applicationId,
-      status: result.status,
-      executionMode: result.executionMode
-    });
+    request.log.info( {
+      applicationId: queuedApplicationId,
+      status: 'QUEUED',
+      executionMode: executionMode
+    }, '✅ Automation queued successfully');
 
     return reply.send({
       success: true,
       data: {
-        applicationId,
-        status: result.status,
-        executionMode: result.executionMode,
-        message: result.message,
-        progress: result.progress || 0
+        applicationId: queuedApplicationId,
+        status: 'QUEUED',
+        executionMode: executionMode,
+        message: 'Application queued for automation processing',
+        progress: 0
       }
     });
 
   } catch (error) {
-    request.log.error('❌ Automation execution failed:', error);
+    request.log.error({err: error, msg: '❌ Automation execution failed:'});
 
     return reply.code(500).send({
       success: false,
@@ -177,8 +173,8 @@ async function getAutomationStatus(
   try {
     const { applicationId } = request.params;
 
-    // Check if application queue service is available
-    if (!request.server.applicationQueue) {
+    // Check if job queue service is available
+    if (!request.server.jobQueue) {
       return reply.code(503).send({
         success: false,
         error: 'Queue service not available'
@@ -186,7 +182,7 @@ async function getAutomationStatus(
     }
 
     // Get application status from queue
-    const job = await request.server.applicationQueue.getJob(applicationId);
+    const job = await request.server.jobQueue.getJob(applicationId);
 
     if (!job) {
       return reply.code(404).send({
@@ -212,7 +208,7 @@ async function getAutomationStatus(
     });
 
   } catch (error) {
-    request.log.error('❌ Failed to get automation status:', error);
+    request.log.error({err: error, msg:'❌ Failed to get automation status:'});
 
     return reply.code(500).send({
       success: false,
@@ -234,8 +230,8 @@ async function cancelAutomation(
   try {
     const { applicationId } = request.params;
 
-    // Check if application queue service is available
-    if (!request.server.applicationQueue) {
+    // Check if job queue service is available
+    if (!request.server.jobQueue) {
       return reply.code(503).send({
         success: false,
         error: 'Queue service not available'
@@ -243,7 +239,7 @@ async function cancelAutomation(
     }
 
     // Cancel job in queue
-    const job = await request.server.applicationQueue.getJob(applicationId);
+    const job = await request.server.jobQueue.getJob(applicationId);
 
     if (!job) {
       return reply.code(404).send({
@@ -256,7 +252,7 @@ async function cancelAutomation(
     // Cancel the job
     await job.remove();
 
-    request.log.info('🚫 Automation cancelled:', { applicationId });
+    request.log.info({ applicationId }, '🚫 Automation cancelled:');
 
     return reply.send({
       success: true,
@@ -268,7 +264,7 @@ async function cancelAutomation(
     });
 
   } catch (error) {
-    request.log.error('❌ Failed to cancel automation:', error);
+    request.log.error({err: error, msg: '❌ Failed to cancel automation:'});
 
     return reply.code(500).send({
       success: false,

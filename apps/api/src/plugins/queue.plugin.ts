@@ -1,953 +1,28 @@
 /**
- * @fileoverview Queue Management Plugin for Fastify
- * @description Enterprise-grade job application queue system using Redis + BullMQ
- * @version 1.0.0
+ * @fileoverview Queue Plugin - BullMQ Integration for Fastify
+ * @description Production-grade distributed queue system with Redis + PostgreSQL dual persistence
+ * @version 2.0.0 (REWRITTEN)
  * @author JobSwipe Team
- * @security Production-level queue processing with comprehensive error handling
+ *
+ * ARCHITECTURE:
+ * - Redis (BullMQ): Queue state, job processing, real-time operations
+ * - PostgreSQL: Permanent record, audit trail, source of truth
+ * - Dual-persistence: Database FIRST, then queue to BullMQ
  */
 
-import { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import fastifyPlugin from 'fastify-plugin';
-import { Queue, Worker, Job, QueueEvents } from 'bullmq';
-import { Redis } from 'ioredis';
-import { QueueStatus } from '@jobswipe/database';
-import type { WebSocketService } from './websocket.plugin';
-
-// =============================================================================
-// INTERFACES & TYPES
-// =============================================================================
-
-interface QueueConfig {
-  redis: {
-    host: string;
-    port: number;
-    password?: string;
-    db?: number;
-    maxRetriesPerRequest?: number;
-    retryDelayOnFailover?: number;
-    lazyConnect?: boolean;
-    ssl?: boolean;
-  };
-  queues: {
-    applications: {
-      name: string;
-      defaultJobOptions: {
-        removeOnComplete: number;
-        removeOnFail: number;
-        attempts: number;
-        backoff: {
-          type: string;
-          delay: number;
-        };
-      };
-    };
-    priority: {
-      name: string;
-      defaultJobOptions: {
-        removeOnComplete: number;
-        removeOnFail: number;
-        attempts: number;
-        backoff: {
-          type: string;
-          delay: number;
-        };
-      };
-    };
-  };
-  workers: {
-    concurrency: number;
-    maxStalledCount: number;
-    stalledInterval: number;
-    removeOnComplete: number;
-    removeOnFail: number;
-  };
-}
-
-interface JobData {
-  jobId: string;
-  userId: string;
-  jobData: {
-    title: string;
-    company: string;
-    url: string;
-    description: string;
-    requirements?: string;
-    salary?: {
-      min?: number;
-      max?: number;
-      currency?: string;
-    };
-    location: string;
-    remote: boolean;
-    type: string;
-    level: string;
-  };
-  userProfile: {
-    resumeUrl?: string;
-    coverLetter?: string;
-    preferences: Record<string, any>;
-  };
-  priority: number;
-  metadata: {
-    source: 'web' | 'mobile' | 'desktop';
-    deviceId?: string;
-    timestamp: string;
-  };
-}
-
-interface ApplicationStatus {
-  id: string;
-  jobId: string;
-  userId: string;
-  status: QueueStatus;
-  progress?: number;
-  message?: string;
-  result?: {
-    success: boolean;
-    applicationId?: string;
-    confirmationId?: string;
-    screenshots?: string[];
-    error?: string;
-    logs?: string[];
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  processedAt?: Date;
-  completedAt?: Date;
-}
-
-// =============================================================================
-// QUEUE SERVICE CLASS
-// =============================================================================
-
-class QueueService {
-  private redisConnection: Redis;
-  private applicationQueue: Queue;
-  private priorityQueue: Queue;
-  private queueEvents: QueueEvents;
-  private worker?: Worker;
-  private isInitialized = false;
-  private config: QueueConfig;
-  private websocketService?: WebSocketService;
-  private fastify: FastifyInstance;
-
-  constructor(config: QueueConfig, fastify: FastifyInstance) {
-    this.config = config;
-    this.fastify = fastify;
-    this.redisConnection = new Redis({
-      ...config.redis,
-      maxRetriesPerRequest: null,
-      lazyConnect: true,
-    });
-
-    // Initialize queues
-    this.applicationQueue = new Queue(config.queues.applications.name, {
-      connection: this.redisConnection,
-      defaultJobOptions: config.queues.applications.defaultJobOptions,
-    });
-
-    this.priorityQueue = new Queue(config.queues.priority.name, {
-      connection: this.redisConnection,
-      defaultJobOptions: config.queues.priority.defaultJobOptions,
-    });
-
-    // Queue events for monitoring
-    this.queueEvents = new QueueEvents(config.queues.applications.name, {
-      connection: this.redisConnection,
-    });
-  }
-
-  /**
-   * Set WebSocket service for real-time updates
-   */
-  setWebSocketService(websocketService: WebSocketService): void {
-    this.websocketService = websocketService;
-    this.setupQueueEventListeners();
-  }
-
-  /**
-   * Setup queue event listeners for WebSocket notifications
-   */
-  private setupQueueEventListeners(): void {
-    if (!this.websocketService) return;
-
-    // Listen for job events and emit WebSocket updates
-    this.queueEvents.on('active', ({ jobId, prev }: { jobId: string; prev: string }) => {
-      this.emitJobUpdate(jobId, 'job-claimed', { previousStatus: prev });
-    });
-
-    this.queueEvents.on('progress', ({ jobId, data }: { jobId: string; data: any }) => {
-      this.emitJobUpdate(jobId, 'processing-progress', { progress: data });
-    });
-
-    this.queueEvents.on('completed', ({ jobId, returnvalue }: { jobId: string; returnvalue: any }) => {
-      this.emitJobUpdate(jobId, 'processing-completed', { 
-        success: true,
-        result: returnvalue 
-      });
-    });
-
-    this.queueEvents.on('failed', ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
-      this.emitJobUpdate(jobId, 'processing-failed', {
-        success: false,
-        errorMessage: failedReason
-      });
-    });
-
-    this.queueEvents.on('stalled', ({ jobId }: { jobId: string }) => {
-      this.emitJobUpdate(jobId, 'processing-progress', {
-        message: 'Job processing stalled, retrying...'
-      });
-    });
-
-    console.log('✅ Queue event listeners setup for WebSocket notifications');
-  }
-
-  /**
-   * Emit job update via WebSocket
-   */
-  private async emitJobUpdate(jobId: string, eventType: string, data: any): Promise<void> {
-    if (!this.websocketService) return;
-
-    try {
-      // Get job data to find applicationId and userId
-      let job = await this.applicationQueue.getJob(jobId);
-      if (!job) {
-        job = await this.priorityQueue.getJob(jobId);
-      }
-
-      if (job && job.data) {
-        const { userId, jobId: applicationJobId } = job.data;
-        
-        // Emit to the specific user
-        this.websocketService.emitToUser(userId, eventType, {
-          applicationId: applicationJobId,
-          jobId,
-          ...data
-        });
-
-        // Emit to application subscribers
-        this.websocketService.emitToApplication(applicationJobId, eventType, {
-          jobId,
-          ...data
-        });
-
-        console.log(`🔔 Emitted ${eventType} for job ${jobId} to user ${userId}`);
-      }
-    } catch (error) {
-      console.error('Failed to emit job update:', error);
-    }
-  }
-
-  /**
-   * Initialize queue service
-   */
-  async initialize(): Promise<void> {
-    if (this.isInitialized) return;
-
-    try {
-      // Test Redis connection
-      await this.redisConnection.ping();
-
-      // Wait for queues to be ready
-      await Promise.all([
-        this.applicationQueue.waitUntilReady(),
-        this.priorityQueue.waitUntilReady(),
-      ]);
-
-      // Initialize workers
-      await this.initializeWorkers();
-
-      this.isInitialized = true;
-      console.log('✅ Queue service initialized successfully');
-    } catch (error) {
-      console.error('❌ Failed to initialize queue service:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Initialize BullMQ workers for processing job applications
-   */
-  private async initializeWorkers(): Promise<void> {
-    try {
-      // Create worker for processing job applications
-      this.worker = new Worker(
-        this.config.queues.applications.name,
-        async (job) => {
-          return await this.processJobApplication(job);
-        },
-        {
-          connection: this.redisConnection,
-          concurrency: this.config.workers.concurrency,
-          maxStalledCount: this.config.workers.maxStalledCount,
-          stalledInterval: this.config.workers.stalledInterval,
-          removeOnComplete: { count: this.config.workers.removeOnComplete },
-          removeOnFail: { count: this.config.workers.removeOnFail },
-        }
-      );
-
-      // Setup worker event listeners
-      this.setupWorkerEventListeners();
-
-      console.log('✅ BullMQ workers initialized successfully');
-    } catch (error) {
-      console.error('❌ Failed to initialize workers:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Setup worker event listeners for monitoring and logging
-   */
-  private setupWorkerEventListeners(): void {
-    if (!this.worker) return;
-
-    this.worker.on('ready', () => {
-      console.log('🔄 Worker is ready and waiting for jobs');
-    });
-
-    this.worker.on('active', (job) => {
-      console.log(`🏃 Worker started processing job ${job.id}`);
-    });
-
-    this.worker.on('completed', (job, result) => {
-      console.log(`✅ Worker completed job ${job.id}:`, result);
-    });
-
-    this.worker.on('failed', (job, err) => {
-      console.error(`❌ Worker failed job ${job?.id}:`, err);
-    });
-
-    this.worker.on('stalled', (jobId) => {
-      console.warn(`⚠️ Worker job ${jobId} stalled`);
-    });
-
-    this.worker.on('error', (err) => {
-      console.error('❌ Worker error:', err);
-    });
-  }
-
-  /**
-   * Process job application - main worker logic with subscription-based routing
-   */
-  private async processJobApplication(job: Job): Promise<any> {
-    const { userId, jobId, jobData, userProfile, priority, metadata } = job.data;
-    const applicationQueueId = userProfile?.preferences?.applicationId;
-
-    try {
-      console.log(`🤖 Processing job application for user ${userId}`);
-      console.log(`   Job: ${jobData.title} at ${jobData.company}`);
-      console.log(`   Application Queue ID: ${applicationQueueId}`);
-
-      await job.updateProgress(10);
-
-      // =================================================================
-      // STEP 1: Get user's subscription plan
-      // =================================================================
-      const user = await this.fastify.db.user.findUnique({
-        where: { id: userId },
-        include: { subscription: true }
-      });
-
-      if (!user) {
-        throw new Error(`User not found: ${userId}`);
-      }
-
-      const subscriptionPlan = user.subscription?.plan || 'FREE';
-      console.log(`   Subscription Plan: ${subscriptionPlan}`);
-
-      await job.updateProgress(20);
-
-      // =================================================================
-      // STEP 2: Route based on subscription plan
-      // =================================================================
-
-      if (subscriptionPlan === 'FREE') {
-        // FREE USER: Route to desktop processing
-        console.log(`✅ [FREE USER] Queuing for desktop processing`);
-
-        // Update ApplicationQueue status to QUEUED (desktop will claim it)
-        if (applicationQueueId) {
-          await this.fastify.db.applicationQueue.update({
-            where: { id: applicationQueueId },
-            data: {
-              status: 'QUEUED',
-              scheduledAt: new Date(),
-              updatedAt: new Date()
-            }
-          });
-        }
-
-        // Emit WebSocket event for desktop app
-        if (this.websocketService) {
-          this.websocketService.emitToUser(userId, 'job-queued-for-desktop', {
-            applicationId: applicationQueueId,
-            jobTitle: jobData.title,
-            company: jobData.company,
-            status: 'queued',
-            message: 'Job queued for desktop processing. Open desktop app to process.',
-            timestamp: new Date().toISOString()
-          });
-        }
-
-        await job.updateProgress(100);
-
-        return {
-          success: true,
-          applicationId: applicationQueueId,
-          status: 'QUEUED',
-          message: 'Application queued for desktop processing',
-          executionMode: 'desktop',
-          queuedAt: new Date().toISOString(),
-          requiresDesktop: true
-        };
-
-      } else {
-        // PAID USER: Process immediately on server
-        console.log(`🚀 [PAID USER - ${subscriptionPlan}] Processing on server`);
-
-        // Check if ServerAutomationService is available
-        if (!this.fastify.serverAutomationService) {
-          throw new Error('ServerAutomationService not initialized');
-        }
-
-        await job.updateProgress(30);
-
-        // Prepare automation request
-        const automationRequest = {
-          userId,
-          jobId,
-          applicationId: applicationQueueId,
-          companyAutomation: this.detectCompanyAutomation(jobData.url),
-          userProfile: {
-            firstName: userProfile.preferences.firstName || user.email.split('@')[0],
-            lastName: userProfile.preferences.lastName || 'User',
-            email: userProfile.preferences.email,
-            phone: userProfile.preferences.phone || '',
-            resumeUrl: userProfile.resumeUrl,
-            currentTitle: userProfile.preferences.currentTitle,
-            yearsExperience: userProfile.preferences.yearsExperience,
-            skills: userProfile.preferences.skills || [],
-            currentLocation: userProfile.preferences.currentLocation,
-            linkedinUrl: userProfile.preferences.linkedinUrl,
-            workAuthorization: userProfile.preferences.workAuthorization,
-            coverLetter: userProfile.coverLetter
-          },
-          jobData: {
-            id: jobId,
-            title: jobData.title,
-            company: jobData.company,
-            applyUrl: jobData.url,
-            location: jobData.location,
-            description: jobData.description,
-            requirements: jobData.requirements ? [jobData.requirements] : []
-          }
-        };
-
-        await job.updateProgress(40);
-
-        // Execute server automation
-        const result = await this.fastify.serverAutomationService.executeAutomation(
-          automationRequest,
-          job.id
-        );
-
-        await job.updateProgress(100);
-
-        console.log(`${result.success ? '✅' : '❌'} [SERVER] Completed: ${result.status}`);
-
-        return {
-          success: result.success,
-          applicationId: result.applicationId,
-          status: result.status,
-          message: result.success ? 'Application submitted successfully' : result.error,
-          confirmationNumber: result.confirmationNumber,
-          executionMode: 'server',
-          executionTime: result.executionTime,
-          companyAutomation: result.companyAutomation,
-          screenshots: result.screenshots,
-          steps: result.steps,
-          captchaEvents: result.captchaEvents,
-          processingTime: result.serverInfo.processingTime
-        };
-      }
-
-    } catch (error) {
-      console.error(`❌ Job application processing failed:`, error);
-
-      // Update status to FAILED
-      if (applicationQueueId) {
-        await this.fastify.db.applicationQueue.update({
-          where: { id: applicationQueueId },
-          data: {
-            status: 'FAILED',
-            failedAt: new Date(),
-            errorMessage: error instanceof Error ? error.message : 'Unknown error',
-            updatedAt: new Date()
-          }
-        });
-      }
-
-      return {
-        success: false,
-        applicationId: applicationQueueId,
-        status: 'FAILED',
-        message: error instanceof Error ? error.message : 'Unknown error occurred',
-        failedAt: new Date().toISOString(),
-        executionMode: 'unknown'
-      };
-    }
-  }
-
-  /**
-   * Detect company automation type from URL
-   */
-  private detectCompanyAutomation(url: string): string {
-    const urlLower = url.toLowerCase();
-
-    if (urlLower.includes('linkedin.com')) return 'linkedin';
-    if (urlLower.includes('greenhouse.io')) return 'greenhouse';
-    if (urlLower.includes('lever.co')) return 'lever';
-    if (urlLower.includes('workday.com') || urlLower.includes('myworkdayjobs.com')) return 'workday';
-    if (urlLower.includes('indeed.com')) return 'indeed';
-    if (urlLower.includes('glassdoor.com')) return 'glassdoor';
-    if (urlLower.includes('ziprecruiter.com')) return 'ziprecruiter';
-
-    return 'generic';
-  }
-
-  /**
-   * Add job application to queue
-   */
-  async addJobApplication(data: JobData, isPriority = false): Promise<string> {
-    if (!this.isInitialized) {
-      throw new Error('Queue service not initialized');
-    }
-
-    const queue = isPriority ? this.priorityQueue : this.applicationQueue;
-    const jobOptions = {
-      priority: data.priority,
-      delay: 0, // Process immediately
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 5000,
-      },
-      removeOnComplete: 100,
-      removeOnFail: 50,
-    };
-
-    try {
-      const job = await queue.add('process-job-application', data, jobOptions);
-      console.log(`Job application queued: ${job.id} for user ${data.userId}`);
-      return job.id!;
-    } catch (error) {
-      console.error('Failed to add job application to queue:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get job status
-   */
-  async getJobStatus(jobId: string): Promise<ApplicationStatus | null> {
-    try {
-      // Check both queues for the job
-      let job = await this.applicationQueue.getJob(jobId);
-      if (!job) {
-        job = await this.priorityQueue.getJob(jobId);
-      }
-
-      if (!job) {
-        return null;
-      }
-
-      const state = await job.getState();
-      const progress = job.progress;
-      const result = job.returnvalue;
-      const failedReason = job.failedReason;
-
-      return {
-        id: job.id!,
-        jobId: job.data.jobId,
-        userId: job.data.userId,
-        status: this.mapJobState(state),
-        progress: typeof progress === 'number' ? progress : undefined,
-        message: failedReason || undefined,
-        result: result || undefined,
-        createdAt: new Date(job.timestamp),
-        updatedAt: new Date(job.processedOn || job.timestamp),
-        processedAt: job.processedOn ? new Date(job.processedOn) : undefined,
-        completedAt: job.finishedOn ? new Date(job.finishedOn) : undefined,
-      };
-    } catch (error) {
-      console.error('Failed to get job status:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get queue statistics
-   */
-  async getQueueStats() {
-    try {
-      const [appStats, priorityStats] = await Promise.all([
-        this.applicationQueue.getJobCounts(),
-        this.priorityQueue.getJobCounts(),
-      ]);
-
-      return {
-        applications: appStats,
-        priority: priorityStats,
-        total: {
-          waiting: appStats.waiting + priorityStats.waiting,
-          active: appStats.active + priorityStats.active,
-          completed: appStats.completed + priorityStats.completed,
-          failed: appStats.failed + priorityStats.failed,
-          delayed: appStats.delayed + priorityStats.delayed,
-        },
-      };
-    } catch (error) {
-      console.error('Failed to get queue statistics:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's job applications
-   */
-  async getUserApplications(userId: string, limit = 50): Promise<ApplicationStatus[]> {
-    try {
-      // Get jobs from both queues for the user
-      const [appJobs, priorityJobs] = await Promise.all([
-        this.applicationQueue.getJobs(['waiting', 'active', 'completed', 'failed'], 0, limit),
-        this.priorityQueue.getJobs(['waiting', 'active', 'completed', 'failed'], 0, limit),
-      ]);
-
-      const allJobs = [...appJobs, ...priorityJobs].filter(job => job.data.userId === userId);
-
-      const applications: ApplicationStatus[] = [];
-      for (const job of allJobs) {
-        const status = await this.getJobStatus(job.id!);
-        if (status) {
-          applications.push(status);
-        }
-      }
-
-      // Sort by creation date (newest first)
-      return applications.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    } catch (error) {
-      console.error('Failed to get user applications:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Cancel job application
-   */
-  async cancelJobApplication(jobId: string): Promise<boolean> {
-    try {
-      // Try to find and cancel the job in both queues
-      let job = await this.applicationQueue.getJob(jobId);
-      if (!job) {
-        job = await this.priorityQueue.getJob(jobId);
-      }
-
-      if (!job) {
-        return false;
-      }
-
-      await job.remove();
-      console.log(`Job application cancelled: ${jobId}`);
-      return true;
-    } catch (error) {
-      console.error('Failed to cancel job application:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Get health status
-   */
-  async getHealthStatus() {
-    try {
-      const ping = await this.redisConnection.ping();
-      const stats = await this.getQueueStats();
-
-      return {
-        status: 'healthy',
-        details: {
-          redis: ping === 'PONG' ? 'connected' : 'disconnected',
-          initialized: this.isInitialized,
-          queues: {
-            applications: this.config.queues.applications.name,
-            priority: this.config.queues.priority.name,
-          },
-          stats,
-        },
-      };
-    } catch (error) {
-      return {
-        status: 'unhealthy',
-        details: {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          initialized: this.isInitialized,
-        },
-      };
-    }
-  }
-
-  /**
-   * Cleanup and shutdown
-   */
-  async shutdown(): Promise<void> {
-    console.log('Shutting down queue service...');
-
-    try {
-      // Close worker if it exists
-      if (this.worker) {
-        await this.worker.close();
-      }
-
-      // Close queue events
-      await this.queueEvents.close();
-
-      // Close queues
-      await Promise.all([
-        this.applicationQueue.close(),
-        this.priorityQueue.close(),
-      ]);
-
-      // Close Redis connection
-      await this.redisConnection.disconnect();
-
-      this.isInitialized = false;
-      console.log('Queue service shut down successfully');
-    } catch (error) {
-      console.error('Error shutting down queue service:', error);
-    }
-  }
-
-  /**
-   * Map BullMQ job state to application status
-   */
-  private mapJobState(state: string): QueueStatus {
-    switch (state) {
-      case 'waiting':
-      case 'delayed':
-        return QueueStatus.PENDING;
-      case 'active':
-        return QueueStatus.RUNNING;
-      case 'completed':
-        return QueueStatus.COMPLETED;
-      case 'failed':
-        return QueueStatus.FAILED;
-      default:
-        return QueueStatus.PENDING;
-    }
-  }
-
-  // Getters for queue instances (for external worker setup)
-  getApplicationQueue(): Queue {
-    return this.applicationQueue;
-  }
-
-  getPriorityQueue(): Queue {
-    return this.priorityQueue;
-  }
-
-  getQueueEvents(): QueueEvents {
-    return this.queueEvents;
-  }
-}
-
-// =============================================================================
-// QUEUE PLUGIN
-// =============================================================================
-
-interface QueuePluginOptions {}
-
-const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
-  fastify: FastifyInstance,
-  options: QueuePluginOptions
-) => {  const config: QueueConfig = {
-    redis: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '1'), // Use DB 1 for queues
-      maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '3'),
-      retryDelayOnFailover: parseInt(process.env.REDIS_RETRY_DELAY || '100'),
-      lazyConnect: process.env.REDIS_LAZY_CONNECT !== 'false',
-      ssl: process.env.REDIS_SSL === 'true',
-    },
-    queues: {
-      applications: {
-        name: process.env.QUEUE_APPLICATIONS_NAME || 'job-applications',
-        defaultJobOptions: {
-          removeOnComplete: parseInt(process.env.QUEUE_REMOVE_ON_COMPLETE || '100'),
-          removeOnFail: parseInt(process.env.QUEUE_REMOVE_ON_FAIL || '50'),
-          attempts: parseInt(process.env.QUEUE_MAX_ATTEMPTS || '3'),
-          backoff: {
-            type: 'exponential',
-            delay: parseInt(process.env.QUEUE_BACKOFF_DELAY || '5000'),
-          },
-        },
-      },
-      priority: {
-        name: process.env.QUEUE_PRIORITY_NAME || 'job-applications-priority',
-        defaultJobOptions: {
-          removeOnComplete: parseInt(process.env.QUEUE_REMOVE_ON_COMPLETE || '100'),
-          removeOnFail: parseInt(process.env.QUEUE_REMOVE_ON_FAIL || '50'),
-          attempts: parseInt(process.env.QUEUE_MAX_ATTEMPTS || '3'),
-          backoff: {
-            type: 'exponential',
-            delay: parseInt(process.env.QUEUE_BACKOFF_DELAY || '2000'), // Faster for priority
-          },
-        },
-      },
-    },
-    workers: {
-      concurrency: parseInt(process.env.QUEUE_WORKER_CONCURRENCY || '3'),
-      maxStalledCount: parseInt(process.env.QUEUE_MAX_STALLED_COUNT || '1'),
-      stalledInterval: parseInt(process.env.QUEUE_STALLED_INTERVAL || '30000'),
-      removeOnComplete: parseInt(process.env.QUEUE_REMOVE_ON_COMPLETE || '100'),
-      removeOnFail: parseInt(process.env.QUEUE_REMOVE_ON_FAIL || '50'),
-    },
-  };
-
-  fastify.log.info('Initializing Queue Management Service...');
-
-  // Create queue service
-  const queueService = new QueueService(config, fastify);
-
-  try {
-    // Initialize the service
-    await queueService.initialize();
-
-    // Register with service registry if available
-    if (fastify.serviceRegistry) {
-      fastify.serviceRegistry.register(
-        'queue',
-        queueService,
-        () => queueService.getHealthStatus()
-      );
-    }
-
-    fastify.log.info('✅ Queue Management Service initialized successfully');
-  } catch (error) {
-    fastify.log.error({err: error, msg:'❌ Failed to initialize Queue Management Service:'});
-    throw error;
-  }
-
-  // =============================================================================
-  // REGISTER WITH FASTIFY
-  // =============================================================================
-
-  // Decorate Fastify instance
-  fastify.decorate('queueService', queueService);
-  fastify.decorate('applicationQueue', queueService); // Alias for routes compatibility
-
-
-  // Connect WebSocket service if available (after websocket plugin loads)
-  fastify.addHook('onReady', async () => {
-    if (fastify.websocket) {
-      queueService.setWebSocketService(fastify.websocket);
-      fastify.log.info('✅ Queue service connected to WebSocket service');
-    } else {
-      fastify.log.warn('⚠️ WebSocket service not available - real-time updates disabled');
-    }
-  });
-
-  // Add queue health check endpoint
-  fastify.get('/health/queue', {
-    schema: {
-      summary: 'Get queue service health status',
-      tags: ['Health'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            status: { type: 'string' },
-            timestamp: { type: 'string' },
-            queue: { type: 'object' },
-          },
-        },
-      },
-    },
-  }, async (request, reply) => {
-    try {
-      const health = await queueService.getHealthStatus();
-      const statusCode = health.status === 'healthy' ? 200 : 503;
-
-      return reply.code(statusCode).send({
-        status: health.status,
-        timestamp: new Date().toISOString(),
-        queue: health.details,
-      });
-    } catch (error) {
-      return reply.code(503).send({
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Queue health check failed',
-      });
-    }
-  });
-
-  // Add queue statistics endpoint
-  fastify.get('/queue/stats', {
-    schema: {
-      summary: 'Get queue statistics',
-      tags: ['Queue'],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            timestamp: { type: 'string' },
-            stats: { type: 'object' },
-          },
-        },
-        500: {
-          type: "object",
-          properties: {
-            error: { type: "string" },
-            timestamp: { type: "string" }
-          }
-        },
-        503: {
-          type: "object",
-          properties: {
-            error: { type: "string" },
-            timestamp: { type: "string" }
-          }
-        },
-      },
-    },
-  }, async (request, reply) => {
-    try {
-      const stats = await queueService.getQueueStats();
-
-      return reply.send({
-        timestamp: new Date().toISOString(),
-        stats,
-      });
-    } catch (error) {
-      return reply.code(500).send({
-        error: error instanceof Error ? error.message : 'Failed to get queue stats',
-        timestamp: new Date().toISOString(),
-      });
-    }
-  });
-
-  // Graceful shutdown
-  fastify.addHook('onClose', async () => {
-    fastify.log.info('Shutting down queue service...');
-    await queueService.shutdown();
-  });
-
-  fastify.log.info('🚀 Queue service registered successfully with Fastify');
-};
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
+import { Queue, QueueEvents } from 'bullmq';
+import { bullmqConnection } from '../config/redis.config';
+import {
+  createJobApplicationQueue,
+  createDeadLetterQueue,
+  JOB_APPLICATION_QUEUE_NAME,
+  JOB_APPLICATION_DLQ_NAME,
+  JobApplicationData,
+  DeadLetterJobData
+} from '../queues/job-application.queue';
+import { createJobApplicationWorker } from '../workers/job-application.worker';
 
 // =============================================================================
 // TYPE DECLARATIONS
@@ -955,21 +30,254 @@ const queuePlugin: FastifyPluginAsync<QueuePluginOptions> = async (
 
 declare module 'fastify' {
   interface FastifyInstance {
-    queueService: QueueService;
-    applicationQueue: any; // For BullMQ Job access in routes
-
+    jobQueue: Queue<JobApplicationData>;
+    deadLetterQueue: Queue<DeadLetterJobData>; // Dead Letter Queue
+    jobWorker: ReturnType<typeof createJobApplicationWorker>;
+    queueEvents: QueueEvents;
+    dlqEvents: QueueEvents; // DLQ events
   }
 }
 
 // =============================================================================
-// EXPORTS
+// QUEUE PLUGIN
 // =============================================================================
 
-export default fastifyPlugin(queuePlugin as any, {
-  name: 'queue',
-  fastify: '5.x',
-  dependencies: ['services'], // Depends on services plugin for Redis
-});
+async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptions) {
+  fastify.log.info('🔧 Initializing BullMQ Queue Plugin...');
 
-export type { QueueConfig, JobData, ApplicationStatus };
-export { QueueService };
+  try {
+    // =========================================================================
+    // STEP 1: Create Dead Letter Queue (DLQ) first
+    // =========================================================================
+    fastify.log.info('🔧 Creating Dead Letter Queue...');
+    const dlq = createDeadLetterQueue();
+    fastify.log.info(`✅ Dead Letter Queue '${JOB_APPLICATION_DLQ_NAME}' created`);
+
+    // =========================================================================
+    // STEP 2: Create Main Queue with DLQ integration
+    // =========================================================================
+    fastify.log.info('🔧 Creating Job Application Queue...');
+    const queue = createJobApplicationQueue(dlq);
+    fastify.log.info(`✅ Queue '${JOB_APPLICATION_QUEUE_NAME}' created with DLQ integration`);
+
+    // =========================================================================
+    // STEP 3: Create Queue Events for monitoring
+    // =========================================================================
+    const queueEvents = new QueueEvents(JOB_APPLICATION_QUEUE_NAME, {
+      connection: bullmqConnection,
+    });
+
+    const dlqEvents = new QueueEvents(JOB_APPLICATION_DLQ_NAME, {
+      connection: bullmqConnection,
+    });
+
+    queueEvents.on('waiting', ({ jobId }) => {
+      fastify.log.debug({ jobId }, '⏳ Job waiting in queue');
+    });
+
+    queueEvents.on('active', ({ jobId, prev }) => {
+      fastify.log.info({ jobId, prevStatus: prev }, '🔄 Job became active');
+    });
+
+    queueEvents.on('completed', ({ jobId, returnvalue }) => {
+      fastify.log.info(
+        {
+          jobId,
+          success: typeof returnvalue === 'object' && returnvalue !== null ? (returnvalue as any).success : undefined
+        },
+        '✅ Job completed'
+      );
+    });
+
+    queueEvents.on('failed', ({ jobId, failedReason }) => {
+      fastify.log.error(
+        { jobId, error: failedReason },
+        '❌ Job failed'
+      );
+    });
+
+    queueEvents.on('stalled', ({ jobId }) => {
+      fastify.log.warn({ jobId }, '⚠️ Job stalled');
+    });
+
+    queueEvents.on('progress', ({ jobId, data }) => {
+      fastify.log.debug({ jobId, progress: data }, '📊 Job progress update');
+    });
+
+    fastify.log.info('✅ Queue events listener created');
+
+    // DLQ event listeners
+    dlqEvents.on('added', ({ jobId }) => {
+      fastify.log.warn({ jobId }, '💀 Job added to Dead Letter Queue');
+    });
+
+    dlqEvents.on('failed', ({ jobId, failedReason }) => {
+      fastify.log.error(
+        { jobId, error: failedReason },
+        '❌ DLQ job failed (critical - requires manual intervention)'
+      );
+    });
+
+    fastify.log.info('✅ DLQ events listener created');
+
+    // =========================================================================
+    // STEP 4: Create Worker (only if not in web-only mode)
+    // =========================================================================
+    const isWorkerEnabled = process.env.QUEUE_WORKER_ENABLED !== 'false';
+    let worker = null;
+
+    if (isWorkerEnabled) {
+      worker = createJobApplicationWorker(fastify);
+      fastify.log.info('✅ BullMQ worker created and started');
+    } else {
+      fastify.log.warn('⚠️ Queue worker disabled (QUEUE_WORKER_ENABLED=false)');
+    }
+
+    // =========================================================================
+    // STEP 5: Decorate Fastify instance
+    // =========================================================================
+    fastify.decorate('jobQueue', queue);
+    fastify.decorate('deadLetterQueue', dlq);
+    fastify.decorate('queueEvents', queueEvents);
+    fastify.decorate('dlqEvents', dlqEvents);
+    if (worker) {
+      fastify.decorate('jobWorker', worker);
+    }
+
+    fastify.log.info('✅ Queue and DLQ decorators added to Fastify instance');
+
+    // =========================================================================
+    // STEP 6: Health check endpoint
+    // =========================================================================
+    fastify.get('/health/queue', async (request, reply) => {
+      try {
+        const [jobCounts, isPaused] = await Promise.all([
+          queue.getJobCounts(),
+          queue.isPaused(),
+        ]);
+
+        // Check if queue is operational by attempting to get job counts
+        const isHealthy = jobCounts !== null && !isPaused;
+
+        const health = {
+          status: isHealthy ? 'healthy' : 'degraded',
+          queue: {
+            name: JOB_APPLICATION_QUEUE_NAME,
+            paused: isPaused,
+            counts: jobCounts,
+          },
+          worker: worker
+            ? {
+                enabled: true,
+                concurrency: worker['opts'].concurrency,
+                running: worker.isRunning(),
+              }
+            : {
+                enabled: false,
+              },
+          timestamp: new Date().toISOString(),
+        };
+
+        return reply.code(isHealthy ? 200 : 503).send(health);
+      } catch (error) {
+        fastify.log.error({ error }, '❌ Queue health check failed');
+        return reply.code(503).send({
+          status: 'unhealthy',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    });
+
+    // =========================================================================
+    // STEP 6: Queue stats endpoint
+    // =========================================================================
+    fastify.get('/queue/stats', async (request, reply) => {
+      try {
+        const [jobCounts, waiting, active, completed, failed] = await Promise.all([
+          queue.getJobCounts(),
+          queue.getWaiting(0, 10),
+          queue.getActive(0, 10),
+          queue.getCompleted(0, 10),
+          queue.getFailed(0, 10),
+        ]);
+
+        return reply.send({
+          counts: jobCounts,
+          recentJobs: {
+            waiting: waiting.map((j) => ({
+              id: j.id,
+              data: j.data,
+              timestamp: j.timestamp,
+            })),
+            active: active.map((j) => ({
+              id: j.id,
+              data: j.data,
+              timestamp: j.timestamp,
+              processedOn: j.processedOn,
+            })),
+            completed: completed.map((j) => ({
+              id: j.id,
+              data: j.data,
+              timestamp: j.timestamp,
+              finishedOn: j.finishedOn,
+            })),
+            failed: failed.map((j) => ({
+              id: j.id,
+              data: j.data,
+              timestamp: j.timestamp,
+              failedReason: j.failedReason,
+            })),
+          },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        fastify.log.error({ error }, '❌ Failed to get queue stats');
+        return reply.code(500).send({
+          error: error instanceof Error ? error.message : 'Failed to get queue stats',
+        });
+      }
+    });
+
+    // =========================================================================
+    // STEP 7: Graceful shutdown
+    // =========================================================================
+    fastify.addHook('onClose', async () => {
+      fastify.log.info('🔌 Shutting down queue system...');
+
+      try {
+        // Close worker first (stop processing new jobs)
+        if (worker) {
+          await worker.close();
+          fastify.log.info('✅ Worker closed');
+        }
+
+        // Close queue events
+        await queueEvents.close();
+        fastify.log.info('✅ Queue events closed');
+
+        // Close queue
+        await queue.close();
+        fastify.log.info('✅ Queue closed');
+
+        fastify.log.info('✅ Queue system shutdown complete');
+      } catch (error) {
+        fastify.log.error({ error }, '❌ Error during queue shutdown');
+      }
+    });
+
+    fastify.log.info('🚀 BullMQ Queue Plugin initialized successfully');
+  } catch (error) {
+    fastify.log.error({ error }, '❌ Failed to initialize Queue Plugin');
+    throw error;
+  }
+}
+
+// =============================================================================
+// EXPORT
+// =============================================================================
+
+export default fp(queuePlugin, {
+  name: 'queue',
+  dependencies: ['services'], // Load after services plugin (for db, etc.)
+});

@@ -971,6 +971,37 @@ async function start(): Promise<void> {
       host: config.host,
     });
 
+    // =================================================================
+    // Initialize Queue Recovery Service (PHASE 5)
+    // =================================================================
+    try {
+      if (server.jobQueue && server.db) {
+        const { QueueRecoveryService } = await import('./services/QueueRecoveryService');
+        const queueRecovery = new QueueRecoveryService(server);
+
+        server.log.info('🔄 Initializing queue recovery service...');
+
+        // Restore jobs from database to BullMQ
+        await queueRecovery.restoreQueueFromDatabase();
+
+        // Start periodic stale job checker (every 10 minutes)
+        const staleJobCheckerInterval = queueRecovery.startPeriodicStaleJobChecker();
+
+        // Add cleanup on shutdown
+        server.addHook('onClose', async () => {
+          clearInterval(staleJobCheckerInterval);
+          server.log.info('✅ Stopped periodic stale job checker');
+        });
+
+        server.log.info('✅ Queue recovery service initialized successfully');
+      } else {
+        server.log.warn('⚠️ Queue recovery skipped (BullMQ or DB not available)');
+      }
+    } catch (error) {
+      server.log.error({ error }, '❌ Queue recovery failed (continuing anyway)');
+      // Don't crash the server if queue recovery fails
+    }
+
     server.log.info(`🚀 JobSwipe API Server started successfully!`);
     server.log.info(`📡 Server listening on http://${config.host}:${config.port}`);
     server.log.info(`🔍 Health check: http://${config.host}:${config.port}/health`);

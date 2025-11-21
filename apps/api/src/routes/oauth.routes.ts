@@ -180,7 +180,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         // Generate authorization URL
         const authResponse = await oauthService.initiateOAuthFlow({
           provider: provider as OAuthProvider,
-          source: query.source,
+          source: query.source as OAuthSource,
           redirectUri: query.redirect,
           deviceId: query.deviceId,
           deviceName: query.deviceName,
@@ -284,7 +284,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
             result.errorCode || 'OAUTH_FAILED'
           );
 
-          return reply.redirect(302, redirectUrl);
+          return reply.code(302).redirect(redirectUrl);
         }
 
         // OAuth successful - set auth cookies
@@ -422,7 +422,7 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
         const userId = request.user.id;
 
         // Unlink OAuth provider
-        await oauthService.unlinkOAuthProvider(userId, body.provider);
+        await oauthService.unlinkOAuthProvider(userId, body.provider as OAuthProvider);
 
         fastify.log.info( {
           userId,
@@ -548,6 +548,26 @@ export async function registerOAuthRoutes(fastify: FastifyInstance): Promise<voi
               },
             },
           },
+
+          500: {
+            type: 'object',
+            properties: {
+              success: { type: 'boolean' },
+              providers: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    displayName: { type: 'string' },
+                    icon: { type: 'string' },
+                    enabled: { type: 'boolean' },
+                  },
+                },
+              },
+            },
+          },
+
 
           
         },

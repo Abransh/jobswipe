@@ -432,7 +432,7 @@ async function registerHandler(
         success: false,
         error: 'Validation failed',
         errorCode: AuthErrorCode.INVALID_REQUEST,
-        details: error.errors,
+        details: error.issues,
       });
     }
 
@@ -595,7 +595,7 @@ async function loginHandler(
         success: false,
         error: 'Validation failed',
         errorCode: AuthErrorCode.INVALID_REQUEST,
-        details: error.errors,
+        details: error.issues,
       });
     }
 
