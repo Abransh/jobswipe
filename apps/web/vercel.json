@@ -3,17 +3,19 @@
   "name": "jobswipe-web",
   "buildCommand": "cd ../.. && pnpm --filter @jobswipe/database run db:generate && pnpm --filter @jobswipe/shared build && pnpm --filter @jobswipe/database build && pnpm --filter @jobswipe/web build",
   "devCommand": "cd ../.. && pnpm run dev:web",
-  "installCommand": "npm install -g pnpm@9.0.0 && cd ../.. && pnpm install --frozen-lockfile",
+  "installCommand": "npm install -g pnpm@9.0.0 && cd ../.. && pnpm install --frozen-lockfile --include-workspace-root",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NPM_CONFIG_INCLUDE_WORKSPACE_ROOT": "true"
   },
   "build": {
     "env": {
       "NODE_ENV": "production",
       "NEXT_TELEMETRY_DISABLED": "1",
-      "SKIP_ENV_VALIDATION": "1"
+      "SKIP_ENV_VALIDATION": "1",
+      "NPM_CONFIG_SHAMEFULLY_HOIST": "true"
     }
   },
   "regions": ["iad1"],
