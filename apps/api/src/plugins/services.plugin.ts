@@ -241,7 +241,41 @@ class ServiceRegistry {
 // SERVICES PLUGIN
 // =============================================================================
 
+/**
+ * Parse Redis URL for services plugin
+ */
+function parseRedisUrlForServices(url: string): any {
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+      password: parsed.password || undefined,
+      db: parsed.pathname && parsed.pathname.length > 1 ? parseInt(parsed.pathname.substring(1), 10) : 0,
+      tls: parsed.protocol === 'rediss:' ? {} : undefined,
+    };
+  } catch (error) {
+    console.error('Failed to parse REDIS_URL in services plugin:', error);
+    throw new Error('Invalid REDIS_URL format');
+  }
+}
+
 const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  // Get Redis configuration (priority: REDIS_URL > individual vars)
+  let redisBaseConfig: any;
+  if (process.env.REDIS_URL) {
+    console.log('🔧 Services plugin using REDIS_URL');
+    redisBaseConfig = parseRedisUrlForServices(process.env.REDIS_URL);
+  } else {
+    console.log('🔧 Services plugin using individual Redis env vars');
+    redisBaseConfig = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      password: process.env.REDIS_PASSWORD,
+      db: parseInt(process.env.REDIS_DB || '0'),
+    };
+  }
+
   const config: ServicesConfig = {
     jwt: {
       keyRotationInterval: parseInt(process.env.JWT_KEY_ROTATION_INTERVAL || '86400000'), // 24 hours
@@ -249,16 +283,13 @@ const servicesPlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       revokedTokensCleanupInterval: parseInt(process.env.JWT_CLEANUP_INTERVAL || '3600000'), // 1 hour
     },
     redis: {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
+      ...redisBaseConfig,
       keyPrefix: process.env.REDIS_KEY_PREFIX || 'jobswipe:',
       maxRetriesPerRequest: parseInt(process.env.REDIS_MAX_RETRIES || '3'),
       retryDelayOnFailover: parseInt(process.env.REDIS_RETRY_DELAY || '100'),
       enableOfflineQueue: process.env.REDIS_OFFLINE_QUEUE === 'true',
       lazyConnect: process.env.REDIS_LAZY_CONNECT === 'true',
-      ssl: process.env.REDIS_SSL === 'true',
+      ssl: redisBaseConfig.tls || process.env.REDIS_SSL === 'true',
     },
     session: {
       keyPrefix: process.env.SESSION_KEY_PREFIX || 'session:',

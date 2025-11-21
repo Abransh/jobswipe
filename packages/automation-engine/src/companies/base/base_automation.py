@@ -336,7 +336,7 @@ class BaseJobAutomation(ABC):
                 )
 
                 # Process the results
-                await self._process_automation_result(agent, browser_session)
+               # await self._process_automation_result(agent, browser_session)
 
                 # Take final screenshot
                 final_screenshot = await self._take_screenshot(browser_session, "final_result")
@@ -377,60 +377,60 @@ class BaseJobAutomation(ABC):
                     "AUTOMATION_ERROR"
                 )
 
-    async def _process_automation_result(self, agent: Agent, browser_session: BrowserSession):
-        """Process the automation result and update the result object"""
-        try:
-            # Extract information from agent memory/context
-            if hasattr(agent, 'memory') and agent.memory:
-                memory_content = str(agent.memory)
+    # async def _process_automation_result(self, agent: Agent, browser_session: BrowserSession):
+    #     """Process the automation result and update the result object"""
+    #     try:
+    #         # Extract information from agent memory/context
+    #         if hasattr(agent, 'memory') and agent.memory:
+    #             memory_content = str(agent.memory)
 
-                if 'SUCCESS:' in memory_content:
-                    # Extract confirmation ID
-                    success_parts = memory_content.split('SUCCESS:')
-                    if len(success_parts) > 1:
-                        confirmation_id = success_parts[1].split()[0] if success_parts[1].split() else None
-                        self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
+    #             if 'SUCCESS:' in memory_content:
+    #                 # Extract confirmation ID
+    #                 success_parts = memory_content.split('SUCCESS:')
+    #                 if len(success_parts) > 1:
+    #                     confirmation_id = success_parts[1].split()[0] if success_parts[1].split() else None
+    #                     self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
 
-                        self.result.add_step(
-                            "confirm", "Extract confirmation details", True,
-                            metadata={"confirmation_id": confirmation_id}
-                        )
-                        return
+    #                     self.result.add_step(
+    #                         "confirm", "Extract confirmation details", True,
+    #                         metadata={"confirmation_id": confirmation_id}
+    #                     )
+    #                     return
 
-                elif 'CAPTCHA_DETECTED:' in memory_content:
-                    self.result.set_failed(
-                        "Captcha detected - manual intervention required",
-                        "CAPTCHA_REQUIRED",
-                        ApplicationStatus.CAPTCHA_REQUIRED
-                    )
-                    return
+    #             elif 'CAPTCHA_DETECTED:' in memory_content:
+    #                 self.result.set_failed(
+    #                     "Captcha detected - manual intervention required",
+    #                     "CAPTCHA_REQUIRED",
+    #                     ApplicationStatus.CAPTCHA_REQUIRED
+    #                 )
+    #                 return
 
-                elif 'ERROR:' in memory_content:
-                    error_parts = memory_content.split('ERROR:')
-                    error_msg = error_parts[1].split('\n')[0] if len(error_parts) > 1 else "Unknown error"
-                    self.result.set_failed(error_msg, "FORM_ERROR", ApplicationStatus.FORM_ERROR)
-                    return
+    #             elif 'ERROR:' in memory_content:
+    #                 error_parts = memory_content.split('ERROR:')
+    #                 error_msg = error_parts[1].split('\n')[0] if len(error_parts) > 1 else "Unknown error"
+    #                 self.result.set_failed(error_msg, "FORM_ERROR", ApplicationStatus.FORM_ERROR)
+    #                 return
 
-            # Default: Check current page for success indicators
-            page = await browser_session.get_current_page()
-            page_text = await page.inner_text('body')
+    #         # Default: Check current page for success indicators
+    #         page = await browser_session.get_current_page()
+    #         page_text = await page.inner_text('body')
 
-            if any(indicator in page_text.lower() for indicator in [
-                'thank you', 'application submitted', 'successfully applied', 'confirmation'
-            ]):
-                confirmation_id = ResultProcessor.extract_confirmation_number(page_text)
-                self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
+    #         if any(indicator in page_text.lower() for indicator in [
+    #             'thank you', 'application submitted', 'successfully applied', 'confirmation'
+    #         ]):
+    #             confirmation_id = ResultProcessor.extract_confirmation_number(page_text)
+    #             self.result.set_completed(ApplicationStatus.SUCCESS, confirmation_id)
 
-                self.result.add_step(
-                    "confirm", "Detected success on final page", True,
-                    metadata={"page_indicators": True}
-                )
-            else:
-                self.result.set_failed("No clear success indicators found", "UNCLEAR_RESULT")
+    #             self.result.add_step(
+    #                 "confirm", "Detected success on final page", True,
+    #                 metadata={"page_indicators": True}
+    #             )
+    #         else:
+    #             self.result.set_failed("No clear success indicators found", "UNCLEAR_RESULT")
 
-        except Exception as e:
-            self.logger.error(f"Failed to process automation result: {e}")
-            self.result.set_failed(f"Result processing failed: {str(e)}", "PROCESSING_ERROR")
+    #     except Exception as e:
+    #         self.logger.error(f"Failed to process automation result: {e}")
+    #         self.result.set_failed(f"Result processing failed: {str(e)}", "PROCESSING_ERROR")
 
 
 # Example implementation for testing
