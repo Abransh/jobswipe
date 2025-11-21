@@ -352,7 +352,7 @@ class DatabaseAutomation(BaseJobAutomation):
         """
         try:
             # Setup proxy for server mode
-            await self.setup_proxy_for_server_mode()
+            #await self.setup_proxy_for_server_mode() #TODO PROXYDISABLE
             
             # Log start of automation
             await self.log_automation_step(
