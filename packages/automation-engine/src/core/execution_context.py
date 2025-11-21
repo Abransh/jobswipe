@@ -173,12 +173,9 @@ class ExecutionContext:
             #         self.logger.info(f"✅ Proxy configured: {server_url}")
 
             # Create BrowserProfile
-            # For server mode: headless=True (changed from False for performance)
-            # For desktop mode: headless=False (visible browser)
-            is_headless = self.mode == ExecutionMode.SERVER
-
+            # Always use headful mode (headless=False) as per user requirement
             browser_profile = BrowserProfile(
-                headless=is_headless,
+                headless=False,  # Always headful mode
                 proxy=proxy_settings,
                 keep_alive=False,  # Always cleanup after job
                 wait_between_actions=0.5,  # Slight delay to avoid rate limits
@@ -257,7 +254,7 @@ class ExecutionContext:
         ]
 
         options = {
-            "headful": self.browser_config.headless,
+            "headless": self.browser_config.headless,
             "args": browser_args,
         }
 
