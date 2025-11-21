@@ -8,36 +8,100 @@
 import { Redis, RedisOptions } from 'ioredis';
 
 /**
- * Redis connection configuration
- * Uses environment variables for production flexibility
+ * Parse Redis URL into connection options
+ * Supports formats: redis://[[username]:password@]host[:port][/db-number]
  */
-export const redisConfig: RedisOptions = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD || undefined,
-  db: parseInt(process.env.REDIS_DB || '0', 10),
+function parseRedisUrl(url: string): Partial<RedisOptions> {
+  try {
+    const parsed = new URL(url);
+    const config: Partial<RedisOptions> = {
+      host: parsed.hostname,
+      port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+    };
 
-  // Connection pool settings
-  maxRetriesPerRequest: 3,
-  enableReadyCheck: true,
-  enableOfflineQueue: true,
+    if (parsed.password) {
+      config.password = parsed.password;
+    }
 
-  // Reconnection strategy with exponential backoff
-  retryStrategy(times: number) {
+    // Extract DB number from pathname
+    if (parsed.pathname && parsed.pathname.length > 1) {
+      const db = parseInt(parsed.pathname.substring(1), 10);
+      if (!isNaN(db)) {
+        config.db = db;
+      }
+    }
+
+    // Support TLS URLs
+    if (parsed.protocol === 'rediss:') {
+      config.tls = {};
+    }
+
+    return config;
+  } catch (error) {
+    console.error('Failed to parse REDIS_URL:', error);
+    throw new Error('Invalid REDIS_URL format. Expected: redis://[username:password@]host[:port][/db]');
+  }
+}
+
+/**
+ * Get Redis connection configuration from environment
+ * Priority: REDIS_URL > individual env vars (REDIS_HOST, etc.) > defaults
+ */
+function getRedisConfig(): RedisOptions {
+  let config: RedisOptions;
+
+  // Priority 1: Use REDIS_URL if available (common in cloud deployments)
+  if (process.env.REDIS_URL) {
+    console.log('📡 Using REDIS_URL for Redis connection');
+    config = {
+      ...parseRedisUrl(process.env.REDIS_URL),
+      // Connection pool settings
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      enableOfflineQueue: true,
+      // Connection timeout
+      connectTimeout: 10000,
+      // Keep-alive
+      keepAlive: 30000,
+      // Family: prefer IPv4
+      family: 4,
+    } as RedisOptions;
+  } else {
+    // Priority 2: Use individual environment variables
+    console.log('📡 Using individual Redis env vars (REDIS_HOST, REDIS_PORT, etc.)');
+    config = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB || '0', 10),
+      // Connection pool settings
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+      enableOfflineQueue: true,
+      // Connection timeout
+      connectTimeout: 10000,
+      // Keep-alive
+      keepAlive: 30000,
+      // Family: prefer IPv4
+      family: 4,
+    };
+  }
+
+  // Add reconnection strategy
+  config.retryStrategy = function(times: number) {
     const delay = Math.min(times * 50, 2000);
     console.log(`Redis reconnection attempt ${times}, waiting ${delay}ms`);
     return delay;
-  },
+  };
 
-  // Connection timeout
-  connectTimeout: 10000,
+  return config;
+}
 
-  // Keep-alive
-  keepAlive: 30000,
-
-  // Family: prefer IPv4
-  family: 4,
-};
+/**
+ * Redis connection configuration
+ * Uses environment variables for production flexibility
+ */
+export const redisConfig: RedisOptions = getRedisConfig();
 
 /**
  * Create a new Redis connection instance
@@ -71,16 +135,34 @@ export function createRedisConnection(): Redis {
 
 /**
  * BullMQ connection options (simplified for BullMQ compatibility)
+ * Uses same logic as redisConfig but with BullMQ-specific settings
  */
-export const bullmqConnection = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD || undefined,
-  db: parseInt(process.env.REDIS_DB || '0', 10),
-  maxRetriesPerRequest: null, // Required for BullMQ
-  enableReadyCheck: false,      // Required for BullMQ
-  enableOfflineQueue: false,    // Required for BullMQ
-};
+function getBullMQConnection() {
+  let config: any;
+
+  if (process.env.REDIS_URL) {
+    config = {
+      ...parseRedisUrl(process.env.REDIS_URL),
+      maxRetriesPerRequest: null, // Required for BullMQ
+      enableReadyCheck: false,      // Required for BullMQ
+      enableOfflineQueue: false,    // Required for BullMQ
+    };
+  } else {
+    config = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB || '0', 10),
+      maxRetriesPerRequest: null, // Required for BullMQ
+      enableReadyCheck: false,      // Required for BullMQ
+      enableOfflineQueue: false,    // Required for BullMQ
+    };
+  }
+
+  return config;
+}
+
+export const bullmqConnection = getBullMQConnection();
 
 /**
  * Test Redis connection

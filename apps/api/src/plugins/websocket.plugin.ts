@@ -58,6 +58,25 @@ interface WebSocketPluginOptions {
 // WEBSOCKET PLUGIN
 // =============================================================================
 
+/**
+ * Parse Redis URL for WebSocket plugin
+ */
+function parseRedisUrlForWebSocket(url: string): any {
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+      password: parsed.password || undefined,
+      db: parsed.pathname && parsed.pathname.length > 1 ? parseInt(parsed.pathname.substring(1), 10) : 0,
+      tls: parsed.protocol === 'rediss:' ? {} : undefined,
+    };
+  } catch (error) {
+    console.error('Failed to parse REDIS_URL in websocket plugin:', error);
+    throw new Error('Invalid REDIS_URL format');
+  }
+}
+
 const websocketPlugin = async (
   fastify: any,
   options: WebSocketPluginOptions = {}
@@ -66,12 +85,20 @@ const websocketPlugin = async (
 
   try {
     // Redis configuration for Socket.IO adapter
-    const redisConfig = {
-      host: options.redis?.host || process.env.REDIS_HOST || 'localhost',
-      port: options.redis?.port || parseInt(process.env.REDIS_PORT || '6379'),
-      password: options.redis?.password || process.env.REDIS_PASSWORD,
-      db: options.redis?.db || parseInt(process.env.REDIS_DB || '0'),
-    };
+    // Priority: REDIS_URL > individual env vars > defaults
+    let redisConfig: any;
+    if (process.env.REDIS_URL) {
+      log.info('🔧 WebSocket plugin using REDIS_URL');
+      redisConfig = parseRedisUrlForWebSocket(process.env.REDIS_URL);
+    } else {
+      log.info('🔧 WebSocket plugin using individual Redis env vars');
+      redisConfig = {
+        host: options.redis?.host || process.env.REDIS_HOST || 'localhost',
+        port: options.redis?.port || parseInt(process.env.REDIS_PORT || '6379'),
+        password: options.redis?.password || process.env.REDIS_PASSWORD,
+        db: options.redis?.db || parseInt(process.env.REDIS_DB || '0'),
+      };
+    }
 
     // Create Redis clients for Socket.IO adapter
     const pubClient = new Redis(redisConfig);
