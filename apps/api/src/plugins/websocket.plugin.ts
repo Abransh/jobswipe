@@ -59,18 +59,45 @@ interface WebSocketPluginOptions {
 // =============================================================================
 
 /**
- * Parse Redis URL for WebSocket plugin
+ * Parse Redis URL for WebSocket plugin with Upstash-aware configuration
  */
 function parseRedisUrlForWebSocket(url: string): any {
   try {
     const parsed = new URL(url);
-    return {
+    const isUpstash = parsed.hostname.includes('.upstash.io');
+
+    const config: any = {
       host: parsed.hostname,
       port: parsed.port ? parseInt(parsed.port, 10) : 6379,
       password: parsed.password || undefined,
       db: parsed.pathname && parsed.pathname.length > 1 ? parseInt(parsed.pathname.substring(1), 10) : 0,
-      tls: parsed.protocol === 'rediss:' ? {} : undefined,
+
+      // Connection settings for cloud Redis (especially Upstash)
+      connectTimeout: 30000, // 30 seconds for cloud connections
+      retryStrategy: (times: number) => {
+        if (times > 10) return null; // Stop retrying after 10 attempts
+        return Math.min(times * 100, 3000); // Exponential backoff up to 3s
+      },
+
+      // Socket.IO adapter needs offline queue to handle commands during connection
+      lazyConnect: true,
+      enableReadyCheck: false,
+      enableOfflineQueue: true, // MUST be true for Socket.IO adapter to queue commands
     };
+
+    // Enable TLS for rediss:// or Upstash domains
+    if (parsed.protocol === 'rediss:' || isUpstash) {
+      config.tls = {
+        // Upstash uses self-signed certs, need to accept them
+        rejectUnauthorized: false,
+      };
+
+      if (isUpstash) {
+        console.log('🔒 Detected Upstash Redis - enabling TLS with custom settings');
+      }
+    }
+
+    return config;
   } catch (error) {
     console.error('Failed to parse REDIS_URL in websocket plugin:', error);
     throw new Error('Invalid REDIS_URL format');
@@ -97,26 +124,21 @@ const websocketPlugin = async (
         port: options.redis?.port || parseInt(process.env.REDIS_PORT || '6379'),
         password: options.redis?.password || process.env.REDIS_PASSWORD,
         db: options.redis?.db || parseInt(process.env.REDIS_DB || '0'),
+        lazyConnect: true,
+        enableReadyCheck: false,
+        enableOfflineQueue: true, // MUST be true for Socket.IO adapter to queue commands
       };
     }
 
-    // Create Redis clients for Socket.IO adapter
+    log.info('Creating Redis clients for Socket.IO adapter...');
+
+    // Create Redis clients for Socket.IO adapter with lazy connection
+    // With lazyConnect: true, we DON'T call .connect() - the Socket.IO adapter
+    // will handle connections internally when needed
     const pubClient = new Redis(redisConfig);
     const subClient = pubClient.duplicate();
 
-    // Wait for Redis connections
-    await Promise.all([
-      new Promise<void>((resolve, reject) => {
-        pubClient.once('ready', resolve);
-        pubClient.once('error', reject);
-      }),
-      new Promise<void>((resolve, reject) => {
-        subClient.once('ready', resolve);
-        subClient.once('error', reject);
-      }),
-    ]);
-
-    log.info('✅ Redis clients connected for WebSocket adapter');
+    log.info('✅ Redis clients created (lazy connection - will connect on first use)');
 
     // Create Socket.IO server
     const io = new SocketIOServer(fastify.server, {

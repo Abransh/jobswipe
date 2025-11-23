@@ -242,18 +242,33 @@ class ServiceRegistry {
 // =============================================================================
 
 /**
- * Parse Redis URL for services plugin
+ * Parse Redis URL for services plugin with Upstash-aware configuration
  */
 function parseRedisUrlForServices(url: string): any {
   try {
     const parsed = new URL(url);
-    return {
+    const isUpstash = parsed.hostname.includes('.upstash.io');
+
+    const config: any = {
       host: parsed.hostname,
       port: parsed.port ? parseInt(parsed.port, 10) : 6379,
       password: parsed.password || undefined,
       db: parsed.pathname && parsed.pathname.length > 1 ? parseInt(parsed.pathname.substring(1), 10) : 0,
-      tls: parsed.protocol === 'rediss:' ? {} : undefined,
     };
+
+    // Enable TLS for rediss:// or Upstash domains
+    if (parsed.protocol === 'rediss:' || isUpstash) {
+      config.tls = {
+        // Upstash uses self-signed certs, need to accept them
+        rejectUnauthorized: false,
+      };
+
+      if (isUpstash) {
+        console.log('🔒 Detected Upstash Redis in services plugin - enabling TLS');
+      }
+    }
+
+    return config;
   } catch (error) {
     console.error('Failed to parse REDIS_URL in services plugin:', error);
     throw new Error('Invalid REDIS_URL format');

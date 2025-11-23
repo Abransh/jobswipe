@@ -2,21 +2,29 @@
 
 ## Quick Fix for Current Issues
 
-### Issue 1: Redis Connection Error (ECONNREFUSED)
+### Issue 1: Redis Connection Error (ECONNREFUSED / ECONNRESET)
 
-**Problem**: Application tries to connect to `localhost:6379` instead of your cloud Redis service.
+**Problem**: Application tries to connect to `localhost:6379` or fails TLS handshake with cloud Redis service.
 
 **Solution**: Set the `REDIS_URL` environment variable in your deployment platform:
 
 ```bash
-# Example for Upstash Redis
-REDIS_URL="redis://default:YOUR_PASSWORD@us1-striking-fawn-12345.upstash.io:6379"
-
-# Example with TLS (recommended for production)
-REDIS_URL="rediss://default:YOUR_PASSWORD@us1-striking-fawn-12345.upstash.io:6380"
+# For Upstash Redis (TLS auto-detected!)
+REDIS_URL="redis://default:YOUR_PASSWORD@saved-eel-38173.upstash.io:6379"
+# OR with explicit TLS:
+REDIS_URL="rediss://default:YOUR_PASSWORD@saved-eel-38173.upstash.io:6380"
 ```
 
-**Why it works**: The code now prioritizes `REDIS_URL` over individual Redis variables (`REDIS_HOST`, `REDIS_PORT`, etc.).
+**✨ Smart Features**:
+- **Auto-detects Upstash**: Automatically enables TLS for `.upstash.io` domains
+- **Works with both protocols**: Accepts `redis://` or `rediss://` for Upstash
+- **Handles self-signed certs**: Configures TLS to accept Upstash certificates
+- **Lazy connections**: Prevents timeout issues with slow cloud connections
+
+**Why it works**: The code now:
+1. Prioritizes `REDIS_URL` over individual variables
+2. Auto-detects Upstash domains and enables TLS
+3. Configures proper TLS settings for cloud providers
 
 ---
 
@@ -96,14 +104,30 @@ The application checks environment variables in this order:
    ```
 2. `REDIS_URL` is automatically set by Heroku
 
-### Upstash Redis (Standalone)
+### Upstash Redis (Standalone) ⭐ Recommended
 
 1. Create Redis database at [console.upstash.com](https://console.upstash.com)
-2. Copy the Redis URL
+2. Copy the **connection string** from dashboard
 3. Set in your deployment platform:
    ```bash
-   REDIS_URL="redis://default:YOUR_PASSWORD@us1-....upstash.io:6379"
+   # Upstash provides multiple connection strings - use any of these:
+
+   # Option 1: Standard format (TLS auto-detected)
+   REDIS_URL="redis://default:YOUR_PASSWORD@saved-eel-38173.upstash.io:6379"
+
+   # Option 2: Explicit TLS format
+   REDIS_URL="rediss://default:YOUR_PASSWORD@saved-eel-38173.upstash.io:6380"
+
+   # Option 3: CLI format (copy from "redis-cli" tab, remove the --tls flag)
+   # redis-cli --tls -u redis://default:PASSWORD@host:6379
+   # Just use: redis://default:PASSWORD@host:6379
    ```
+
+**Important Notes**:
+- ✅ **TLS is auto-detected** for `.upstash.io` domains
+- ✅ **Both ports work**: 6379 and 6380
+- ✅ **Both protocols work**: `redis://` and `rediss://`
+- ⚠️ Don't include the `--tls` flag from CLI commands - just the URL
 
 ---
 

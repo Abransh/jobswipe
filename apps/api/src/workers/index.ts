@@ -2,6 +2,7 @@
  * @fileoverview Worker Manager for JobSwipe Queue Processing
  * @description Manages BullMQ workers for job application processing
  * @version 1.0.0
+ * 
  * @author JobSwipe Team
  */
 
