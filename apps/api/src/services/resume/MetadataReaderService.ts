@@ -159,7 +159,7 @@ export class MetadataReaderService {
       }
 
       // Decode stream content
-      const xmpBytes = metadataStream.decode();
+      const xmpBytes = metadataStream.getContents();
       const xmpXml = new TextDecoder('utf-8').decode(xmpBytes);
 
       return xmpXml;

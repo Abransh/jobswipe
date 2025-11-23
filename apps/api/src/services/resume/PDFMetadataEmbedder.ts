@@ -65,7 +65,7 @@ export class PDFMetadataEmbedder {
 
       // Convert XMP XML to bytes and embed
       const xmpBytes = Buffer.from(xmpXml, 'utf-8');
-      const stream = PDFStream.of(pdfDoc.context.obj({}), xmpBytes);
+      const stream = pdfDoc.context.stream(xmpBytes);
 
       stream.dict.set(PDFName.of('Type'), PDFName.of('Metadata'));
       stream.dict.set(PDFName.of('Subtype'), PDFName.of('XML'));

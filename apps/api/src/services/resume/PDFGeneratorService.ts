@@ -98,7 +98,7 @@ export class PDFGeneratorService {
 
       // Apply template
       const template = this.getTemplate(opts.template);
-      await template.renderFunction(resume, pdfDoc, fonts, opts);
+      await template.renderFunction(resume as StructuredResume, pdfDoc, fonts, opts);
 
       // Add PDF metadata
       pdfDoc.setTitle(`Resume - ${resume.contact.fullName}`);

@@ -145,8 +145,8 @@ export class ResumeVersioningService {
           type,
           description,
           originalContent: originalResume.content,
-          enhancedContent: tailoredResume,
-          changes: tailoredResume.changes,
+          enhancedContent: tailoredResume as any,
+          changes: tailoredResume.changes as any,
           aiModel: tailoredResume.metadata.aiModel,
           confidence: 85, // Default confidence
           isApplied: options?.autoApply || false,
@@ -343,8 +343,8 @@ export class ResumeVersioningService {
 
       // Use enhancer service to generate diff
       const diff = await this.enhancerService.compareVersions(
-        version1.originalContent as StructuredResume,
-        version2.enhancedContent as TailoredResume
+        version1.originalContent as unknown as StructuredResume,
+        version2.enhancedContent as unknown as TailoredResume
       );
 
       console.log(`✅ Version comparison complete (${diff.summary.totalChanges} changes)`);
@@ -372,8 +372,8 @@ export class ResumeVersioningService {
       }
 
       const diff = await this.enhancerService.compareVersions(
-        version.originalContent as StructuredResume,
-        version.enhancedContent as TailoredResume
+        version.originalContent as unknown as StructuredResume,
+        version.enhancedContent as unknown as TailoredResume
       );
 
       return diff;
@@ -469,7 +469,7 @@ export class ResumeVersioningService {
       const resume = await db.resume.findUnique({
         where: { id: version.resumeId },
         include: {
-          resumeEnhancements: {
+          enhancements: {
             where: { isApplied: true },
           },
         },
