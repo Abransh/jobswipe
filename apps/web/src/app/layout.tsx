@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { QueueStatusProvider } from '@/providers/QueueStatusProvider';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 // TEMP: Using system fonts for offline build
@@ -112,6 +113,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         }}
       >
         <AuthProvider>
+          <SpeedInsights/>
           <QueueStatusProvider>
             <div className="relative flex min-h-screen flex-col">
               <div className="flex-1">{children}</div>
