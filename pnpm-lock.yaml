@@ -597,9 +597,6 @@ importers:
       react:
         specifier: ^18.3.1
         version: 18.3.1
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -613,6 +610,9 @@ importers:
       eslint:
         specifier: ^8.54.0
         version: 8.57.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/types:
     dependencies:
