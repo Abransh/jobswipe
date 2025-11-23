@@ -68,7 +68,7 @@ graph TB
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/jobswipe.git
+   git clone https://github.com/Abransh/jobswipe.git
    cd jobswipe
    ```
 

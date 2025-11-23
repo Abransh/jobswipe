@@ -326,7 +326,7 @@ export function createJobApplicationWorker(fastify: FastifyInstance): Worker<Job
 
     // Lock settings to prevent job stealing
     lockDuration: 900000, // 15 minutes (matches job timeout)
-    lockRenewTime: 450000, // Renew lock every 7.5 minutes
+    lockRenewTime: 300000, // Renew lock every 5 minutes (optimized from 7.5min - reduces Redis commands)
 
     // Auto-run on creation
     autorun: true,

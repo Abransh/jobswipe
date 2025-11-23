@@ -336,7 +336,7 @@ class BaseJobAutomation(ABC):
                 )
 
                 # Process the results
-               # await self._process_automation_result(agent, browser_session)
+             #   await self._process_automation_result(agent, browser_session)
 
                 # Take final screenshot
                 final_screenshot = await self._take_screenshot(browser_session, "final_result")

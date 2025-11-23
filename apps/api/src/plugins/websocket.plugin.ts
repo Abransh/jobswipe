@@ -148,10 +148,10 @@ const websocketPlugin = async (
         methods: ['GET', 'POST'],
         allowedHeaders: ['Authorization'],
       },
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'], // WebSocket only - no HTTP polling (reduces Redis commands)
       allowEIO3: true,
       pingTimeout: 60000,
-      pingInterval: 25000,
+      pingInterval: 30000, // Increased from 25s to 30s (reduces Redis commands)
     });
 
     // Setup Redis adapter for horizontal scaling

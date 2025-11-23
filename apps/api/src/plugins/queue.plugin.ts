@@ -100,9 +100,10 @@ async function queuePlugin(fastify: FastifyInstance, options: FastifyPluginOptio
       fastify.log.warn({ jobId }, '⚠️ Job stalled');
     });
 
-    queueEvents.on('progress', ({ jobId, data }) => {
-      fastify.log.debug({ jobId, progress: data }, '📊 Job progress update');
-    });
+    // OPTIMIZATION: Progress event monitoring removed to reduce Redis polling
+    // Progress updates create excessive Redis commands (~3k/day)
+    // Only monitor critical events: failed, stalled, completed
+    // Re-enable if real-time progress tracking is required
 
     fastify.log.info('✅ Queue events listener created');
 
