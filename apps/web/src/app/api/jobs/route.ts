@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-const FASTIFY_API_BASE = 'http://localhost:3001/api/v1';
+const FASTIFY_API_BASE = process.env.API_BASE_URL;
 
 export async function GET(request: NextRequest) {
   try {
