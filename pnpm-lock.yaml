@@ -441,18 +441,15 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.10.7
         version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-<<<<<<< HEAD
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(next@15.5.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@vercel/speed-insights':
         specifier: ^1.2.0
         version: 1.2.0(next@15.5.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
-=======
       autoprefixer:
         specifier: ^10.4.16
         version: 10.4.22(postcss@8.5.6)
->>>>>>> dde46f44b747cad114fcd0da9eab4d4bd0255474
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -526,9 +523,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.15
         version: 18.3.7(@types/react@18.3.27)
-      autoprefixer:
-        specifier: ^10.4.16
-        version: 10.4.22(postcss@8.5.6)
       eslint:
         specifier: ^8.54.0
         version: 8.57.1
