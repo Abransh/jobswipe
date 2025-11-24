@@ -10,7 +10,7 @@ from browser_use import Agent, ChatGoogle
 
 load_dotenv()
 
-api_key = "AIzaSyDHuwt28RlnZkJAZyPd_4BjrwJwQne7tLo"
+api_key = os.getenv('GOOGLE_API_KEY')
 if not api_key:
 	raise ValueError('GOOGLE_API_KEY is not set')
 
