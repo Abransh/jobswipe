@@ -232,6 +232,57 @@
 #!/usr/bin/env python3
 """
 Simple server automation wrapper
+# """
+# import sys
+# import os
+# import json
+# import asyncio
+# from pathlib import Path
+
+# sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# from src.companies.greenhouse.simple_greenhouse import GreenhouseAutomation
+
+
+# async def main():
+#     try:
+#         # Read user data from env vars
+#         user = {
+#             'first_name': os.getenv('USER_FIRST_NAME'),
+#             'last_name': os.getenv('USER_LAST_NAME'),
+#             'email': os.getenv('USER_EMAIL'),
+#             'phone': os.getenv('USER_PHONE'),
+#             'resume_path': os.getenv('USER_RESUME_PATH')
+#         }
+        
+#         # Read job data from env vars
+#         job = {
+#             'title': os.getenv('JOB_TITLE'),
+#             'company': os.getenv('JOB_COMPANY'),
+#             'apply_url': os.getenv('JOB_APPLY_URL')
+#         }
+        
+#         # Run automation
+#         automation = GreenhouseAutomation()
+#         result = await automation.apply(user, job)
+        
+#         # Output JSON for TypeScript
+#         print(json.dumps(result))
+        
+#         sys.exit(0 if result['success'] else 1)
+    
+#     except Exception as e:
+#         print(json.dumps({'success': False, 'message': str(e)}))
+#         sys.exit(1)
+
+
+# if __name__ == "__main__":
+#     asyncio.run(main())
+
+#!/usr/bin/env python3
+"""
+JobSwipe Automation - Universal Entry Point
+Works for both DESKTOP and SERVER modes
 """
 import sys
 import os
@@ -239,42 +290,61 @@ import json
 import asyncio
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Read environment variables
+USER_FIRST_NAME = os.getenv('USER_FIRST_NAME')
+USER_LAST_NAME = os.getenv('USER_LAST_NAME')
+USER_EMAIL = os.getenv('USER_EMAIL')
+USER_PHONE = os.getenv('USER_PHONE')
+USER_RESUME_PATH = os.getenv('USER_RESUME_LOCAL_PATH') or os.getenv('USER_RESUME_PATH')
 
-from src.companies.greenhouse.simple_greenhouse import GreenhouseAutomation
+JOB_TITLE = os.getenv('JOB_TITLE')
+JOB_COMPANY = os.getenv('JOB_COMPANY')
+JOB_APPLY_URL = os.getenv('JOB_APPLY_URL')
 
+EXECUTION_MODE = os.getenv('EXECUTION_MODE', 'desktop')  # 'desktop' or 'server'
+HEADLESS = os.getenv('AUTOMATION_HEADLESS', 'false').lower() == 'true'
+
+# Import the automation
+from ..src.companies.greenhouse.simple_greenhouse import GreenhouseAutomation
 
 async def main():
     try:
-        # Read user data from env vars
-        user = {
-            'first_name': os.getenv('USER_FIRST_NAME'),
-            'last_name': os.getenv('USER_LAST_NAME'),
-            'email': os.getenv('USER_EMAIL'),
-            'phone': os.getenv('USER_PHONE'),
-            'resume_path': os.getenv('USER_RESUME_PATH')
+        # Validate inputs
+        if not all([USER_FIRST_NAME, USER_LAST_NAME, USER_EMAIL, USER_PHONE]):
+            print(json.dumps({'success': False, 'message': 'Missing user data'}))
+            sys.exit(1)
+        
+        if not all([JOB_TITLE, JOB_COMPANY, JOB_APPLY_URL]):
+            print(json.dumps({'success': False, 'message': 'Missing job data'}))
+            sys.exit(1)
+        
+        # Prepare data
+        user_data = {
+            'first_name': USER_FIRST_NAME,
+            'last_name': USER_LAST_NAME,
+            'email': USER_EMAIL,
+            'phone': USER_PHONE,
+            'resume_path': USER_RESUME_PATH
         }
         
-        # Read job data from env vars
-        job = {
-            'title': os.getenv('JOB_TITLE'),
-            'company': os.getenv('JOB_COMPANY'),
-            'apply_url': os.getenv('JOB_APPLY_URL')
+        job_data = {
+            'title': JOB_TITLE,
+            'company': JOB_COMPANY,
+            'apply_url': JOB_APPLY_URL
         }
         
         # Run automation
-        automation = GreenhouseAutomation()
-        result = await automation.apply(user, job)
+        automation = GreenhouseAutomation(headless=HEADLESS)
+        result = await automation.apply(user_data, job_data)
         
-        # Output JSON for TypeScript
+        # Output JSON
         print(json.dumps(result))
-        
         sys.exit(0 if result['success'] else 1)
-    
+        
     except Exception as e:
-        print(json.dumps({'success': False, 'message': str(e)}))
+        print(json.dumps({'success': False, 'message': str(e)}), file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
+

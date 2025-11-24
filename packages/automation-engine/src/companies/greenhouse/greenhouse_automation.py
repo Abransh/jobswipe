@@ -16,7 +16,6 @@ from ..base.base_automation import BaseJobAutomation
 from ..base.user_profile import UserProfile, JobData
 from ..base.result_handler import ApplicationResult, ApplicationStatus, ResultProcessor
 
-
 # Import ExecutionContext
 from ...core.execution_context import ExecutionContext
 

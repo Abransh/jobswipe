@@ -252,7 +252,7 @@ export class PythonBridge extends EventEmitter {
    */
   private getScriptPath(companyAutomation: string): string {
     // Use unified automation engine wrapper script (server mode)
-    const unifiedScriptPath = path.join(__dirname, '../../../../packages/automation-engine/scripts/run_server_automation.py');
+    const unifiedScriptPath = path.join(__dirname, '../../../../packages/automation-engine/run_automation.py');
 
     this.fastify.log.debug({
       event: 'unified_engine_script_path',

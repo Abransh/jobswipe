@@ -23,7 +23,7 @@ class SimpleAutomation:
     
     def __init__(self, company_name: str):
         self.company_name = company_name
-        self.controller = Controller()
+        tools = Tools()
         self._setup_actions()
     
     def _setup_actions(self):
@@ -33,7 +33,7 @@ class SimpleAutomation:
             index: int = Field(..., description="Element index")
             file_path: str = Field(..., description="File path")
         
-        @self.controller.action("Upload resume file", param_model=UploadParams)
+        @tools.action('Upload file to interactive element with file path')
         async def upload_resume(params: UploadParams, browser_session: BrowserSession):
             """Upload resume file"""
             try:
