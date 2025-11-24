@@ -150,6 +150,49 @@ STEP-BY-STEP INSTRUCTIONS:
    - If login is required at any point, stop and report
    - Document any errors encountered
 
+9. 🚨 HANDLING UNKNOWN/MISSING DATA (CRITICAL)
+
+   If you encounter a form field that requires information NOT in the candidate information above,
+   you MUST use the 'request_missing_data' action to pause and ask the user.
+
+   WHEN TO REQUEST DATA:
+   - Field asks specifically about THIS company (e.g., "Why do you want to work at {job_data.company}?")
+   - Field requires company-specific motivation or interest
+   - Field asks for information not in the profile (referral code, specific dates, custom questions)
+   - Field is a required essay or long-form question
+
+   DO NOT request for standard fields already in profile:
+   - Name, email, phone (we have these)
+   - Resume (we have this)
+   - Work authorization (we have this)
+   - Years of experience (we have this)
+
+   HOW TO REQUEST:
+   ```
+   result = await request_missing_data(
+       field_name="why_{job_data.company.lower().replace(' ', '_')}",
+       field_label="Why do you want to work at {job_data.company}?",
+       field_type="textarea",
+       required=True,
+       context="Asking about specific motivation for applying to {job_data.company}",
+       max_length=500
+   )
+
+   if result['success']:
+       # Use the value to fill the field
+       fill_field_with_value(result['value'])
+   else:
+       # User didn't respond or timed out
+       # Skip if optional, or abort if required
+   ```
+
+   EXAMPLES OF FIELDS TO REQUEST:
+   - "Why do you want to work at {job_data.company}?" → request_missing_data
+   - "Why are you interested in this specific role?" → request_missing_data
+   - "What excites you about this opportunity?" → request_missing_data
+   - "Do you have a referral code?" → request_missing_data
+   - "When can you start?" (if asking for specific date) → request_missing_data
+
 IMPORTANT LINKEDIN-SPECIFIC GUIDELINES:
 - LinkedIn Easy Apply is typically 1-4 steps maximum
 - Most profile information should be pre-filled
